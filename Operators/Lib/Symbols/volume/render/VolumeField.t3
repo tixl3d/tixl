@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "cd200763-633f-513e-8f24-d983b95d9ff0"/*VolumeField*/,
+  "Inputs": [
+    {
+      "Id": "5f30e9a1-da69-5421-8438-d1270a3467a2"/*BoundsMax*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "8c4b78e6-abe0-547c-b243-3f3c8e100c38"/*ValueOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "9a1ecbca-e38e-537f-8f38-837e0218c951"/*ValueScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "ac832ebe-2283-57ec-851b-a173ff449a36"/*BoundsMin*/,
+      "DefaultValue": {
+        "X": -1.0,
+        "Y": -1.0,
+        "Z": -1.0
+      }
+    },
+    {
+      "Id": "de0f63b7-05c2-5cb1-817e-d4f8bfe2222b"/*OutsideValue*/,
+      "DefaultValue": 1E+20
+    },
+    {
+      "Id": "eefa5651-27d2-5347-99fb-850697ea913b"/*Texture*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

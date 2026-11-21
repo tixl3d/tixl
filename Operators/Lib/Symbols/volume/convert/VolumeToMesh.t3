@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "5bc7d656-8a0f-5834-88da-14c3048d760c"/*VolumeToMesh*/,
+  "Inputs": [
+    {
+      "Id": "19c6ca3f-d7ff-507f-8d28-2490f0edb66e"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "345f946b-8c36-5548-a569-4123e0544b8f"/*Isovalue*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

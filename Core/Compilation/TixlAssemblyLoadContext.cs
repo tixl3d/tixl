@@ -536,6 +536,9 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             return handle;
         }
 
+        if (TryLoadFromExplicitPaths(libraryName, assembly, out handle))
+            return handle;
+
         Log.Error($"{assembly.FullName!}: Failed to resolve native dll {libraryName} relative to assembly '{assembly.Location}'");
         return IntPtr.Zero;
     }
@@ -558,6 +561,9 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         {
             return handle;
         }
+
+        if (TryLoadFromExplicitPaths(libraryName, assembly, out handle))
+            return handle;
 
         Log.Error($"{assembly.FullName!}: Failed to resolve native dll {libraryName} relative to assembly '{assembly.Location}'");
         return IntPtr.Zero;
@@ -582,17 +588,9 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             fullPath = Path.Combine(MainDirectory, unmanagedDllName);
         }
 
-        if (File.Exists(fullPath))
+        if (File.Exists(fullPath) && TryLoadUnmanagedPath(fullPath, unmanagedDllName, out var handle))
         {
-            try
-            {
-                return LoadUnmanagedDllFromPath(fullPath);
-            }
-            catch (Exception e)
-            {
-                Log.Error($"{Name!}: Failed to load unmanaged dll {unmanagedDllName} from path {fullPath}: {e}");
-                return IntPtr.Zero;
-            }
+            return handle;
         }
 
         // check for the platform's native extension on linux/mac
@@ -600,21 +598,20 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
         {
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? ".dylib" : ".so";
-            var unixPath = pathFullyQualified
-                               ? Path.ChangeExtension(fullPath, extension)
-                               : Path.Combine(MainDirectory, unmanagedDllName + extension);
 
-            if (File.Exists(unixPath))
+            // Both spellings: P/Invoke names are bare ("mediapipe_c"), while the shipped unix libraries are
+            // almost always prefixed ("libmediapipe_c.so").
+            foreach (var fileName in new[] { unmanagedDllName + extension, "lib" + unmanagedDllName + extension })
             {
-                try
-                {
-                    return LoadUnmanagedDllFromPath(unixPath);
-                }
-                catch (Exception e)
-                {
-                    Log.Error($"{Name!}: Failed to load unmanaged dll {unmanagedDllName} from unix path {unixPath}: {e}");
-                    return IntPtr.Zero;
-                }
+                var unixPath = pathFullyQualified
+                                   ? Path.ChangeExtension(fullPath, extension)
+                                   : Path.Combine(MainDirectory, fileName);
+
+                if (File.Exists(unixPath) && TryLoadUnmanagedPath(unixPath, unmanagedDllName, out handle))
+                    return handle;
+
+                if (pathFullyQualified)
+                    break;
             }
         }
 
@@ -625,7 +622,115 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         if (fromRuntimes != IntPtr.Zero)
             return fromRuntimes;
 
-        return IntPtr.Zero;
+        return TryLoadFromExplicitPaths(unmanagedDllName, Root?.Assembly, out handle) ? handle : IntPtr.Zero;
+    }
+
+    private bool TryLoadUnmanagedPath(string path, string unmanagedDllName, out IntPtr handle)
+    {
+        try
+        {
+            handle = LoadUnmanagedDllFromPath(path);
+            return true;
+        }
+        catch (Exception e)
+        {
+            // Not terminal: another candidate (the platform's own file name, the runtimes layout) may still work.
+            Log.Debug($"{Name!}: Could not load unmanaged dll {unmanagedDllName} from {path}: {e.Message}");
+            handle = IntPtr.Zero;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Resolves a bare P/Invoke name against the folders that ship our natives, using the platform's file name.
+    ///
+    /// Windows' LoadLibrary searches the application directory for a bare name, so a package that already
+    /// resolved through <see cref="NativeLibrary.TryLoad(string, Assembly, DllImportSearchPath?, out IntPtr)"/>
+    /// needs nothing more. Linux and macOS do not: dlopen only consults the loader configuration, and
+    /// DllImportSearchPath.ApplicationDirectory does not add the application folder (on .NET 10
+    /// NATIVE_DLL_SEARCH_DIRECTORIES holds just the shared framework). A package loaded from a shadow copy
+    /// therefore could not find a native that ships next to the editor - MediaPipe's libmediapipe_c.so threw
+    /// DllNotFoundException inside UnsafeNativeMethods' static constructor, which surfaced as "The type
+    /// initializer for 'Mediapipe.PInvoke.UnsafeNativeMethods' threw an exception".
+    /// </summary>
+    private static bool TryLoadFromExplicitPaths(string libraryName, Assembly? assembly, out IntPtr handle)
+    {
+        handle = IntPtr.Zero;
+        if (Path.IsPathFullyQualified(libraryName))
+            return false;
+
+        var bare = Path.GetFileName(libraryName);
+        foreach (var extension in new[] { ".dll", ".so", ".dylib" })
+        {
+            if (bare.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+            {
+                bare = bare[..^extension.Length];
+                break;
+            }
+        }
+
+        if (bare.StartsWith("lib", StringComparison.Ordinal) && bare.Length > 3)
+            bare = bare[3..];
+
+        foreach (var directory in NativeProbeDirectories(assembly))
+        {
+            foreach (var fileName in NativeFileNames(bare))
+            {
+                var path = Path.Combine(directory, fileName);
+                if (!File.Exists(path))
+                    continue;
+
+                try
+                {
+                    handle = NativeLibrary.Load(path);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    // A same-named file that is not a loadable library for this platform - e.g. the Windows
+                    // mediapipe_c.dll that sits beside libmediapipe_c.so in a cross-platform output folder.
+                    Log.Debug($"Could not load native candidate '{path}': {e.Message}");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> NativeProbeDirectories(Assembly? assembly)
+    {
+        var assemblyDirectory = GetDirectorySafely(assembly);
+        var applicationDirectory = AppContext.BaseDirectory;
+
+        foreach (var root in new[] { assemblyDirectory, applicationDirectory })
+        {
+            if (string.IsNullOrEmpty(root))
+                continue;
+
+            yield return root;
+
+            foreach (var rid in NativeRuntimeIdentifiers())
+            {
+                yield return Path.Combine(root, "runtimes", rid, "native");
+                yield return Path.Combine(root, "runtimes", rid);
+            }
+        }
+    }
+
+    private static string? GetDirectorySafely(Assembly? assembly)
+    {
+        if (assembly == null)
+            return null;
+
+        try
+        {
+            return Path.GetDirectoryName(assembly.Location);
+        }
+        catch
+        {
+            // Dynamic and single-file assemblies have no location.
+            return null;
+        }
     }
 
     /// <summary>Probes the NuGet runtimes layout, most specific identifier first.</summary>

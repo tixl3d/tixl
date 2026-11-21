@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "cb09f697-7b35-4f7c-b1bd-243cfd102137"/*NanoVdbToPoints*/,
+  "Inputs": [
+    {
+      "Id": "4db54dc7-b227-433a-8442-56fe0a3374df"/*Threshold*/,
+      "DefaultValue": 0.001
+    },
+    {
+      "Id": "6c01c2c6-c3ec-4f59-93ee-a4654b218f2e"/*Grid*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c48d37c8-ea1d-4207-9bad-0dd8d0bffe94"/*MaxLeaves*/,
+      "DefaultValue": 4096
+    },
+    {
+      "Id": "d998b43d-d4b5-4029-90ec-6c90eb14a1b2"/*MaxPoints*/,
+      "DefaultValue": 262144
+    },
+    {
+      "Id": "e3952b20-aba1-44fa-a6d6-64d61a5085e4"/*Shader*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

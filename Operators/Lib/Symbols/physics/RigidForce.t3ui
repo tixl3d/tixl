@@ -1,0 +1,113 @@
+{
+  "FormatVersion": 3,
+  "Id": "001a1112-e722-4bdb-b6f2-bb2456643c02"/*RigidForce*/,
+  "Description": "Declares a force for [PhysicsWorld].\n\nOutputs a description, like [RigidBody]: the world applies it to its dynamic bodies while it steps. A continuous force accelerates them every step. With IsImpulse on it changes their velocity once each time Trigger turns on, which suits beats and other events.\n\nAKA: wind, attractor, repel, explosion, vortex, impulse, kick, field force\n\nTips\n- Connect any vector field to Field and choose the Field type to steer bodies with it.\n- A negative Strength on a Radial impulse is an explosion.\n- Resting bodies are woken by a force that is strong enough to move them.",
+  "InputUis": [
+    {
+      "InputId": "12531efe-7296-40c4-a894-4eb2bf46de14"/*Position*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Centre of a Radial force, or a point on the axis of a Vortex."
+    },
+    {
+      "InputId": "34707a7a-88fc-45c2-84dc-9e4efef74a7d"/*Field*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Vector field for the Field type, sampled at each body's position and multiplied by Strength."
+    },
+    {
+      "InputId": "35656afd-b2bd-4006-a7a3-552c2c9d47cb"/*CollisionGroup*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Only bodies with this collision group are affected. 0 affects all bodies."
+    },
+    {
+      "InputId": "4b020f6c-2875-42f1-b1d7-3fe2f53a57b6"/*Strength*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Acceleration in units per second squared. For an impulse, the velocity change in units per second."
+    },
+    {
+      "InputId": "5f0608b7-ce9f-4b7c-83f3-fcff5e45bb7f"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Reach of a Radial or Vortex force around its centre or axis. 0 is unlimited."
+    },
+    {
+      "InputId": "65b63902-756a-42a8-b027-2d5a26332f08"/*ForceType*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Directional pushes along Direction. Radial pulls towards Position, or away from it with a negative Strength. Vortex swirls around the axis through Position along Direction. Field samples the connected vector field at each body."
+    },
+    {
+      "InputId": "7eea3f9b-24f0-4c1a-8059-dcaf4655478f"/*Enabled*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "Turns the force off without deleting the node."
+    },
+    {
+      "InputId": "9b65922c-50c8-4a66-8b14-f01d82006d73"/*ScaleByMass*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Description": "Divide the effect by each body's mass, so heavy bodies react less. Off moves everything alike."
+    },
+    {
+      "InputId": "9c51f502-2305-4927-8502-6051d51846ff"/*Trigger*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Fires the impulse each time it turns on."
+    },
+    {
+      "InputId": "aa70a793-a6f2-4363-9a6a-341ef160336e"/*Falloff*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "How much the force fades towards Radius: 0 keeps full strength up to the edge, 1 fades to nothing at the edge."
+    },
+    {
+      "InputId": "bd4ab7bc-644d-4958-b6eb-407f5d30a42a"/*IsImpulse*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Apply once per Trigger instead of continuously: a kick, not a wind."
+    },
+    {
+      "InputId": "edd7245d-d227-4f4c-a840-a68a14d7e71d"/*Direction*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Direction of a Directional force, or the axis of a Vortex. Its length does not matter."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7e787098-3f49-49c4-8718-7ad0b6793026"/*OutForce*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

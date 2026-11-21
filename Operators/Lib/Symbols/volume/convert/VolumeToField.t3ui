@@ -1,0 +1,56 @@
+{
+  "FormatVersion": 3,
+  "Id": "30a13904-cff8-55af-bc36-16e7ea41d608"/*VolumeToField*/,
+  "Description": "Wraps a volume in a CPU scalar field that samples it trilinearly in world space.\n\nThe field plugs into everything that consumes scalar fields, such as [DisplaceGeometry], [ScatterPointsInVolume] density or field SDF combinations.\n\nAKA: volume as field, sample volume\n\nTips\n- Outside the active bounds the field returns OutsideValue, so use a large positive value for signed distance fields.\n\nThe Vectors output is the volume's vector grid, such as a cached velocity, or the gradient of its float grid when there is none. Connect it to the Field input of [RigidForce] to steer rigid bodies with a volume. Scale multiplies it; outside the volume it is zero.",
+  "InputUis": [
+    {
+      "InputId": "179afeb1-79ab-5473-b63e-6dabc122a107"/*Scale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Multiplies the sampled value."
+    },
+    {
+      "InputId": "5fa0d40a-3c96-5b7a-9b85-ab82725cb168"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Added to the sampled value after scaling."
+    },
+    {
+      "InputId": "b7d33ffd-4de6-5f58-8c6b-b0b9d4a1dd5e"/*OutsideValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Value returned for positions outside the bounding box of the active voxels."
+    },
+    {
+      "InputId": "b878129b-860f-5060-97e3-7ac2d09b3b9d"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to sample. Only the first float grid is used."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "bbb5490e-0f5d-5dfb-bb67-b3ac9c0109ec"/*Field*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "fae7c157-3915-47c0-9bb3-912ed4c17d5a"/*Vectors*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    }
+  ]
+}

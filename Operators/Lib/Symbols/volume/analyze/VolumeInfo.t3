@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "0cf85d34-2a41-534c-af7c-bdc6d7e64ecb"/*VolumeInfo*/,
+  "Inputs": [
+    {
+      "Id": "9de3a513-9065-5207-a4ae-3780bf007dd3"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "dbfceb27-904a-55ff-b0ed-3a3707d795d6"/*LogToConsole*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

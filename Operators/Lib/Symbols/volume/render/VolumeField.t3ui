@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "cd200763-633f-513e-8f24-d983b95d9ff0"/*VolumeField*/,
+  "Description": "Samples a baked 3D texture as a distance field for [RaymarchField].\n\nThis is how volumes get rendered with TiXL's field pipeline: bake the volume with [VolumeToTexture3D], then map the texture and its bounds one to one into this operator.\n\nAKA: raymarch volume, 3D texture field, volume SDF\n\nTips\n- Outside the bounds the field returns the distance to the bounding box plus the clamped edge value, so rays approach the volume without overshooting. OutsideValue caps that distance.",
+  "InputUis": [
+    {
+      "InputId": "5f30e9a1-da69-5421-8438-d1270a3467a2"/*BoundsMax*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "World-space corner of the texture with the highest coordinates. Connect from [VolumeToTexture3D]."
+    },
+    {
+      "InputId": "8c4b78e6-abe0-547c-b243-3f3c8e100c38"/*ValueOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Added to the sampled value. Negative values grow the surface, positive values shrink it."
+    },
+    {
+      "InputId": "9a1ecbca-e38e-537f-8f38-837e0218c951"/*ValueScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Multiplies the sampled value. Use values below 1 if the stored distances overestimate."
+    },
+    {
+      "InputId": "ac832ebe-2283-57ec-851b-a173ff449a36"/*BoundsMin*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "World-space corner of the texture with the lowest coordinates. Connect from [VolumeToTexture3D]."
+    },
+    {
+      "InputId": "de0f63b7-05c2-5cb1-817e-d4f8bfe2222b"/*OutsideValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -150.0
+      },
+      "Description": "Upper limit for the distance reported outside the bounds. Keep it large unless you want to clip the field."
+    },
+    {
+      "InputId": "eefa5651-27d2-5347-99fb-850697ea913b"/*Texture*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The baked volume texture from [VolumeToTexture3D]."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "436a5543-a0e8-506d-891e-8ef353c96151"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

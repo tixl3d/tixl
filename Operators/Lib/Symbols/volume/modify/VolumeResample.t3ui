@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "5c4dc3a7-fc82-59c1-afde-daf023bad7c9"/*VolumeResample*/,
+  "Description": "Changes a volume's voxel size by resampling its values trilinearly.\n\nSmaller voxels give finer detail and more memory; larger voxels are cheaper. The sign of a solid's interior is preserved beyond the band, and fog density outside the source's active region stays empty.\n\nAKA: rescale, change resolution, remesh grid\n\nTips\n- Resample before expensive filters to speed up previews, and again afterwards for the final quality.\n- A result that would need more than about 500 MB of voxel data is rejected with a log warning; use a larger VoxelSize.",
+  "InputUis": [
+    {
+      "InputId": "3b90bbbd-0607-5c2b-8e65-61c8a7e04030"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to resample."
+    },
+    {
+      "InputId": "d21b910d-a7d9-507f-b7f6-4053dbdee86a"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "New voxel edge length in world units. Zero or negative passes the volume through unchanged."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "def20e90-909a-5405-b7ad-0e6a953727db"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

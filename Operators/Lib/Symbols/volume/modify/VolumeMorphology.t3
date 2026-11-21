@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "f3b93568-90a7-5119-a0a9-fcd9f1ee60e0"/*VolumeMorphology*/,
+  "Inputs": [
+    {
+      "Id": "2ad87fa8-ac60-5972-a42e-38a4a224c4f1"/*Operation*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "afb22fff-6a74-5f28-893e-950eb71eba4d"/*Radius*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "f762b0d3-0f82-5660-9169-c94524c5a414"/*Volume*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

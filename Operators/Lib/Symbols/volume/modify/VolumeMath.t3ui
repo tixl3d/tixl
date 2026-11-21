@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "608bc5be-57d2-5450-a9c2-f85a68fe95eb"/*VolumeMath*/,
+  "Description": "Arithmetic between two volumes or between a volume and a constant.\n\nAdd, Subtract, Multiply, Divide, Min and Max. With UseConstant off, B participates and voxels missing from either volume read as their background. Division by a value close to zero yields zero.\n\nAKA: add, subtract, multiply, divide, min, max, combine\n\nTips\n- Adding a constant to a signed distance field moves its surface inward; subtracting moves it outward.\n- Max of two level sets is their intersection and Min is their union.",
+  "InputUis": [
+    {
+      "InputId": "4aeafb41-fe6e-556a-abc1-2346f9898b51"/*Operation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Add, Subtract, Multiply, Divide, Min or Max."
+    },
+    {
+      "InputId": "7d8e6b01-c2e2-53d9-8d11-e96db67ec6fb"/*VolumeB*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "The second operand. Ignored when UseConstant is on."
+    },
+    {
+      "InputId": "9eb64387-fc91-54dd-a187-ac6110ec0188"/*UseConstant*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Use the Constant instead of volume B."
+    },
+    {
+      "InputId": "d7a5ce51-3e0f-57b5-81b6-3599334f0d4d"/*Constant*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "The value used as the second operand when UseConstant is on."
+    },
+    {
+      "InputId": "db65839e-a02b-58a2-b1f7-341ea1b5b390"/*VolumeA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The first operand and the grid that defines the result."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1b9bd8b1-5d32-547f-ad2f-fe0f1a7171f3"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

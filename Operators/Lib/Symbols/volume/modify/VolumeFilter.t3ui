@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "4c253b2e-fc94-586f-b6c9-c30c7862cf9d"/*VolumeFilter*/,
+  "Description": "Smoothing and value filters on the active voxels.\n\nGaussian and Box smooth noisy data, Median removes outliers, and Offset shifts all values. Inactive voxels keep their values, so the sign of a solid's interior is preserved.\n\nAKA: blur, smooth, denoise, median\n\nTips\n- Smooth a point density volume before extracting a liquid surface.\n- Radius is rounded to whole voxels, so values below half a voxel have no effect.",
+  "InputUis": [
+    {
+      "InputId": "0241402e-4fae-5ca3-98be-eb4bcd4fc339"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to filter."
+    },
+    {
+      "InputId": "12e5440b-633d-5f77-a421-df4b4d39c4c5"/*Iterations*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "How many times the filter is applied (1 to 10)."
+    },
+    {
+      "InputId": "caed5556-f587-5958-89df-6521430780da"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Filter radius in world units. It is converted to whole voxels (up to 8; the median uses 1 or 2)."
+    },
+    {
+      "InputId": "d3ff33b1-1a0e-5921-be50-0486032ad9bc"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Value added to every voxel. Used by the Offset filter only."
+    },
+    {
+      "InputId": "f4356aa3-0941-5c80-bc46-4670bb4edf85"/*FilterType*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Gaussian, Box, Median or Offset."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7fb850c0-2036-5922-89df-565c9c0ba8b7"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

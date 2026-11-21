@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "9bd1746d-a869-417a-8467-080652ddf718"/*DrawVdbBounds*/,
+  "Description": "Draws the sparse structure of a NanoVDB grid as wireframe boxes, one per node of the selected level.\n\nPoint Grid at the Buffer output of [LoadNanoVdb] or [VolumeToNanoVdb], and connect a [ComputeShader] whose Path is Lib:shaders/volume/nanovdb-bounds.hlsl. Draw the point output with [DrawLines].\n\nUse it to verify a grid before trusting a render: Level 0 shows every leaf (the finest structure), Level 1 the lower nodes, Level 2 the upper nodes. If the boxes sit on top of the volume and their density matches what you expect, the tree, bounds and transform are being read correctly. If they are offset or scaled wrong, the grid's map is not the translation-and-voxel-size form these shaders assume.\n\nAKA: vdb debug, nanovdb tree view, node bounds\n\nTips\n- Capacity is in points, 36 per box; raise it when the boxes look clipped.\n- MaxNodes bounds the dispatch; leaves past the grid's own count are skipped.\n- A dense level set can have tens of thousands of leaves, so start with Level 2 to see the overall extent.",
+  "InputUis": [
+    {
+      "InputId": "1d104dc8-1b12-469f-a2b3-d9093d2634f0"/*Level*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Which node level to outline: 0 = leaves (8 voxels), 1 = lower nodes (128), 2 = upper nodes (4096)."
+    },
+    {
+      "InputId": "37de5282-2685-49d4-814e-fb0d2ad2ac1d"/*Grid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The NanoVDB buffer to inspect, from LoadNanoVdb or VolumeToNanoVdb."
+    },
+    {
+      "InputId": "5c8c098a-4fb2-49cb-90f8-68ae87cca5c6"/*Capacity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Point slots in the output. Each box takes 36 slots (12 edges with a separator each)."
+    },
+    {
+      "InputId": "768eeb4d-4083-45f7-884e-a852c41f9146"/*MaxNodes*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Number of nodes to dispatch. Larger than the grid is harmless; smaller clips the view."
+    },
+    {
+      "InputId": "c1c55f26-1ce4-4ef0-b045-57582c4e82b8"/*Shader*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Compute shader to dispatch. Use Lib:shaders/volume/nanovdb-bounds.hlsl."
+    },
+    {
+      "InputId": "f97533c9-c128-4126-b1f3-0ed9dece008a"/*Color*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -150.0
+      },
+      "Description": "Line colour written into each point."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b9b80bf9-db91-4996-b295-ceeadde34273"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

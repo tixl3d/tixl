@@ -1,0 +1,202 @@
+{
+  "FormatVersion": 3,
+  "Id": "3e2b155e-52cd-4a58-9b7c-602d7a36e19c"/*CsvToPoints*/,
+  "Description": "Loads a CSV file and routes its columns into a point buffer.\n\nEvery point attribute has a dropdown that selects the CSV column to read from. Columns are matched by header name, so their order does not matter. Unmapped attributes keep their defaults: position 0, scale, color and F1/F2 at 1, and an identity rotation. Numeric cells may carry unit suffixes such as \"m\", \"°\" or \"W\".\n\nRotation X/Y/Z are Euler angles in degrees by default; switch RotationMode to Quaternion for W/X/Y/Z data.\n\nAKA: csv to points, fixture import\n\nSee also: [DataPointConverter]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "074a03c5-08a8-4edc-9906-edef98dbb754"/*RotationZ*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "CSV column for the Z euler angle in degrees, or the Z quaternion component in Quaternion mode.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "1074083c-0ede-4821-9a64-381fc19502dc"/*PositionY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "CSV column copied into Position.Y. Unmapped keeps 0.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "1ad9c3d6-5497-4be4-8f3d-ed935ca7e1ae"/*ColorA*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "CSV column copied into the alpha channel. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "1b668fd3-5ad8-4e50-8ad3-359d3de9b404"/*PositionX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "GroupTitle": "Position",
+      "Description": "CSV column copied into Position.X. Unmapped keeps 0.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "20802e48-71d9-4636-b47a-dc0d3271306a"/*RotationMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "GroupTitle": "Rotation",
+      "Description": "EulerXYZ treats Rotation X/Y/Z as degrees and ignores W. Quaternion reads all four as quaternion components."
+    },
+    {
+      "InputId": "2d59cb93-d544-42c9-ade4-2f871110ca0d"/*F2*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1425.0
+      },
+      "Description": "CSV column copied into the custom F2 attribute. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "4cf2dead-6843-4ec6-a8b7-a639b4bb63f4"/*ColorB*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "Description": "CSV column copied into the blue channel. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "537605b3-5d85-4989-bf95-3324107b34c7"/*FilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "CSV File",
+      "Description": "CSV file to read. Its first row supplies the column names used by the mapping dropdowns.",
+      "Usage": "FilePath",
+      "FileFilter": "csv"
+    },
+    {
+      "InputId": "723a2460-2db4-485d-9763-42f00c987350"/*ColorG*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "CSV column copied into the green channel. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "73b148ac-4669-4738-b18d-4790adf174ba"/*ScaleZ*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1275.0
+      },
+      "Description": "CSV column copied into Scale.Z. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "7854f719-d7a4-42c5-b52d-22ae1f0e76b1"/*ColorR*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "GroupTitle": "Color",
+      "Description": "CSV column copied into the red channel. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "a1037cf2-10db-432e-a65d-526e2cd58583"/*RotationY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "CSV column for the Y euler angle in degrees, or the Y quaternion component in Quaternion mode.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "ba625921-0efd-49f9-b7f5-b335bb39c6c3"/*PositionZ*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "CSV column copied into Position.Z. Unmapped keeps 0.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "bd3a1311-caee-4283-83a4-59b93a971d38"/*ScaleX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "GroupTitle": "Scale",
+      "Description": "CSV column copied into Scale.X. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "c2d008e4-5553-465c-a9fc-b8c7d41f2296"/*ColorIs0To255*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "Divides mapped color channels by 255, for 8-bit color columns."
+    },
+    {
+      "InputId": "cc323942-e0e7-4a66-84d3-066fa23c3ed7"/*ScaleY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
+      },
+      "Description": "CSV column copied into Scale.Y. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "d8311eeb-ab1e-4d51-bb6c-3a416868a4a5"/*Reload*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Re-reads the file after its contents changed on disk."
+    },
+    {
+      "InputId": "dce9bb44-a12e-4c28-876d-d6fd7c19af16"/*RotationW*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "CSV column for the quaternion W component. Ignored in EulerXYZ mode.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "e03929c8-b50f-4c46-b283-74b76d1fcc58"/*RotationX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "CSV column for the X euler angle in degrees, or the X quaternion component in Quaternion mode.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "eaefda89-f7ad-4456-be37-ed9d4e6b0245"/*F1*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1350.0
+      },
+      "GroupTitle": "Custom Attributes",
+      "Description": "CSV column copied into the custom F1 attribute. Unmapped keeps 1.",
+      "Usage": "CustomDropdown"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "013eb3d8-8e97-44fc-83e4-c777231d8434"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

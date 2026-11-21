@@ -1,0 +1,68 @@
+{
+  "FormatVersion": 3,
+  "Id": "0cf85d34-2a41-534c-af7c-bdc6d7e64ecb"/*VolumeInfo*/,
+  "Description": "Reports statistics about a volume.\n\nActive voxel count, memory footprint, value range, average and NaN or Inf corruption. Use it to catch broken volumes early in a graph.\n\nAKA: stats, diagnose, inspect\n\nTips\n- Enable LogToConsole once to see a full line with leaf count and value range in the log.",
+  "InputUis": [
+    {
+      "InputId": "9de3a513-9065-5207-a4ae-3780bf007dd3"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to inspect."
+    },
+    {
+      "InputId": "dbfceb27-904a-55ff-b0ed-3a3707d795d6"/*LogToConsole*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Write a summary line to the log whenever the volume changes."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "83364604-237b-5983-866b-d24c2b342aac"/*ActiveVoxels*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "de88bdf5-4ceb-5a38-99fc-cc3c9e6275fa"/*MemoryMB*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 30.0
+      }
+    },
+    {
+      "OutputId": "5ef2ebae-279f-51ab-95f1-afd2f912d408"/*HasNaN*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 60.0
+      }
+    },
+    {
+      "OutputId": "78a262b1-42e9-5ead-86e5-182f28a31c5a"/*Min*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "4eff0f63-d9a5-50b9-a60f-f00a5a593cf2"/*Max*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "OutputId": "fb4a6683-b5db-5e6d-981e-248d8b715c0c"/*Average*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 150.0
+      }
+    }
+  ]
+}

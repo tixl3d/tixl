@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "d050e786-b744-4d12-a43d-5ed53fa41950"/*RigidBodyPoints*/,
+  "Inputs": [
+    {
+      "Id": "227ac807-1515-43b7-97fe-dade52819264"/*Body*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f006ea17-a6c5-45ad-8657-74b88873061a"/*World*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

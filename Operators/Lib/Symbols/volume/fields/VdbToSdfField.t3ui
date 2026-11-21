@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "d8f932c2-dde0-4c24-a073-99de3829f91a"/*VdbToSdfField*/,
+  "Description": "Exposes a NanoVDB level set as a signed-distance field, so every existing field operator works on it.\n\nPoint Grid at the Buffer output of [LoadNanoVdb] or [VolumeToNanoVdb], and map BoundsMin/BoundsMax from the same operator's WorldMin/WorldMax. Outside that box the field returns the distance to the box plus the positive part of the value, so [RaymarchField] never steps into the volume blind.\n\nWith this, [RaymarchField] renders the surface, [FieldVolumeForce] and [FieldDistanceForce] make particles collide with it, [SampleFieldPoints] writes distances onto points, and [SDFToColor] shades by distance - all without new operators.\n\nAKA: vdb sdf, nanovdb field, level set field\n\nTips\n- Keep the grid's own transform in the grid: use TiXL's field transform operators to move or scale the result instead of rebuilding.\n- The value is trilinearly sampled; a level set that is not a true narrow-band SDF will march unevenly.\n- Bounds drive early rejection only; a wrong box shows up as the volume being clipped away.",
+  "InputUis": [
+    {
+      "InputId": "41e6db16-5a41-4f49-adbd-45b1cda2d0ac"/*BoundsMax*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "World-space maximum of the grid box. Wire LoadNanoVdb's WorldMax."
+    },
+    {
+      "InputId": "5893924c-b57a-4807-bf4a-d498a105a371"/*Grid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "NanoVDB buffer to sample, from LoadNanoVdb or VolumeToNanoVdb."
+    },
+    {
+      "InputId": "5e761feb-f214-4c33-9d36-90c88c3f1b6f"/*BoundsMin*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "World-space minimum of the grid box. Wire LoadNanoVdb's WorldMin."
+    },
+    {
+      "InputId": "794b9793-e02f-484f-be18-3b1e07b62839"/*ValueOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Added after scaling; use it to move the extracted isosurface."
+    },
+    {
+      "InputId": "7c49a500-4dfe-48bb-9ace-77a74d9d0a94"/*OutsideValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -150.0
+      },
+      "Description": "Clamp for the value far outside the box, so a distant march step stays finite."
+    },
+    {
+      "InputId": "bedfc0b1-99d3-4d38-8a28-e0bace94f3f8"/*ValueScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Multiplies the sampled distance, for grids stored in different units."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fa70337b-0461-4d3e-aecf-7230c37f3154"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "FormatVersion": 3,
+  "Id": "9bd1746d-a869-417a-8467-080652ddf718"/*DrawVdbBounds*/,
+  "Inputs": [
+    {
+      "Id": "1d104dc8-1b12-469f-a2b3-d9093d2634f0"/*Level*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "37de5282-2685-49d4-814e-fb0d2ad2ac1d"/*Grid*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5c8c098a-4fb2-49cb-90f8-68ae87cca5c6"/*Capacity*/,
+      "DefaultValue": 65536
+    },
+    {
+      "Id": "768eeb4d-4083-45f7-884e-a852c41f9146"/*MaxNodes*/,
+      "DefaultValue": 4096
+    },
+    {
+      "Id": "c1c55f26-1ce4-4ef0-b045-57582c4e82b8"/*Shader*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f97533c9-c128-4126-b1f3-0ed9dece008a"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.7,
+        "Z": 0.2,
+        "W": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

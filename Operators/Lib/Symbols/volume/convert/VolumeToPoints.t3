@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "9741d4b6-e9cb-5ea4-ab4c-fdee86312243"/*VolumeToPoints*/,
+  "Inputs": [
+    {
+      "Id": "0369a449-b250-53bc-89c5-85e1c2288b80"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "3c3f2652-7c22-5b1c-9984-d9182f3d2652"/*Isovalue*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3e761d43-45d2-5c07-af9d-50b71cc341c1"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a82acc1d-bacb-5839-90b5-53b2ae36ca7d"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "bd7e2b17-0c96-52d3-a674-68d58855057a"/*MaxPoints*/,
+      "DefaultValue": 100000
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

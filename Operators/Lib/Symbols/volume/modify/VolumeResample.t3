@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "5c4dc3a7-fc82-59c1-afde-daf023bad7c9"/*VolumeResample*/,
+  "Inputs": [
+    {
+      "Id": "3b90bbbd-0607-5c2b-8e65-61c8a7e04030"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d21b910d-a7d9-507f-b7f6-4053dbdee86a"/*VoxelSize*/,
+      "DefaultValue": 0.05
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

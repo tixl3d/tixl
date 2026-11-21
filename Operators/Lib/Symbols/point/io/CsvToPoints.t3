@@ -1,0 +1,88 @@
+{
+  "FormatVersion": 3,
+  "Id": "3e2b155e-52cd-4a58-9b7c-602d7a36e19c"/*CsvToPoints*/,
+  "Inputs": [
+    {
+      "Id": "074a03c5-08a8-4edc-9906-edef98dbb754"/*RotationZ*/,
+      "DefaultValue": "Rotation Z"
+    },
+    {
+      "Id": "1074083c-0ede-4821-9a64-381fc19502dc"/*PositionY*/,
+      "DefaultValue": "Position Y"
+    },
+    {
+      "Id": "1ad9c3d6-5497-4be4-8f3d-ed935ca7e1ae"/*ColorA*/,
+      "DefaultValue": "Color A"
+    },
+    {
+      "Id": "1b668fd3-5ad8-4e50-8ad3-359d3de9b404"/*PositionX*/,
+      "DefaultValue": "Position X"
+    },
+    {
+      "Id": "20802e48-71d9-4636-b47a-dc0d3271306a"/*RotationMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "2d59cb93-d544-42c9-ade4-2f871110ca0d"/*F2*/,
+      "DefaultValue": "F2"
+    },
+    {
+      "Id": "4cf2dead-6843-4ec6-a8b7-a639b4bb63f4"/*ColorB*/,
+      "DefaultValue": "Color B"
+    },
+    {
+      "Id": "537605b3-5d85-4989-bf95-3324107b34c7"/*FilePath*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "723a2460-2db4-485d-9763-42f00c987350"/*ColorG*/,
+      "DefaultValue": "Color G"
+    },
+    {
+      "Id": "73b148ac-4669-4738-b18d-4790adf174ba"/*ScaleZ*/,
+      "DefaultValue": "Scale Z"
+    },
+    {
+      "Id": "7854f719-d7a4-42c5-b52d-22ae1f0e76b1"/*ColorR*/,
+      "DefaultValue": "Color R"
+    },
+    {
+      "Id": "a1037cf2-10db-432e-a65d-526e2cd58583"/*RotationY*/,
+      "DefaultValue": "Rotation Y"
+    },
+    {
+      "Id": "ba625921-0efd-49f9-b7f5-b335bb39c6c3"/*PositionZ*/,
+      "DefaultValue": "Position Z"
+    },
+    {
+      "Id": "bd3a1311-caee-4283-83a4-59b93a971d38"/*ScaleX*/,
+      "DefaultValue": "Scale X"
+    },
+    {
+      "Id": "c2d008e4-5553-465c-a9fc-b8c7d41f2296"/*ColorIs0To255*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "cc323942-e0e7-4a66-84d3-066fa23c3ed7"/*ScaleY*/,
+      "DefaultValue": "Scale Y"
+    },
+    {
+      "Id": "d8311eeb-ab1e-4d51-bb6c-3a416868a4a5"/*Reload*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "dce9bb44-a12e-4c28-876d-d6fd7c19af16"/*RotationW*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "e03929c8-b50f-4c46-b283-74b76d1fcc58"/*RotationX*/,
+      "DefaultValue": "Rotation X"
+    },
+    {
+      "Id": "eaefda89-f7ad-4456-be37-ed9d4e6b0245"/*F1*/,
+      "DefaultValue": "F1"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

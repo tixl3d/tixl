@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "30a13904-cff8-55af-bc36-16e7ea41d608"/*VolumeToField*/,
+  "Inputs": [
+    {
+      "Id": "179afeb1-79ab-5473-b63e-6dabc122a107"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "5fa0d40a-3c96-5b7a-9b85-ab82725cb168"/*Offset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b7d33ffd-4de6-5f58-8c6b-b0b9d4a1dd5e"/*OutsideValue*/,
+      "DefaultValue": 1E+20
+    },
+    {
+      "Id": "b878129b-860f-5060-97e3-7ac2d09b3b9d"/*Volume*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

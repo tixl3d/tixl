@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "6583bddb-034b-5ff0-b12e-6e5c38bdba64"/*VolumePrimitive*/,
+  "Description": "Generates an analytic primitive as a narrow-band level set volume.\n\nThe result is an exact signed distance field: negative inside, positive outside, with values stored in world units. Voxels deeper than the band keep only their sign. Use it as the starting point for [VolumeCsg], [VolumeNoise], [VolumeMorphology] and [VolumeToMesh].\n\nAKA: SDF, sphere, box, torus, level set primitive\n\nTips\n- Size is the full extent, not the radius. A sphere uses the X component only.\n- Center moves the whole grid, so two primitives with different centers live in different index spaces. CSG and math resample them for you.\n- Smaller VoxelSize means sharper surfaces and quadratically more memory.",
+  "InputUis": [
+    {
+      "InputId": "1465ff4d-d5af-5bf8-8c87-10c6ab682967"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Full extents of the shape in world units. A sphere reads only X as its diameter."
+    },
+    {
+      "InputId": "89ac8fe1-dfda-5b97-8d05-1c5378f896b4"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Edge length of one voxel in world units. Smaller values give a sharper surface and cost memory and time."
+    },
+    {
+      "InputId": "91618a1f-bc81-581a-99eb-77714007172d"/*BandWidth*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Half-width of the narrow band in voxels (1 to 64). Operators such as filters and morphology need a few voxels of band to work with."
+    },
+    {
+      "InputId": "bc2ac4ee-9a07-5229-87e0-9b527ee316c6"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "World-space position of the shape. The voxel grid is translated with it, so the surface stays aligned to voxel centers."
+    },
+    {
+      "InputId": "d2cf0b36-bd51-5f39-9ae4-ea24893f1222"/*Shape*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Which primitive to build: Sphere, Box, RoundedBox, Torus, Capsule, Cylinder, Cone, Octahedron or Plane."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1c2a036f-72e1-5cb0-a787-f8a5e06defe7"/*Volume*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

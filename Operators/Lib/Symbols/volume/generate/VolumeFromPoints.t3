@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "c698dc60-e135-5cc0-8346-31eb7ee77637"/*VolumeFromPoints*/,
+  "Inputs": [
+    {
+      "Id": "234a9c82-72f4-5388-9473-8bff628ba0fe"/*VoxelSize*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "51935275-be34-555d-a9dc-7fbc6a55db39"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5f863764-57b0-5e98-b6ac-4c621fcb5380"/*Density*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "5fbe41e2-1376-5ead-b9aa-97c925092e26"/*Falloff*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "8a3c8412-7266-50ce-83ba-7841bb431863"/*Radius*/,
+      "DefaultValue": 0.25
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

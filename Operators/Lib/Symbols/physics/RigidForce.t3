@@ -1,0 +1,64 @@
+{
+  "FormatVersion": 3,
+  "Id": "001a1112-e722-4bdb-b6f2-bb2456643c02"/*RigidForce*/,
+  "Inputs": [
+    {
+      "Id": "12531efe-7296-40c4-a894-4eb2bf46de14"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "34707a7a-88fc-45c2-84dc-9e4efef74a7d"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "35656afd-b2bd-4006-a7a3-552c2c9d47cb"/*CollisionGroup*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4b020f6c-2875-42f1-b1d7-3fe2f53a57b6"/*Strength*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "5f0608b7-ce9f-4b7c-83f3-fcff5e45bb7f"/*Radius*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "65b63902-756a-42a8-b027-2d5a26332f08"/*ForceType*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7eea3f9b-24f0-4c1a-8059-dcaf4655478f"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "9b65922c-50c8-4a66-8b14-f01d82006d73"/*ScaleByMass*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9c51f502-2305-4927-8502-6051d51846ff"/*Trigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "aa70a793-a6f2-4363-9a6a-341ef160336e"/*Falloff*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "bd4ab7bc-644d-4958-b6eb-407f5d30a42a"/*IsImpulse*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "edd7245d-d227-4f4c-a840-a68a14d7e71d"/*Direction*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "4c253b2e-fc94-586f-b6c9-c30c7862cf9d"/*VolumeFilter*/,
+  "Inputs": [
+    {
+      "Id": "0241402e-4fae-5ca3-98be-eb4bcd4fc339"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "12e5440b-633d-5f77-a421-df4b4d39c4c5"/*Iterations*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "caed5556-f587-5958-89df-6521430780da"/*Radius*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "d3ff33b1-1a0e-5921-be50-0486032ad9bc"/*Offset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f4356aa3-0941-5c80-bc46-4670bb4edf85"/*FilterType*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

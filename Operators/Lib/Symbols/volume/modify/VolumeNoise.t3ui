@@ -1,0 +1,89 @@
+{
+  "FormatVersion": 3,
+  "Id": "157fac50-f3ea-5404-94ef-89b470fd6194"/*VolumeNoise*/,
+  "Description": "Adds procedural fractal noise to a volume.\n\nPerlin, Simplex or Worley noise with fractal combination. Add and Multiply modulate the values, Displace pushes level-set surfaces along the noise for organic shapes, and Replace writes the noise itself.\n\nAKA: turbulence, displacement, perlin, simplex, worley, fbm\n\nTips\n- Animate Offset to make the noise flow.\n- Displace scales the amplitude by the voxel size, so an Amplitude of 2 moves the surface up to about two voxels.",
+  "InputUis": [
+    {
+      "InputId": "1ee7f2e0-d46f-5bd6-909e-1cd0cb15d0d0"/*Fractal*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "How octaves are combined: None, Fbm, Ridged or Billow."
+    },
+    {
+      "InputId": "20af828b-f18e-5822-95e1-e9708aa8fd01"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to modulate. In Replace mode only its topology is used."
+    },
+    {
+      "InputId": "255e7244-b30b-5a05-ad44-cb5512d39f40"/*Frequency*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -150.0
+      },
+      "Description": "How quickly the noise varies across space. Higher values give finer features."
+    },
+    {
+      "InputId": "3af327f6-9030-57a5-bd59-949410d3275e"/*Octaves*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Number of noise layers (1 to 8). More octaves add fine detail and cost time."
+    },
+    {
+      "InputId": "3d95a0ca-fd17-53e5-817f-fdfe293f3b6e"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -240.0
+      },
+      "Description": "Add, Multiply, Displace (level sets) or Replace."
+    },
+    {
+      "InputId": "435f4c7b-b598-5cb0-a4d5-5875652c6518"/*Seed*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Seed of the noise generator."
+    },
+    {
+      "InputId": "a8c2bbd9-1601-59c4-bbdb-db3189a7bdf7"/*Offset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -210.0
+      },
+      "Description": "Shifts the noise lookup position in noise space. Animate it to flow the pattern."
+    },
+    {
+      "InputId": "f7e2ced5-9031-57ec-9be4-30252ca644a1"/*NoiseType*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Perlin, Simplex or Worley."
+    },
+    {
+      "InputId": "fa3b21cd-383f-5f82-9b5a-57c316cdef7d"/*Amplitude*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -180.0
+      },
+      "Description": "Strength of the noise. For Displace it is measured in voxels."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2f675093-d490-50ea-ac15-613f7c5b367d"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

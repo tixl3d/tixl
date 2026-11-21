@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "f3b93568-90a7-5119-a0a9-fcd9f1ee60e0"/*VolumeMorphology*/,
+  "Description": "Morphological dilate and erode on volumes.\n\nOn level sets the surface moves outward (Dilate) or inward (Erode) by the radius; Open and Close apply both to remove thin features or fill pinholes. Fog volumes use min and max stencil filtering instead.\n\nAKA: grow, shrink, offset surface, open, close\n\nTips\n- Radius is in world units, so a radius of 0.1 on a sphere of radius 0.6 gives 0.7 or 0.5.\n- Keep a few voxels of band around the surface, or large radii fall outside it.",
+  "InputUis": [
+    {
+      "InputId": "2ad87fa8-ac60-5972-a42e-38a4a224c4f1"/*Operation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Dilate grows, Erode shrinks, Open erodes then dilates, Close dilates then erodes."
+    },
+    {
+      "InputId": "afb22fff-6a74-5f28-893e-950eb71eba4d"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Offset distance in world units. Zero or negative leaves the volume unchanged."
+    },
+    {
+      "InputId": "f762b0d3-0f82-5660-9169-c94524c5a414"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to modify."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e385bebb-b9e7-576f-9c3a-f794d84d5d48"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "df34163c-3dca-5de3-aabf-225dc08162a9"/*SaveVdb*/,
+  "Inputs": [
+    {
+      "Id": "0266ff85-52d7-59fb-a4e1-6b8c0557a3b9"/*Save*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "21cb11b5-601d-5925-a11e-59a788f05fc0"/*PathSaved*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "48b7436c-1126-5b8f-af8b-d87880bc8077"/*ZipCompression*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "6db4a395-2245-58f4-9db8-3e6e5ae814e1"/*Volume*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

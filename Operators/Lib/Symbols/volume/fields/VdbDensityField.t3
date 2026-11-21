@@ -1,0 +1,44 @@
+{
+  "FormatVersion": 3,
+  "Id": "d3c3c4eb-791e-4897-9c8c-27e159090239"/*VdbDensityField*/,
+  "Inputs": [
+    {
+      "Id": "2f7b9e04-1c5a-4d63-8e92-a4b7c0d1f368"/*ValueOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3e457cb0-9b2c-475b-a616-e0a176c08d0c"/*Grid*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "4d6b9f1a-8f2c-4a1e-9a3d-6b7c5e2d8f10"/*BoundsMax*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "6e1d8b47-3a92-4c05-b7e8-9f2a1d6c4b53"/*IsoValue*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "8a2e5c31-7b4d-42f8-9c61-5d3a0e9b7c24"/*ValueScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "b5c2a918-4e7f-4d0b-a361-8c9e2f5b7d04"/*OutsideValue*/,
+      "DefaultValue": 10.0
+    },
+    {
+      "Id": "c0ecc90c-7529-45e4-b860-7d079452e4f3"/*BoundsMin*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

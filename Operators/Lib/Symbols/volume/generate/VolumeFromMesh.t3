@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "1cd14db1-d084-5d7b-935e-0c8cac5b9bd6"/*VolumeFromMesh*/,
+  "Inputs": [
+    {
+      "Id": "5dc83de1-24e8-52c8-9ef4-2ad2aafab51f"/*VoxelSize*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "674cd211-f65b-5e98-bca5-0a78c68e770a"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "780d9a0e-ef3e-5db7-a842-3aeeef647cad"/*BandWidth*/,
+      "DefaultValue": 3.0
+    },
+    {
+      "Id": "e4c8434c-5d4a-57b7-996e-5006785e8cf8"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

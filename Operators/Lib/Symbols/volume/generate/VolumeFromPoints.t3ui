@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "c698dc60-e135-5cc0-8346-31eb7ee77637"/*VolumeFromPoints*/,
+  "Description": "Splats a point list into a sparse density volume.\n\nEvery point contributes a falloff kernel over its radius, and overlapping contributions add up. This is OpenVDB's particles-to-volume conversion and is the first step of a liquid surface: points become density, a filter smooths it, and [VolumeToMesh] extracts the surface.\n\nAKA: particles to volume, splat, metaballs, point cloud to density\n\nTips\n- Feed GPU points through [ReadPointsFromGpu] first.\n- Pick the Radius around two to four voxel sizes. Smaller radii make separate beads, larger ones merge into a blob.\n- Radius is limited to 64 voxels; increase VoxelSize for a wider kernel.\n- Extract the surface with an isovalue between 0 and the peak density, and smooth the volume first with [VolumeFilter].",
+  "InputUis": [
+    {
+      "InputId": "234a9c82-72f4-5388-9473-8bff628ba0fe"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Edge length of one voxel in world units."
+    },
+    {
+      "InputId": "51935275-be34-555d-a9dc-7fbc6a55db39"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The points to splat. Only positions are used."
+    },
+    {
+      "InputId": "5f863764-57b0-5e98-b6ac-4c621fcb5380"/*Density*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Peak contribution of a single point at its center. Overlaps add up."
+    },
+    {
+      "InputId": "5fbe41e2-1376-5ead-b9aa-97c925092e26"/*Falloff*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Shape of the kernel: Gaussian, Smoothstep or Constant."
+    },
+    {
+      "InputId": "8a3c8412-7266-50ce-83ba-7841bb431863"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Radius of the falloff kernel around every point in world units."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d6f70e3d-84d5-57da-b94d-ffc284fca668"/*Volume*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

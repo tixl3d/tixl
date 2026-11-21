@@ -1,0 +1,47 @@
+{
+  "FormatVersion": 3,
+  "Id": "db930e54-f0aa-5894-88ae-67b54353c513"/*VolumeToTexture3D*/,
+  "Description": "Bakes a volume into a dense 3D texture plus its world-space bounds.\n\nThis is the GPU bridge for raymarching: the texture holds the distance or density values as R32 float, and the bounds map them back into world space.\n\nAKA: voxel texture, 3D texture, bake volume\n\nTips\n- Connect the texture and both bounds to [VolumeField] and feed that into [RaymarchField].\n- The texture grows with the cube of the resolution. Keep MaxResolution modest.",
+  "InputUis": [
+    {
+      "InputId": "208b3d98-a7d7-5453-96cc-b29c89d1141b"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to bake. Only the first float grid is used."
+    },
+    {
+      "InputId": "b88c73a2-e66c-530e-9e72-a52bf2c27e13"/*MaxResolution*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Largest number of texels along any axis (8 to 2048). Larger volumes are clamped to this size. The total is additionally capped at 64M texels (256 MB), so extreme settings shrink evenly instead of exhausting memory."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "18e3a08c-edc3-5c42-a11f-eccaee753caa"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "1449308e-6d89-52eb-9ce2-124c4a972dab"/*BoundsMin*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 30.0
+      }
+    },
+    {
+      "OutputId": "ca612cd0-3d23-59a1-912e-cad23f75d645"/*BoundsMax*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 60.0
+      }
+    }
+  ]
+}

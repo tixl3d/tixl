@@ -1,0 +1,50 @@
+{
+  "FormatVersion": 3,
+  "Id": "df34163c-3dca-5de3-aabf-225dc08162a9"/*SaveVdb*/,
+  "Description": "Writes the volume's grids to an OpenVDB file.\n\nThe file is readable by Houdini, Blender, Maya and TiXL. It is written once whenever Save switches from off to on. The write runs on a background thread, so large volumes do not stall the renderer.\n\nAKA: export vdb, write openvdb\n\nTips\n- Toggle Save from a button or trigger operator. The output pulses true for one evaluation after a successful write.",
+  "InputUis": [
+    {
+      "InputId": "0266ff85-52d7-59fb-a4e1-6b8c0557a3b9"/*Save*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Writes the file on the rising edge."
+    },
+    {
+      "InputId": "21cb11b5-601d-5925-a11e-59a788f05fc0"/*PathSaved*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Target file path. Missing folders are created.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "48b7436c-1126-5b8f-af8b-d87880bc8077"/*ZipCompression*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Compress the voxel data with zip. Smaller files, slightly slower writing."
+    },
+    {
+      "InputId": "6db4a395-2245-58f4-9db8-3e6e5ae814e1"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to write. All grids of the volume are saved."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "08124f7f-e719-5ce0-8f61-92e9cceb340c"/*Saved*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

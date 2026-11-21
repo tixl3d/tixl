@@ -1,0 +1,80 @@
+{
+  "FormatVersion": 3,
+  "Id": "88af1ae4-2758-4349-8d5a-ac0a9e5af97a"/*PhysicsWorld*/,
+  "Inputs": [
+    {
+      "Id": "01e66019-3f45-4933-895d-8cb2c5f8a757"/*FixedRate*/,
+      "DefaultValue": 60.0
+    },
+    {
+      "Id": "098ac911-44f7-45e4-99e4-80b18b7058ba"/*Gravity*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": -9.81,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "138645fa-4742-4d28-961e-a5ffdc2b962a"/*Bodies*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "142c8ba1-4d45-4410-a4cf-bdf08b256717"/*ContactSpeed*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "1dd023b9-76b2-4455-86c2-fced2726528e"/*ContactStiffness*/,
+      "DefaultValue": 30.0
+    },
+    {
+      "Id": "47787d21-9ddc-45ab-97f6-a573a717675c"/*MaxContacts*/,
+      "DefaultValue": 64
+    },
+    {
+      "Id": "4e9535a7-d7ed-4917-aa4e-df566c6b7328"/*TimeScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "508e2ee0-fe78-48e1-9e78-7b2a4c937cc4"/*Forces*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "54247fde-224c-4764-97e1-01d1e725acdc"/*Substeps*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "65c7e041-a308-407c-8bfe-a7f0f516279a"/*Multithreaded*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "8279a472-cae2-4427-8de7-2fe51bde82b4"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "93aea25c-08d7-49ba-8989-16881f1a475b"/*SolverIterations*/,
+      "DefaultValue": 4
+    },
+    {
+      "Id": "a8d603b9-64ce-40ea-8593-ba4b4d67af19"/*Paused*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "be5ef8d6-240b-4d61-9883-49e5f107d5d6"/*Deterministic*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c2e25c12-d0fe-4593-a149-a324ff73b19b"/*IncludeStatics*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d674cf34-39bf-4fab-884a-879eb4a27e26"/*Joints*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "ffe4f804-dbc2-48c8-aa5e-3a4d0fb38407"/*Interpolate*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

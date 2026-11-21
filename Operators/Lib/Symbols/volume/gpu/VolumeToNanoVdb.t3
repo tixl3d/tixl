@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "564e17a3-182b-5dbb-b402-088f0e717f9d"/*VolumeToNanoVdb*/,
+  "Inputs": [
+    {
+      "Id": "8a677502-fd4d-5284-ab06-fd659490a4fa"/*Volume*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,42 @@
+{
+  "FormatVersion": 3,
+  "Id": "e90edc95-86bb-5508-a36c-fc77f5d14459"/*SaveNanoVdb*/,
+  "Description": "Writes the volume as a NanoVDB file.\n\nNanoVDB is the GPU-flattened grid format used by CUDA and renderers, and is readable by the reference NanoVDB library. The file is written once whenever Save switches from off to on. Flattening and writing run on a background thread.\n\nAKA: export nvdb, write nanovdb\n\nTips\n- Only float and vector grids are written. The first float grid wins.\n- Saved pulses true for one evaluation after the write has finished.",
+  "InputUis": [
+    {
+      "InputId": "413cb751-966b-5e5e-b8ee-e6c10a0db501"/*PathSaved*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Target file path. Missing folders are created.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "7ddbba10-4371-5f6e-ba1f-ce3f26c47d6e"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to write."
+    },
+    {
+      "InputId": "c7946670-7bed-50c6-bd36-59b69be6e85e"/*Save*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Writes the file on the rising edge."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4ce764eb-1a7a-5d04-96e9-4ddeba3804d9"/*Saved*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

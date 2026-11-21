@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "49449447-78bd-525f-96ad-83759321316d"/*VolumeCsg*/,
+  "Inputs": [
+    {
+      "Id": "91c95ddc-98c5-5e99-947e-a9f94cbaf1de"/*VolumeB*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c8eda1a2-1379-572e-92d1-ea640a6b9e61"/*VolumeA*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e0616bd7-2a4a-5953-95a5-a11929871bd9"/*Operation*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

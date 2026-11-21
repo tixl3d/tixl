@@ -1,0 +1,49 @@
+{
+  "FormatVersion": 3,
+  "Id": "1cd14db1-d084-5d7b-935e-0c8cac5b9bd6"/*VolumeFromMesh*/,
+  "Description": "Converts a mesh into a sparse volume, either a signed distance field or a fog density.\n\nDistances are exact within a narrow band around the surface; the interior of a closed mesh is filled with the sign so the solid behaves correctly in CSG and offsets. The mesh needs consistent outward winding for the sign to be right.\n\nAKA: mesh to SDF, voxelize, mesh to level set, mesh to fog\n\nTips\n- Convert back with [VolumeToMesh] for remeshing, smoothing or boolean operations on arbitrary meshes.\n- Open meshes have no inside. Close holes before converting, or use Fog mode.",
+  "InputUis": [
+    {
+      "InputId": "5dc83de1-24e8-52c8-9ef4-2ad2aafab51f"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Edge length of one voxel in world units. This sets the resolution of the result."
+    },
+    {
+      "InputId": "674cd211-f65b-5e98-bca5-0a78c68e770a"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Sdf stores signed distances (negative inside). Fog stores a density from 0 to 1 that falls off from the surface across the band."
+    },
+    {
+      "InputId": "780d9a0e-ef3e-5db7-a842-3aeeef647cad"/*BandWidth*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Half-width of the narrow band in voxels around the surface (1 to 64). Distances beyond the band are not stored."
+    },
+    {
+      "InputId": "e4c8434c-5d4a-57b7-996e-5006785e8cf8"/*Geometry*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The mesh to convert. It must contain faces."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "09b1560a-62c1-5824-965e-c99ca55057de"/*Volume*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

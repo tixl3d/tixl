@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "fc358fd5-f6ba-4971-9d40-2090e51aaa71"/*LoadNanoVdb*/,
+  "Inputs": [
+    {
+      "Id": "1f4c2a80-5d3e-4b97-8a61-2e7d9c0b4f13"/*Frame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "69a0c6d6-243c-4cf2-b022-c557955660fd"/*Path*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "7b2e9d14-3c8a-4f60-9d52-6a0e1c7b8f25"/*PreloadFrames*/,
+      "DefaultValue": 3
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

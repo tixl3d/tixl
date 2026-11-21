@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "34203fa5-2ff2-548b-98ee-fc427923ebb1"/*FieldToVolume*/,
+  "Description": "Samples a CPU scalar field into a sparse grid over a box region.\n\nTreat the field as a signed distance to get a valid level set, or as density for a fog volume. The box is sampled completely, so the cost grows with the cube of Size divided by VoxelSize and is capped at about 16.7 million samples.\n\nAKA: field to SDF, bake field, rasterize field\n\nTips\n- Combine with [VolumeToField] to resample or reshape a volume through any field operator.\n- In Sdf mode the deep interior keeps its sign, so the solid does not read as outside.",
+  "InputUis": [
+    {
+      "InputId": "07e12791-cb1a-57db-94ac-eeb2d8011cff"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "World-space center of the sampled box."
+    },
+    {
+      "InputId": "56318452-ae77-53d2-b4b1-55d93eaffcd7"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Sdf treats field values as signed distances and builds a level set. Fog treats them as density and keeps non-zero samples."
+    },
+    {
+      "InputId": "5ca91e75-52a4-542a-b317-fe1e35dd6a3e"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Full extents of the sampled box in world units. All components must be positive."
+    },
+    {
+      "InputId": "623c40fb-5337-5a30-98c8-a0542cc6ee09"/*Field*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The scalar field to sample, for example from [CustomScalarField] or [VolumeToField]."
+    },
+    {
+      "InputId": "cf9b56dc-27cd-58e9-96ff-29a4770f6277"/*VoxelSize*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Edge length of one voxel in world units. The sample count is limited, so very small values produce no volume."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a34b2f67-46e3-58ab-9cd0-c6c137869fa1"/*Volume*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "FormatVersion": 3,
+  "Id": "d3c3c4eb-791e-4897-9c8c-27e159090239"/*VdbDensityField*/,
+  "Description": "Exposes a NanoVDB fog volume as a field with the usual negative-inside convention.\n\nThe output is IsoValue minus the sampled density, so dense smoke reads as \"inside\" to operators that expect a signed distance. Point Grid at the Buffer output of [LoadNanoVdb] or [VolumeToNanoVdb], and map BoundsMin/BoundsMax from the same operator's world bounds.\n\nUse it where a level set makes no sense but the density still has to drive something: [FieldVolumeForce] to drag particles into smoke, [SampleFieldPoints] to write density onto points, or [SDFToColor] for shaded cross-sections.\n\nAKA: vdb density, smoke field, fog field\n\nTips\n- Set IsoValue to the density that should count as the surface; 0.5 suits normalized smoke.\n- Raise ValueScale when the grid stores density in a small range.\n- The result is not a true distance, so avoid marching it with fine steps in RaymarchField; use NanoVdbRender for volume shading.",
+  "InputUis": [
+    {
+      "InputId": "2f7b9e04-1c5a-4d63-8e92-a4b7c0d1f368"/*ValueOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Added after scaling, to shift the density range."
+    },
+    {
+      "InputId": "3e457cb0-9b2c-475b-a616-e0a176c08d0c"/*Grid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "NanoVDB buffer to sample, from LoadNanoVdb or VolumeToNanoVdb."
+    },
+    {
+      "InputId": "4d6b9f1a-8f2c-4a1e-9a3d-6b7c5e2d8f10"/*BoundsMax*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "World-space maximum of the grid box. Wire LoadNanoVdb's WorldMax."
+    },
+    {
+      "InputId": "6e1d8b47-3a92-4c05-b7e8-9f2a1d6c4b53"/*IsoValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -150.0
+      },
+      "Description": "Density treated as the surface; higher values shrink the inside region."
+    },
+    {
+      "InputId": "8a2e5c31-7b4d-42f8-9c61-5d3a0e9b7c24"/*ValueScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Multiplies the sampled density before the iso comparison."
+    },
+    {
+      "InputId": "b5c2a918-4e7f-4d0b-a361-8c9e2f5b7d04"/*OutsideValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -180.0
+      },
+      "Description": "Value reported outside the grid box."
+    },
+    {
+      "InputId": "c0ecc90c-7529-45e4-b860-7d079452e4f3"/*BoundsMin*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "World-space minimum of the grid box. Wire LoadNanoVdb's WorldMin."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "9d4c046e-98a5-46a3-b694-dc383e6eb68e"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

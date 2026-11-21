@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "d050e786-b744-4d12-a43d-5ed53fa41950"/*RigidBodyPoints*/,
+  "Description": "The poses of the bodies of one [RigidBody], picked out of a [PhysicsWorld].\n\nThe world publishes all its bodies in one point buffer, which [DrawMeshAtPoints] can only draw with one mesh. Connect the world's OutBuffer and one body description here to get a buffer with just that description's bodies, and draw each kind of body with its own mesh.\n\nAKA: body poses, filter bodies, per body points, body transform\n\nTips\n- Static and kinematic bodies are included, so a moving kinematic platform can be drawn this way too.\n- With several fractured objects in one world, give each its own [RigidBodyPoints] before [DrawMeshChunksAtPoints].\n- Count is the number of bodies the description stands for.",
+  "InputUis": [
+    {
+      "InputId": "227ac807-1515-43b7-97fe-dade52819264"/*Body*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "The [RigidBody] whose bodies to pick."
+    },
+    {
+      "InputId": "f006ea17-a6c5-45ad-8657-74b88873061a"/*World*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The OutBuffer of the [PhysicsWorld] that simulates the body. Connecting it also makes sure the world has stepped before the poses are read."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "49e195a2-8c7c-4a02-98c3-bd810ebdaea1"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "bbabd4a8-f55f-45f9-b489-133c79c9461f"/*Count*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    }
+  ]
+}

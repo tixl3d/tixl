@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "e90edc95-86bb-5508-a36c-fc77f5d14459"/*SaveNanoVdb*/,
+  "Inputs": [
+    {
+      "Id": "413cb751-966b-5e5e-b8ee-e6c10a0db501"/*PathSaved*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "7ddbba10-4371-5f6e-ba1f-ce3f26c47d6e"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c7946670-7bed-50c6-bd36-59b69be6e85e"/*Save*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

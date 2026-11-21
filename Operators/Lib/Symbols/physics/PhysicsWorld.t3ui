@@ -1,0 +1,181 @@
+{
+  "FormatVersion": 3,
+  "Id": "88af1ae4-2758-4349-8d5a-ac0a9e5af97a"/*PhysicsWorld*/,
+  "Description": "Simulates rigid bodies with BepuPhysics and outputs their poses as a point buffer.\n\nTime advances at a fixed rate, render poses are interpolated between the last two steps, and a timeline jump or rewind rebuilds the simulation. Bodies and joints are declared by [RigidBody] and [RigidJoint]; this world is the only stateful part of the system.\n\nAKA: physics, bepu, rigid body dynamics, collisions, simulation\n\nTips\n- Draw the output with [DrawMeshAtPoints] or [DrawPoints].\n- A timeline change of more than half a second restarts the simulation, so scrub with care.\n- IncludeStatics also writes static bodies such as the ground into the output.",
+  "InputUis": [
+    {
+      "InputId": "01e66019-3f45-4933-895d-8cb2c5f8a757"/*FixedRate*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Physics steps per second. The render rate never feeds the solver."
+    },
+    {
+      "InputId": "098ac911-44f7-45e4-99e4-80b18b7058ba"/*Gravity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "World gravity in units per second squared."
+    },
+    {
+      "InputId": "138645fa-4742-4d28-961e-a5ffdc2b962a"/*Bodies*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Body operators to simulate. Connect RigidBody outputs here."
+    },
+    {
+      "InputId": "142c8ba1-4d45-4410-a4cf-bdf08b256717"/*ContactSpeed*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 720.0
+      },
+      "Description": "Closing speed in units per second from which an impact is reported in Contacts. Raise it to keep only hard hits."
+    },
+    {
+      "InputId": "1dd023b9-76b2-4455-86c2-fced2726528e"/*ContactStiffness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Spring frequency of contacts in Hz. Higher is harder and less forgiving."
+    },
+    {
+      "InputId": "47787d21-9ddc-45ab-97f6-a573a717675c"/*MaxContacts*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 675.0
+      },
+      "Description": "Length of the Contacts buffer. When more impacts happen in one frame the strongest are kept. 0 turns the output off."
+    },
+    {
+      "InputId": "4e9535a7-d7ed-4917-aa4e-df566c6b7328"/*TimeScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 585.0
+      },
+      "Description": "Multiplier on the timeline delta. 0 freezes, 2 runs at double speed."
+    },
+    {
+      "InputId": "508e2ee0-fe78-48e1-9e78-7b2a4c937cc4"/*Forces*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 630.0
+      },
+      "Description": "Force operators acting on the dynamic bodies. Connect RigidForce outputs here."
+    },
+    {
+      "InputId": "54247fde-224c-4764-97e1-01d1e725acdc"/*Substeps*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 540.0
+      },
+      "Description": "Solver substeps per step. More substeps make stacks and joints stiffer."
+    },
+    {
+      "InputId": "65c7e041-a308-407c-8bfe-a7f0f516279a"/*Multithreaded*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Spread collision and solving over worker threads. Disable to make stepping reproducible on one thread."
+    },
+    {
+      "InputId": "8279a472-cae2-4427-8de7-2fe51bde82b4"/*Reset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Rebuild the simulation from the body descriptions on the rising edge."
+    },
+    {
+      "InputId": "93aea25c-08d7-49ba-8989-16881f1a475b"/*SolverIterations*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "Velocity iterations per substep."
+    },
+    {
+      "InputId": "a8d603b9-64ce-40ea-8593-ba4b4d67af19"/*Paused*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 405.0
+      },
+      "Description": "Freeze simulation time while still updating the output."
+    },
+    {
+      "InputId": "be5ef8d6-240b-4d61-9883-49e5f107d5d6"/*Deterministic*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Ask Bepu for deterministic scheduling, so the same graph and thread count replay identically."
+    },
+    {
+      "InputId": "c2e25c12-d0fe-4593-a149-a324ff73b19b"/*IncludeStatics*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Also write static bodies into the Point buffer. Usually the ground is not part of the simulation output."
+    },
+    {
+      "InputId": "d674cf34-39bf-4fab-884a-879eb4a27e26"/*Joints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Description": "Joint operators connecting pairs of bodies."
+    },
+    {
+      "InputId": "ffe4f804-dbc2-48c8-aa5e-3a4d0fb38407"/*Interpolate*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Description": "Blend poses between fixed steps so motion stays smooth above the physics rate."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f76bac73-a7e4-4ccb-8cf4-e3cc6e5bd0b8"/*OutBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "43f606b9-4879-4435-b453-00c1a2d10ff3"/*BodyCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "OutputId": "e10cf7f7-d78d-4a5f-9afb-36e18b44e513"/*SimTime*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "ae24bbd8-298c-47b1-99ad-30b2878623ac"/*Contacts*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "OutputId": "a38d9319-fcf9-4399-aaeb-7a0b430e6ddb"/*ContactCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 180.0
+      }
+    }
+  ]
+}

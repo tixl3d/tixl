@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "db930e54-f0aa-5894-88ae-67b54353c513"/*VolumeToTexture3D*/,
+  "Inputs": [
+    {
+      "Id": "208b3d98-a7d7-5453-96cc-b29c89d1141b"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b88c73a2-e66c-530e-9e72-a52bf2c27e13"/*MaxResolution*/,
+      "DefaultValue": 128
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

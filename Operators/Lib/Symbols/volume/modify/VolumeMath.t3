@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "608bc5be-57d2-5450-a9c2-f85a68fe95eb"/*VolumeMath*/,
+  "Inputs": [
+    {
+      "Id": "4aeafb41-fe6e-556a-abc1-2346f9898b51"/*Operation*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7d8e6b01-c2e2-53d9-8d11-e96db67ec6fb"/*VolumeB*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "9eb64387-fc91-54dd-a187-ac6110ec0188"/*UseConstant*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d7a5ce51-3e0f-57b5-81b6-3599334f0d4d"/*Constant*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "db65839e-a02b-58a2-b1f7-341ea1b5b390"/*VolumeA*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

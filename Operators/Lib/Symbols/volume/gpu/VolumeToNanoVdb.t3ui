@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "564e17a3-182b-5dbb-b402-088f0e717f9d"/*VolumeToNanoVdb*/,
+  "Description": "Flattens the volume into a NanoVDB buffer and uploads it to the GPU.\n\nNanoVDB is the linear grid layout used by CUDA and GPU renderers. The buffer is uploaded as a structured uint buffer for custom HLSL traversal; the tree offsets are given relative to the start of the buffer.\n\nAKA: GPU grid, linear grid, nvdb\n\nTips\n- Use [SaveNanoVdb] to write the same layout to a file.",
+  "InputUis": [
+    {
+      "InputId": "8a677502-fd4d-5284-ab06-fd659490a4fa"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to convert. Only the first float grid is used."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7b63ace0-265a-54c5-90d9-239e84f7b317"/*Buffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "11c12656-918e-5780-a877-8042575ff67a"/*ShaderResourceView*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 15.0
+      }
+    },
+    {
+      "OutputId": "2464ac6a-e5cb-5d0d-8b51-4e916600002c"/*TreeOffsets*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 30.0
+      }
+    },
+    {
+      "OutputId": "ef5eb577-22de-57b2-a0b7-273a40b64cd4"/*VoxelCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 60.0
+      }
+    },
+    {
+      "OutputId": "f6a0d0bb-7bca-5e16-a0e4-6d13f3c1ee75"/*VoxelSize*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "39bed154-5921-41a7-a84e-463796c20f9c"/*WorldMin*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "OutputId": "2a0082da-462a-455e-af7d-e500d79f2f2a"/*WorldMax*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 270.0
+      }
+    }
+  ]
+}

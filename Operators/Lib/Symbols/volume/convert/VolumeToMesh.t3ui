@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 3,
+  "Id": "5bc7d656-8a0f-5834-88da-14c3048d760c"/*VolumeToMesh*/,
+  "Description": "Extracts an isosurface from a volume as a triangle mesh.\n\nUses marching cubes with shared vertices and gradient normals. Isovalue 0 extracts the surface of a level set; for fog volumes pick a density cutoff. The mesh faces outward with counter-clockwise winding.\n\nAKA: marching cubes, isosurface, surface extraction, meshing\n\nTips\n- Render with [DrawMesh] after [GeometryToMesh].\n- Smooth noisy results with [VolumeFilter] before extracting.",
+  "InputUis": [
+    {
+      "InputId": "19c6ca3f-d7ff-507f-8d28-2490f0edb66e"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to mesh. Only the first float grid is used."
+    },
+    {
+      "InputId": "345f946b-8c36-5548-a569-4123e0544b8f"/*Isovalue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "The value at which the surface is extracted. Zero for level sets; a density threshold for fog volumes."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "362c33b2-88c6-537e-ad87-035c85afd29d"/*Geometry*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

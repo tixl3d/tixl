@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "cb09f697-7b35-4f7c-b1bd-243cfd102137"/*NanoVdbToPoints*/,
+  "Description": "Turns the active voxels of a NanoVDB grid into TiXL points on the GPU.\n\nPoint Grid at the Buffer output of [LoadNanoVdb] or [VolumeToNanoVdb], and connect a [ComputeShader] whose Path is Lib:shaders/volume/nanovdb-to-points.hlsl. The output is a point buffer for [DrawPoints], [PointsToCurve] or any other point operator.\n\nNothing is read back to the CPU: one thread group walks one leaf node and appends the voxels above Threshold. The unused tail of the buffer is filled with separators, so downstream operators stop at the real count. Voxel values land in FX1, which is handy for sizing or colouring by density.\n\nAKA: vdb points, voxels to points, nanovdb particles\n\nTips\n- MaxLeaves bounds the dispatch, one group per leaf; leaves past the grid's own count are skipped, so a value larger than needed only costs empty groups.\n- Lower Threshold or raise MaxPoints when the result looks clipped.\n- The shader assumes a float grid with the standard NanoVDB layout; vector grids need their own leaf stride.",
+  "InputUis": [
+    {
+      "InputId": "4db54dc7-b227-433a-8442-56fe0a3374df"/*Threshold*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Voxels below this value are skipped. Use the background value for fog volumes."
+    },
+    {
+      "InputId": "6c01c2c6-c3ec-4f59-93ee-a4654b218f2e"/*Grid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The NanoVDB buffer to read, from LoadNanoVdb or VolumeToNanoVdb."
+    },
+    {
+      "InputId": "c48d37c8-ea1d-4207-9bad-0dd8d0bffe94"/*MaxLeaves*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Number of leaf nodes to dispatch. Larger than the grid is harmless; smaller clips the volume."
+    },
+    {
+      "InputId": "d998b43d-d4b5-4029-90ec-6c90eb14a1b2"/*MaxPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Capacity of the output buffer. Voxels past this many are dropped."
+    },
+    {
+      "InputId": "e3952b20-aba1-44fa-a6d6-64d61a5085e4"/*Shader*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "Compute shader to dispatch. Use Lib:shaders/volume/nanovdb-to-points.hlsl."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3bd4066b-b0ad-4d86-af8c-50b77ab487a9"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

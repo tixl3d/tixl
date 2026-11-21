@@ -1,0 +1,314 @@
+{
+  "FormatVersion": 3,
+  "Id": "d3f006fd-b18b-5d4b-9ef9-1dd19653a4a5"/*NanoVdbRender*/,
+  "Description": "Renders NanoVDB liquid, smoke and fire inside a glass box.\n\nThe shader traverses the NanoVDB tree uploaded by [VolumeToNanoVdb] directly on the GPU. The liquid grid is shaded as a reflective surface; the smoke and fire grids use the depth below their zero level as density and temperature, broken up by procedural noise. Place the op inside a camera such as [OrbitCamera] and render it into a texture.\n\nAKA: NanoVDB raymarch, volume render, fluid box\n\nTips\n- Connect all three grid inputs; use LiquidAmount, SmokeDensity and FireIntensity at 0 to hide one of them.\n- Grids are rebuilt on the CPU, so keep voxel sizes moderate for animated volumes.",
+  "InputUis": [
+    {
+      "InputId": "0f98affe-42d1-5d56-98ba-ed5bdd948ced"/*Fire*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 80.0
+      },
+      "Description": "NanoVDB level set whose inside is rendered as hot, emissive fire."
+    },
+    {
+      "InputId": "18b26691-6ea7-5f60-b162-aaf029bb271c"/*NoiseAmount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 600.0
+      },
+      "Description": "How strongly procedural noise breaks up smoke and flames."
+    },
+    {
+      "InputId": "1d6e5b85-380e-5c4f-927a-2edeea989d3c"/*SmokeDensity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 440.0
+      },
+      "Description": "Opacity scale of the smoke. 0 hides the smoke."
+    },
+    {
+      "InputId": "2d6c8cb1-4099-58a1-8075-1ff545926c5f"/*FireSoftness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 560.0
+      },
+      "Description": "Depth below the surface in world units over which the flame goes from cool to hottest."
+    },
+    {
+      "InputId": "4871a6d8-10bb-58a9-9fa3-f5bba233e122"/*EdgeColor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 640.0
+      },
+      "Description": "Color and opacity of the glass box edges."
+    },
+    {
+      "InputId": "5b6564b0-a48e-53c7-ae8a-ed1f362aa26d"/*Smoke*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 40.0
+      },
+      "Description": "NanoVDB level set whose inside is rendered as smoke density."
+    },
+    {
+      "InputId": "6caab367-83de-56dd-99f8-4ee1264f1427"/*SmokeColor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 400.0
+      },
+      "Description": "Albedo of the smoke. Alpha is unused."
+    },
+    {
+      "InputId": "74e636af-eec7-51a4-89a6-bb851f98938f"/*Liquid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "NanoVDB level set of the liquid. Connect the ShaderResourceView output of [VolumeToNanoVdb]. All three grid inputs must be connected so the shader registers stay in order; use the amount inputs to switch one off."
+    },
+    {
+      "InputId": "76f6689f-4b17-5daa-b078-1f2a176c7f03"/*StepCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 240.0
+      },
+      "Description": "Raymarch steps across the box. Higher is smoother and slower."
+    },
+    {
+      "InputId": "7a34beba-0bdb-5c08-a8ce-3e2cfdfac56f"/*SmokeSoftness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 520.0
+      },
+      "Description": "Depth below the surface in world units over which the smoke fades from transparent to full density."
+    },
+    {
+      "InputId": "9e36533d-0334-5aab-880b-7799fbd6bffa"/*LightDirection*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 280.0
+      },
+      "Description": "Direction towards the light."
+    },
+    {
+      "InputId": "b9044242-4e5e-556f-a09f-b63482dfbce7"/*LiquidAmount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 320.0
+      },
+      "Description": "Opacity of the liquid surface. 0 hides the liquid."
+    },
+    {
+      "InputId": "c1140119-00fa-56d4-8f71-6bb4a79366a8"/*FireIntensity*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 480.0
+      },
+      "Description": "Brightness of the flames. 0 hides the fire."
+    },
+    {
+      "InputId": "c722d77b-1aca-5bf9-a22a-255b6feb87ab"/*BoxMax*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 160.0
+      },
+      "Description": "Upper corner of the glass box in world space."
+    },
+    {
+      "InputId": "cd5b7c56-40b8-5f45-b736-e2448a20af1a"/*BoxMin*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 120.0
+      },
+      "Description": "Lower corner of the glass box in world space. Rays are clipped to the box."
+    },
+    {
+      "InputId": "f0396726-d4ad-55af-9009-b7ad8ce82d7a"/*LiquidColor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 360.0
+      },
+      "Description": "Body color of the liquid."
+    },
+    {
+      "InputId": "f115a2e9-1fa8-5f78-983a-6bb8bd6b61bf"/*Time*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      },
+      "Description": "Drives the scrolling of the procedural smoke and flame detail."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0b0be1e8-15fa-4767-a75a-7e97753c4a2e",
+      "SymbolName": "Types.Gfx.BlendState",
+      "Position": {
+        "X": 780.0,
+        "Y": 840.0
+      }
+    },
+    {
+      "ChildId": "22f979f3-425e-4f82-a917-32833f82fde6",
+      "SymbolName": "Types.Gfx.DepthStencilState",
+      "Position": {
+        "X": 780.0,
+        "Y": 960.0
+      }
+    },
+    {
+      "ChildId": "2608aa18-576f-4bee-9b5c-1f495f593481",
+      "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
+      "Position": {
+        "X": 780.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "ChildId": "2c4890c2-3c70-46d7-b599-ae85556875b9",
+      "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
+      "Position": {
+        "X": 520.0,
+        "Y": 840.0
+      }
+    },
+    {
+      "ChildId": "316b4db9-3dc0-4f54-8730-9e4a18f47bf0",
+      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
+      "Position": {
+        "X": 1040.0,
+        "Y": 840.0
+      }
+    },
+    {
+      "ChildId": "31d5414e-8bbb-4dfb-8f3c-f6daeca4be08",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 840.0
+      }
+    },
+    {
+      "ChildId": "3b4f726a-8970-438b-ac1e-da10409b9ed8",
+      "SymbolName": "Lib.render._dx11.api.Rasterizer",
+      "Position": {
+        "X": 1040.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "ChildId": "5e4d5d1e-87cf-4a57-8573-7793b22bf797",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 480.0
+      }
+    },
+    {
+      "ChildId": "66d22c1d-726f-40b3-881b-86d601f67257",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 1300.0,
+        "Y": 480.0
+      }
+    },
+    {
+      "ChildId": "6971da80-1ecd-4f24-8101-ad68dd51c515",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 720.0
+      }
+    },
+    {
+      "ChildId": "80ba3f5d-2375-4f0e-b9d4-bb86b9640110",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 1040.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "8d6a9ef6-b1d3-4cf3-8ecf-c768ed974664",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "ChildId": "9400c759-b611-4758-b6ba-409ba9357a2c",
+      "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
+      "Position": {
+        "X": 1040.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "ChildId": "a1be769e-ad48-4a9f-8555-9b6c4c813024",
+      "SymbolName": "Types.Gfx.PixelShader",
+      "Position": {
+        "X": 0.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "b0a5cace-ea23-4d04-ba25-34c5e5bc7373",
+      "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
+      "Position": {
+        "X": 780.0,
+        "Y": 480.0
+      }
+    },
+    {
+      "ChildId": "cad4a988-092f-4818-a01d-2c2221793071",
+      "SymbolName": "Types.Gfx.VertexShader",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ccc2a9e9-f02a-48c5-921b-e2a9df0d0074",
+      "SymbolName": "Lib.numbers.vec3.Vector3Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "e239c142-d8e4-4e97-8a7c-064067bef0bc",
+      "SymbolName": "Lib.render._dx11.api.Draw",
+      "Position": {
+        "X": 1040.0,
+        "Y": 960.0
+      }
+    },
+    {
+      "ChildId": "ecf99bff-5073-4685-88cb-06a3ad9bfa73",
+      "SymbolName": "Lib.numbers.vec4.Vector4Components",
+      "Position": {
+        "X": 260.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "ChildId": "f630dafa-2c77-483a-9f12-33d1cf256461",
+      "SymbolName": "Types.Gfx.RasterizerState",
+      "Position": {
+        "X": 780.0,
+        "Y": 720.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a6455792-c57f-5579-952a-c2a7818c9955"/*DrawCommand*/,
+      "Position": {
+        "X": 1600.0,
+        "Y": 500.0
+      }
+    }
+  ]
+}

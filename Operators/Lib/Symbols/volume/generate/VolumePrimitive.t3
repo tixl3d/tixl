@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "6583bddb-034b-5ff0-b12e-6e5c38bdba64"/*VolumePrimitive*/,
+  "Inputs": [
+    {
+      "Id": "1465ff4d-d5af-5bf8-8c87-10c6ab682967"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "89ac8fe1-dfda-5b97-8d05-1c5378f896b4"/*VoxelSize*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "91618a1f-bc81-581a-99eb-77714007172d"/*BandWidth*/,
+      "DefaultValue": 3.0
+    },
+    {
+      "Id": "bc2ac4ee-9a07-5229-87e0-9b527ee316c6"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "d2cf0b36-bd51-5f39-9ae4-ea24893f1222"/*Shape*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

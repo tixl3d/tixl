@@ -21,6 +21,8 @@ namespace Core.Tests;
 /// Skips itself where slangc or a Vulkan device is missing, so it runs on a developer machine and stays
 /// quiet on one without the toolchain.
 /// </remarks>
+// ShaderCompiler.Instance is process-wide, so these classes must not run in parallel.
+[Collection("ShaderCompiler")]
 public class SlangShaderCompilerTests(ITestOutputHelper output)
 {
     [Fact]

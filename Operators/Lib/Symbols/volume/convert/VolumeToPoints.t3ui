@@ -1,0 +1,64 @@
+{
+  "FormatVersion": 3,
+  "Id": "9741d4b6-e9cb-5ea4-ab4c-fdee86312243"/*VolumeToPoints*/,
+  "Description": "Converts volume voxels into a point list.\n\nEither the active voxels above a threshold (highest values first), or a uniform random subset of them. The same points are also uploaded to a GPU buffer for point renderers.\n\nAKA: voxels to points, scatter, sample volume\n\nTips\n- Use Scatter mode for a stable, evenly spread cloud and ActiveVoxels mode to keep the densest voxels.\n- Level sets have negative values inside; lower Isovalue to include them.",
+  "InputUis": [
+    {
+      "InputId": "0369a449-b250-53bc-89c5-85e1c2288b80"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -30.0
+      },
+      "Description": "ActiveVoxels keeps the highest-valued voxels when there are more than MaxPoints. Scatter keeps a uniform random subset."
+    },
+    {
+      "InputId": "3c3f2652-7c22-5b1c-9984-d9182f3d2652"/*Isovalue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -60.0
+      },
+      "Description": "Only voxels with a value above this threshold become points."
+    },
+    {
+      "InputId": "3e761d43-45d2-5c07-af9d-50b71cc341c1"/*Seed*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -120.0
+      },
+      "Description": "Random seed for Scatter mode. The same seed gives the same points."
+    },
+    {
+      "InputId": "a82acc1d-bacb-5839-90b5-53b2ae36ca7d"/*Volume*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The volume to read. Only active voxels are considered."
+    },
+    {
+      "InputId": "bd7e2b17-0c96-52d3-a674-68d58855057a"/*MaxPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": -90.0
+      },
+      "Description": "Upper limit of the point count (up to 2,000,000)."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f0b7798d-04d4-5339-b4ae-9ac1701cb114"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "82b8dcdf-9ae0-5c62-8cde-c14eae985660"/*GPoints*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

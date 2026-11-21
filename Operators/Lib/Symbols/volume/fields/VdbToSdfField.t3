@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "d8f932c2-dde0-4c24-a073-99de3829f91a"/*VdbToSdfField*/,
+  "Inputs": [
+    {
+      "Id": "41e6db16-5a41-4f49-adbd-45b1cda2d0ac"/*BoundsMax*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "5893924c-b57a-4807-bf4a-d498a105a371"/*Grid*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5e761feb-f214-4c33-9d36-90c88c3f1b6f"/*BoundsMin*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "794b9793-e02f-484f-be18-3b1e07b62839"/*ValueOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "7c49a500-4dfe-48bb-9ace-77a74d9d0a94"/*OutsideValue*/,
+      "DefaultValue": 10.0
+    },
+    {
+      "Id": "bedfc0b1-99d3-4d38-8a28-e0bace94f3f8"/*ValueScale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

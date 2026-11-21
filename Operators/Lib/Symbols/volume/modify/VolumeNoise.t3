@@ -1,0 +1,48 @@
+{
+  "FormatVersion": 3,
+  "Id": "157fac50-f3ea-5404-94ef-89b470fd6194"/*VolumeNoise*/,
+  "Inputs": [
+    {
+      "Id": "1ee7f2e0-d46f-5bd6-909e-1cd0cb15d0d0"/*Fractal*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "20af828b-f18e-5822-95e1-e9708aa8fd01"/*Volume*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "255e7244-b30b-5a05-ad44-cb5512d39f40"/*Frequency*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "3af327f6-9030-57a5-bd59-949410d3275e"/*Octaves*/,
+      "DefaultValue": 4
+    },
+    {
+      "Id": "3d95a0ca-fd17-53e5-817f-fdfe293f3b6e"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "435f4c7b-b598-5cb0-a4d5-5875652c6518"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a8c2bbd9-1601-59c4-bbdb-db3189a7bdf7"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "f7e2ced5-9031-57ec-9be4-30252ca644a1"/*NoiseType*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "fa3b21cd-383f-5f82-9b5a-57c316cdef7d"/*Amplitude*/,
+      "DefaultValue": 0.5
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

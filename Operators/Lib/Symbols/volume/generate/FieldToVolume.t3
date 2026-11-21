@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "34203fa5-2ff2-548b-98ee-fc427923ebb1"/*FieldToVolume*/,
+  "Inputs": [
+    {
+      "Id": "07e12791-cb1a-57db-94ac-eeb2d8011cff"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "56318452-ae77-53d2-b4b1-55d93eaffcd7"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "5ca91e75-52a4-542a-b317-fe1e35dd6a3e"/*Size*/,
+      "DefaultValue": {
+        "X": 2.0,
+        "Y": 2.0,
+        "Z": 2.0
+      }
+    },
+    {
+      "Id": "623c40fb-5337-5a30-98c8-a0542cc6ee09"/*Field*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "cf9b56dc-27cd-58e9-96ff-29a4770f6277"/*VoxelSize*/,
+      "DefaultValue": 0.1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
