@@ -312,6 +312,31 @@ internal static partial class ProjectXml
         File.WriteAllText(path, BuildOutputPropsContent);
     }
 
+    /// <summary>
+    /// Tells Rider/ReSharper that the Symbols folder only organises files on disk and adds no namespace level,
+    /// so operator namespaces (e.g. <c>Lib.geometry.modify</c>) don't trigger "namespace does not correspond to
+    /// file location". Skipped when the file exists, so a user's own IDE settings survive.
+    /// </summary>
+    internal static void WriteRiderNamespaceSettings(string csprojPath)
+    {
+        var path = csprojPath + ".DotSettings";
+        if (File.Exists(path))
+            return;
+
+        try
+        {
+            File.WriteAllText(path, RiderNamespaceSettingsContent);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Couldn't write {path}: {e.Message}");
+        }
+    }
+
+    private static readonly string RiderNamespaceSettingsContent =
+        "<wpf:ResourceDictionary xml:space=\"preserve\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" xmlns:s=\"clr-namespace:System;assembly=mscorlib\" xmlns:ss=\"urn:shemas-jetbrains-com:settings-storage-xaml\" xmlns:wpf=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\">\n"
+        + $"\t<s:Boolean x:Key=\"/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/={FileLocations.SymbolsSubfolder.ToLowerInvariant()}/@EntryIndexedValue\">True</s:Boolean></wpf:ResourceDictionary>\n";
+
     internal const string BuildPropsFileName = "Directory.Build.props";
 
     internal const string BuildOutputPropsContent =

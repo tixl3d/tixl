@@ -24,6 +24,7 @@ internal sealed partial class To2_SymbolsFolder : ProjectMigrationStep
         var movedCount = MoveOperatorFilesIntoSymbolsFolder(projectFolder);
         RemoveEmptiedDirectories(projectFolder);
         csProjectFile.MigrateContentIncludesToSymbolsFolder();
+        ProjectXml.WriteRiderNamespaceSettings(csProjectFile.FullPath);
 
         Log.Info($"Moved {movedCount} operator files of \"{csProjectFile.Name}\" into the Symbols folder.");
     }

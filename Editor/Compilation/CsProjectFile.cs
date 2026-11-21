@@ -642,6 +642,7 @@ internal sealed class CsProjectFile
 
         projRoot.FullPath = Path.Combine(destinationDirectory, $"{projectName}.csproj");
         projRoot.Save(Encoding.UTF8);
+        ProjectXml.WriteRiderNamespaceSettings(projRoot.FullPath);
         return new CsProjectFile(projRoot);
     }
 
