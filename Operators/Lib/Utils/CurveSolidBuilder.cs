@@ -88,6 +88,7 @@ internal sealed class CurveSolidBuilder
 
     public void Finish(Geometry target, Geometry source)
     {
+        RemoveUnusedPoints();
         var pointCount = _positions.Count;
         var primitiveCount = _faceOffsets.Count - 1;
         var vertexCount = _corners.Count;
@@ -133,6 +134,53 @@ internal sealed class CurveSolidBuilder
 
         target.InvalidateTopologyCaches();
     }
+
+    /// <summary>
+    /// Profile rings that no face uses (the second ring of a flat fill, the back ring without a back cap or walls) would
+    /// stay behind as loose duplicates, so points without a vertex are removed before the geometry is written.
+    /// </summary>
+    private void RemoveUnusedPoints()
+    {
+        var pointCount = _positions.Count;
+        if (_pointRemap.Length < pointCount)
+            _pointRemap = new int[pointCount];
+
+        Array.Fill(_pointRemap, -1, 0, pointCount);
+        foreach (var point in _corners)
+            _pointRemap[point] = 0;
+
+        var kept = 0;
+        for (var point = 0; point < pointCount; point++)
+        {
+            if (_pointRemap[point] < 0)
+                continue;
+
+            _pointRemap[point] = kept;
+            _positions[kept] = _positions[point];
+            if (_carriesAttributes && _pointSources.Count == pointCount)
+                _pointSources[kept] = _pointSources[point];
+
+            kept++;
+        }
+
+        if (kept == pointCount)
+            return;
+
+        _positions.RemoveRange(kept, pointCount - kept);
+        if (_carriesAttributes && _pointSources.Count == pointCount)
+            _pointSources.RemoveRange(kept, pointCount - kept);
+
+        for (var index = 0; index < _corners.Count; index++)
+            _corners[index] = _pointRemap[_corners[index]];
+
+        for (var index = 0; index < _curvePointHandles.Count; index++)
+        {
+            var (point, handleIn, handleOut) = _curvePointHandles[index];
+            _curvePointHandles[index] = (_pointRemap[point], handleIn, handleOut);
+        }
+    }
+
+    private int[] _pointRemap = [];
 
     public void BuildPart(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
                           float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
@@ -849,9 +897,9 @@ internal sealed class CurveSolidBuilder
 
         tess.Tessellate(windingRule, ElementType.Polygons, 3, null, new Vec3(0, 0, 1));
 
-        var normal = flip ? -Vector3.UnitZ : Vector3.UnitZ;
         var vertices = tess.Vertices;
         var elements = tess.Elements;
+        _capTriangles.Clear();
         for (var t = 0; t < tess.ElementCount; t++)
         {
             var i0 = elements[t * 3];
@@ -863,18 +911,104 @@ internal sealed class CurveSolidBuilder
             var p0 = TessPoint(vertices[i0]);
             var p1 = TessPoint(vertices[i1]);
             var p2 = TessPoint(vertices[i2]);
+            _capTriangles.Add(CounterClockwise(p0, p1, p2));
+        }
 
-            // Front cap counter-clockwise seen from +Z, back cap the other way
-            var a = _positions[p0];
-            var b = _positions[p1];
-            var c = _positions[p2];
-            var ccw = (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X) > 0;
-            if (ccw == flip)
-                (p1, p2) = (p2, p1);
+        RemoveSlivers();
 
-            AddFace(p0, p1, p2, normal, isSide: false);
+        // Front cap counter-clockwise seen from +Z, back cap the other way
+        var normal = flip ? -Vector3.UnitZ : Vector3.UnitZ;
+        foreach (var (p0, p1, p2) in _capTriangles)
+        {
+            if (flip)
+                AddFace(p0, p2, p1, normal, isSide: false);
+            else
+                AddFace(p0, p1, p2, normal, isSide: false);
         }
     }
+
+    /// <summary>
+    /// The tessellator leaves zero-area triangles where three outline points lie on one line (e.g. along a letter stem
+    /// where its arms join). They are harmless when drawn but fold over as soon as the cap is subdivided and smoothed,
+    /// so each one has its long edge flipped with the triangle across it, which splits that triangle at the middle
+    /// point. A sliver on the outline has nothing across and is dropped; the outline still runs through its middle point.
+    /// </summary>
+    private void RemoveSlivers()
+    {
+        for (var pass = 0; pass < 4 * _capTriangles.Count + 4; pass++)
+        {
+            var sliver = -1;
+            for (var t = 0; t < _capTriangles.Count; t++)
+            {
+                if (!IsSliver(_capTriangles[t]))
+                    continue;
+
+                sliver = t;
+                break;
+            }
+
+            if (sliver < 0)
+                return;
+
+            // Rotate so that (u, v) is the longest edge and w the point on it
+            var (u, v, w) = _capTriangles[sliver];
+            var lengthUv = Vector3.DistanceSquared(_positions[u], _positions[v]);
+            var lengthVw = Vector3.DistanceSquared(_positions[v], _positions[w]);
+            var lengthWu = Vector3.DistanceSquared(_positions[w], _positions[u]);
+            if (lengthVw >= lengthUv && lengthVw >= lengthWu)
+                (u, v, w) = (v, w, u);
+            else if (lengthWu >= lengthUv && lengthWu >= lengthVw)
+                (u, v, w) = (w, u, v);
+
+            // A sliver's winding is arbitrary, so the triangle across may share the edge in either direction
+            var across = -1;
+            var x = -1;
+            for (var t = 0; t < _capTriangles.Count && across < 0; t++)
+            {
+                if (t == sliver)
+                    continue;
+
+                var (a, b, c) = _capTriangles[t];
+                if ((a == u || b == u || c == u) && (a == v || b == v || c == v))
+                {
+                    across = t;
+                    x = a != u && a != v ? a : b != u && b != v ? b : c;
+                }
+            }
+
+            if (across < 0)
+            {
+                _capTriangles.RemoveAt(sliver);
+                continue;
+            }
+
+            // The quad u, x, v, w gets the other diagonal; a result that is still a sliver is handled in a later pass
+            _capTriangles[sliver] = CounterClockwise(u, x, w);
+            _capTriangles[across] = CounterClockwise(x, v, w);
+        }
+    }
+
+    private bool IsSliver((int A, int B, int C) triangle)
+    {
+        var a = _positions[triangle.A];
+        var b = _positions[triangle.B];
+        var c = _positions[triangle.C];
+        var longest = MathF.Max(Vector3.DistanceSquared(a, b), MathF.Max(Vector3.DistanceSquared(b, c), Vector3.DistanceSquared(c, a)));
+        return MathF.Abs(Cross(triangle.A, triangle.B, triangle.C)) <= 1e-6f * longest;
+    }
+
+    private (int, int, int) CounterClockwise(int p0, int p1, int p2) => Cross(p0, p1, p2) < 0 ? (p0, p2, p1) : (p0, p1, p2);
+
+    /** Twice the signed area of the triangle in the XY plane. */
+    private float Cross(int p0, int p1, int p2)
+    {
+        var a = _positions[p0];
+        var b = _positions[p1];
+        var c = _positions[p2];
+        return (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
+    }
+
+    private readonly List<(int A, int B, int C)> _capTriangles = [];
 
     /// <summary>Splits every loop segment where it crosses a grid line, unless the crossing is within <paramref name="snap"/> of a point already there.</summary>
     private void InsertGridCrossings(float cell, float snap)
