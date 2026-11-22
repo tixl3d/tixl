@@ -167,6 +167,18 @@ Each milestone gets a `.tests-manual/` set and `.help/` updates for the new ops.
 4. Base color for vertex-color / point-color driven draws: store the multiplied color (proposal) or the material only?
 5. Should `[DrawMeshCelShading]` / hatched get spot and directional in M2 or later?
 
+## Deferred Performance Ideas
+
+- **Velocity work in point draws when nobody asks for it.** `[DrawPoints]` (and the other draws gated by
+  `[GetRenderPassState]`) already skip the previous-buffer copy without `VelocityRequested`, but the vertex shader still
+  reads the previous point and does two extra matrix multiplies, and the pixel shader encodes velocity into an unbound
+  target. Estimated a few percent of vertex cost on large point counts, not measured. Cheapest fix: pass
+  `VelocityRequested` as a cbuffer flag and branch around the previous-position block. A define-based variant would also
+  free the interpolator, but needs per-define-set shader caching. Measure 1-5M points with velocity on/off first.
+- **Feature variants for lighting.** Keep uniform branches for point/spot/directional (and sphere/tube). Expensive
+  features (rect LTC, shadow sampling) raise register pressure for every PBR draw; either keep them deferred-only (M7)
+  or select a variant automatically from the light stack, never from a user-set project flag.
+
 ## Risks
 
 - Five targets at 4K with MSAA: memory and bandwidth; opt-in keeps the default cost at zero.

@@ -14,6 +14,8 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 
 ## Working with graphs
 
+- [Lighting](Lighting.md) — point, spot and directional lights, aiming them, materials and which draw
+  operators respond to which lights.
 - [Procedural geometry](ProceduralGeometry.md) — bevel, displace, fracture and extrude
   meshes and text on the CPU. *Experimental.*
 - [Character animation](CharacterAnimation.md) — play glTF animation clips, blend and

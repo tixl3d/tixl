@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "9dc0b2de-1f79-4d8b-8d87-6f3764875220"/*SpotLight*/,
-  "Description": "Adds a spotlight with a transform gizmo to the connected subgraph.\n\nThe light illuminates geometry drawn with PBR and other shaded draw operators using Color, Intensity, Range and Decay. Up to 8 point lights can be used at the same time, e.g. by chaining several of them before the camera.\n\nNote that scenes are also lit by an environment map. Without a [SetEnvironment], a default environment is used.\n\nAKA: light, lamp, omni, bulb\n\nSee also: [SetPointLight], [SetEnvironment], [Locator]\n\nAlso check out the [HowToDrawThings] tutorial.",
+  "Description": "Adds a spot light with a cone gizmo to the connected subgraph.\n\nThe light shines from Position toward Target in a cone of ConeAngle degrees. Distance falloff uses Range and Decay like [PointLight]. With the operator selected, the move gizmo moves the light and the rotate gizmo swings Target around it, so the cone keeps its aim while you move it. Spot, point and directional lights share the limit of 8 lights.\n\nOperators with their own lighting (cel shading, hatching, tubes, ribbons) treat it as a point light for now.\n\nAKA: spotlight, cone light, stage light, lamp\n\nSee also: [SetSpotLight], [PointLight], [DirectionalLight], [SetShadow]",
   "InputUis": [
     {
       "InputId": "0d4c855d-4122-4f68-8cd4-a8c30cfa850f"/*ConeAngle*/,
@@ -22,7 +22,7 @@
         "X": 78.02582,
         "Y": -127.043304
       },
-      "Description": "World space point the light points at."
+      "Description": "The light points at this point. The rotate gizmo swings it around Position."
     },
     {
       "InputId": "31b0cc5b-2351-4b49-8af6-ad74bc793ad9"/*Command*/,
@@ -98,7 +98,7 @@
         "X": 735.94586,
         "Y": 392.68475
       },
-      "Description": "Size of the drawn gizmo.",
+      "Description": "Size of the drawn cone. Its opening follows ConeAngle.",
       "Min": 0.0,
       "Scale": 0.01,
       "ClampMin": true
