@@ -57,3 +57,15 @@ Turn WithMaterialBuffer on in [RenderScene] and connect its output to an image e
 **Expected:**
 - The output's caption ends with +DNVM.
 - With the input off it ends with +DNV, as before.
+
+## Step: Reflections follow the material
+
+**Action:**
+Put a sphere above a floor, render with [RenderScene] into [ScreenSpaceReflections], and turn WithMaterialBuffer on.
+Change the floor's Roughness in its [SetMaterial] from 0 to 0.8, then set its Metal to 1 with an orange BaseColor.
+
+**Expected:**
+- The sphere's reflection on the floor gets blurrier and weaker as Roughness rises, and almost disappears near 0.9.
+- With Metal 1 the reflection is tinted orange.
+- With WithMaterialBuffer off, the reflection looks the same for every floor roughness, as before, and only the
+  Roughness parameter of [ScreenSpaceReflections] blurs it.

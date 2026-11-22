@@ -111,6 +111,14 @@ a small, bright highlight and reflect the environment.
 Emissive color is added on top of the lighting, so emissive parts glow even in a dark scene. They don't light
 other objects, though. For that, add a point light next to them.
 
+## Reflections and materials
+
+[ScreenSpaceReflections] adds reflections of what is visible on screen. By default it treats the whole scene as one
+material, set by its own Roughness and Reflectivity. Turn on **WithMaterialBuffer** in [RenderScene] and it uses
+each surface's [SetMaterial] instead: rough surfaces get blurred and weaker reflections, very rough ones none, and
+metals reflect in their base color. Only physically based draw operators write the material; everything else keeps
+the effect's parameters.
+
 ## Shadows
 
 [SetShadow] renders a shadow map from a light position toward a target. Only [DrawMeshWithShadow] receives it,

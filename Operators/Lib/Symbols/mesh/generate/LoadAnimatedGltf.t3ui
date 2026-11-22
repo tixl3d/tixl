@@ -4,6 +4,14 @@
   "Description": "A small wrapper setup to load and pose an animated GLTF scene.",
   "InputUis": [
     {
+      "InputId": "342ae171-066e-47c7-871c-9b26e5ed3360"/*OverrideTime*/,
+      "Position": {
+        "X": -160.29565,
+        "Y": 218.8483
+      },
+      "Description": "If connected, the clip is sampled at this time in seconds instead of the playback time."
+    },
+    {
       "InputId": "443aae80-dff3-49bf-bfa9-82f33ccaaa2d"/*Path*/,
       "Position": {
         "X": -416.61496,

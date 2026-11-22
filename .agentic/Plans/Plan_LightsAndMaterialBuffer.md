@@ -2,7 +2,16 @@
 
 Status: **M1 and M2 implemented 2026-11-22, untested by a human** (test set `.tests-manual/light-types-and-blending.md`).
 Written 2026-11-20 on `main` (32bcb8124). **M3 implemented 2026-11-22**, probed on Vulkan (test set
-`.tests-manual/material-buffer.md`). M4-M7 not started.
+`.tests-manual/material-buffer.md`). **M5 implemented 2026-11-22**, probed on Vulkan. M4, M6, M7 not started.
+
+**M5 as built:** [ScreenSpaceReflections] binds the material buffer at t6 and base color at t7 in all three passes
+(trace and composite get an empty `UnusedSlot` SRV as filler, because registers follow the multi-input order). Per
+pixel roughness = lerp(Roughness parameter, material roughness, coverage) in trace and temporal; composite uses
+F0 = lerp(Reflectivity, baseColor, metalness), scales by Specular and fades roughness 0.6-0.95, all weighted by
+coverage, so without a material buffer the output is unchanged. New MaterialMap / BaseColorMap override inputs.
+Probe (floor under a sphere, mean SSR change on the floor, 0-255): roughness 0.02 off/on 4.97 / 5.00, roughness 0.8
+off/on 5.37 / 2.69. The Vulkan debug callback now drops `Undefined-Value-ShaderOutputNotConsumed-DynamicRendering`
+(draws writing optional targets a render target lacks); validation otherwise silent.
 
 **M3 as built:** `[RenderTarget]` `WithMaterialBuffer` (off by default) adds RGBA8 `BaseColorBuffer` (albedo x material
 color x field tint, a = occlusion) and `MaterialBuffer` (roughness, metalness, specular, a = **relight coverage**: 1 PBR,

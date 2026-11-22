@@ -1637,8 +1637,15 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     private static uint OnDebugMessage(VkDebugUtilsMessageSeverityFlagsEXT severity, VkDebugUtilsMessageTypeFlagsEXT types,
                                        VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* userData)
     {
-        var message = new VkUtf8String(callbackData->pMessage).ToString();
         var isError = (severity & VkDebugUtilsMessageSeverityFlagsEXT.Error) != 0;
+
+        // Draw shaders write optional targets (normal, velocity, material) that a render target may not have; the
+        // spec discards those writes, so the warning repeats for every such draw without pointing at a problem.
+        if (!isError && callbackData->pMessageIdName != null
+                     && new VkUtf8String(callbackData->pMessageIdName).ToString() == UnusedFragmentOutputMessageId)
+            return VK_FALSE;
+
+        var message = new VkUtf8String(callbackData->pMessage).ToString();
 
         if (isError && userData != (void*)InstanceCreationMarker)
             Interlocked.Increment(ref _validationErrorCount);
@@ -1662,6 +1669,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     private static int _validationErrorCount;
     private const nint InstanceCreationMarker = 1;
+    private const string UnusedFragmentOutputMessageId = "Undefined-Value-ShaderOutputNotConsumed-DynamicRendering";
 
     /// <summary>
     /// The requested sample count, reduced to one the device offers for the ways this image will be used.

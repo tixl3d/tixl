@@ -16,14 +16,14 @@
       "InputId": "3db94583-6694-47e5-b775-23eb351e9f11"/*ClearColor*/,
       "Position": {
         "X": -140.0,
-        "Y": 70.0
+        "Y": 35.0
       }
     },
     {
       "InputId": "5b838d3a-b693-4524-b8cd-b60530173d46"/*Resolution*/,
       "Position": {
         "X": -140.0,
-        "Y": 35.0
+        "Y": 0.0
       },
       "Description": "Size in pixels. 0×0 uses the requested resolution, e.g. the output window's."
     },
@@ -31,7 +31,7 @@
       "InputId": "679fa6c5-7b78-4846-b462-4de672cd63b0"/*Multisampling*/,
       "Position": {
         "X": -140.0,
-        "Y": 105.0
+        "Y": 70.0
       },
       "Description": "Samples per pixel (1, 2, 4 or 8). 1 is usually right when [TXAA] smooths the edges; multisampling averages normals and velocity at edges.",
       "Min": 1,
@@ -42,8 +42,8 @@
     {
       "InputId": "bcb6064d-e137-4cd7-b743-cc84058a0d23"/*WithMaterialBuffer*/,
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": -140.0,
+        "Y": 105.0
       },
       "Description": "Also renders base color and material buffers, which post effects like [ScreenSpaceReflections] use for rough and metallic surfaces. Off by default to save memory."
     },
@@ -77,7 +77,7 @@
       "SymbolName": "Lib.image.generate.basic.RenderTarget",
       "Position": {
         "X": 0.0,
-        "Y": 0.0
+        "Y": -35.0
       }
     },
     {
@@ -118,7 +118,7 @@
       "OutputId": "45777ce5-6408-4302-8a5a-a73b403b07c1"/*Output*/,
       "Position": {
         "X": 140.0,
-        "Y": 0.0
+        "Y": -35.0
       }
     },
     {
