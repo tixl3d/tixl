@@ -19,6 +19,12 @@ internal sealed class HandleTextureBundle : Instance<HandleTextureBundle>, IStat
     [Output(Guid = "d41ff3e9-bcbb-492a-af2b-9fb340cd80a2")]
     public readonly Slot<Texture2D?> Velocity = new();
 
+    [Output(Guid = "792e2626-6d07-4b58-a7c1-4109111b9d7c")]
+    public readonly Slot<Texture2D?> BaseColor = new();
+
+    [Output(Guid = "cfdbb2a7-5e0e-4750-88d6-bb690b43e054")]
+    public readonly Slot<Texture2D?> Material = new();
+
     [Output(Guid = "bcb64c90-6771-43ae-85b8-bea3dd975f35")]
     public readonly Slot<object?> Camera = new();
 
@@ -27,6 +33,8 @@ internal sealed class HandleTextureBundle : Instance<HandleTextureBundle>, IStat
         Depth.UpdateAction += Update;
         Normal.UpdateAction += Update;
         Velocity.UpdateAction += Update;
+        BaseColor.UpdateAction += Update;
+        Material.UpdateAction += Update;
         Camera.UpdateAction += Update;
     }
 
@@ -38,6 +46,8 @@ internal sealed class HandleTextureBundle : Instance<HandleTextureBundle>, IStat
         Depth.Value = DepthMap.GetValue(context) ?? bundle?.Depth;
         Normal.Value = NormalMap.GetValue(context) ?? bundle?.Normal;
         Velocity.Value = VelocityMap.GetValue(context) ?? bundle?.Velocity;
+        BaseColor.Value = BaseColorMap.GetValue(context) ?? bundle?.BaseColor;
+        Material.Value = MaterialMap.GetValue(context) ?? bundle?.Material;
         Camera.Value = CameraReference.GetValue(context) ?? bundle?.Camera;
 
         _missing = Depth.Value == null
@@ -49,6 +59,8 @@ internal sealed class HandleTextureBundle : Instance<HandleTextureBundle>, IStat
         Depth.DirtyFlag.Clear();
         Normal.DirtyFlag.Clear();
         Velocity.DirtyFlag.Clear();
+        BaseColor.DirtyFlag.Clear();
+        Material.DirtyFlag.Clear();
         Camera.DirtyFlag.Clear();
     }
 
@@ -69,6 +81,12 @@ internal sealed class HandleTextureBundle : Instance<HandleTextureBundle>, IStat
 
     [Input(Guid = "2d6f7aaa-5952-4bee-865f-11b7937cf1cc")]
     public readonly InputSlot<Texture2D> VelocityMap = new();
+
+    [Input(Guid = "3f252509-193e-4c56-a0e7-5ca1ba26e7e0")]
+    public readonly InputSlot<Texture2D> BaseColorMap = new();
+
+    [Input(Guid = "04bba317-ef1b-4de3-a3a0-37f3163bd6d1")]
+    public readonly InputSlot<Texture2D> MaterialMap = new();
 
     [Input(Guid = "2a205c54-81f2-4e80-9de5-ed7a98bb6fc8")]
     public readonly InputSlot<object> CameraReference = new();

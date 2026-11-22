@@ -13,6 +13,7 @@ internal sealed class GetRenderPassState : Instance<GetRenderPassState>
         CubeFace = 2,
         IsShadowPass = 3,
         SubframeCount = 4,
+        MaterialRequested = 5,
     }
 
     /** Re-read on every pull: one op instance can run in several passes per frame (a shadow map and the main image). */
@@ -33,6 +34,7 @@ internal sealed class GetRenderPassState : Instance<GetRenderPassState>
                               PassValues.CubeFace          => context.RenderPass.CubeFace,
                               PassValues.IsShadowPass      => context.RenderPass.IsShadowPass ? 1 : 0,
                               PassValues.SubframeCount     => context.RenderPass.SubframeCount,
+                              PassValues.MaterialRequested => context.RenderPass.MaterialRequested ? 1 : 0,
                               _                            => 0,
                           };
     }

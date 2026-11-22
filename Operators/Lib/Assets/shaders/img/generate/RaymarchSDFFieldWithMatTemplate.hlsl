@@ -179,6 +179,8 @@ struct PSOutput
     float4 color : SV_Target0;
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
     float depth : SV_Depth;
 };
 
@@ -522,5 +524,6 @@ PSOutput psMain(vsOutput input)
     float4 clipPosition = mul(float4(p, 1), WorldToClipSpace);
     float4 previousClipPosition = a >= 0.999 ? mul(float4(p, 1), PrevWorldToClipSpace) : 0;
     result.Velocity = EncodeVelocity(clipPosition, previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    GetMaterialTargets(fieldColor.rgb, a >= 0.999 ? 1 : 0, result.BaseColor, result.Material);
     return result;
 }

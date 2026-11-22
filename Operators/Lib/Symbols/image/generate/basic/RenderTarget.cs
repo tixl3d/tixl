@@ -11,8 +11,8 @@ namespace Lib.image.generate.basic;
 [Guid("f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1")]
 internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvider, IReleasableGpuResources
 {
-    /** An extra RGBA16F target beside the color buffer (normals, velocity), with its MSAA resolve. */
-    private sealed class ColorAttachment(string name)
+    /** An extra target beside the color buffer (normals, velocity, material), with its MSAA resolve. */
+    private sealed class ColorAttachment(string name, Format format)
     {
         public RenderTargetView Rtv => _multiSampledRtv;
 
@@ -75,14 +75,14 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             T3.Graphics.Compat.GraphicsUtilities.Dispose(ref _resolved);
         }
 
-        private static Texture2DDescription CreateDescription(Int2 size, int mipLevels, int sampleCount)
+        private Texture2DDescription CreateDescription(Int2 size, int mipLevels, int sampleCount)
         {
             return new Texture2DDescription
                        {
                            ArraySize = 1,
                            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                            CpuAccessFlags = CpuAccessFlags.None,
-                           Format = Format.R16G16B16A16_Float,
+                           Format = format,
                            Width = size.Width,
                            Height = size.Height,
                            MipLevels = mipLevels,
@@ -110,12 +110,22 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     [Output(Guid = "1c9e78c4-af13-4688-ab51-50360d738f07")]
     public readonly Slot<Texture2D> VelocityBuffer = new();
 
+    /** Unlit surface color of PBR draws (rgb) and their occlusion (a). */
+    [Output(Guid = "6df4a69f-917a-4fcb-9fea-d40226b05192")]
+    public readonly Slot<Texture2D> BaseColorBuffer = new();
+
+    /** Roughness, metalness and specular of PBR draws (rgb), and how much of the pixel they cover (a, 0 = not relightable). */
+    [Output(Guid = "e26a28c5-61bd-46d4-9b1b-41bdef8a6435")]
+    public readonly Slot<Texture2D> MaterialBuffer = new();
+
     public RenderTarget()
     {
         ColorBuffer.UpdateAction += Update;
         DepthBuffer.UpdateAction += Update;
         NormalBuffer.UpdateAction += Update;
         VelocityBuffer.UpdateAction += Update;
+        BaseColorBuffer.UpdateAction += Update;
+        MaterialBuffer.UpdateAction += Update;
         SetupResolveShaderResources();
         ReleasableGpuResources.Register(this);
 
@@ -140,6 +150,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         var withDepthBuffer = WithDepthBuffer.GetValue(context);
         var withNormalBuffer = WithNormalBuffer.GetValue(context);
         var withVelocityBuffer = WithVelocityBuffer.GetValue(context);
+        var withMaterialBuffer = WithMaterialBuffer.GetValue(context);
         var clear = Clear.GetValue(context);
         var clearColor = ClearColor.GetValue(context);
         var reference = TextureReference.GetValue(context);
@@ -170,7 +181,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             TextureFormat.SetTypedInputValue(textureFormat);
         }
             
-        var formatChanged = UpdateTextures(device, size, textureFormat, withDepthBuffer ? Format.R32_Typeless : Format.Unknown, generateMips, withNormalBuffer, withVelocityBuffer);
+        var formatChanged = UpdateTextures(device, size, textureFormat, withDepthBuffer ? Format.R32_Typeless : Format.Unknown, generateMips, withNormalBuffer, withVelocityBuffer,
+                                           withMaterialBuffer);
 
         if (formatChanged || enableUpdate)
         {
@@ -194,9 +206,15 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
                 
                 
             deviceContext.Rasterizer.SetViewport(new T3.Graphics.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
-            // Draws write normals to SV_Target1 and velocity to SV_Target2. Velocity keeps a normal target in slot 1:
-            // the Vulkan backend packs bound targets, which would move velocity into the normal slot.
-            if (withVelocityBuffer && _normalTarget.Rtv != null && _velocityTarget.Rtv != null)
+            // Draws write normals to SV_Target1, velocity to SV_Target2, base color and material to SV_Target3/4. Each
+            // later target keeps the earlier ones bound: the Vulkan backend packs bound targets, which would shift slots.
+            if (withMaterialBuffer && _normalTarget.Rtv != null && _velocityTarget.Rtv != null && _baseColorTarget.Rtv != null
+                && _materialTarget.Rtv != null)
+            {
+                deviceContext.OutputMerger.SetTargets(_multiSampledDepthBufferDsv, _multiSampledColorBufferRtv, _normalTarget.Rtv,
+                                                      _velocityTarget.Rtv, _baseColorTarget.Rtv, _materialTarget.Rtv);
+            }
+            else if (withVelocityBuffer && _normalTarget.Rtv != null && _velocityTarget.Rtv != null)
             {
                 deviceContext.OutputMerger.SetTargets(_multiSampledDepthBufferDsv, _multiSampledColorBufferRtv, _normalTarget.Rtv,
                                                       _velocityTarget.Rtv);
@@ -220,6 +238,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
                     _normalTarget.Clear(deviceContext, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
                     _velocityTarget.Clear(deviceContext, Vector4.Zero);
+                    _baseColorTarget.Clear(deviceContext, Vector4.Zero);
+                    _materialTarget.Clear(deviceContext, Vector4.Zero);
 
 
                     if (_multiSampledDepthBufferDsv != null)
@@ -256,6 +276,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             // Render; draws keep velocity history only when this target can take it.
             var keepRenderPass = context.RenderPass;
             context.RenderPass.VelocityRequested = withVelocityBuffer;
+            context.RenderPass.MaterialRequested = withMaterialBuffer;
             context.RenderPass.RenderedCamera = null;
             Command.GetValue(context);
             _bundle.Camera = context.RenderPass.RenderedCamera;
@@ -289,6 +310,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
                     _normalTarget.Resolve(device.ImmediateContext);
                     _velocityTarget.Resolve(device.ImmediateContext);
+                    _baseColorTarget.Resolve(device.ImmediateContext);
+                    _materialTarget.Resolve(device.ImmediateContext);
                 }
                 catch (Exception e)
                 {
@@ -317,6 +340,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             _bundle.Depth = withDepthBuffer ? DepthTexture : null;
             _bundle.Normal = _normalTarget.Texture;
             _bundle.Velocity = _velocityTarget.Texture;
+            _bundle.BaseColor = _baseColorTarget.Texture;
+            _bundle.Material = _materialTarget.Texture;
             ColorTexture.Bundle = _bundle;
         }
 
@@ -328,6 +353,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         NormalBuffer.DirtyFlag.Clear();
         VelocityBuffer.Value = _velocityTarget.Texture;
         VelocityBuffer.DirtyFlag.Clear();
+        BaseColorBuffer.Value = _baseColorTarget.Texture;
+        BaseColorBuffer.DirtyFlag.Clear();
+        MaterialBuffer.Value = _materialTarget.Texture;
+        MaterialBuffer.DirtyFlag.Clear();
 
         _statsCount++;
         _statsCountPixels += size.Height * size.Width;
@@ -388,7 +417,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     }
 
     private bool UpdateTextures(Device device, Int2 size, Format colorFormat, Format depthFormat, bool generateMips, bool withNormalBuffer,
-                                bool withVelocityBuffer)
+                                bool withVelocityBuffer, bool withMaterialBuffer)
     {
         var w = Math.Max(size.Width, size.Height);
         var mipLevels = generateMips ? (int)MathUtils.Log2(w) + 1 : 1;
@@ -494,8 +523,11 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
             _wasClearedOnce = false;
         }
 
-        wasChanged |= _normalTarget.Update(device, size, _sampleCount, mipLevels, withNormalBuffer || withVelocityBuffer, this);
-        wasChanged |= _velocityTarget.Update(device, size, _sampleCount, mipLevels, withVelocityBuffer, this);
+        wasChanged |= _normalTarget.Update(device, size, _sampleCount, mipLevels, withNormalBuffer || withVelocityBuffer || withMaterialBuffer,
+                                           this);
+        wasChanged |= _velocityTarget.Update(device, size, _sampleCount, mipLevels, withVelocityBuffer || withMaterialBuffer, this);
+        wasChanged |= _baseColorTarget.Update(device, size, _sampleCount, mipLevels, withMaterialBuffer, this);
+        wasChanged |= _materialTarget.Update(device, size, _sampleCount, mipLevels, withMaterialBuffer, this);
 
         // Depth buffer handling
         var depthRequired = depthFormat != Format.Unknown;
@@ -600,7 +632,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     public long ReleasableBytes => SizeInBytes(_multiSampledColorBuffer) + SizeInBytes(_resolvedColorBuffer)
                                    + SizeInBytes(_multiSampledDepthBuffer) + SizeInBytes(_resolvedDepthBuffer)
-                                   + _normalTarget.SizeInBytes + _velocityTarget.SizeInBytes;
+                                   + _normalTarget.SizeInBytes + _velocityTarget.SizeInBytes
+                                   + _baseColorTarget.SizeInBytes + _materialTarget.SizeInBytes;
 
     public bool TryReleaseGpuResources()
     {
@@ -615,10 +648,14 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         DepthBuffer.Value = null;
         NormalBuffer.Value = null;
         VelocityBuffer.Value = null;
+        BaseColorBuffer.Value = null;
+        MaterialBuffer.Value = null;
         ColorBuffer.DirtyFlag.ForceInvalidate();
         DepthBuffer.DirtyFlag.ForceInvalidate();
         NormalBuffer.DirtyFlag.ForceInvalidate();
         VelocityBuffer.DirtyFlag.ForceInvalidate();
+        BaseColorBuffer.DirtyFlag.ForceInvalidate();
+        MaterialBuffer.DirtyFlag.ForceInvalidate();
         return true;
     }
 
@@ -664,6 +701,8 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
         _normalTarget.Dispose();
         _velocityTarget.Dispose();
+        _baseColorTarget.Dispose();
+        _materialTarget.Dispose();
     }
     
 
@@ -691,8 +730,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     private UnorderedAccessView _resolvedDepthBufferUav;
 
     private readonly RenderBundle _bundle = new();
-    private readonly ColorAttachment _normalTarget = new("normal");
-    private readonly ColorAttachment _velocityTarget = new("velocity");
+    private readonly ColorAttachment _normalTarget = new("normal", Format.R16G16B16A16_Float);
+    private readonly ColorAttachment _velocityTarget = new("velocity", Format.R16G16B16A16_Float);
+    private readonly ColorAttachment _baseColorTarget = new("base color", Format.R8G8B8A8_UNorm);
+    private readonly ColorAttachment _materialTarget = new("material", Format.R8G8B8A8_UNorm);
  
     private bool _wasClearedOnce;
     private bool _isRebuildable;
@@ -733,6 +774,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
 
     [Input(Guid = "db4ac4e3-2dd9-4f88-982b-a2e71dcb29f6")]
     public readonly InputSlot<bool> WithVelocityBuffer = new();
+
+    /** Base color and material targets for post effects that relight or reflect; also keeps normal and velocity. */
+    [Input(Guid = "e63bb9fb-208b-49d4-8500-aed1f6a74e18")]
+    public readonly InputSlot<bool> WithMaterialBuffer = new();
 
     [Input(Guid = "269ab682-769a-4c9e-acf5-5791ea4735f3")]
     public readonly InputSlot<bool> AttachBundle = new();

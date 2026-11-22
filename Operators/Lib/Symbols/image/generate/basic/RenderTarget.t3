@@ -51,6 +51,10 @@
       "DefaultValue": false
     },
     {
+      "Id": "e63bb9fb-208b-49d4-8500-aed1f6a74e18"/*WithMaterialBuffer*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,
       "DefaultValue": 4
     },

@@ -1,7 +1,21 @@
 # Plan: Light Types and Material Buffer (deferred ingredients, forward shading)
 
 Status: **M1 and M2 implemented 2026-11-22, untested by a human** (test set `.tests-manual/light-types-and-blending.md`).
-Written 2026-11-20 on `main` (32bcb8124). M3-M7 not started.
+Written 2026-11-20 on `main` (32bcb8124). **M3 implemented 2026-11-22**, probed on Vulkan (test set
+`.tests-manual/material-buffer.md`). M4-M7 not started.
+
+**M3 as built:** `[RenderTarget]` `WithMaterialBuffer` (off by default) adds RGBA8 `BaseColorBuffer` (albedo x material
+color x field tint, a = occlusion) and `MaterialBuffer` (roughness, metalness, specular, a = **relight coverage**: 1 PBR,
+0 nothing relightable). Coverage replaces the planned shading-model id because it survives the averaging MSAA resolve,
+so no custom resolve pass was needed; more shading models would need another encoding. With material on, normal and
+velocity are bound (Vulkan packs targets) but velocity history is not requested. `RenderPassState.MaterialRequested`
+and [GetRenderPassState] `MaterialRequested = 5` exist; shaders don't read it yet (writes to unbound targets are
+dropped). `RenderBundle.BaseColor/Material` (label `+M`), [HandleTextureBundle] outputs + override inputs,
+[RenderScene] `WithMaterialBuffer` input. Helper `GetMaterialTargets(tint, coverage, ...)` in `pbr-render.hlsl`, called
+by the 6 PBR shaders. Slang numbers fragment outputs by declaration order, not by the SV_Target index, so
+`mesh-CustomDraw-template` gained a velocity output (written 0) to keep slots 3/4 aligned. Probe (256x256, sphere,
+Roughness 0.3 / Metal 0.6 / Specular 0.5 / BaseColor (1, 0.5, 0.25)): material (76, 153, 128, 255), base color
+(255, 128, 64, 255), background 0, identical with 4x MSAA, Vulkan validation silent. D3D11 not run.
 
 **What shipped:** `[PickBlendMode]` is a C# op with nine cached states (same color blends as the old graph, targets
 1-7 written unblended for Normal/None and masked for all other modes). Core `PointLight`/`PointLightStack`/

@@ -96,6 +96,8 @@ struct psOutput
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
 };
 
 sampler WrappedSampler : register(s0);
@@ -328,7 +330,8 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 
     float4 litColor = ComputePbr();
 
-    litColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0));
+    float4 fieldColor = GetField(float4(pin.worldPosition.xyz, 0));
+    litColor.rgba *= fieldColor;
 
     if (AlphaCutOff > 0 && litColor.a < AlphaCutOff)
     {
@@ -339,6 +342,7 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 
     output.Normal = float4 (frag.N,1);
     output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    GetMaterialTargets(fieldColor.rgb, 1, output.BaseColor, output.Material);
     
     return output;
 }

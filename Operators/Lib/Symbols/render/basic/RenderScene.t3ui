@@ -40,6 +40,14 @@
       "ClampMax": true
     },
     {
+      "InputId": "bcb6064d-e137-4cd7-b743-cc84058a0d23"/*WithMaterialBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Also renders base color and material buffers, which post effects like [ScreenSpaceReflections] use for rough and metallic surfaces. Off by default to save memory."
+    },
+    {
       "InputId": "e67e7052-1f2f-4ad0-909f-f97190128c34"/*Environment*/,
       "Position": {
         "X": -280.0,

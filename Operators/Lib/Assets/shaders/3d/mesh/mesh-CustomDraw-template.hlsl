@@ -88,6 +88,9 @@ struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
 };
 
 sampler WrappedSampler : register(s0);
@@ -319,6 +322,8 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     output.Color = c;
     // Output to normal buffer (SV_Target1)
     output.Normal = float4(worldNormal, 1.0);
+    output.Velocity = 0; // Motion of custom vertex code is unknown; the shader compiler numbers outputs by order, so slot 2 must exist.
+    GetMaterialTargets(1, 1, output.BaseColor, output.Material);
     
     return output;
 

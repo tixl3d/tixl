@@ -107,4 +107,10 @@ public struct RenderPassState
     /// (e.g. last frame's points), which they can skip otherwise.
     /// </summary>
     public bool VelocityRequested;
+
+    /// <summary>
+    /// The render target being drawn has base color and material buffers (SV_Target3 and SV_Target4), so PBR draws
+    /// should write their material.
+    /// </summary>
+    public bool MaterialRequested;
 }

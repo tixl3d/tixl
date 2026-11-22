@@ -29,4 +29,7 @@ internal sealed class RenderScene : Instance<RenderScene>
 
         [Input(Guid = "e67e7052-1f2f-4ad0-909f-f97190128c34")]
         public readonly InputSlot<int> Environment = new InputSlot<int>();
+
+    [Input(Guid = "bcb6064d-e137-4cd7-b743-cc84058a0d23")]
+    public readonly InputSlot<bool> WithMaterialBuffer = new();
 }
