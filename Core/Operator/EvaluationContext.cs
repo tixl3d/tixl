@@ -48,7 +48,7 @@ public sealed class EvaluationContext
             
         LocalTime = Playback.TimeInBars;
         LocalFxTime = Playback.FxTimeInBars;
-        PointLights.Clear();
+        Lights.Clear();
         FloatVariables.Clear();
         BoolVariables.Clear();
         IntVariables.Clear();
@@ -284,7 +284,7 @@ public sealed class EvaluationContext
     /// </summary>
     public Dictionary<string, Texture2D> ContextTextures { get; set; } = new(10);
     // public Texture2D PrbPrefilteredSpecular { get; set; }
-    public PointLightStack PointLights { get; } = new();
+    public LightStack Lights { get; } = new();
         
     /// <summary>
     /// This should be set by RenderTargets and other ops can could be directly used by SetFog.

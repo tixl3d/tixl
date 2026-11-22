@@ -21,7 +21,8 @@
         "Y": 334.0
       },
       "Description": "The formula to evaluate. Variables a, b, c, d are available. Math functions: Sin, Cos, Tan, Sqrt, Pow, Log, Abs, Floor, Ceil, Round, Min, Max, Clamp, Lerp, etc.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "CSharp"
     },
     {
       "InputId": "d0e6f3a9-5c2b-4d8f-9a4e-3b0c7f1d6e2a"/*A*/,

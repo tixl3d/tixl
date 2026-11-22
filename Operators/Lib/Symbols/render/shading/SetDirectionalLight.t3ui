@@ -1,0 +1,61 @@
+{
+  "FormatVersion": 3,
+  "Id": "39b8b6a2-59a8-49b2-b375-bed3bf3914d6"/*SetDirectionalLight*/,
+  "Description": "Adds a directional light, like sunlight, to the connected subgraph.\n\nAll surfaces are lit along the direction from Position to Target with the same Intensity, independent of distance. Only that direction matters, not where the two points are. With the operator selected, the rotate gizmo swings Target around Position. It shares the limit of 8 lights with point and spot lights. Operators with their own lighting (cel shading, hatching, tubes, ribbons) treat it as a distant point light for now.\n\nAKA: sun, sunlight, distant light, parallel light\n\nSee also: [SetPointLight], [SetSpotLight], [SetEnvironment]",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "290fa10c-5ff3-481e-a2c8-b01c9b792ff6"/*Intensity*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Brightness of the light.",
+      "Min": 0.0,
+      "Max": 10.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "36a4ed94-7236-4bfb-8eb4-eab22b733186"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "51920d4b-5769-4c55-8c9b-534e7a237fa6"/*Position*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Start of the light direction. Also places the gizmo.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "558129dc-8c41-4218-8ba0-9a9c9d4ea59f"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Sets the color of the light."
+    },
+    {
+      "InputId": "ffb89029-2133-4b78-9444-776d2394d485"/*Target*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "The light travels from Position toward this point."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e1c1793a-5443-45e9-926d-26047eaac263"/*Output*/,
+      "Position": {
+        "X": 30.0,
+        "Y": 90.0
+      }
+    }
+  ]
+}

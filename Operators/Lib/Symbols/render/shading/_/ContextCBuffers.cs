@@ -18,6 +18,6 @@ internal sealed class ContextCBuffers : Instance<ContextCBuffers>
     private void Update(EvaluationContext context)
     {
         FogParameters.Value = context.FogParameters;
-        PointLights.Value = context.PointLights.ConstBuffer;
+        PointLights.Value = context.Lights.ConstBuffer;
     }
 }

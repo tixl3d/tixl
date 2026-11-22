@@ -1,6 +1,21 @@
 # Plan: Light Types and Material Buffer (deferred ingredients, forward shading)
 
-Status: **not started**, written 2026-11-20 on `main` (32bcb8124). Nothing built or run; findings come from reading.
+Status: **M1 and M2 implemented 2026-11-22, untested by a human** (test set `.tests-manual/light-types-and-blending.md`).
+Written 2026-11-20 on `main` (32bcb8124). M3-M7 not started.
+
+**What shipped:** `[PickBlendMode]` is a C# op with nine cached states (same color blends as the old graph, targets
+1-7 written unblended for Normal/None and masked for all other modes). Core `PointLight`/`PointLightStack`/
+`context.PointLights` became `Light`/`LightStack`/`context.Lights` (96-byte layout, first five fields at their old
+offsets, `LightType` Point/Spot/Directional). HLSL keeps the name `PointLight` in `shared/point-light.hlsl`, which
+now has `EvaluateLight()`; `ComputePbr()` uses it. New C# ops `[SetSpotLight]` (Position, Target, ConeAngle full
+degrees, Softness) and `[SetDirectionalLight]`. Directional lights reach point-only shaders as a distant point light
+with decay 0. All 22 light shaders compile with slangc and the cbuffer reflection matches the C# layout (stride 96,
+count at 768). Not yet run in the editor; FXC (D3D11) not compiled.
+Gizmo hook (2026-11-22): `ITransformable.AimTargetInput` (default null). When set, the rotate gizmo swings that point
+around `TranslationInput` (fixed axes, screen ring around the view ray, Ctrl snaps 15 degrees) and Move leaves it
+fixed. `[SetSpotLight]` and `[SetDirectionalLight]` (now Position + Target instead of Direction) implement it.
+Open-question answers taken (proposals): 1 write, 2 separate ops, 3 keep 8, 5 later. Still to do for M2: gizmo
+wrappers `[SpotLight]` / `[DirectionalLight]` like `[PointLight]`, `.help/` pages.
 
 ## Why
 

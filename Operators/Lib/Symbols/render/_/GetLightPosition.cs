@@ -31,7 +31,7 @@ internal sealed class GetLightPosition : Instance<GetLightPosition>
 
     private void Update(EvaluationContext context)
     {
-        var pointLightsCount = context.PointLights.Count;
+        var pointLightsCount = context.Lights.Count;
             
         LightCount.Value = pointLightsCount;
             
@@ -40,7 +40,7 @@ internal sealed class GetLightPosition : Instance<GetLightPosition>
             
         var requestedLightIndex = LightIndex.GetValue(context).Clamp(0, pointLightsCount-1);
             
-        var pointLight = context.PointLights.GetPointLight(requestedLightIndex);
+        var pointLight = context.Lights.GetLight(requestedLightIndex);
         Position.Value = pointLight.Position;
         Radius.Value = pointLight.Range;
         Color.Value = pointLight.Color;

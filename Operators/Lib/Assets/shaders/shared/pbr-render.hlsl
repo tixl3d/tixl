@@ -46,13 +46,9 @@ float4 ComputePbr()
     float3 directLighting = 0.0;
     for (uint i = 0; i < (uint)ActiveLightCount; ++i)
     {
-        float3 Lvec = Lights[i].position - frag.worldPosition;
-        float dist = length(Lvec);
-        float3 L = Lvec / max(dist, 1e-4); // normalize once
-
-        float intensity = Lights[i].intensity / (pow(dist / Lights[i].range, Lights[i].decay) + 1);
-
-        float3 Lradiance = Lights[i].color.rgb * intensity;
+        float3 L;
+        float3 Lradiance;
+        EvaluateLight(Lights[i], frag.worldPosition, L, Lradiance);
 
         float NdotV = saturate(dot(N, V));
         float NdotL = saturate(dot(N, L));

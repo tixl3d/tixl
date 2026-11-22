@@ -1,0 +1,41 @@
+{
+  "FormatVersion": 3,
+  "Id": "39b8b6a2-59a8-49b2-b375-bed3bf3914d6"/*SetDirectionalLight*/,
+  "Inputs": [
+    {
+      "Id": "290fa10c-5ff3-481e-a2c8-b01c9b792ff6"/*Intensity*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "36a4ed94-7236-4bfb-8eb4-eab22b733186"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "51920d4b-5769-4c55-8c9b-534e7a237fa6"/*Position*/,
+      "DefaultValue": {
+        "X": 2.0,
+        "Y": 4.0,
+        "Z": 2.0
+      }
+    },
+    {
+      "Id": "558129dc-8c41-4218-8ba0-9a9c9d4ea59f"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 0.97,
+        "Z": 0.92,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "ffb89029-2133-4b78-9444-776d2394d485"/*Target*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,3 +1,5 @@
+using T3.Core.Rendering;
+
 namespace Lib.render.shading;
 
 [Guid("4912ba82-460a-4229-884d-6b647d64b08c")]
@@ -13,17 +15,18 @@ internal sealed class SetPointLight : Instance<SetPointLight>
 
     private void Update(EvaluationContext context)
     {
-        var pointLights = context.PointLights;
-        var light = new T3.Core.Rendering.PointLight(Position.GetValue(context),
-                                                     Intensity.GetValue(context),
-                                                     Color.GetValue(context),
-                                                     Range.GetValue(context),
-                                                     Decay.GetValue(context));
-        pointLights.Push(light);
+        var lights = context.Lights;
+        var light = Light.CreatePoint(Position.GetValue(context),
+                                      Intensity.GetValue(context),
+                                      Color.GetValue(context),
+                                      Range.GetValue(context),
+                                      Decay.GetValue(context));
+        var wasPushed = lights.Push(light);
 
         Command.GetValue(context); // Evaluate sub-tree
 
-        pointLights.Pop();
+        if (wasPushed)
+            lights.Pop();
     }
 
     [Input(Guid = "d46d2cb6-9ab9-4640-a3d4-e70e643bd3b4")]

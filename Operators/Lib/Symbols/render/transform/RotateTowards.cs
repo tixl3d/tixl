@@ -32,8 +32,16 @@ internal sealed class RotateTowards : Instance<RotateTowards>
         }
             
         var sourcePos = Vector4.Transform( new Vector4(0,0,0,1), context.ObjectToWorld).ToVector3();
-            
-        var lookAt = GraphicsMath.LookAtRH(Vector3.Zero , -targetPosDx + sourcePos, VectorT3.Up);
+        var awayFromTarget = sourcePos - targetPosDx;
+        var distance = awayFromTarget.Length();
+        if (distance < 1e-6f)
+        {
+            // No direction to aim along.
+            Command.GetValue(context);
+            return;
+        }
+
+        var lookAt = GraphicsMath.LookAtRH(Vector3.Zero, awayFromTarget, GetUpVector(awayFromTarget / distance));
         Matrix4x4.Invert(lookAt, out lookAt);
 
         var rotationOffset = RotationOffset.GetValue(context);
@@ -50,6 +58,18 @@ internal sealed class RotateTowards : Instance<RotateTowards>
         Command.GetValue(context);
         context.ObjectToWorld = previousWorldTobject;
     }
+
+    /// <summary>
+    /// Up is +Y, except when aiming (nearly) straight up or down, where it is parallel to the aim and the
+    /// orientation would be undefined.
+    /// </summary>
+    private static Vector3 GetUpVector(Vector3 normalizedDirection)
+    {
+        return MathF.Abs(normalizedDirection.Y) > MaxAimYForWorldUp ? Vector3.UnitZ : VectorT3.Up;
+    }
+
+    /** About 2.5 degrees from vertical. */
+    private const float MaxAimYForWorldUp = 0.999f;
 
     [Input(Guid = "ae8b45e6-e72f-40fe-8ff9-34cd9fffc164")]
     public readonly InputSlot<Command> Command = new();
