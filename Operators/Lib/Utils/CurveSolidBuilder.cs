@@ -1061,8 +1061,8 @@ internal sealed class CurveSolidBuilder
 
     /// <summary>
     /// A cap made of the grid cells: cells fully inside become one quad, cells on the outline the part of the shape
-    /// inside them (clipped by the tessellator). Points are welded to the ring's points within the snap distance and
-    /// shared between neighbouring cells, so the cap has no gaps and meets the walls.
+    /// inside them (clipped by the tessellator). Where the cells meet the outline they use its ring points, and grid
+    /// corners are shared between neighbouring cells, so the cap has no gaps and meets the walls.
     /// </summary>
     /// <returns>False when there would be too many cells; the caller falls back to the plain cap.</returns>
     private bool TryAddLatticeCap(int ringIndex, bool flip)
@@ -1090,27 +1090,10 @@ internal sealed class CurveSolidBuilder
             return false;
         }
 
-        // Ring points by snap bucket, for welding cap points onto them
-        _ringBuckets.Clear();
-        var z = 0f;
-        for (var l = 0; l < _loops.Count; l++)
-        {
-            var count = _loops[l].Count;
-            for (var i = 0; i < count; i++)
-            {
-                var pointId = _loopRings[l][ringIndex * count + i];
-                var p = _positions[pointId];
-                z = p.Z;
-                var key = ((long)MathF.Floor(p.X / snap), (long)MathF.Floor(p.Y / snap));
-                if (!_ringBuckets.TryGetValue(key, out var list))
-                {
-                    list = [];
-                    _ringBuckets[key] = list;
-                }
-
-                list.Add(pointId);
-            }
-        }
+        var firstLoop = _loopRings.Count > 0 && _loops[0].Count > 0 ? _loopRings[0][ringIndex * _loops[0].Count] : -1;
+        var z = firstLoop >= 0 ? _positions[firstLoop].Z : 0f;
+        _capRingIndex = ringIndex;
+        _capSnap = snap;
 
         _capPointLookup.Clear();
         var normal = flip ? -Vector3.UnitZ : Vector3.UnitZ;
@@ -1125,17 +1108,17 @@ internal sealed class CurveSolidBuilder
                     if (IsInside((cellMin + cellMax) * 0.5f))
                     {
                         _polygon.Clear();
-                        _polygon.Add(WeldCapPoint(cellMin, z, snap));
-                        _polygon.Add(WeldCapPoint(new Vector2(cellMax.X, cellMin.Y), z, snap));
-                        _polygon.Add(WeldCapPoint(cellMax, z, snap));
-                        _polygon.Add(WeldCapPoint(new Vector2(cellMin.X, cellMax.Y), z, snap));
+                        _polygon.Add(GetCapPoint(cellMin, z));
+                        _polygon.Add(GetCapPoint(new Vector2(cellMax.X, cellMin.Y), z));
+                        _polygon.Add(GetCapPoint(cellMax, z));
+                        _polygon.Add(GetCapPoint(new Vector2(cellMin.X, cellMax.Y), z));
                         AddCapPolygon(normal, flip);
                     }
 
                     continue;
                 }
 
-                ClipCell(cellMin, cellMax, z, snap, normal, flip);
+                ClipCell(cellMin, cellMax, ringIndex, z, snap, normal, flip);
             }
         }
 
@@ -1143,17 +1126,19 @@ internal sealed class CurveSolidBuilder
     }
 
     /** The shape inside one cell: the loops and the cell's square, where both overlap (winding of 2 or more). */
-    private void ClipCell(Vector2 cellMin, Vector2 cellMax, float z, float snap, Vector3 normal, bool flip)
+    private void ClipCell(Vector2 cellMin, Vector2 cellMax, int ringIndex, float z, float snap, Vector3 normal, bool flip)
     {
         var tess = new Tess();
-        foreach (var loop in _loops)
+        for (var l = 0; l < _loops.Count; l++)
         {
+            var loop = _loops[l];
             if (!BoundsOverlap(loop, cellMin, cellMax))
                 continue;
 
+            // Outline vertices carry their ring point, so every cell resolves them (and crossings next to them) alike
             var contour = new ContourVertex[loop.Count];
             for (var i = 0; i < loop.Count; i++)
-                contour[i] = new ContourVertex(new Vec3(loop[i].X, loop[i].Y, 0));
+                contour[i] = new ContourVertex(new Vec3(loop[i].X, loop[i].Y, 0), _loopRings[l][ringIndex * loop.Count + i]);
 
             tess.AddContour(contour, ContourOrientation.Original);
         }
@@ -1165,7 +1150,8 @@ internal sealed class CurveSolidBuilder
                             new ContourVertex(new Vec3(cellMax.X, cellMax.Y, 0)),
                             new ContourVertex(new Vec3(cellMin.X, cellMax.Y, 0)),
                         ], ContourOrientation.Original);
-        tess.Tessellate(WindingRule.AbsGeqTwo, ElementType.Polygons, MaxCapPolygonSize, null, new Vec3(0, 0, 1));
+        _combineSnap = snap;
+        tess.Tessellate(WindingRule.AbsGeqTwo, ElementType.Polygons, MaxCapPolygonSize, _combineCapVertex ??= CombineCapVertex, new Vec3(0, 0, 1));
         for (var element = 0; element < tess.ElementCount; element++)
         {
             _polygon.Clear();
@@ -1175,47 +1161,108 @@ internal sealed class CurveSolidBuilder
                 if (index == Tess.Undef)
                     break;
 
-                var v = tess.Vertices[index].Position;
-                _polygon.Add(WeldCapPoint(new Vector2(v.X, v.Y), z, snap));
+                var vertex = tess.Vertices[index];
+                _polygon.Add(vertex.Data is int ringPoint ? ringPoint : GetCapPoint(new Vector2(vertex.Position.X, vertex.Position.Y), z));
             }
 
             AddCapPolygon(normal, flip);
         }
     }
 
-    /// <summary>A ring point within the snap distance, otherwise a cap point shared by all cells at that position.</summary>
-    private int WeldCapPoint(Vector2 position, float z, float snap)
+    /// <summary>
+    /// Where the cell's square crosses an outline segment: the segment's nearest ring point within the snap distance.
+    /// Grid crossings were inserted into the outlines or snapped onto a point next to them, so one is always there; deciding
+    /// by the segment rather than by distance alone keeps neighbouring cells from picking two different points that lie
+    /// close together, which would make them overlap.
+    /// </summary>
+    private object? CombineCapVertex(Vec3 position, object[] data, float[] weights)
     {
-        var bucketX = (long)MathF.Floor(position.X / snap);
-        var bucketY = (long)MathF.Floor(position.Y / snap);
         var best = -1;
-        var bestDistance = snap * snap;
-        for (var dy = -1; dy <= 1; dy++)
+        var bestDistance = _combineSnap * _combineSnap;
+        foreach (var entry in data)
         {
-            for (var dx = -1; dx <= 1; dx++)
+            if (entry is not int pointId)
+                continue;
+
+            var p = _positions[pointId];
+            var distance = (p.X - position.X) * (p.X - position.X) + (p.Y - position.Y) * (p.Y - position.Y);
+            if (distance > bestDistance)
+                continue;
+
+            bestDistance = distance;
+            best = pointId;
+        }
+
+        return best >= 0 ? best : null;
+    }
+
+    /// <summary>
+    /// For a position on an outline segment: the segment's nearer ring point within the snap distance (grid crossings
+    /// were inserted into the outline or snapped onto such a point), otherwise -1. Depends only on the position, so all
+    /// cells sharing a corner agree.
+    /// </summary>
+    private int FindRingPointOnOutline(Vector2 position)
+    {
+        var onLine = 1e-4f * Lattice;
+        var best = -1;
+        var bestDistance = _capSnap * _capSnap;
+        for (var l = 0; l < _loops.Count; l++)
+        {
+            var loop = _loops[l];
+            var count = loop.Count;
+            for (var i = 0; i < count; i++)
             {
-                if (!_ringBuckets.TryGetValue((bucketX + dx, bucketY + dy), out var list))
+                var a = loop[i];
+                var b = loop[(i + 1) % count];
+                if (position.X < MathF.Min(a.X, b.X) - onLine || position.X > MathF.Max(a.X, b.X) + onLine
+                    || position.Y < MathF.Min(a.Y, b.Y) - onLine || position.Y > MathF.Max(a.Y, b.Y) + onLine)
                     continue;
 
-                foreach (var pointId in list)
-                {
-                    var p = _positions[pointId];
-                    var distance = Vector2.DistanceSquared(new Vector2(p.X, p.Y), position);
-                    if (distance <= bestDistance)
-                    {
-                        bestDistance = distance;
-                        best = pointId;
-                    }
-                }
+                var segment = b - a;
+                var lengthSquared = segment.LengthSquared();
+                var u = lengthSquared > 0 ? Math.Clamp(Vector2.Dot(position - a, segment) / lengthSquared, 0, 1) : 0;
+                if (Vector2.DistanceSquared(a + segment * u, position) > onLine * onLine)
+                    continue;
+
+                var distanceA = Vector2.DistanceSquared(a, position);
+                var distanceB = Vector2.DistanceSquared(b, position);
+                var nearer = distanceA <= distanceB ? i : (i + 1) % count;
+                var distance = MathF.Min(distanceA, distanceB);
+                if (distance > bestDistance)
+                    continue;
+
+                bestDistance = distance;
+                best = _loopRings[l][_capRingIndex * count + nearer];
             }
         }
 
-        if (best >= 0)
-            return best;
+        return best;
+    }
 
+    private int _capRingIndex;
+    private float _capSnap;
+    private CombineCallback? _combineCapVertex;
+    private float _combineSnap;
+
+    /// <summary>
+    /// The cap point at a grid position, shared by all cells there. Corners are not welded onto nearby outline points:
+    /// that would move them for the cells using them but not for a clipped neighbour following the outline, and the two
+    /// would overlap. Crossings with the outline are resolved onto ring points by <see cref="CombineCapVertex"/>.
+    /// </summary>
+    private int GetCapPoint(Vector2 position, float z)
+    {
         var key = ((long)MathF.Round(position.X * 1e5f), (long)MathF.Round(position.Y * 1e5f));
         if (_capPointLookup.TryGetValue(key, out var existing))
             return existing;
+
+        // A corner lying on the outline (edges along grid lines) must be one of its ring points, or the cap would have a
+        // point the wall lacks and open there
+        var onOutline = FindRingPointOnOutline(position);
+        if (onOutline >= 0)
+        {
+            _capPointLookup[key] = onOutline;
+            return onOutline;
+        }
 
         var added = AddPoint(new Vector3(position.X, position.Y, z));
         _capPointLookup[key] = added;
@@ -1440,7 +1487,6 @@ internal sealed class CurveSolidBuilder
     private readonly List<Vector2> _crossingLoop = [];
     private readonly List<float> _crossings = [];
     private readonly List<int> _polygon = [];
-    private readonly Dictionary<(long, long), List<int>> _ringBuckets = [];
     private readonly Dictionary<(long, long), int> _capPointLookup = [];
     private readonly List<List<Vector2>> _loops = [];
     private readonly List<Vector3> _scratch = [];
