@@ -3,6 +3,10 @@
   "Id": "1bd6ebd0-0414-4d29-99df-4f4e123e0570"/*LoadAnimatedGltf*/,
   "Inputs": [
     {
+      "Id": "443aae80-dff3-49bf-bfa9-82f33ccaaa2d"/*Path*/,
+      "DefaultValue": "pixtur.Playground:mesh/animations/Fox.gltf"
+    },
+    {
       "Id": "b9ee9f01-0c73-45c7-a72d-5ce28cb56e3c"/*ClipIndex*/,
       "DefaultValue": 5
     }
@@ -69,6 +73,12 @@
       "SourceSlotId": "8a05e9d4-27c3-4b61-9f88-51e6b3a0c792",
       "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "TargetSlotId": "dd53cc7e-736c-44dc-8c3e-ad79c919f35a"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "443aae80-dff3-49bf-bfa9-82f33ccaaa2d",
+      "TargetParentOrChildId": "4a78396b-a8a8-437d-8aea-88b67a13ae24",
+      "TargetSlotId": "292e80cf-ba31-4a50-9bf4-83712430f811"
     },
     {
       "SourceParentOrChildId": "ca154d30-d139-44f7-9314-d21b7bb5009d",
