@@ -4,6 +4,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Core.Utils;
 using T3.Core.Utils.Math3d;
@@ -142,7 +143,8 @@ internal static class TransformGizmoHandling
         }
 
         _objectToWorld = context.ObjectToWorld;
-        _objectToClipSpace = context.ObjectToWorld * context.WorldToCamera * context.CameraToClipSpace;
+        // TXAA jitters the projection each frame, but the gizmo is drawn over the resolved, unjittered image.
+        _objectToClipSpace = context.ObjectToWorld * context.WorldToCamera * CameraJitter.GetUnjitteredCameraToClipSpace(context);
 
         PrepareCalculations(context);
 

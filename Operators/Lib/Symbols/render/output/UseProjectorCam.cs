@@ -46,10 +46,14 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
         context.WorldToCamera = WorldToCamera;
         context.CameraToClipSpace = CameraToClipSpace;
 
+        var prevProjectionJitter = context.RenderPass.ProjectionJitter;
+        context.RenderPass.ProjectionJitter = _projectionJitter;
+
         // The innermost camera claims the rendered image for the render op's bundle.
         var renderedCameraSerial = context.RenderPass.RenderedCameraSerial;
         Command.GetValue(context);
         context.RenderPass.RecordCamera(renderedCameraSerial, this);
+        context.RenderPass.ProjectionJitter = prevProjectionJitter;
 
         context.CameraToClipSpace = prevCameraToClipSpace;
         context.WorldToCamera = prevWorldToCamera;
@@ -65,6 +69,7 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
         {
             WorldToCamera = context.WorldToCamera;
             CameraToClipSpace = context.CameraToClipSpace;
+            _projectionJitter = context.RenderPass.ProjectionJitter;
             return;
         }
 
@@ -90,7 +95,7 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
         }
 
         var cameraToClipSpace = lens.GetMatrix(aspect);
-        CameraJitter.ApplyFromContext(context, ref cameraToClipSpace);
+        _projectionJitter = CameraJitter.ApplyFromContext(context, ref cameraToClipSpace);
         WorldToCamera = pose.ToViewMatrix();
         CameraToClipSpace = cameraToClipSpace;
 
@@ -149,4 +154,5 @@ internal sealed class UseProjectorCam : Instance<UseProjectorCam>, IStatusProvid
 
     private CameraDefinition _cameraDefinition = new();
     private bool _hasOutput;
+    private Vector2 _projectionJitter;
 }

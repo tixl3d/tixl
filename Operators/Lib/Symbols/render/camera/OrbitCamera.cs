@@ -42,10 +42,14 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         context.CameraToClipSpace = CameraToClipSpace;
         context.WorldToCamera = WorldToCamera;
 
+        var prevProjectionJitter = context.RenderPass.ProjectionJitter;
+        context.RenderPass.ProjectionJitter = _projectionJitter;
+
         // The innermost camera claims the rendered image for the render op's bundle.
         var renderedCameraSerial = context.RenderPass.RenderedCameraSerial;
         Command.GetValue(context);
         context.RenderPass.RecordCamera(renderedCameraSerial, this);
+        context.RenderPass.ProjectionJitter = prevProjectionJitter;
 
         context.CameraToClipSpace = prevCameraToClipSpace;
         context.WorldToCamera = prevWorldToCamera;
@@ -71,7 +75,7 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         Vector2 clip = NearFarClip.GetValue(context);
 
         var camToClipSpace = GraphicsMath.PerspectiveFovRH(fov, aspectRatio, clip.X, clip.Y);
-        CameraJitter.ApplyFromContext(context, ref camToClipSpace);
+        _projectionJitter = CameraJitter.ApplyFromContext(context, ref camToClipSpace);
         CameraToClipSpace = camToClipSpace;
 
         var radiusValue = DistanceToTarget.GetValue(context) == 0.0f ? .0001f : DistanceToTarget.GetValue(context); // avoid 0 radius that causes issues
@@ -173,6 +177,7 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
     private Vector3 _dampedTarget;
     private Vector3 _dampedEye;
     private CameraDefinition _cameraDefinition;
+    private Vector2 _projectionJitter;
     public CameraDefinition CameraDefinition => _cameraDefinition;
 
     [Input(Guid = "33752356-8348-4938-8f73-6257e6bb1c1f")]

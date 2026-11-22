@@ -39,10 +39,14 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
         context.WorldToCamera = WorldToCamera;
         context.CameraToClipSpace = CameraToClipSpace;
 
+        var prevProjectionJitter = context.RenderPass.ProjectionJitter;
+        context.RenderPass.ProjectionJitter = _projectionJitter;
+
         // The innermost camera claims the rendered image for the render op's bundle.
         var renderedCameraSerial = context.RenderPass.RenderedCameraSerial;
         Command.GetValue(context);
         context.RenderPass.RecordCamera(renderedCameraSerial, this);
+        context.RenderPass.ProjectionJitter = prevProjectionJitter;
 
         context.CameraToClipSpace = prevCameraToClipSpace;
         context.WorldToCamera = prevWorldToCamera;
@@ -76,12 +80,14 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
             
         _cameraDefinition.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
 
-        CameraJitter.ApplyFromContext(context, ref camToClipSpace);
+        _projectionJitter = CameraJitter.ApplyFromContext(context, ref camToClipSpace);
 
         CameraToClipSpace = camToClipSpace;
         WorldToCamera = worldToCamera;
     }
     
+    private Vector2 _projectionJitter;
+
     public  CameraDefinition CameraDefinition => _cameraDefinition;
     private CameraDefinition _cameraDefinition;
         
