@@ -13,7 +13,8 @@
       "Min": 0.0,
       "Max": 0.05,
       "Scale": 0.0001,
-      "ClampMin": true
+      "ClampMin": true,
+      "Format": "{0:0.0000}"
     },
     {
       "InputId": "81b960fa-f826-481c-9b1e-40fb34fc6e62"/*Geometry*/,
