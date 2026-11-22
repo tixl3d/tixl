@@ -1,4 +1,5 @@
 #nullable enable
+using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -98,22 +99,22 @@ internal sealed class HelpWindow : Window
         UpdateContextFromGraphSelection();
 
         var topCursorPos = ImGui.GetCursorPos();
-        var content = DrawHelpBody();
+        DrawHelpBody();
 
         // The floating icons overlap the doc child, and between overlapping sibling children the one
         // submitted later is on top and receives the mouse — so they must be drawn after the body.
         ImGui.SetCursorPos(topCursorPos);
-        DrawHeaderIcons(content);
+        DrawHeaderIcons();
 
         IsDrawingContent = false;
     }
 
     #region header
-    private void DrawHeaderIcons(in HelpContent content)
+    private void DrawHeaderIcons()
     {
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var buttonCount = content.SymbolUi != null ? 5 : 4;
+        var buttonCount = _shownSymbolUi != null ? 5 : 4;
         var iconAreaWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
 
         // sameLine: false — the cursor was already placed at the window top; the default SameLine would
@@ -123,25 +124,19 @@ internal sealed class HelpWindow : Window
         CustomComponents.RightAlign(iconAreaWidth + _docScrollbarWidth, sameLine: false);
         ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
 
-        if (content.SymbolUi is { } symbolUi)
+        if (_shownSymbolUi != null)
         {
             if (CustomComponents.IconButton(Icon.PopUp, buttonSize))
-                OperatorHelp.EditDescriptionDialog.ShowNextFrame(symbolUi.Symbol);
+                OperatorHelp.EditDescriptionDialog.ShowNextFrame(_shownSymbolUi.Symbol);
 
             CustomComponents.TooltipForLastItem("Edit description and links");
             ImGui.SameLine();
         }
-        
-        var canCopy = content.HasContent;
-        if (CustomComponents.IconButton(Icon.CopyToClipboard, buttonSize,
-                                        canCopy ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
-            && canCopy)
-        {
-            CopyHelpToClipboard(content);
-        }
 
-        CustomComponents.TooltipForLastItem("Copy help content to clipboard",
-                                            "Paste it into a translation service to read it in your language.");
+        if (CustomComponents.IconButton(Icon.CopyToClipboard, buttonSize))
+            CopyHelpToClipboard();
+
+        CustomComponents.TooltipForLastItem("Copy help content to clipboard");
         ImGui.SameLine();
 
         // Index 0 is the newest entry, so "back" moves towards higher indices (see PushTopic).
@@ -183,16 +178,50 @@ internal sealed class HelpWindow : Window
     }
 
     /// <summary>
-    /// Copies what is on screen as plain text (including the hover preview, when that is what is shown),
-    /// so people can paste it into a translation service and read the help in their own language.
+    /// Copies the shown topic as markdown text — an operator's name, description and parameter descriptions,
+    /// or a <c>ui:</c> topic's title and doc — so it can be pasted into a translation service.
     /// </summary>
-    private void CopyHelpToClipboard(in HelpContent content)
+    private void CopyHelpToClipboard()
     {
-        var text = HelpTextExport.Build(content);
-        if (text.Length == 0)
+        var topic = _lastShownTopic; // The topic DrawHelpBody resolved for this frame.
+        var sb = new StringBuilder();
+
+        if (topic.UiTopicKey != null)
+        {
+            if (!UiTopicDocs.TryGet(topic.UiTopicKey, out var title, out var doc))
+                return;
+
+            sb.Append(title);
+            if (!string.IsNullOrWhiteSpace(doc))
+                sb.Append("\n\n").Append(doc);
+        }
+        else if (topic.SymbolId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(topic.SymbolId, out var symbolUi))
+        {
+            sb.Append(symbolUi.Symbol.Name).Append("\nin ").Append(symbolUi.Symbol.Namespace);
+
+            if (!string.IsNullOrWhiteSpace(symbolUi.Description))
+                sb.Append("\n\n").Append(symbolUi.Description);
+
+            var wroteParameterHeader = false;
+            foreach (var inputUi in symbolUi.InputUis.Values)
+            {
+                if (string.IsNullOrEmpty(inputUi.Description))
+                    continue;
+
+                if (!wroteParameterHeader)
+                {
+                    sb.Append("\n\nParameter Details");
+                    wroteParameterHeader = true;
+                }
+
+                sb.Append("\n- ").Append(inputUi.InputDefinition.Name).Append(": ").Append(inputUi.Description);
+            }
+        }
+
+        if (sb.Length == 0)
             return;
 
-        ImGui.SetClipboardText(text);
+        ImGui.SetClipboardText(sb.ToString());
         ActionToast.Show("{Help copied to clipboard}   paste it into a translator to read it in your language");
     }
     
@@ -257,7 +286,7 @@ internal sealed class HelpWindow : Window
     #endregion
 
     #region help mode
-    private HelpContent DrawHelpBody()
+    private void DrawHelpBody()
     {
         var topic = GetTopicToShow();
         var topicChanged = topic != _lastShownTopic;
@@ -267,10 +296,28 @@ internal sealed class HelpWindow : Window
             _lastShownTopic = topic;
         }
 
-        var content = HelpContent.For(topic);
-        var symbolUi = content.SymbolUi;
-        var mentionKey = content.ResourceKey;
-        var resourceLinks = content.Links;
+        SymbolUi? symbolUi = null;
+        string? topicTitle = null;
+        string? topicDoc = null;
+        string? mentionKey = null;
+        var resourceLinks = (IReadOnlyList<VideoResourceList.LinkRow>)Array.Empty<VideoResourceList.LinkRow>();
+
+        if (topic.UiTopicKey != null)
+        {
+            if (UiTopicDocs.TryGet(topic.UiTopicKey, out var title, out topicDoc))
+            {
+                topicTitle = title;
+                mentionKey = topic.UiTopicKey;
+            }
+        }
+        else if (topic.SymbolId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(topic.SymbolId, out symbolUi))
+        {
+            mentionKey = "op:" + symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
+            // The hand-authored symbol links rank into the same footer list as the extracted video references.
+            resourceLinks = OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi);
+        }
+
+        _shownSymbolUi = symbolUi; // The header's edit icon targets the shown symbol.
 
         // Reserve space at the bottom so the resources stay docked while the doc scrolls above them.
         var bodyHeight = ImGui.GetContentRegionAvail().Y;
@@ -290,9 +337,9 @@ internal sealed class HelpWindow : Window
             DrawHeaderWithThumbnail(symbolUi);
             OperatorHelp.DrawHelp(symbolUi, omitHeader: true);
         }
-        else if (content.UiTopicTitle != null)
+        else if (topicTitle != null)
         {
-            DrawUiTopicDoc(content.UiTopicTitle, content.UiTopicDoc);
+            DrawUiTopicDoc(topicTitle, topicDoc);
         }
         else if (!topic.IsEmpty)
         {
@@ -316,8 +363,6 @@ internal sealed class HelpWindow : Window
 
         if (footerHeight > 0)
             DrawResourceFooter(mentionKey, resourceLinks);
-
-        return content;
     }
 
     /// <summary>
@@ -398,6 +443,7 @@ internal sealed class HelpWindow : Window
 
     private Guid _lastGraphSelectionId;
     private HelpTopic _lastShownTopic;
+    private SymbolUi? _shownSymbolUi;
 
     /// <summary>Width of the doc child's vertical scrollbar this frame, or 0 when it is hidden.</summary>
     private float _docScrollbarWidth;
