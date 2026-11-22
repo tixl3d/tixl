@@ -160,7 +160,11 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         UpdatePreviousKeyStates();
 
         OutPages.Value = _paging.Pages;
-        ActivePageIndexOutput.Value = _paging.ActivePageIndex;
+        // Onion skinning already fades in the neighbouring pages, so it must not also get the held page at full strength.
+        var shownPageIndex = _paging.HasActivePage || ShowOnionSkin.GetValue(context)
+                                 ? _paging.ActivePageIndex
+                                 : _paging.GetHeldPageIndex(_overridePageIndex);
+        ActivePageIndexOutput.Value = shownPageIndex;
         var pageTitle = _paging.HasActivePage ? $"PAGE{_paging.ActivePageIndex}" : "EMPTY PAGE";
         var tool = !IsOpSelected
                        ? "Not selected"
@@ -189,7 +193,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             _sketchRevision++;
         }
 
-        FillTriangles.Value = BuildFillTriangles();
+        FillTriangles.Value = BuildFillTriangles(shownPageIndex >= 0 ? _paging.Pages[shownPageIndex] : null);
 
         var needsSave = _lastSavedSketchVersion < _sketchRevision;
 
@@ -1127,12 +1131,11 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     private static bool IsFillPoint(in Point point) => point.F1 < 0 && !Point.IsSeparator(point);
 
     /// <summary>
-    /// Tessellates every fill stroke of the active page into triangles. Only runs when the page or the sketch
+    /// Tessellates every fill stroke of the shown page into triangles. Only runs when the page or the sketch
     /// changed, so it allocates while drawing but not while idle.
     /// </summary>
-    private StructuredList BuildFillTriangles()
+    private StructuredList BuildFillTriangles(Page? page)
     {
-        var page = _paging.ActivePage;
         if (page == null)
             return _emptyFill;
 
@@ -1706,6 +1709,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return new Page
                        {
                            Time = Time,
+                           WriteIndex = WriteIndex,
                            PointsList = structuredList,
                        };
         }
@@ -1882,6 +1886,15 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         public int ActivePageIndex { get; private set; } = NoPageIndex;
 
+        /** With keyframe sync, the override index follows the constant keyframe curve, so between keys it names the held page. */
+        public int GetHeldPageIndex(int overridePageIndex)
+        {
+            if (!_sketch._enableKeyframeSync || overridePageIndex < 0 || overridePageIndex >= Pages.Count)
+                return NoPageIndex;
+
+            return overridePageIndex;
+        }
+
         public bool IsOverridingPageIndex(int overridePageIndex) => overridePageIndex >= 0 && !_sketch._enableKeyframeSync;
 
         private Page CreateEmptyPage() => new()
@@ -1959,6 +1972,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     [Input(Guid = "D156BD8F-F2A7-47F2-BF14-99BE4AAD32D7")]
     public readonly InputSlot<bool> EnableKeyframeSync = new();
+
+    [Input(Guid = "CB47DE73-C22E-48B8-802A-90CDC4455A87")]
+    public readonly InputSlot<bool> ShowOnionSkin = new();
 
     private sealed class KeyframeSync
     {
@@ -2069,21 +2085,27 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             return -1;
         }
 
+        /** Updates keys in place: the timeline's selection and its undo commands hold on to these key objects. */
         private static void NormalizeKeyValuesByTime(Curve curve)
         {
             var keyframes = curve.GetVDefinitions();
-            for (var i = 0; i < keyframes.Count; i++)
+            for (var keyIndex = 0; keyIndex < keyframes.Count; keyIndex++)
             {
-                var t = keyframes[i].U;
-                curve.AddOrUpdateV(t,
-                                   new VDefinition
-                                       {
-                                           U = t,
-                                           Value = i,
-                                           InInterpolation = VDefinition.KeyInterpolation.Constant,
-                                           OutInterpolation = VDefinition.KeyInterpolation.Constant,
-                                       });
+                SetConstantIndex(keyframes[keyIndex], keyIndex);
             }
+        }
+
+        private static void SetConstantIndex(VDefinition key, int index)
+        {
+            // Setters notify the curve, so unchanged values are skipped to keep its change count stable.
+            if (Math.Abs(key.Value - index) > 0.0001)
+                key.Value = index;
+
+            if (key.InInterpolation != VDefinition.KeyInterpolation.Constant)
+                key.InInterpolation = VDefinition.KeyInterpolation.Constant;
+
+            if (key.OutInterpolation != VDefinition.KeyInterpolation.Constant)
+                key.OutInterpolation = VDefinition.KeyInterpolation.Constant;
         }
 
         private static VDefinition MakeConstantIndexV(double t, int index)
@@ -2103,76 +2125,125 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             var newExists = curve.HasVAt(newTime);
 
             var needsMove = oldExists && Math.Abs(newTime - oldTime) > TimePrecision;
-
-            if (needsMove && !newExists)
+            if (needsMove)
             {
-                curve.MoveKey(oldTime, newTime);
-                curve.AddOrUpdateV(newTime, MakeConstantIndexV(newTime, newIndex));
-                return;
+                if (newExists)
+                {
+                    curve.RemoveKeyframeAt(oldTime);
+                }
+                else
+                {
+                    curve.MoveKey(oldTime, newTime);
+                }
             }
 
-            if (needsMove && newExists)
+            if (TryFindKeyAt(curve, newTime, out var key))
             {
-                curve.RemoveKeyframeAt(oldTime);
+                SetConstantIndex(key, newIndex);
+                return;
             }
 
             curve.AddOrUpdateV(newTime, MakeConstantIndexV(newTime, newIndex));
         }
 
-        // Replace ApplyCurveToPages(...) with this version
+        private static bool TryFindKeyAt(Curve curve, double time, [NotNullWhen(true)] out VDefinition? key)
+        {
+            var keys = curve.GetVDefinitions();
+            for (var keyIndex = 0; keyIndex < keys.Count; keyIndex++)
+            {
+                if (Math.Abs(keys[keyIndex].U - time) > TimePrecision)
+                    continue;
+
+                key = keys[keyIndex];
+                return true;
+            }
+
+            key = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Rebuilds the pages from the keyframes after the curve was edited in the timeline. A key's value is the
+        /// index of the page it shows, so a moved key keeps its page and a duplicated key gets a copy of it.
+        /// </summary>
         private void ApplyCurveToPages(Curve curve, List<Page> pages)
         {
             var keys = curve.GetVDefinitions();
-            if (keys.Count == 0)
+            var isPageUsed = new bool[pages.Count];
+            var pagesForKeys = new Page?[keys.Count];
+
+            // Keys that stayed in place claim their page first, so the original wins over its duplicates.
+            for (var keyIndex = 0; keyIndex < keys.Count; keyIndex++)
             {
-                pages.Clear();
-                return;
+                var pageIndex = GetPageIndexOfKey(keys[keyIndex], pages.Count);
+                if (pageIndex < 0 || isPageUsed[pageIndex] || Math.Abs(pages[pageIndex].Time - keys[keyIndex].U) > TimePrecision)
+                    continue;
+
+                isPageUsed[pageIndex] = true;
+                pagesForKeys[keyIndex] = pages[pageIndex];
             }
 
-            // Current pages represent "old indices" (their current list order).
-            // We still keep a time-sorted view for the fallback matching.
-            var pagesByIndex = pages; // old index == current list index
-            var pagesByTime = pages.OrderBy(p => p.Time).ToList();
-            var pageTimes = pagesByTime.Select(p => p.Time).ToList();
+            // Undo restores key values from before they were renumbered, so a page at the key's time is more reliable.
+            for (var keyIndex = 0; keyIndex < keys.Count; keyIndex++)
+            {
+                if (pagesForKeys[keyIndex] != null)
+                    continue;
 
-            var usedByIndex = new bool[pagesByIndex.Count];
-            var usedByTime = new bool[pagesByTime.Count];
+                var pageIndex = FindUnusedPageAtTime(pages, isPageUsed, keys[keyIndex].U);
+                if (pageIndex < 0)
+                    continue;
 
-            var newPages = new List<Page>(keys.Count);
+                isPageUsed[pageIndex] = true;
+                pagesForKeys[keyIndex] = pages[pageIndex];
+            }
 
             for (var keyIndex = 0; keyIndex < keys.Count; keyIndex++)
             {
-                var key = keys[keyIndex];
-                Page? chosen = null;
+                if (pagesForKeys[keyIndex] != null)
+                    continue;
 
-                // 1) Prefer value-based reuse (page indices encoded in key.Value)
-                var oldIndex = (int)Math.Round(key.Value);
-                if (oldIndex >= 0 && oldIndex < pagesByIndex.Count && !usedByIndex[oldIndex])
+                var pageIndex = GetPageIndexOfKey(keys[keyIndex], pages.Count);
+                if (pageIndex < 0)
                 {
-                    usedByIndex[oldIndex] = true;
-                    chosen = pagesByIndex[oldIndex];
+                    pagesForKeys[keyIndex] = CreateBlankPage(keys[keyIndex].U);
                 }
-
-                // 2) Fallback: reuse page by (approx) time match
-                if (chosen == null)
+                else if (!isPageUsed[pageIndex])
                 {
-                    var match = FindNearestUnusedByTime(pageTimes, usedByTime, key.U, TimePrecision);
-                    if (match >= 0)
-                    {
-                        usedByTime[match] = true;
-                        chosen = pagesByTime[match];
-                    }
+                    isPageUsed[pageIndex] = true;
+                    pagesForKeys[keyIndex] = pages[pageIndex];
                 }
-
-                // 3) Otherwise: new blank page
-                chosen ??= CreateBlankPage(key.U);
-                chosen.Time = key.U;
-                newPages.Add(chosen);
-                _sketch._paging.ActivePage = chosen;
+                else
+                {
+                    pagesForKeys[keyIndex] = pages[pageIndex].Clone();
+                }
             }
 
-            pages.Clear();
-            pages.AddRange(newPages);
+            var newPages = new List<Page>(keys.Count);
+            for (var keyIndex = 0; keyIndex < keys.Count; keyIndex++)
+            {
+                var page = pagesForKeys[keyIndex]!;
+                page.Time = keys[keyIndex].U;
+                newPages.Add(page);
+            }
+
+            _sketch._paging.ReplacePages(newPages);
+        }
+
+        private static int GetPageIndexOfKey(VDefinition key, int pageCount)
+        {
+            var pageIndex = (int)Math.Round(key.Value);
+            return pageIndex >= 0 && pageIndex < pageCount ? pageIndex : -1;
+        }
+
+        private static int FindUnusedPageAtTime(List<Page> pages, bool[] isPageUsed, double time)
+        {
+            for (var pageIndex = 0; pageIndex < pages.Count; pageIndex++)
+            {
+                if (!isPageUsed[pageIndex] && Math.Abs(pages[pageIndex].Time - time) <= TimePrecision)
+                    return pageIndex;
+            }
+
+            return -1;
         }
 
         private void ApplyPagesToCurve(List<Page> pages, Curve curve)
