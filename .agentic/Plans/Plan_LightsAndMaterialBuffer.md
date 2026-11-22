@@ -2,7 +2,19 @@
 
 Status: **M1 and M2 implemented 2026-11-22, untested by a human** (test set `.tests-manual/light-types-and-blending.md`).
 Written 2026-11-20 on `main` (32bcb8124). **M3 implemented 2026-11-22**, probed on Vulkan (test set
-`.tests-manual/material-buffer.md`). **M5 implemented 2026-11-22**, probed on Vulkan. M4, M6, M7 not started.
+`.tests-manual/material-buffer.md`). **M5 implemented 2026-11-22**, probed on Vulkan. **M4 implemented 2026-11-22**, probed on Vulkan.
+M6, M7 not started.
+
+**M4 as built:** two extra field evaluations at the hit point instead of the planned one with a sentinel, because the
+~30 generator lines write `f.xyz = p.w < 0.5 ? p.xyz : 1` and a sentinel can't blend. Pass `p.w = 2` holds roughness,
+metal, specular; pass `p.w = 3` holds per channel how much is *not* set (generators default to 1, [SetSDFMaterial]
+writes 0). [CombineSDF] / [BlendSDFWithSDF] blend both passes with the same factor, so the template recovers the set
+values exactly: `set = (value - notSet) / (1 - notSet)`, `material = lerp(set, parameters, notSet)`. No generator
+changed. [SetSDFMaterial] has OverrideMaterial (code switch via FlagCodeChanged, off by default so existing projects
+keep the [RaymarchField] settings) plus Roughness / Metal / Specular graph params. Specular reaches ComputePbr()
+through a `PBR_SPECULAR` macro (default: the cbuffer `Specular`). [RepeatFieldAtPoints] now tints only passes below
+1.5 with point colors. Probe (two spheres, smooth union K 0.5, material buffer): left (26, 0, 255) = 0.1 / 0 / 1,
+right (229, 255, 128) = 0.9 / 1 / 0.5, seam (129, 129, 190); override off is byte-identical to no [SetSDFMaterial].
 
 **M5 as built:** [ScreenSpaceReflections] binds the material buffer at t6 and base color at t7 in all three passes
 (trace and composite get an empty `UnusedSlot` SRV as filler, because registers follow the multi-input order). Per

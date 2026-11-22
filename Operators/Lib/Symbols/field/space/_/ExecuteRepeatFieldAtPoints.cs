@@ -108,7 +108,8 @@ internal sealed class ExecuteRepeatFieldAtPoints : Instance<ExecuteRepeatFieldAt
             inputField?.CollectEmbeddedShaderCode(c);
             
             // Multiply Point color
-            c.AppendCall($"f{c}.rgb *= {ShaderNode}PointTransforms[i{c}].PointColor.rgb;");
+            // Point colors tint the color pass only; the material passes (p.w 2 and 3) carry values, not colors.
+            c.AppendCall($"f{c}.rgb *= p{c}.w < 1.5 ? {ShaderNode}PointTransforms[i{c}].PointColor.rgb : 1;");
             c.AppendCall($"fLoop{c}.rgb = lerp(fLoop{c}.rgb, f{c}.rgb, GetColorBlendFactor(fLoop{c}.w, f{c}.w, {ShaderNode}K ));");
             
             // Combine initial value with new value...

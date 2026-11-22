@@ -108,6 +108,10 @@ and drive roughness, metalness and occlusion from one combined map. Put it above
 same way as lights. Rough surfaces spread a light's highlight into a soft sheen, smooth and metallic ones show
 a small, bright highlight and reflect the environment.
 
+Raymarched fields drawn with [RaymarchField] use its Roughness, Metal and Specular settings for the whole field. To
+give parts of a field their own material, put a [SetSDFMaterial] after them and turn on **OverrideMaterial**. When
+fields are blended, for example with a smooth [CombineSDF], their materials blend as well.
+
 Emissive color is added on top of the lighting, so emissive parts glow even in a dark scene. They don't light
 other objects, though. For that, add a point light next to them.
 

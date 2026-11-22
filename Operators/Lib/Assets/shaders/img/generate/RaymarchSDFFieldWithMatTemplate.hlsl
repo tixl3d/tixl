@@ -197,6 +197,8 @@ float3 UnpackNormal(float4 packedNormal)
     return normalize(normal);
 }
 
+static float SdfSpecular = 1;
+#define PBR_SPECULAR SdfSpecular
 #include "shared/pbr-render.hlsl"
 
 static const float3 w1 = float3(+1, -1, -1);
@@ -484,7 +486,16 @@ PSOutput psMain(vsOutput input)
     //frag.Roughness = SpecularAA;
     //frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
 
-    frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
+    // Per-object materials from [SetSDFMaterial]: pass 2 holds roughness, metal and specular, pass 3 how much of each
+    // is not set there (field generators default to 1). Blends mix both passes alike, so the set part can be recovered.
+    float3 sdfMaterial = GetField(float4(p, 2)).rgb;
+    float3 notSet = saturate(GetField(float4(p, 3)).rgb);
+    float3 setMaterial = (sdfMaterial - notSet) / max(1 - notSet, 1e-4);
+    float3 parameterMaterial = float3(roughnessMetallicOcclusion.x + Roughness, roughnessMetallicOcclusion.y + Metal, Specular);
+    float3 material = lerp(setMaterial, parameterMaterial, notSet);
+    SdfSpecular = max(material.z, 0);
+
+    frag.Metalness = saturate(material.y);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, uv);
     frag.uv = uv;
@@ -493,7 +504,7 @@ PSOutput psMain(vsOutput input)
     frag.worldPosition = mul(float4(p, 1), ObjectToWorld).xyz;
     frag.fog = 0;
 
-    frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);
+    frag.Roughness = AdjustRoughnessForSpecularAA(material.x, SpecularAA);
     
     float4 litColor = ComputePbr();
     litColor *= fieldColor;

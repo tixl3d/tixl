@@ -3,12 +3,20 @@
   "Id": "88926602-4694-4632-9fd7-04c8d6ddd728"/*SetSDFMaterial*/,
   "Inputs": [
     {
+      "Id": "627b6724-654a-4418-a400-2d08e8f08c7b"/*Metal*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "7c656067-ef12-4990-b094-7f8160a242d1"/*SdfField*/,
       "DefaultValue": null
     },
     {
       "Id": "93d0ee54-b2f6-41ea-bbaa-ef06bca1f1a0"/*ColorField*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "c12b2d75-b7e2-4470-b18d-378d52cd0601"/*OverrideMaterial*/,
+      "DefaultValue": false
     },
     {
       "Id": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
@@ -18,6 +26,14 @@
         "Z": 1.0,
         "W": 1.0
       }
+    },
+    {
+      "Id": "f0476922-420a-4f6c-bda8-1f1e9ad3090b"/*Specular*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f9750728-9baf-493f-8a40-03674e66789a"/*Roughness*/,
+      "DefaultValue": 0.3
     }
   ],
   "Children": [],

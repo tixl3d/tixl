@@ -1,9 +1,21 @@
 {
   "FormatVersion": 3,
   "Id": "88926602-4694-4632-9fd7-04c8d6ddd728"/*SetSDFMaterial*/,
-  "Description": "Sets the color of an SDF, either with a constant color or with a connected color field.\n\nColors of several fields are blended when they are combined with [CombineSDF]. [RaymarchField] uses this color as albedo.\n\nSee also: [Raster3dField], [SDFToColor]",
+  "Description": "Sets the color of an SDF, either with a constant color or with a connected color field.\n\nColors of several fields are blended when they are combined with [CombineSDF]. [RaymarchField] uses this color as albedo. With OverrideMaterial on, the field also gets its own roughness, metal and specular; blended fields mix their materials smoothly, and fields without a material keep the settings of [RaymarchField].\n\nSee also: [Raster3dField], [SDFToColor]",
   "SymbolTags": "1",
   "InputUis": [
+    {
+      "InputId": "627b6724-654a-4418-a400-2d08e8f08c7b"/*Metal*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "0 for plastic, stone or wood, 1 for metals, which reflect in their own color.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
     {
       "InputId": "7c656067-ef12-4990-b094-7f8160a242d1"/*SdfField*/,
       "Relevancy": "Required",
@@ -21,12 +33,45 @@
       "Description": "Optional color field such as [Raster3dField] that defines the color per position."
     },
     {
+      "InputId": "c12b2d75-b7e2-4470-b18d-378d52cd0601"/*OverrideMaterial*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Surface",
+      "Description": "Gives the field its own roughness, metal and specular in [RaymarchField]. Off: the field uses the settings of [RaymarchField].",
+      "AddPadding": "True"
+    },
+    {
       "InputId": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
       },
       "Description": "Albedo color. If a ColorField is connected, its color is multiplied with this.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f0476922-420a-4f6c-bda8-1f1e9ad3090b"/*Specular*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Strength of highlights from lights.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f9750728-9baf-493f-8a40-03674e66789a"/*Roughness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "0 gives sharp highlights and reflections, 1 a matte surface.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,

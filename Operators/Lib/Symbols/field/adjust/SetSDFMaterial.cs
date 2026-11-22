@@ -18,6 +18,14 @@ internal sealed class SetSDFMaterial : Instance<SetSDFMaterial>
 
     private void Update(EvaluationContext context)
     {
+        // Switches generated code, so it is not a shader parameter.
+        var overrideMaterial = OverrideMaterial.GetValue(context);
+        if (overrideMaterial != _overrideMaterial)
+        {
+            _overrideMaterial = overrideMaterial;
+            ShaderNode.FlagCodeChanged();
+        }
+
         ShaderNode.Update(context);
     }
 
@@ -72,8 +80,17 @@ internal sealed class SetSDFMaterial : Instance<SetSDFMaterial>
         c.Unindent();
         c.AppendCall("}");
 
+        // [RaymarchField] reads roughness, metal and specular in pass 2 and how much of each is not set in pass 3.
+        if (_overrideMaterial)
+        {
+            c.AppendCall($"else if(p{c}.w > 1.5 && p{c}.w < 2.5) {{ f{c}.rgb = float3({ShaderNode}Roughness, {ShaderNode}Metal, {ShaderNode}Specular); }}");
+            c.AppendCall($"else if(p{c}.w > 2.5) {{ f{c}.rgb = 0; }}");
+        }
+
         return true;
     }
+
+    private bool _overrideMaterial;
     
     
     [Input(Guid = "7c656067-ef12-4990-b094-7f8160a242d1")]
@@ -85,4 +102,19 @@ internal sealed class SetSDFMaterial : Instance<SetSDFMaterial>
     [GraphParam]
     [Input(Guid = "D2A64234-C7EF-424B-822C-ADDCE0B84E69")]
     public readonly InputSlot<Vector4> Color = new();
+
+    [Input(Guid = "c12b2d75-b7e2-4470-b18d-378d52cd0601")]
+    public readonly InputSlot<bool> OverrideMaterial = new();
+
+    [GraphParam]
+    [Input(Guid = "f9750728-9baf-493f-8a40-03674e66789a")]
+    public readonly InputSlot<float> Roughness = new();
+
+    [GraphParam]
+    [Input(Guid = "627b6724-654a-4418-a400-2d08e8f08c7b")]
+    public readonly InputSlot<float> Metal = new();
+
+    [GraphParam]
+    [Input(Guid = "f0476922-420a-4f6c-bda8-1f1e9ad3090b")]
+    public readonly InputSlot<float> Specular = new();
 }

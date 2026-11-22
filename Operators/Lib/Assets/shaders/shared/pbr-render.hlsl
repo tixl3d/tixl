@@ -1,5 +1,10 @@
 #include "shared/pbr.hlsl"
 
+// Shaders with a specular value per pixel (e.g. raymarched fields with per-object materials) define this before the include.
+#ifndef PBR_SPECULAR
+#define PBR_SPECULAR Specular
+#endif
+
 
 #ifndef __AdjustRoughnessForSpecularAA
 #define __AdjustRoughnessForSpecularAA
@@ -32,7 +37,7 @@ inline float AdjustRoughnessForSpecularAA(float baseRoughness, float specularAA)
 void GetMaterialTargets(float3 tint, float coverage, out float4 baseColor, out float4 material)
 {
     baseColor = float4(saturate(frag.albedo.rgb * BaseColor.rgb * Color.rgb * tint), saturate(frag.Occlusion));
-    material = float4(saturate(frag.Roughness), saturate(frag.Metalness), saturate(Specular), saturate(coverage));
+    material = float4(saturate(frag.Roughness), saturate(frag.Metalness), saturate(PBR_SPECULAR), saturate(coverage));
 }
 
 // based on https://github.com/Nadrin/PBR/blob/master/data/shaders/hlsl/pbr.hlsl
@@ -73,7 +78,7 @@ float4 ComputePbr()
 
         float3 kd = lerp(1.0 - F, 0.0, frag.Metalness);
         float3 diffuseBRDF = kd * frag.albedo.rgb;
-        float3 specularBRDF = ((F * D * G) / max(Epsilon, 4.0 * NdotL * NdotV)) * Specular;
+        float3 specularBRDF = ((F * D * G) / max(Epsilon, 4.0 * NdotL * NdotV)) * PBR_SPECULAR;
 
         directLighting += (diffuseBRDF + specularBRDF) * Lradiance * NdotL;
     }

@@ -69,3 +69,16 @@ Change the floor's Roughness in its [SetMaterial] from 0 to 0.8, then set its Me
 - With Metal 1 the reflection is tinted orange.
 - With WithMaterialBuffer off, the reflection looks the same for every floor roughness, as before, and only the
   Roughness parameter of [ScreenSpaceReflections] blurs it.
+
+## Step: Materials of raymarched fields
+
+**Action:**
+Combine two [SphereSDF] with [CombineSDF] (UnionSmooth, K 0.5), each through its own [SetSDFMaterial], into
+[RaymarchField] under a light. Turn OverrideMaterial on for both and give one Roughness 0.1, Metal 0 and the other
+Roughness 0.9, Metal 1.
+
+**Expected:**
+- The smooth sphere shows a sharp highlight, the rough metallic one a broad, tinted sheen.
+- Where they blend, the material changes gradually.
+- Turning OverrideMaterial off on both makes them look exactly as without [SetSDFMaterial].
+- With a [RenderTarget] material buffer, the MaterialBuffer shows the two values and the blend between them.
