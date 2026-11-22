@@ -1,0 +1,37 @@
+{
+  "FormatVersion": 3,
+  "Id": "12492a88-9e16-49a4-84c7-75ab11bb7bd4"/*MergeVertices*/,
+  "Description": "Welds points that lie closer than a tolerance into one point.\n\nThe position-level counterpart of Blender's merge by distance: duplicated points, e.g. in geometry read with [LoadObjGeometry] or produced per face, become a shared point, so the surface joins up and stays connected through subdivision, beveling and export. Each merged point keeps the position and the attribute values of the first point of its group; points that end up without a vertex are removed. Primitive topology, parts and the vertex, primitive and part attributes stay unchanged; only the point attributes are rebuilt.\n\nCurve control points are welded too: the merged point keeps the handles of the first point, so welding control points that carry different handles changes the curve.\n\n[GeometryToMesh] writes one vertex per face corner, so its mesh can contain duplicate vertices even when the points are already welded. Its Merge Duplicate Vertices option removes those as well.\n\nAKA: weld, merge by distance, remove doubles, fuse, stitch\n\nTips\n- Keep the tolerance small (0.0001) to weld exact duplicates; larger values also snap nearly coincident points and can collapse thin faces.\n- The operator's status shows how many points were merged.",
+  "InputUis": [
+    {
+      "InputId": "00348b5b-f0dc-40aa-a8f2-1b0c6d03be99"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Maximum distance between points that are merged. 0 merges only exactly coincident points.",
+      "Min": 0.0,
+      "Max": 0.05,
+      "Scale": 0.0001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "81b960fa-f826-481c-9b1e-40fb34fc6e62"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0fe84b04-eacd-4e51-8932-bc673e86d07e"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

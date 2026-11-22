@@ -18,6 +18,14 @@
         "Y": 45.0
       },
       "Description": "Fills closed curves flat and draws them with the polygons, e.g. text from [StringToCurves] without an extrusion. Turn off to draw only polygons; for control over the fill use [FillCurves]."
+    },
+    {
+      "InputId": "afa480eb-6d84-44e1-ae1c-28ac32d856f3"/*MergeDuplicateVertices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Merges output vertices that repeat an earlier one with the same position, normal, UVs and color, e.g. the face corners [FillCurves] creates. Reduces the vertex buffer and the size of exported .obj files; the tangent basis of the first vertex is kept."
     }
   ],
   "SymbolChildUis": [],

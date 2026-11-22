@@ -498,6 +498,32 @@ Connect [StringToCurves] (text `TiXL`) -> [MergeCurves] -> [ExtrudeCurves] and l
 - Xor turns overlaps into holes; Intersect keeps only the overlapping areas.
 - A [CubeGeometry] as input passes through with the warning that there are no closed curves.
 
+## Step: Weld duplicated points
+
+**Action:**
+Load an .obj whose positions are listed once per face, e.g. one exported by [WriteObj] after [GeometryToMesh], with
+[LoadObjGeometry] -> [MergeVertices] (Tolerance 0.0001), and look at the Stats of each.
+
+**Expected:**
+- [LoadObjGeometry] has one point per `v` line and many more vertices; its Boundary edges show that no faces share
+  edges.
+- After [MergeVertices], Points drops to the number of unique positions, Vertices stays the same, and Boundary edges
+  shrink because the faces now share edges through the welded points. The status reports how many points were merged.
+- With the output of [FillCurves] as input, the status says no points to merge: the fill already shares its points.
+- A Tolerance larger than the spacing of the mesh collapses thin faces; 0 merges only exactly coincident points.
+
+## Step: Merge duplicate mesh vertices
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [FillCurves] -> [GeometryToMesh] -> [WriteObj], export once with Merge
+Duplicate Vertices off and once with it on, and count the `v` lines of both files.
+
+**Expected:**
+- With the option off, the export has one vertex per face corner, several times the Points count of [FillCurves].
+- With it on, the exported vertex count equals the Points count of [FillCurves]; the faces, UVs and normals are
+  unchanged and the render looks the same.
+- Corners whose position, normal, UVs or color differ, e.g. at a UV seam, stay separate vertices.
+
 ## Step: Lattice caps
 
 **Action:**
