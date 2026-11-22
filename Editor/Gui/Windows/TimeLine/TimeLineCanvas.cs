@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -171,7 +172,9 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             HoveredKeyframeUniqueId = null;
 
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() );
-            if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition))
+            // A main soundtrack shown as a clip block (a lone AutoPlay [AudioClip]) isn't drawn as background too.
+            if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition)
+                && (soundtrack.Clip.Display == AudioClipDisplay.BackgroundImage || soundtrack.Owner is not IAudioClipProvider))
             {
                 TimeLineImage.Draw(Drawlist, soundtrack);
             }

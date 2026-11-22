@@ -1203,6 +1203,7 @@ internal sealed class ProjectSettingsWindow : Window
                                           Soundtracks are defined by [AudioClip] operators on the timeline.
                                           The clip with **Display** set to **Background Image** is the main soundtrack:
                                           it drives audio-reactive operators and defines the exported duration.
+                                          Without one, a single clip with **AutoPlay** is the main soundtrack.
                                           """;
 
     private static readonly MarkdownView.OperatorRefRendered _markdownOpRefHandler = op => MarkdownOperatorLinks.HandleOperatorRef(op);

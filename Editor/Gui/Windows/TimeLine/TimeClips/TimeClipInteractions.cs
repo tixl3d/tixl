@@ -158,7 +158,8 @@ internal sealed class TimeClipInteractions
 
             if (hasSoundtrackItem)
             {
-                var isMain = audioProvider!.GetResourceHandle().Clip.IsMainSoundtrack;
+                // Keyed to the explicit designation: a lone AutoPlay clip is main implicitly and has nothing to unset.
+                var isMain = audioProvider!.GetResourceHandle().Clip.Display == AudioClipDisplay.BackgroundImage;
                 if (DrawClipMenuItem(_mainSoundtrackId, isMain ? "Unset Main Soundtrack" : "Set as Main Soundtrack"))
                 {
                     SetMainSoundtrackClip(compositionOp, audioClipId, enable: !isMain);
