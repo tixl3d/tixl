@@ -99,7 +99,7 @@ internal static class KeyActionHandling
                 continue;
 
             // Ctrl combinations are document commands (undo, save) that must keep working while an operator owns the keyboard.
-            if (isKeyboardCapturedByOperator && !binding.KeyCombination.Ctrl)
+            if (isKeyboardCapturedByOperator && !binding.KeyCombination.Ctrl && !binding.IgnoresOperatorKeyboardCapture)
                 continue;
 
             if (binding.IsTriggered(io))
@@ -147,6 +147,9 @@ internal static class KeyActionHandling
         RemainActiveWhenItemActive = 1<<3,  // Most shortcuts should be disabled when some input item is active, which few exceptions like WASD camera short cuts 
         KeyPressOnly = 1 << 4,
         KeyHoldOnly = 1 << 5,
+
+        /** Timeline controls must keep working while drawing with an operator like [Sketch]. */
+        IgnoresOperatorKeyboardCapture = 1 << 6,
     }
 
     /// <summary>
@@ -168,13 +171,20 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.Redo, Flags.KeyPressOnly);
 
         // Playback controls
-        RegisterActionsFlags(UserActions.PlaybackForward, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackForwardHalfSpeed, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackBackwards, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackStop, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackToggle, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackJumpToStartTime, Flags.KeyPressOnly);
-        RegisterActionsFlags(UserActions.PlaybackScrubTime, Flags.KeyHoldOnly);
+        const Flags playback = Flags.IgnoresOperatorKeyboardCapture;
+        RegisterActionsFlags(UserActions.PlaybackForward, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackForwardHalfSpeed, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackBackwards, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackNextFrame, playback);
+        RegisterActionsFlags(UserActions.PlaybackPreviousFrame, playback);
+        RegisterActionsFlags(UserActions.PlaybackStop, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackToggle, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackJumpBack, playback);
+        RegisterActionsFlags(UserActions.PlaybackJumpToNextKeyframe, playback);
+        RegisterActionsFlags(UserActions.PlaybackJumpToPreviousKeyframe, playback);
+        RegisterActionsFlags(UserActions.PlaybackJumpToEndTime, playback);
+        RegisterActionsFlags(UserActions.PlaybackJumpToStartTime, playback | Flags.KeyPressOnly);
+        RegisterActionsFlags(UserActions.PlaybackScrubTime, playback | Flags.KeyHoldOnly);
         RegisterActionsFlags(UserActions.ToggleIdleMotion, Flags.KeyPressOnly);
 
         // Timeline actions
