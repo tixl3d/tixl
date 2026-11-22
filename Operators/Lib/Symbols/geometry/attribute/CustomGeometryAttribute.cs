@@ -11,7 +11,7 @@ namespace Lib.geometry.attribute;
 /// </summary>
 [Guid("2e781d86-2a24-4ee9-95fd-26a051e0aeff")]
 [ExportDependencies("Microsoft.CodeAnalysis.dll", "Microsoft.CodeAnalysis.CSharp.dll")]
-internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute>, IStatusProvider, ICustomDropdownHolder, IInputStatusProvider
+internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute>, IStatusProvider, ICustomDropdownHolder, IInputStatusProvider, ITransformable
 {
     private enum Domains
     {
@@ -31,12 +31,19 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
     }
 
     [Output(Guid = "e90cfe0e-c1e8-461e-b755-431b9929f017")]
-    public readonly Slot<Geometry?> Result = new();
+    public readonly TransformCallbackSlot<Geometry?> Result = new();
 
     public CustomGeometryAttribute()
     {
+        Result.TransformableOp = this;
         Result.UpdateAction = Update;
     }
+
+    // Offset is a free position for the snippet (an attractor, a center); the gizmo lets it be dragged in the viewer
+    IInputSlot ITransformable.TranslationInput => Offset;
+    IInputSlot? ITransformable.RotationInput => null;
+    IInputSlot? ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext>? TransformCallback { get; set; }
 
     private void Update(EvaluationContext context)
     {

@@ -630,4 +630,61 @@ internal static partial class CustomComponents
         ImGui.PopStyleColor(4);
         return clicked;
     }
+
+    /// <summary>
+    /// An invisible button with a drag-indicator icon that moves the current popup while dragged. Popups open below
+    /// the parameter and can cover the operator being edited, so the grip lets users move them aside.
+    /// </summary>
+    public static void DrawPopupMoveGrip(string id, Vector2 size)
+    {
+        ImGui.InvisibleButton(id, size);
+        var isHovered = ImGui.IsItemHovered();
+        var isActive = ImGui.IsItemActive();
+        if (isHovered || isActive)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        if (isActive)
+            ImGui.SetWindowPos(ImGui.GetWindowPos() + ImGui.GetIO().MouseDelta);
+
+        var gripColor = isHovered || isActive ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        Icons.DrawIconOnLastItem(Icon.DragIndicator, gripColor);
+    }
+
+    /// <summary>
+    /// A triangle in the current popup's lower right corner that resizes it. Call it last, so it draws above the content.
+    /// </summary>
+    /// <param name="unscaledSize">The size the popup lays its content out with, before UI scaling.</param>
+    public static void DrawPopupResizeGrip(ref Vector2 unscaledSize, Vector2 minUnscaledSize, ref bool isResizing)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var gripSize = MathF.Round(PopupResizeGripSize * scale);
+        var windowMax = (ImGui.GetWindowPos() + ImGui.GetWindowSize()).Floor();
+        var gripMin = windowMax - new Vector2(gripSize);
+
+        var isHovered = ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(gripMin, windowMax);
+        if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            isResizing = true;
+
+        if (isResizing && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            isResizing = false;
+
+        if (isHovered || isResizing)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNWSE);
+
+        if (isResizing)
+        {
+            unscaledSize += ImGui.GetIO().MouseDelta / scale;
+            unscaledSize = Vector2.Max(unscaledSize, minUnscaledSize);
+        }
+
+        // Inset, so the popup's rounded corner doesn't cut the triangle.
+        var inset = MathF.Round(2 * scale);
+        var triangleMax = windowMax - new Vector2(inset);
+        var triangleMin = triangleMax - new Vector2(gripSize - inset * 2);
+        var color = isHovered || isResizing ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        ImGui.GetWindowDrawList().AddTriangleFilled(new Vector2(triangleMax.X, triangleMin.Y), triangleMax,
+                                                    new Vector2(triangleMin.X, triangleMax.Y), color);
+    }
+
+    private const float PopupResizeGripSize = 12;
 }

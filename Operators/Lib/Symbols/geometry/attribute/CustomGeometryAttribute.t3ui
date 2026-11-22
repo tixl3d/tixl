@@ -18,7 +18,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Free vector parameter for the snippet, available as Offset, e.g. a center to measure from: `return Vector3.Distance(p, Offset);`."
+      "Description": "Free vector parameter for the snippet, available as Offset, e.g. a center to measure from: `return Vector3.Distance(p, Offset);`. While the op is selected, a gizmo in the Output Window moves it."
     },
     {
       "InputId": "5fdbbd34-2144-4ba0-bea1-2866726ca09b"/*A*/,

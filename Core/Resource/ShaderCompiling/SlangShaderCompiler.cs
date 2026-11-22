@@ -133,7 +133,7 @@ public sealed class SlangShaderCompiler : ShaderCompiler
     /// </summary>
     public bool TryCompileSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
         where TShader : AbstractShader
-        => CompileShaderFromSource<TShader>(args, out blob, out errorMessage);
+        => CompileShaderFromSource<TShader>(args, out blob, out errorMessage, []);
 
     /** Includes the Slang version, because another compiler can generate different code from the same source. */
     protected override string CacheTarget => _cacheTarget.Value;
@@ -152,7 +152,8 @@ public sealed class SlangShaderCompiler : ShaderCompiler
                                                                 return "spirv-slang-" + (version ?? "unknown");
                                                             });
 
-    protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
+    protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage,
+                                                                     List<ShaderCompileFailures.Diagnostic> diagnostics)
     {
         blob = null!;
         var compiler = FindCompiler();
@@ -183,19 +184,20 @@ public sealed class SlangShaderCompiler : ShaderCompiler
 
             var arguments = BuildArguments(sourcePath, args, stage, spirvPath, reflectionPath);
 
-            string diagnostics;
+            string compilerOutput;
             var succeeded = SlangLibrary.TryLoad(compiler)
-                                ? SlangLibrary.Compile(arguments, out diagnostics)
-                                : TryRun(compiler, arguments, out diagnostics);
+                                ? SlangLibrary.Compile(arguments, out compilerOutput)
+                                : TryRun(compiler, arguments, out compilerOutput);
 
             if (!succeeded)
             {
-                errorMessage = SlangDiagnostics.DescribeFirstError(diagnostics, sourcePath, args.Name);
+                errorMessage = SlangDiagnostics.DescribeFirstError(compilerOutput, sourcePath, args.Name);
+                SlangDiagnostics.Parse(compilerOutput, sourcePath, diagnostics);
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(diagnostics))
-                Log.Warning($"slangc {args.Name}@{args.EntryPoint}\n{diagnostics}");
+            if (!string.IsNullOrWhiteSpace(compilerOutput))
+                Log.Warning($"slangc {args.Name}@{args.EntryPoint}\n{compilerOutput}");
 
             var bindings = ReadBindings(reflectionPath, stage, out var threadGroups);
             blob = SpirvBlob.Pack(File.ReadAllBytes(spirvPath), bindings, threadGroups);

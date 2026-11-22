@@ -1243,6 +1243,21 @@ internal static class DebugServer
                                 ["sourceLineCount"] = f.SourceLineCount,
                             };
 
+            var diagnostics = new JArray();
+            foreach (var d in f.Diagnostics)
+            {
+                diagnostics.Add(new JObject
+                                    {
+                                        ["isError"] = d.IsError,
+                                        ["file"] = d.File,
+                                        ["line"] = d.Line,
+                                        ["column"] = d.Column,
+                                        ["text"] = d.Text,
+                                    });
+            }
+
+            entry["diagnostics"] = diagnostics;
+
             if (includeSource && f.SourcePath != null)
             {
                 try

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
+using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -20,6 +21,8 @@ namespace T3.Editor.Gui.InputUi.SimpleInputUis;
 public sealed class StringInputUi : InputValueUi<string>
 {
     private const int MaxStringLength = 32000;
+
+    private static Instance? _drawnInstance;
 
     public enum UsageType
     {
@@ -67,6 +70,15 @@ public sealed class StringInputUi : InputValueUi<string>
                    };
     }
 
+    /** Keeps the drawn op for the code controls: a pinned parameter window can show another op than the selected one. */
+    protected override InputEditStateFlags DrawValueControl(string name, InputSlot<string> inputSlot, ref string? value, bool readOnly)
+    {
+        _drawnInstance = inputSlot.Parent;
+        var result = base.DrawValueControl(name, inputSlot, ref value, readOnly);
+        _drawnInstance = null;
+        return result;
+    }
+
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref string? value, bool readOnly)
     {
         value ??= string.Empty;
@@ -83,7 +95,8 @@ public sealed class StringInputUi : InputValueUi<string>
                 break;
             case UsageType.Code:
                 var hasStatus = TryGetInputStatus(input, out var status);
-                inputEditStateFlags = DrawMultilineTextEdit(ref value, hasStatus ? status : null);
+                inputEditStateFlags = DrawCodeEditorButton(input, ref value, hasStatus ? status : null);
+                inputEditStateFlags |= DrawMultilineTextEdit(ref value, hasStatus ? status : null, startsOnNewLine: true);
                 break;
             case UsageType.FilePath:
                 inputEditStateFlags = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, FileFilter, ref value);
@@ -168,19 +181,56 @@ public sealed class StringInputUi : InputValueUi<string>
 
 
     
-    /// <summary>What the selected operator reports for this input, e.g. a snippet that doesn't compile.</summary>
+    /// <summary>
+    /// An icon at the right end of the name row that opens the larger <see cref="CodeEditorPopup"/>, tinted when the code
+    /// has a problem. The popup is drawn here too, before the inline field, so that field stays the last item.
+    /// </summary>
+    private InputEditStateFlags DrawCodeEditorButton(Symbol.Child.Input input, ref string value, InputStatus? status)
+    {
+        var instance = GetDrawnInstance();
+        if (instance == null)
+        {
+            // Without the icon, nothing ends the name row for the field below.
+            ImGui.Dummy(new Vector2(1, 1));
+            return InputEditStateFlags.Nothing;
+        }
+
+        var iconWidth = MathF.Round(Icons.FontSize + 4 * T3Ui.UiScaleFactor);
+        var origin = ImGui.GetCursorScreenPos();
+        var availableWidth = ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin;
+        ImGui.SetCursorScreenPos(new Vector2(origin.X + availableWidth - iconWidth, origin.Y));
+
+        var hasError = status is { IsError: true, Message.Length: > 0 };
+        var clicked = hasError
+                          ? CustomComponents.IconButton(Icon.PopUp, new Vector2(iconWidth, ImGui.GetFrameHeight()), UiColors.StatusError)
+                          : CustomComponents.IconButton(Icon.PopUp, new Vector2(iconWidth, ImGui.GetFrameHeight()));
+        if (clicked)
+            CodeEditorPopup.Open(instance, input.InputDefinition.Id, new Vector2(origin.X, ImGui.GetItemRectMax().Y + 4 * T3Ui.UiScaleFactor));
+
+        CustomComponents.TooltipForLastItem("Edit code", "A larger editor with line numbers and every problem the compiler reported.");
+
+        return CodeEditorPopup.Draw(instance, input.InputDefinition.Id, input.Name, CodeLanguage, ref value, status);
+    }
+
+    private static Instance? GetDrawnInstance()
+    {
+        return _drawnInstance ?? ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
+    }
+
+    /// <summary>What the drawn operator reports for this input, e.g. a snippet that doesn't compile.</summary>
     private static bool TryGetInputStatus(Symbol.Child.Input input, out InputStatus status)
     {
-        var instance = ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
+        var instance = GetDrawnInstance();
         status = default;
         return instance != null && CodeInputStatus.TryGet(instance, input.InputDefinition.Id, out status);
     }
 
     /// <param name="status">An error marks the field with a border and shows the message below it; a note is shown dimmed.</param>
-    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, InputStatus? status)
+    /// <param name="startsOnNewLine">False when the field follows the parameter name on its row and must wrap below it.</param>
+    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, InputStatus? status, bool startsOnNewLine = false)
     {
-        // Wrap to next line
-        ImGui.Dummy(new Vector2(1, 1));
+        if (!startsOnNewLine)
+            ImGui.Dummy(new Vector2(1, 1));
         
         ImGui.PushFont(Fonts.Code);
         var lineCount = value.LineCount().Clamp(1, 30) + 1;

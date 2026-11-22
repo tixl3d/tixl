@@ -48,6 +48,7 @@ public abstract partial class ShaderCompiler
         bool success = false;
         bool loadedFromCache = false;
         byte[]? compiledBlob;
+        var diagnostics = new List<ShaderCompileFailures.Diagnostic>();
 
         if (useCache)
         {
@@ -65,7 +66,7 @@ public abstract partial class ShaderCompiler
                     // Logged before compiling so a hanging or slow shader is identifiable from the log tail
                     Log.Debug($"Compiling {args.Name} @{args.EntryPoint}...");
                     Stopwatch timer = Stopwatch.StartNew();
-                    if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason))
+                    if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason, diagnostics))
                     {
                         timer.Stop();
                         success = true;
@@ -80,7 +81,7 @@ public abstract partial class ShaderCompiler
         else
         {   
             Stopwatch timer = Stopwatch.StartNew();
-            if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason))
+            if (Instance.CompileShaderFromSource<TShader>(args, out compiledBlob, out reason, diagnostics))
             {   
                 timer.Stop();
                 reason = $"{timer.Elapsed.TotalMilliseconds:0.0}ms";
@@ -100,7 +101,7 @@ public abstract partial class ShaderCompiler
 
         // Kept for inspection: a generated shader has no file to open afterwards, and the assembled source is
         // the only place the offending line can be seen.
-        ShaderCompileFailures.Record(name, args.EntryPoint, reason, args.SourceCode, args.Owner);
+        ShaderCompileFailures.Record(name, args.EntryPoint, reason, args.SourceCode, args.Owner, diagnostics);
 
         reason = $"Failed to compile {name}: {reason}";
         shader = null;

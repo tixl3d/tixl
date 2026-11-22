@@ -69,7 +69,7 @@ internal static class GradientEditorPopup
         }
 
         ColorEditPopup.OpenBesideRect = null;
-        DrawResizeGrip();
+        CustomComponents.DrawPopupResizeGrip(ref _size, MinSize, ref _isResizing);
 
         // Escape in a text field only cancels that edit.
         if (ImGui.IsKeyPressed(ImGuiKey.Escape, false) && !ImGui.GetIO().WantTextInput)
@@ -85,18 +85,7 @@ internal static class GradientEditorPopup
         var rowStart = ImGui.GetCursorScreenPos();
         var iconSize = new Vector2(ImGui.GetFrameHeight());
 
-        // Popups open below the parameter and can cover the operator being edited, so the grip lets users move it aside.
-        ImGui.InvisibleButton("##moveGradientPopup", iconSize);
-        var isHovered = ImGui.IsItemHovered();
-        var isActive = ImGui.IsItemActive();
-        if (isHovered || isActive)
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
-
-        if (isActive)
-            ImGui.SetWindowPos(ImGui.GetWindowPos() + ImGui.GetIO().MouseDelta);
-
-        var gripColor = isHovered || isActive ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
-        Icons.DrawIconOnLastItem(Icon.DragIndicator, gripColor);
+        CustomComponents.DrawPopupMoveGrip("##moveGradientPopup", iconSize);
 
         // Interpolation, shown as a dropdown label.
         ImGui.SameLine(0, 0);
@@ -311,42 +300,9 @@ internal static class GradientEditorPopup
     }
 
     /** Popups size to their content, so the grip changes the content size. Drawn into the window padding, it adds no item that would grow the popup. */
-    private static void DrawResizeGrip()
-    {
-        var scale = T3Ui.UiScaleFactor;
-        var gripSize = MathF.Round(ResizeGripSize * scale);
-        var windowMax = (ImGui.GetWindowPos() + ImGui.GetWindowSize()).Floor();
-        var gripMin = windowMax - new Vector2(gripSize);
-
-        var isHovered = ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(gripMin, windowMax);
-        if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-            _isResizing = true;
-
-        if (_isResizing && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
-            _isResizing = false;
-
-        if (isHovered || _isResizing)
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNWSE);
-
-        if (_isResizing)
-        {
-            _size += ImGui.GetIO().MouseDelta / scale;
-            _size = Vector2.Max(_size, MinSize);
-        }
-
-        // Inset, so the popup's rounded corner doesn't cut the triangle.
-        var inset = MathF.Round(2 * scale);
-        var triangleMax = windowMax - new Vector2(inset);
-        var triangleMin = triangleMax - new Vector2(gripSize - inset * 2);
-        var color = isHovered || _isResizing ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
-        ImGui.GetWindowDrawList().AddTriangleFilled(new Vector2(triangleMax.X, triangleMin.Y), triangleMax,
-                                                    new Vector2(triangleMin.X, triangleMax.Y), color);
-    }
-
     private const string PopupId = "##gradientEditor";
     private const float PositionColumnWidth = 70;
     private const float RowGap = 2;
-    private const float ResizeGripSize = 12;
 
     /** Unscaled width of the popup content and height of the gradient. */
     private static readonly Vector2 MinSize = new(220, 30);

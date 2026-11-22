@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using T3.Core.Resource.ShaderCompiling;
 using Xunit;
 
@@ -95,5 +96,37 @@ public class SlangDiagnosticsTests
         const string timeout = "slangc did not finish within 60 seconds.";
 
         Assert.Equal(timeout, SlangDiagnostics.DescribeFirstError(timeout, TempSource, "Blur.hlsl"));
+    }
+    [Fact]
+    public void ParseKeepsEveryErrorAndWarningWithTheirLocations()
+    {
+        const string diagnostics = """
+                                   warning[E30081]: implicit conversion not recommended
+                                     --> /tmp/tixl-slang/Blur.main.1.hlsl:3:1
+                                      |
+                                    3 | int error = 1.5;
+                                      | ^ implicit conversion
+                                   ---'
+
+                                   error[E30015]: undefined identifier
+                                     --> /home/me/Assets/shared/my-functions.hlsl:4:7
+                                      |
+                                    4 | foo();
+                                      |       ^^^ undefined identifier 'foo'.
+                                   ---'
+
+                                   error[E30019]: type mismatch in expression
+                                     --> /tmp/tixl-slang/Blur.main.1.hlsl:9:5
+                                   ---'
+                                   """;
+
+        var parsed = new List<ShaderCompileFailures.Diagnostic>();
+        SlangDiagnostics.Parse(diagnostics, TempSource, parsed);
+
+        Assert.Equal([
+                         new ShaderCompileFailures.Diagnostic(false, "", 3, 1, "implicit conversion"),
+                         new ShaderCompileFailures.Diagnostic(true, "my-functions.hlsl", 4, 7, "undefined identifier 'foo'."),
+                         new ShaderCompileFailures.Diagnostic(true, "", 9, 5, "type mismatch in expression"),
+                     ], parsed);
     }
 }

@@ -1,6 +1,7 @@
 # Code inputs: annotated parameters and syntax highlighting
 
-Status: **Phase 1 done** (2026-11-21), plus error display ahead of Phase 4. Drafted 2026-11-20.
+Status: **Phase 1 done** (2026-11-21), plus error display and the code editor popup ahead of Phase 4 (2026-11-22,
+built and unit-tested, not yet tried in the editor). Drafted 2026-11-20.
 
 ## Goal
 
@@ -138,6 +139,34 @@ One annotation per line, anywhere in the snippet:
   AdditionalDefines) and CustomPixelShader. `getGraphState` reports it per child as `codeInputStatus`.
 - Phase 4 underlines `Line` instead of only showing the message. The available `@Name` attributes are the first
   op-provided symbol list for autocomplete.
+
+### Code editor popup (built 2026-11-22, not yet tried in the editor)
+- `Editor/Gui/InputUi/SimpleInputUis/CodeEditorPopup`, opened by an icon at the right end of a `Code` input's name row
+  (red while the code has an error). Like `GradientEditorPopup`: move grip, resize grip (both now
+  `CustomComponents.DrawPopupMoveGrip` / `DrawPopupResizeGrip`), Escape closes.
+- Line numbers without a real editor widget: a gutter and an `InputTextMultiline` sized to its whole text share one
+  scrolling child, so the monospace code font puts line N at a fixed y. Problem lines get a tint drawn under the
+  transparent field; a text callback tracks the cursor line so the child follows it while typing, and places the
+  cursor when a problem is clicked.
+- Escape would revert the whole edit in an ImGui text field, so the popup claims the key every frame
+  (`DrawUtils.ClaimEscapeFromTextInputs`) and closes itself, keeping the text. Closing reports `Finished` so the edit
+  lands in undo.
+- **Compiled source** toggle: the child shader op's spliced source, read-only, with its own line numbers and the
+  snippet tinted. This is the toggle between snippet and final line numbers; no `#line` markers are needed while
+  templates paste the snippet unchanged, since `CodeInputStatus` finds it in the source.
+- Footer lists every problem. Core keeps them now: both compilers fill a list of
+  `ShaderCompileFailures.Diagnostic(IsError, File, Line, Column, Text)` (File empty for the compiled source itself),
+  stored on the `Failure` together with the source; `ShaderCompileFailures.TryFindBySource` finds them, and
+  `getShaderErrors` returns them as `diagnostics`. Problems in the snippet show as `Line N`; others as
+  `Template line N` (click switches to the compiled source) or `file:N` for includes. C# ops without that list show
+  their one `InputStatus`.
+- Fixes in `CodeInputStatus`: an error in an included file is no longer mapped into the snippet, and an input whose text
+  occurs more than once in the source (e.g. a short define) is not mapped. DX11 messages no longer carry the
+  column in the line number (`Line 40,5-12:`, which the mapping couldn't read); the D3D compiler is now given the
+  shader's name as source file name so its own lines can be told from includes (`FxcDiagnostics`, untested on
+  Windows).
+- Known limits: an ImGui popup closes on a click outside, so sliders can't be dragged while it is open (a dockable
+  window would solve that); text over 32000 characters is cut, as in the inline field.
 
 ### Phase 4: Real code editor (separate decision)
 - Inline highlighting while typing, error underlines, autocomplete. Options in "Widget options".
