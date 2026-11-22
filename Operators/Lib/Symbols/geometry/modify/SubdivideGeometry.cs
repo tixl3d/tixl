@@ -365,6 +365,8 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         }
 
         outputOffsets[outputPrimitiveCount] = outputVertexCount;
+        if (smoothness != null)
+            PreventFoldOvers(source, target);
 
         // Parts: primitive ranges become ranges of their children
         var parts = source.Parts;
@@ -392,6 +394,117 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         }
 
         target.InvalidateTopologyCaches();
+    }
+
+    /// <summary>
+    /// Smoothing coarse meshes with long thin faces (e.g. triangulated letter caps) can pull new points past each other,
+    /// so faces turn over. Each output face is compared with its source face: where it points the other way although
+    /// its linear version would not, its points are moved halfway back to their linear positions, repeated until no
+    /// face is turned over, and finally set fully linear. Only the affected points lose smoothing.
+    /// </summary>
+    private void PreventFoldOvers(Geometry source, Geometry target)
+    {
+        var positions = source.Positions;
+        var offsets = source.PrimitiveVertexOffsets;
+        var vertexPoints = source.VertexPoints;
+        var edges = source.Edges.Edges;
+        var outputPositions = target.Positions;
+        var outputOffsets = target.PrimitiveVertexOffsets;
+        var outputVertexPoints = target.VertexPoints;
+        var outputPointCount = outputPositions.Length;
+        EnsureLength(ref _linearPositions, outputPointCount);
+        EnsureLength(ref _foldedPoints, outputPointCount);
+
+        // Linear positions: source points stay, edge points are midpoints, face points are not smoothed anyway
+        Array.Copy(outputPositions, _linearPositions, outputPointCount);
+        Array.Copy(positions, _linearPositions, source.PointCount);
+        for (var edge = 0; edge < edges.Length; edge++)
+        {
+            if (_edgePoints[edge] >= 0)
+                _linearPositions[_edgePoints[edge]] = (positions[edges[edge].PointA] + positions[edges[edge].PointB]) * 0.5f;
+        }
+
+        for (var round = 0; round < MaxFoldOverRounds; round++)
+        {
+            Array.Clear(_foldedPoints, 0, outputPointCount);
+            var anyFolded = false;
+            for (var primitive = 0; primitive < source.PrimitiveCount; primitive++)
+            {
+                var start = offsets[primitive];
+                var vertexCount = offsets[primitive + 1] - start;
+                if (source.PrimitiveKind[primitive] != PrimitiveKinds.Polygon || vertexCount < 3)
+                    continue;
+
+                var reference = Vector3.Zero;
+                for (var i = 0; i < vertexCount; i++)
+                {
+                    var a = positions[vertexPoints[start + i]];
+                    var b = positions[vertexPoints[start + (i + 1) % vertexCount]];
+                    reference += Vector3.Cross(a, b);
+                }
+
+                var firstOutput = _primitiveStarts[primitive];
+                var outputCount = _facePoints[primitive] >= 0 ? vertexCount : 1;
+                for (var output = firstOutput; output < firstOutput + outputCount; output++)
+                {
+                    var outputStart = outputOffsets[output];
+                    var outputEnd = outputOffsets[output + 1];
+                    // Every corner must turn the way of the source face, so a face smoothing made concave is caught before the
+                    // next iteration splits it into turned-over faces. Where even the linear face fails that (a concave
+                    // source face), only a face turned over as a whole counts.
+                    var linearIsConvex = TurnsConsistently(_linearPositions, outputVertexPoints, outputStart, outputEnd, reference);
+                    var isFolded = linearIsConvex
+                                       ? !TurnsConsistently(outputPositions, outputVertexPoints, outputStart, outputEnd, reference)
+                                       : Vector3.Dot(GetNormal(outputPositions, outputVertexPoints, outputStart, outputEnd), reference) <= 0
+                                         && Vector3.Dot(GetNormal(_linearPositions, outputVertexPoints, outputStart, outputEnd), reference) > 0;
+                    if (!isFolded)
+                        continue;
+
+                    anyFolded = true;
+                    for (var vertex = outputStart; vertex < outputEnd; vertex++)
+                        _foldedPoints[outputVertexPoints[vertex]] = true;
+                }
+            }
+
+            if (!anyFolded)
+                return;
+
+            var isLast = round == MaxFoldOverRounds - 1;
+            for (var point = 0; point < outputPointCount; point++)
+            {
+                if (_foldedPoints[point])
+                    outputPositions[point] = isLast ? _linearPositions[point] : Vector3.Lerp(_linearPositions[point], outputPositions[point], 0.5f);
+            }
+        }
+    }
+
+    /** Whether every corner of the polygon turns the way of <paramref name="reference"/>; corners without a turn are ignored. */
+    private static bool TurnsConsistently(Vector3[] positions, int[] vertexPoints, int start, int end, Vector3 reference)
+    {
+        var count = end - start;
+        for (var i = 0; i < count; i++)
+        {
+            var previous = positions[vertexPoints[start + (i + count - 1) % count]];
+            var current = positions[vertexPoints[start + i]];
+            var next = positions[vertexPoints[start + (i + 1) % count]];
+            var incoming = current - previous;
+            var outgoing = next - current;
+            var turn = Vector3.Dot(Vector3.Cross(incoming, outgoing), reference);
+            if (turn < -1e-6f * incoming.Length() * outgoing.Length() * reference.Length())
+                return false;
+        }
+
+        return true;
+    }
+
+    /** Newell normal of a polygon, unnormalized. */
+    private static Vector3 GetNormal(Vector3[] positions, int[] vertexPoints, int start, int end)
+    {
+        var normal = Vector3.Zero;
+        for (var vertex = start; vertex < end; vertex++)
+            normal += Vector3.Cross(positions[vertexPoints[vertex]], positions[vertexPoints[vertex + 1 < end ? vertex + 1 : start]]);
+
+        return normal;
     }
 
     /// <summary>
@@ -587,6 +700,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     public string GetStatusMessage() => _statusMessage;
 
     private const int MaxIterations = 6;
+    private const int MaxFoldOverRounds = 8;
     private const int MaxVertexCount = 4000000;
     private static readonly string[] _normalNames = [GeometryAttributeNames.Normal];
 
@@ -597,6 +711,8 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     private readonly GeometryAttributeStencil _primitiveStencil = new();
     private Geometry? _lastSource;
     private float[] _smoothness = [];
+    private Vector3[] _linearPositions = [];
+    private bool[] _foldedPoints = [];
     private float[] _attributeScratch = [];
     private int[] _facePoints = [];
     private int[] _edgePoints = [];
