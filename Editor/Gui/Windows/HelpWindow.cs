@@ -1,4 +1,5 @@
 #nullable enable
+using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -113,7 +114,7 @@ internal sealed class HelpWindow : Window
     {
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var buttonCount = _shownSymbolUi != null ? 4 : 3;
+        var buttonCount = _shownSymbolUi != null ? 5 : 4;
         var iconAreaWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
 
         // sameLine: false — the cursor was already placed at the window top; the default SameLine would
@@ -131,6 +132,12 @@ internal sealed class HelpWindow : Window
             CustomComponents.TooltipForLastItem("Edit description and links");
             ImGui.SameLine();
         }
+
+        if (CustomComponents.IconButton(Icon.CopyToClipboard, buttonSize))
+            CopyHelpToClipboard();
+
+        CustomComponents.TooltipForLastItem("Copy help content to clipboard");
+        ImGui.SameLine();
 
         // Index 0 is the newest entry, so "back" moves towards higher indices (see PushTopic).
         var canGoBack = _historyIndex >= 0 && _historyIndex < _history.Count - 1;
@@ -168,6 +175,54 @@ internal sealed class HelpWindow : Window
         ImGui.EndChild();
         
         //ImGui.SetCursorPos(keepCursorPos);
+    }
+
+    /// <summary>
+    /// Copies the shown topic as markdown text — an operator's name, description and parameter descriptions,
+    /// or a <c>ui:</c> topic's title and doc — so it can be pasted into a translation service.
+    /// </summary>
+    private void CopyHelpToClipboard()
+    {
+        var topic = _lastShownTopic; // The topic DrawHelpBody resolved for this frame.
+        var sb = new StringBuilder();
+
+        if (topic.UiTopicKey != null)
+        {
+            if (!UiTopicDocs.TryGet(topic.UiTopicKey, out var title, out var doc))
+                return;
+
+            sb.Append(title);
+            if (!string.IsNullOrWhiteSpace(doc))
+                sb.Append("\n\n").Append(doc);
+        }
+        else if (topic.SymbolId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(topic.SymbolId, out var symbolUi))
+        {
+            sb.Append(symbolUi.Symbol.Name).Append("\nin ").Append(symbolUi.Symbol.Namespace);
+
+            if (!string.IsNullOrWhiteSpace(symbolUi.Description))
+                sb.Append("\n\n").Append(symbolUi.Description);
+
+            var wroteParameterHeader = false;
+            foreach (var inputUi in symbolUi.InputUis.Values)
+            {
+                if (string.IsNullOrEmpty(inputUi.Description))
+                    continue;
+
+                if (!wroteParameterHeader)
+                {
+                    sb.Append("\n\nParameter Details");
+                    wroteParameterHeader = true;
+                }
+
+                sb.Append("\n- ").Append(inputUi.InputDefinition.Name).Append(": ").Append(inputUi.Description);
+            }
+        }
+
+        if (sb.Length == 0)
+            return;
+
+        ImGui.SetClipboardText(sb.ToString());
+        ActionToast.Show("{Help copied to clipboard}   paste it into a translator to read it in your language");
     }
     
     #endregion
