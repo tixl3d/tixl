@@ -171,7 +171,7 @@ internal static class ColorEditPopup
     private static Vector4 _dampedCompareColor;
 
     /** How far a drag has to be pulled past the top of the brightness bar before values above 1.0 become editable. */
-    private const float HdrUnlockDistance = 20;
+    private const float HdrUnlockDistance = 60;
 
     private const float MaxHdrValue = 1000;
 
