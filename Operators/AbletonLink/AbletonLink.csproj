@@ -23,6 +23,8 @@
     <TixlPlatforms>win-x64</TixlPlatforms>
     <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
     <PackageLicenseExpression>GPL-2.0-or-later</PackageLicenseExpression>
+    <Title>Ableton Link</Title>
+    <Description>Sync beat time and tempo with Ableton Live and other Link apps on the network.</Description>
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>

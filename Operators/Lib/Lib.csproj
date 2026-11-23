@@ -208,6 +208,9 @@
   <!-- OpenCV's FFmpeg video plugin is unused now that VideoStreamInput decodes via FFmpeg directly, so drop
        it to avoid shipping a second FFmpeg alongside the LGPL FFmpeg build. -->
   <Target Name="DropUnusedOpenCvFfmpegPlugin" AfterTargets="AfterBuild">
-    <Delete Files="$(OutputPath)/runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll" />
+    <ItemGroup>
+      <_OpenCvFfmpegPlugin Include="$(OutputPath)/runtimes/*/native/opencv_videoio_ffmpeg*.dll" />
+    </ItemGroup>
+    <Delete Files="@(_OpenCvFfmpegPlugin)" />
   </Target>
 </Project>

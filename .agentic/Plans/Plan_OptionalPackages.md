@@ -196,14 +196,29 @@ Follow-ups found during Phase 0:
 Decided 2026-11-23 (later the same day): installing must be as easy as *Settings → Extensions → tick a checkbox →
 Install & Restart*, so all optional packages (Ndi included) install the same way. The list comes from the
 `.nupkg`s attached to the GitHub release of the running version (no catalog, no nuget.org yet); the download is
-unpacked into `<SettingsDirectory>/Packages/` and applied on the restart, so live loading (Phase 2) isn't needed.
+unpacked into `<SettingsDirectory>/Extensions/` and applied on the restart, so live loading (Phase 2) isn't needed.
 
-- [ ] `pack` target per package → `TiXL.<Name>.<ver>.nupkg` from the Release folder; CI attaches the optional
-      packages to each GitHub release.
-- [ ] Load installed packages from `<SettingsDirectory>/Packages` at startup (D6).
-- [ ] Drag & drop / file picker for a `.nupkg`: validate packageType, `EditorVersion`, platform → install →
-      restart prompt.
-- Verify: fresh Windows install without Mediapipe, install the nupkg from the release page, Mediapipe examples run.
+Progress 2026-11-23 (uncommitted):
+- [x] `Installer/pack-extensions.py`: `TiXL.<Name>.<TiXL version>.nupkg` per Optional package (package folder under
+      `tixl/`, nuspec with packageType `TixlOperatorPackage`, platforms as tags, licence file for `LicenseRef-`) and
+      `extensions.json` (title, description, licence, platforms, size, SHA-256). NuGet restore accepts the files.
+      `windows-build.yml` packs on every run, uploads an artifact and attaches to the release on tags.
+- [x] Mediapipe uses `TixlCopyLocalPackages` (OpenCvSharp4, its Windows runtime, Google.Protobuf) instead of copying
+      the editor's dependencies: 107 MB instead of 171 MB. The OpenCV FFmpeg plugin is dropped by wildcard (Lib's
+      drop target still named 4.11 and has shipped the 4.13 plugin since the update; fixed).
+- [x] Editor `ExtensionPackages/`: `InstalledExtensions` (stage in `<settings>/Extensions/.pending`, `pending.json`,
+      applied in `ProjectSetup.LoadAll` before loading; installed ones load after built-ins and projects, skipped if
+      the same PackageId is loaded or built for another TiXL minor) and `ExtensionCatalog` (index from
+      `github.com/tixl3d/tixl/releases/download/v<version>/extensions.json`, `TIXL_EXTENSIONS_INDEX` overrides with a
+      URL or folder; size + SHA-256 check; archive validated; Install from File checks platform tags).
+- [x] Settings → Extensions page (compact rows, greyed when unavailable, Install & Restart / Restart to Apply,
+      Install from File...).
+- [x] Missing operators in read-only packages log at debug level (Core `SymbolJson` and the editor summary).
+- Verified on Linux with a Release editor in an isolated settings folder: staging NDI through the catalog code,
+      applying + loading it at startup (Examples' NDI operators resolve), staging and applying the removal, file
+      install (Windows-only package refused, NDI staged), real URL without a published index reports it clearly.
+      Not yet seen by a human: the page itself, the restart from the button, Windows.
+- Docs: `.help/docs/using/Extensions.md`, release notes, `.tests-manual/extensions-install.md`.
 
 ### Phase 2: Live install
 

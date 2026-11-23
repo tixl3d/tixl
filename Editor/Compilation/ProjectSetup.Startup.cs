@@ -7,6 +7,7 @@ using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
+using T3.Editor.ExtensionPackages;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
@@ -52,6 +53,9 @@ internal static partial class ProjectSetup
 
         var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
 
+        // Installs and removals chosen in Settings -> Extensions; nothing of them is loaded yet
+        InstalledExtensions.ApplyPendingChanges();
+
         if (!isDebugBuild)
         {
             // Load pre-built built-in packages as read-only
@@ -64,6 +68,8 @@ internal static partial class ProjectSetup
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
         var projectsMs = totalStopwatch.ElapsedMilliseconds;
+
+        LoadInstalledExtensions();
 
         // Keep projects that failed to load visible and recoverable instead of silently dropping them
         // — a single broken project shouldn't just vanish from the Hub.
@@ -235,6 +241,20 @@ internal static partial class ProjectSetup
                     });
     }
     
+    /** Extensions load after built-in packages and projects, so one that is already loaded (built from source) is skipped. */
+    private static void LoadInstalledExtensions()
+    {
+        var loadedIds = new HashSet<Guid>();
+        foreach (var package in _activePackages)
+            loadedIds.Add(package.Id);
+
+        foreach (var directory in InstalledExtensions.LoadablePackageDirectories(loadedIds.Contains, Program.Version))
+        {
+            AddToLoadedPackages(new EditorSymbolPackage(new AssemblyInformation(directory), null));
+            Log.Info($"Loaded extension {Path.GetFileName(directory)}");
+        }
+    }
+
     private readonly record struct ProjectLoadInfo(
         FileInfo fileInfo,
         CsProjectFile? csProjFile,

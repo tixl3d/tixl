@@ -4,8 +4,12 @@
 # Usage:
 #   pwsh Installer/Windows/build-release.ps1              # full build
 #   pwsh Installer/Windows/build-release.ps1 -SkipRestore # skip dotnet restore (CI may restore separately)
+#   -ExtensionVersion 4.4.0.5                              # version for the extension packages (default: Tixl.props)
+#
+# Optional operator packages (Settings -> Extensions) are packed into Installer/Windows/Output/extensions when
+# Python 3 is installed; without it that step is skipped with a warning.
 
-param([switch]$SkipRestore)
+param([switch]$SkipRestore, [string]$ExtensionVersion)
 
 $ErrorActionPreference = "Stop"
 # Windows PowerShell's progress bar slows Invoke-WebRequest down by an order of magnitude.
@@ -67,5 +71,29 @@ foreach ($file in @("slangc.exe", "slang.dll", "slang-compiler.dll", "slang-glsl
 Copy-Item "$slangStaging/LICENSE" "$slangTarget/"
 Remove-Item -Recurse -Force $slangStaging
 if (-not (Test-Path "$slangTarget/bin/slangc.exe")) { throw "slangc.exe missing after unpacking $slangZip" }
+
+Write-Host "Packing extensions..." -ForegroundColor Cyan
+$extensionsDir = "$PSScriptRoot/Output/extensions"
+if (Test-Path $extensionsDir) { Remove-Item -Recurse -Force $extensionsDir }
+
+# "python" can be the Microsoft Store placeholder, which exists but doesn't run; only accept one that does.
+$python = $null
+foreach ($candidate in @("py", "python", "python3")) {
+    if (-not (Get-Command $candidate -ErrorAction SilentlyContinue)) { continue }
+    # With ErrorActionPreference Stop, Windows PowerShell turns redirected stderr into a terminating error
+    try {
+        & $candidate --version *> $null
+        if ($LASTEXITCODE -eq 0) { $python = $candidate; break }
+    } catch { }
+}
+
+if ($python) {
+    $packArgs = @("$root/Installer/pack-extensions.py", $extensionsDir)
+    if ($ExtensionVersion) { $packArgs += @("--version", $ExtensionVersion) }
+    & $python @packArgs
+    if ($LASTEXITCODE -ne 0) { throw "packing extensions failed" }
+} else {
+    Write-Warning "Python 3 not found: extensions were not packed. Install it (e.g. winget install Python.Python.3.12) to pack them."
+}
 
 Write-Host "Release build complete." -ForegroundColor Green

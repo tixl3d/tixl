@@ -34,6 +34,7 @@ internal sealed partial class SettingsWindow : Window
         Midi,
         InputDevices,
         Keyboard,
+        Extensions,
         Diagnostics,
     }
 
@@ -531,6 +532,9 @@ internal sealed partial class SettingsWindow : Window
                     CustomComponents.HelpText("The keyboard layout can't be edited yet. Working on it");
                     KeyMapEditor.DrawEditor();
                     break;
+                case Categories.Extensions:
+                    ExtensionsSettingsPanel.Draw();
+                    break;
                 case Categories.Diagnostics:
                 {
                     FormInputs.AddVerticalSpace();
@@ -891,6 +895,7 @@ internal sealed partial class SettingsWindow : Window
                                                                         Categories.Midi       => "Midi & OSC",
                                                                         Categories.InputDevices => "Input Devices",
                                                                         Categories.Keyboard   => "Keyboard Shortcuts",
+                                                                        Categories.Extensions  => "Extensions",
                                                                         Categories.Diagnostics => "Diagnostics and debugging",
                                                                         _                     => string.Empty,
                                                                     };

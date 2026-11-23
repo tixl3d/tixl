@@ -44,9 +44,16 @@ jobs:
         run: choco install innosetup --no-progress -y
 
       # Windows PowerShell, like installer.iss does locally.
+      # Also packs the optional operator packages (Settings -> Extensions) into Installer/Windows/Output/extensions;
+      # on a tag their version follows the tag, which is what the editor looks for in the release.
       - name: Build Release
         shell: powershell
-        run: Installer/Windows/build-release.ps1
+        run: |
+          $buildArgs = @{}
+          if ("${{ github.ref_type }}" -eq "tag") {
+              $buildArgs.ExtensionVersion = "${{ github.ref_name }}".TrimStart("v")
+          }
+          Installer/Windows/build-release.ps1 @buildArgs
 
       - name: Check Licences
         run: python Installer/check-licences.py
@@ -74,5 +81,21 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           files: Installer/Windows/Output/*.exe
+          prerelease: true
+          make_latest: false
+
+      - name: Upload Extensions
+        uses: actions/upload-artifact@v4
+        with:
+          name: tixl-extensions
+          path: Installer/Windows/Output/extensions/*
+          retention-days: 14
+
+      - name: Attach Extensions to Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: Installer/Windows/Output/extensions/*
           prerelease: true
           make_latest: false

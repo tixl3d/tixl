@@ -25,6 +25,8 @@
     <TixlPlatforms>win-x64;linux-x64;osx-arm64</TixlPlatforms>
     <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
     <PackageLicenseExpression>LicenseRef-NDI-SDK</PackageLicenseExpression>
+    <Title>NDI</Title>
+    <Description>Send and receive video over the network with NDI.</Description>
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>

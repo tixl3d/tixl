@@ -12,7 +12,7 @@
     <EditorVersion>$(TixlVersion)</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TixlCopyLocalPackages>OpenCvSharp4;OpenCvSharp4.runtime.win;Google.Protobuf</TixlCopyLocalPackages>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
@@ -25,6 +25,8 @@
     <TixlPlatforms>win-x64</TixlPlatforms>
     <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
     <PackageLicenseExpression>MIT AND Apache-2.0</PackageLicenseExpression>
+    <Title>MediaPipe</Title>
+    <Description>Face, hand, pose and object tracking and image segmentation from video.</Description>
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
@@ -158,6 +160,13 @@
   <ItemGroup>
     <Folder Include="Vendor\" />
   </ItemGroup>
+  <!-- OpenCV's FFmpeg video plugin is unused here (video arrives as textures); it would add a second FFmpeg. -->
+  <Target Name="DropUnusedOpenCvFfmpegPlugin" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <_OpenCvFfmpegPlugin Include="$(OutputPath)/runtimes/*/native/opencv_videoio_ffmpeg*.dll" />
+    </ItemGroup>
+    <Delete Files="@(_OpenCvFfmpegPlugin)" />
+  </Target>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
     <!-- Clear previous files in the export folder -->
     <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />

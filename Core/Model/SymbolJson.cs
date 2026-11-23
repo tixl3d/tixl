@@ -292,8 +292,14 @@ public static class SymbolJson
         parent.MoveConnectionsOfUnresolvedChildrenToOwnList();
         if (parent.HasUnresolvedChildren)
         {
-            Log.Warning($"[{parent.Name}] uses {parent.UnresolvedChildren.Count} operator(s) that are not available. "
-                        + "They are skipped but kept in the file.");
+            var message = $"[{parent.Name}] uses {parent.UnresolvedChildren.Count} operator(s) that are not available. "
+                          + "They are skipped but kept in the file.";
+
+            // Shipped packages may use operators of optional packages that aren't installed; nothing to fix there
+            if (parent.SymbolPackage is { IsReadOnly: true })
+                Log.Debug(message);
+            else
+                Log.Warning(message);
         }
 
         if (symbolReadResult.AnimatorJsonData != null)

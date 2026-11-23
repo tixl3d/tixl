@@ -17,7 +17,16 @@
       <RuntimeCopyLocalItems>
         <TixlSelected>$([System.String]::Copy(';$(TixlCopyLocalPackages);').ToLowerInvariant().Contains($([System.String]::Copy(';%(NuGetPackageId);').ToLowerInvariant())))</TixlSelected>
       </RuntimeCopyLocalItems>
+      <RuntimeTargetsCopyLocalItems>
+        <TixlSelected>$([System.String]::Copy(';$(TixlCopyLocalPackages);').ToLowerInvariant().Contains($([System.String]::Copy(';%(NuGetPackageId);').ToLowerInvariant())))</TixlSelected>
+      </RuntimeTargetsCopyLocalItems>
+      <NativeCopyLocalItems>
+        <TixlSelected>$([System.String]::Copy(';$(TixlCopyLocalPackages);').ToLowerInvariant().Contains($([System.String]::Copy(';%(NuGetPackageId);').ToLowerInvariant())))</TixlSelected>
+      </NativeCopyLocalItems>
       <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.TixlSelected)' == 'True'" />
+      <!-- Native libraries keep their runtimes/<rid>/native/ folder, where .NET looks for them -->
+      <ReferenceCopyLocalPaths Include="@(RuntimeTargetsCopyLocalItems)" Condition="'%(RuntimeTargetsCopyLocalItems.TixlSelected)' == 'True'" />
+      <ReferenceCopyLocalPaths Include="@(NativeCopyLocalItems)" Condition="'%(NativeCopyLocalItems.TixlSelected)' == 'True'" />
     </ItemGroup>
   </Target>
 </Project>

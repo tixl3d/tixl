@@ -54,6 +54,7 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 - [TiXL for VJ and live performances](LivePerformances.md)
 - [Output Setup](OutputSetup.md) — projection mapping, multi-display and Spout / NDI outputs.
 - [Using backups](Backups.md)
+- [Extensions: Ableton Link, NDI and MediaPipe](Extensions.md)
 - [Sharing example projects](SharingExampleProjects.md)
 - [FAQ](FAQ.md)
 
