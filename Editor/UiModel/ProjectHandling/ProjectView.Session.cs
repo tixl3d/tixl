@@ -1,5 +1,7 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.Animation;
+using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 
@@ -22,9 +24,14 @@ internal sealed partial class ProjectView
         if (OpenedProject.Package.OverrideHomeGuid != Guid.Empty)
             return;
 
+        var playback = Playback.Current;
         var session = new ProjectSession
                           {
                               CompositionPath = ProjectSession.FormatPath(_compositionPath),
+                              TimeInBars = playback.TimeInBars,
+                              IsLooping = playback.IsLooping,
+                              LoopStartInBars = playback.LoopRange.Start,
+                              LoopEndInBars = playback.LoopRange.End,
                           };
 
         foreach (var childUi in NodeSelection.GetSelectedChildUis())
@@ -90,6 +97,33 @@ internal sealed partial class ProjectView
         {
             if (Guid.TryParse(idText, out var childId))
                 NodeSelection.TrySelectCompositionChild(composition, childId);
+        }
+    }
+
+    /// <summary>
+    /// Moves the playhead and loop range back to where the session left them.
+    /// </summary>
+    internal static void RestorePlayback(ProjectSession session)
+    {
+        ApplyPlayback(T3Ui.DefaultTimelinePlayback, session);
+
+        // A project using beat tapping still has the beat timing playback active until the next frame.
+        if (Playback.Current != T3Ui.DefaultTimelinePlayback)
+            ApplyPlayback(Playback.Current, session);
+    }
+
+    private static void ApplyPlayback(Playback playback, ProjectSession session)
+    {
+        if (session.TimeInBars is { } timeInBars && double.IsFinite(timeInBars))
+            playback.TimeInBars = timeInBars;
+
+        if (session.IsLooping is { } isLooping)
+            playback.IsLooping = isLooping;
+
+        if (session.LoopStartInBars is { } start && session.LoopEndInBars is { } end
+                                                 && float.IsFinite(start) && float.IsFinite(end))
+        {
+            playback.LoopRange = new TimeRange(start, end);
         }
     }
 
