@@ -329,15 +329,11 @@ internal sealed class RenderWindow : Window
         return string.IsNullOrEmpty(folder) ? string.Empty : RenderPaths.ResolveProjectRelativePath(folder);
     }
 
-    // The timeline loop range is empty (zero length), so rendering it would produce nothing.
-    private static bool IsLoopRangeEmpty()
-    {
-        var loop = Playback.Current.LoopRange;
-        return loop.End <= loop.Start;
-    }
-
     private static bool IsRangeOptionDisabled(RenderSettings.TimeRanges range)
-        => range == RenderSettings.TimeRanges.Loop && IsLoopRangeEmpty();
+        => range == RenderSettings.TimeRanges.Loop && !RenderTiming.IsTimelineLoopUsable();
+
+    private static string? GetRangeOptionTooltip(RenderSettings.TimeRanges range)
+        => IsRangeOptionDisabled(range) ? "Enable loop mode in the timeline to render its loop range." : null;
 
     private bool DrawSourceSection()
     {
@@ -347,15 +343,12 @@ internal sealed class RenderWindow : Window
         FormInputs.SetIndentToParameters();
 
         // Range as a left-aligned section header (no label), divided from the timing parameters below.
-        // Loop is disabled while the timeline loop has no length — fall back to Custom if it was selected.
-        if (s.TimeRange == RenderSettings.TimeRanges.Loop && IsLoopRangeEmpty())
-            s.TimeRange = RenderSettings.TimeRanges.Custom;
-
-        modified |= CustomComponents.SegmentedButton(ref s.TimeRange, IsRangeOptionDisabled);
+        RenderTiming.ApplyTimeRange(s);
+        modified |= CustomComponents.SegmentedButton(ref s.TimeRange, IsRangeOptionDisabled, GetRangeOptionTooltip);
         FormInputs.AppendTooltip("""
                                  **What time span to render:**
+                                 - **Loop** — the timeline's loop range (enable loop mode first)
                                  - **Custom** — a start/end you set
-                                 - **Loop** — the timeline's loop range (set a loop first)
                                  - **Soundtrack** — the main soundtrack's length
                                  - **Continuous** — keep recording until you press stop
                                  """);

@@ -14,6 +14,15 @@ internal static class RenderTiming
         public bool AudioRecording;
     }
 
+    /** Loop mode is on in the timeline and its range has a length, so there is something to render. */
+    public static bool IsTimelineLoopUsable()
+    {
+        var playback = Playback.Current;
+        return playback.IsLooping && playback.LoopRange.End > playback.LoopRange.Start;
+    }
+
+    /// <summary>Resolves Loop and Soundtrack ranges into start and end. Call it right before reading them, since
+    /// the timeline loop and the soundtrack can change while the render window is closed.</summary>
     public static void ApplyTimeRange( RenderSettings renderSettings)
     {
         switch (renderSettings.TimeRange)
@@ -25,6 +34,13 @@ internal static class RenderTiming
 
             case RenderSettings.TimeRanges.Loop:
             {
+                // Custom keeps the start and end last resolved from the loop.
+                if (!IsTimelineLoopUsable())
+                {
+                    renderSettings.TimeRange = RenderSettings.TimeRanges.Custom;
+                    break;
+                }
+
                 var playback = Playback.Current;
                 var startInSeconds = playback.SecondsFromBars(playback.LoopRange.Start);
                 var endInSeconds = playback.SecondsFromBars(playback.LoopRange.End);

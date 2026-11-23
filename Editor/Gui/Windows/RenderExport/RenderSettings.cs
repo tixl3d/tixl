@@ -150,10 +150,11 @@ internal sealed class RenderSettings
         Frames
     }
 
+    /// <summary>Declaration order is the order of the range buttons in the render window.</summary>
     internal enum TimeRanges
     {
-        Custom,
         Loop,
+        Custom,
         Soundtrack,
 
         /// <summary>Open-ended recording: capture starts immediately and runs until the user stops it, with no
