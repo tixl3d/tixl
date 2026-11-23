@@ -150,7 +150,7 @@ public sealed partial class InProcessCompilerTests
         if (pack != null)
             return true;
 
-        _output.WriteLine("Skipped: no .NET SDK with a reference pack found to compare with.");
+        Skip("no .NET SDK with a reference pack found to compare with.");
         return false;
     }
 
@@ -163,12 +163,21 @@ public sealed partial class InProcessCompilerTests
 
         if (output.Contains("NU1101") || output.Contains("NU1301"))
         {
-            _output.WriteLine("Skipped: the pinned compiler package could not be restored (offline?).");
+            Skip("the pinned compiler package could not be restored (offline?).");
             return false;
         }
 
         Assert.Fail($"dotnet build failed:\n{output}");
         return false;
+    }
+
+    /** Comparisons with `dotnet build` skip themselves on machines without an SDK, but CI must not skip them silently. */
+    private void Skip(string reason)
+    {
+        if (Environment.GetEnvironmentVariable("TIXL_REQUIRE_SDK_COMPARISON") == "1")
+            Assert.Fail($"Required comparison with dotnet build could not run: {reason}");
+
+        _output.WriteLine($"Skipped: {reason}");
     }
 
     private static SortedSet<string> RelativeFiles(string directory)

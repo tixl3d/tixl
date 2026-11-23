@@ -21,8 +21,11 @@
 - Manual tests: new `.tests-manual/compile-without-sdk.md`; `build-failure-messages.md` SDK steps now turn the
   setting off first. Release-notes entry under Installation.
 
-Open: Windows and macOS runs, Player export (`TryCompileRelease`) in the live editor, Rider debugging of a user op,
-CI running `OperatorCompiler.Tests`, Phase 3 (installers and install docs still list the SDK).
+CI: `.github/workflows/operator-compiler-tests.yml` runs the tests on Linux, Windows and macOS (comparisons with
+`dotnet build` required there, not skipped).
+
+Open: Windows and macOS runs of the editor, Player export (`TryCompileRelease`) in the live editor, Rider debugging of a user op,
+Phase 3 (installers and install docs still list the SDK).
 **Related:** [Plan_Release_v4.4](Plan_Release_v4.4.md) ("Embedding the .NET SDK" was out of scope; this removes the
 need), [Plan_OptionalPackages](Plan_OptionalPackages.md) (packages are precompiled, so they never need this).
 
