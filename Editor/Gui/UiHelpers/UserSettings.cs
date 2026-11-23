@@ -291,6 +291,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool LogPresentationModeChanges = false;
 
         public CompilerOptions.Verbosity CompileCsVerbosity = CompilerOptions.Verbosity.Minimal;
+        public bool CompileOperatorsInProcess = true;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public TimeFormat.TimeDisplayModes TimeDisplayMode = TimeFormat.TimeDisplayModes.Bars;

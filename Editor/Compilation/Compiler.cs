@@ -5,15 +5,21 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
+using T3.OperatorCompiler;
 
 namespace T3.Editor.Compilation;
 
 /// <summary>
-/// The class that executes runtime compilation commands to build a csproj file via the dotnet CLI
+/// Builds operator projects at runtime: with the compiler built into the editor where the project allows it, otherwise
+/// with the dotnet CLI of an installed .NET SDK.
 /// </summary>
 internal static class Compiler
 {
+    /** True if the editor ships what it needs to compile operator projects without the .NET SDK. */
+    internal static bool CanCompileWithoutSdk => _compilerSupport.Value.IsAvailable;
+
     private static readonly string _workingDirectory = Path.Combine(T3.Core.Settings.FileLocations.TempFolder, "CompilationWorkingDirectory");
 
     static Compiler()
@@ -129,7 +135,7 @@ internal static class Compiler
         catch (System.ComponentModel.Win32Exception e)
         {
             // Emit a marker ExplainBuildFailure recognises so the caller can show a useful hint.
-            var marker = e.NativeErrorCode == 2 ? "DOTNET_NOT_FOUND" : "WIN32_EXEC_FAILED";
+            var marker = e.NativeErrorCode == 2 ? DotnetNotFoundMarker : "WIN32_EXEC_FAILED";
             return ($"{marker}: {fileName}: {e.Message}", -1);
         }
         process.BeginOutputReadLine();
@@ -170,6 +176,68 @@ internal static class Compiler
     /// <param name="output">Contains build process output when compilation fails</param>
     /// <returns></returns>
     internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore, [NotNullWhen(false)] out string? output)
+    {
+        string? needsSdkReason = null;
+        if ((UserSettings.Config?.CompileOperatorsInProcess ?? true)
+            && TryCompileInProcess(projectFile, buildMode, out var succeeded, out output, out needsSdkReason))
+        {
+            return succeeded;
+        }
+
+        if (!TryCompileWithSdk(projectFile, buildMode, nugetRestore, out output))
+        {
+            if (needsSdkReason != null && output.StartsWith(DotnetNotFoundMarker, StringComparison.Ordinal))
+                output += $"\n{NeedsSdkMarker} {needsSdkReason}";
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Builds the project with the compiler built into the editor. Returns false if the project needs the .NET SDK or
+    /// the in-process build itself failed, so the caller falls back to `dotnet build`.
+    /// </summary>
+    private static bool TryCompileInProcess(CsProjectFile projectFile, BuildMode buildMode, out bool succeeded, out string? output,
+                                            out string? needsSdkReason)
+    {
+        succeeded = false;
+        output = null;
+        needsSdkReason = null;
+
+        CompileResult result;
+        try
+        {
+            result = InProcessCompiler.Compile(projectFile.FullPath, buildMode.ToString(), projectFile.GetBuildTargetDirectory(buildMode),
+                                               _compilerSupport.Value);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"{projectFile.Name}: Compiling inside the editor failed, using dotnet build instead: {e}");
+            return false;
+        }
+
+        switch (result.Outcome)
+        {
+            case CompileOutcome.NeedsSdk:
+                needsSdkReason = string.Join(", ", result.NeedsSdkReasons);
+                Log.Debug($"{projectFile.Name}: Compiling with the .NET SDK because the project has {needsSdkReason}");
+                return false;
+            case CompileOutcome.Succeeded:
+                succeeded = true;
+                Log.Info($"{projectFile.Name}: Build succeeded in {result.ElapsedMs}ms (built-in compiler)");
+                return true;
+            default:
+                foreach (var error in result.Errors)
+                    Log.Warning(error);
+
+                Log.Error($"{projectFile.Name}: Build failed in {result.ElapsedMs}ms");
+                output = string.Join('\n', result.Errors);
+                return true;
+        }
+    }
+
+    private static bool TryCompileWithSdk(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
         var verbosity = UserSettings.Config?.CompileCsVerbosity ?? CompilerOptions.Verbosity.Minimal;
         output = null;
@@ -257,8 +325,19 @@ internal static class Compiler
         // DOTNET_NOT_FOUND: synthetic marker emitted by RunCommand when the
         // dotnet executable couldn't be launched (typically because the .NET
         // SDK is not installed, or installed but not yet on PATH).
-        if (buildOutput.StartsWith("DOTNET_NOT_FOUND:", StringComparison.Ordinal))
+        if (buildOutput.StartsWith(DotnetNotFoundMarker, StringComparison.Ordinal))
         {
+            var reasonIndex = buildOutput.IndexOf(NeedsSdkMarker, StringComparison.Ordinal);
+            if (reasonIndex >= 0)
+            {
+                var reason = buildOutput[(reasonIndex + NeedsSdkMarker.Length)..].Trim();
+                return $"""
+                        This project needs the .NET SDK to compile because it has {reason}, but the `dotnet` command was not found in PATH.
+
+                        Fix: install the .NET SDK from https://dotnet.microsoft.com/download, or remove what needs it from the project.
+                        """;
+            }
+
             return "TiXL needs the .NET SDK to compile your projects, but the `dotnet` " +
                    "command was not found in PATH.\n\n" +
                    "Fix: install the .NET SDK from https://dotnet.microsoft.com/download. " +
@@ -285,6 +364,14 @@ internal static class Compiler
 
         return null;
     }
+
+    /** Emitted by RunCommand when the dotnet executable could not be started. */
+    private const string DotnetNotFoundMarker = "DOTNET_NOT_FOUND";
+
+    /** Appended to a failed SDK build's output when the in-process compiler had sent the project to the SDK. */
+    private const string NeedsSdkMarker = "NEEDS_SDK_BECAUSE:";
+
+    private static readonly Lazy<CompilerSupport> _compilerSupport = new(() => new CompilerSupport(Path.Combine(FileLocations.StartFolder, "CompilerSupport")));
 
     private static readonly Regex _nu1100Regex = new(
         @"NU1100:\s*Unable to resolve '([^']+)' for '([^']+)'",

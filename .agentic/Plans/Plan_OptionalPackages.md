@@ -1,6 +1,6 @@
 # Plan: Optional operator packages (separate, discoverable, installable from the editor)
 
-**Status:** Proposal 2026-11-23 (`main` d6bce9b43). Nothing implemented. Decisions marked *proposed* need a yes.
+**Status:** Decisions taken 2026-11-23 (`main` d6bce9b43), except hosting (D4, recommendation stands). Nothing implemented.
 **Builds on:** [Plan_Release_v4.4](Plan_Release_v4.4.md) §1 (Link and Emgu leave the default install, decided
 2026-11-20) and the feed sketch in [share-project-and-packages-plan](share-project-and-packages-plan.md) §6.
 **First candidates:** Ableton Link (GPLv2+, Windows-only native today) and Mediapipe (Emgu GPLv3, ~87 MB of
@@ -37,7 +37,7 @@ Gaps found while checking:
   `Lib.io.video.mediapipe`, and `AbletonLinkSync` keeps its `Lib` path after moving (GUIDs stay). Discovery
   therefore needs a symbol-GUID → package map.
 
-## Proposed decisions
+## Decisions
 
 ### D1. Repository: monorepo by default, separate repos only for third parties
 
@@ -83,6 +83,12 @@ for reading as with built-in packages. packageType `TixlOperatorPackage`.
 - **Precompiled, not source:** installing needs no `dotnet restore` (Mediapipe pulls OpenCvSharp, Protobuf, …),
   no network to NuGet sources the user may not reach, no compile that can fail on the user's SDK. The loader
   already handles exactly this format for built-in packages.
+- **All platforms in one package** (decided 2026-11-23: precompiled is fine as long as it works on every platform).
+  The operator DLL targets `net10.0` and is the same everywhere; only natives differ. One `.nupkg` per package
+  carries `runtimes/{win-x64,linux-x64,osx-arm64}/native/` for every RID in `TixlPlatforms`. Packing runs once,
+  after per-platform native builds have uploaded their artifacts (the `native-audio.yml` pattern). The loader
+  copies or resolves only the host RID's natives. A package whose `TixlPlatforms` lacks the host RID is shown
+  as "not available on this platform", never installed.
 - **Compatibility:** `OperatorPackage.json`'s `EditorVersion` must match the editor's major.minor. CI repacks
   every official package for each TiXL release (cheap in the monorepo). A mismatched package is not loaded; its
   operators stay unresolved (lossless) and the Packages window offers the matching version.
@@ -158,7 +164,7 @@ the package's `licenses/`. An export that contains a GPL package must say so in 
 - Verify: release artifacts on all platforms contain no Link/Emgu/Mediapipe files; Debug editor still loads both
   packages; a project using `[AbletonLinkSync]` opened in a Release build keeps the op through a save.
 
-### Phase 1: Pack and manual install (needed for 4.4, see open decision 5)
+### Phase 1: Pack and manual install (in 4.4 scope, decided 2026-11-23)
 
 - [ ] `pack` target per package → `TiXL.<Name>.<ver>.nupkg` from the Release folder; CI attaches the optional
       packages to each GitHub release.
@@ -196,13 +202,12 @@ the package's `licenses/`. An export that contains a GPL package must say so in 
 6. Open a project that used the operators in a Release build without the package (op kept), then with it.
 7. Add the catalog entry (Phase 3 onward).
 
-## Open decisions
+## Decisions taken 2026-11-23
 
-1. **Hosting:** nuget.org (recommended, D4) or GitHub Releases only?
-2. **Precompiled vs source packages:** precompiled recommended (D3); source would avoid per-release repacking but
-   needs restore + compile on the user's machine.
-3. **Community packages in the catalog from the start**, or official only until Phase 4?
-4. **Restart for update/uninstall** acceptable (D7)?
-5. **Sequencing gap:** v4.4 removes Mediapipe from *all* release builds, including Windows, where it ships today.
-   Without Phase 1 in 4.4, Windows users who rely on Mediapipe have no supported way to get it back. Recommended:
-   Phase 1 joins the 4.4 scope (it is small); alternative: keep Mediapipe bundled on Windows for one more release.
+1. **Hosting:** undecided. Recommendation stays nuget.org (D4): free, immutable versions, works for community
+   packages without us running anything. It only matters from Phase 3; Phase 1 attaches `.nupkg`s to GitHub
+   releases either way, so nothing blocks on it.
+2. **Precompiled packages**, with natives for every supported platform in the same package (D3).
+3. **Community packages in the catalog from the start** (`tier: community`), reviewed by catalog PR.
+4. **Restart for update and uninstall** is fine (D7).
+5. **Phase 1 is part of 4.4**, so Windows Mediapipe users can install it from the release page.

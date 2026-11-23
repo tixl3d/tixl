@@ -148,7 +148,7 @@ because it changes which exe gets signed.
 | | What | Blocks |
 |---|---|---|
 | M0 | Start Azure validation (§3, maintainer). AbletonLink package, Emgu into Mediapipe, `Dependencies/` split (§1) | licence-clean builds |
-| M1 | Slang in the tarball (§2a), macOS FFmpeg build + bundling (§2b), clean install layout on Linux, tests in CI | beta |
+| M1 | In-process compile, no SDK for users on any platform ([Plan_InProcessCompile](Plan_InProcessCompile.md), decided 2026-11-23), Slang in the tarball (§2a), macOS FFmpeg build + bundling (§2b), clean install layout on Linux, tests in CI, optional packages as `.nupkg` with manual install ([Plan_OptionalPackages](Plan_OptionalPackages.md) Phase 1, decided 2026-11-23) | beta |
 | M2 | `v4.4.0-beta.1` for macOS and Linux, tester round. Windows: signed pre-releases as soon as Azure approves | stable |
 | M3 | Fixes from testers, `v4.4.0` for macOS and Linux, Flathub submission. Windows stable 4.4 once signing has run a few weeks | |
 
@@ -170,4 +170,5 @@ Assumed, not confirmed: decision 3 also means Windows keeps the flat install lay
 - **Embedding the .NET SDK.** Operators compile at runtime with `dotnet restore`/`build`, which needs the full
   SDK and NuGet access. A private SDK inside the app is ~200 MB and still needs network for restore. The
   installers and startup check already handle it; revisit with an offline package feed later.
+  Superseded 2026-11-23: [Plan_InProcessCompile](Plan_InProcessCompile.md) removes the need and is in 4.4 (M1).
 - Intel Macs, ARM Linux, Mediapipe and Emgu on Linux/macOS, installing optional packages from inside the editor.

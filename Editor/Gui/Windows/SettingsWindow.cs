@@ -627,6 +627,14 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.SetIndentToLeft();
                     FormInputs.AddSectionSubHeader("Compilation");
                     FormInputs.AddVerticalSpace();
+                    changed |= FormInputs.AddCheckBox("Compile Operators Inside TiXL",
+                                                      ref UserSettings.Config.CompileOperatorsInProcess,
+                                                      """
+                                                      Compiles the C# code of your projects with the compiler built into TiXL, so no .NET SDK is needed.
+                                                      Projects that use NuGet packages or custom build steps are still built with the .NET SDK.
+                                                      Turn this off to build every project with the dotnet command line tools.
+                                                      """,
+                                                      UserSettings.Defaults.CompileOperatorsInProcess);
                     changed |= FormInputs.AddCheckBox("Log Assembly Version mismatches",
                                                       ref CoreSettings.Config.LogAssemblyVersionMismatches,
                                                       "Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.\nThese are only relevant in situations where you need to debug or analyse assembly loading problems.",

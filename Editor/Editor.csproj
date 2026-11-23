@@ -89,6 +89,7 @@
     <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
     <ProjectReference Include="..\SdlPlatform\SdlPlatform.csproj" />
         <ProjectReference Include="..\IoServices\IoServices.csproj" />
+        <ProjectReference Include="..\OperatorCompiler\OperatorCompiler.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
@@ -276,4 +277,6 @@
     </Target>
 
     <!-- =========================//================================ -->
+    <!-- Reference assemblies and source generators for compiling operator projects without the .NET SDK -->
+    <Import Project="../OperatorCompiler/CompilerSupport.targets" />
 </Project>

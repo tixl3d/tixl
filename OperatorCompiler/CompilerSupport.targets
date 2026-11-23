@@ -1,0 +1,26 @@
+<!-- Ships what the in-process operator compiler would otherwise take from the .NET SDK: the reference assemblies and
+     source generators of the Microsoft.NETCore.App.Ref package (MIT), copied to <output>/CompilerSupport/ in the
+     package's own layout. Imported by the Editor and by OperatorCompiler.Tests. -->
+<Project>
+  <PropertyGroup>
+    <TixlReferencePackVersion>10.0.12</TixlReferencePackVersion>
+    <TixlReferencePackRoot>$(NuGetPackageRoot)microsoft.netcore.app.ref/$(TixlReferencePackVersion)/</TixlReferencePackRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="Microsoft.NETCore.App.Ref" Version="[$(TixlReferencePackVersion)]" />
+  </ItemGroup>
+
+  <Target Name="CopyCompilerSupport" AfterTargets="Build">
+    <Error Condition="!Exists('$(TixlReferencePackRoot)data/FrameworkList.xml')"
+           Text="Microsoft.NETCore.App.Ref $(TixlReferencePackVersion) was not restored to $(TixlReferencePackRoot)" />
+    <ItemGroup>
+      <_TixlFrameworkList Include="$(TixlReferencePackRoot)data/FrameworkList.xml" />
+      <_TixlReferenceAssemblies Include="$(TixlReferencePackRoot)ref/net10.0/*.dll" />
+      <_TixlSourceGenerators Include="$(TixlReferencePackRoot)analyzers/dotnet/cs/*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_TixlFrameworkList)" DestinationFolder="$(OutDir)CompilerSupport/data" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_TixlReferenceAssemblies)" DestinationFolder="$(OutDir)CompilerSupport/ref/net10.0" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_TixlSourceGenerators)" DestinationFolder="$(OutDir)CompilerSupport/analyzers/dotnet/cs" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

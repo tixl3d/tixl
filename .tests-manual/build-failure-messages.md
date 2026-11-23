@@ -39,6 +39,10 @@ blank, click `Create`.
 ## Step: DOTNET_NOT_FOUND — friendly hint when the .NET SDK is missing
 
 **Action:**
+In `Settings → Diagnostics → Compilation`, turn off `Compile Operators Inside TiXL` first. With it on, TiXL
+compiles new projects without the .NET SDK and this step creates the project successfully (see the
+`compile-without-sdk` test set).
+
 Close TiXL. From an admin command prompt, **temporarily** rename the system
 `dotnet` shim so it's no longer resolvable on `PATH`:
 
@@ -73,6 +77,9 @@ ren "C:\Program Files\dotnet\dotnet.exe.disabled" dotnet.exe
 ## Step: NU1100 — friendly hint when a targeting pack is missing
 
 **Action:**
+Turn off `Compile Operators Inside TiXL` in `Settings → Diagnostics → Compilation` first; the built-in
+compiler doesn't use targeting packs.
+
 Restart TiXL with the .NET SDK back on PATH. Open **New Project**, fill in a
 unique project name (e.g. `TestNu1100`), and **before clicking Create**, edit
 the in-flight `.csproj` template on disk under `<repo>/Resources/default-home/`
