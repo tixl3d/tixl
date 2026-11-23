@@ -27,6 +27,11 @@
           "Value": "pixtur.Playground:mesh/animations/Fox.gltf"
         },
         {
+          "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
           "Id": "d02f41a6-1a6b-4a6e-8d6c-a28873c79f2c"/*Setup*/,
           "Type": "T3.Core.DataTypes.SceneSetup",
           "Value": {
@@ -39,6 +44,11 @@
           "Id": "ef7075e9-4bc2-442e-8e0c-e03667ff2e0a"/*TriggerUpdate*/,
           "Type": "System.Boolean",
           "Value": false
+        },
+        {
+          "Id": "fb325383-754a-4702-aff2-c19e16363460"/*MeshChildIndex*/,
+          "Type": "System.Int32",
+          "Value": -1
         }
       ],
       "Outputs": []

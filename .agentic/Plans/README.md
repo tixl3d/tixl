@@ -158,6 +158,7 @@ These matter more than any filing decision.
 | [Plan_ContextVariableInvalidation](Plan_ContextVariableInvalidation.md) | Parked 2026-11-13; Phase 0 and a targeted resolution patch shipped | Full variable redesign judged not worth it after the baseline. Keeps the analysis, the baseline scripts and the design |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
 | [Plan_CodeInputs](Plan_CodeInputs.md) | Nothing shipped; written 2026-11-20 | `UsageType.Code` + `CodeLanguage` for snippet inputs; `// A: Scale 0..1` comments relabel A–D per instance; highlighting later. Syntax and 4 other decisions open |
+| [Plan_CatAnimationDemo](Plan_CatAnimationDemo.md) | Nothing shipped; written 2026-11-23 | Rigify cat on top of the glTF pose ops: distance-driven cycle phase, gait blending, quadruped foot IK with stateless locking, PBD powered ragdoll + tail, GPU verlet whiskers. Phase 0 = GltfAnimation verification items. 5 questions open |
 
 ## Parked
 
