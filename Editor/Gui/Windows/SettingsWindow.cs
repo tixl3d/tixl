@@ -60,6 +60,14 @@ internal sealed partial class SettingsWindow : Window
         RequestWindowFocus();
     }
 
+    /// <summary>Shows the window on the Extensions category, e.g. to install the package of missing operators.</summary>
+    internal void ShowExtensionsCategory()
+    {
+        Config.Visible = true;
+        SelectCategory(Categories.Extensions);
+        RequestWindowFocus();
+    }
+
     private void SelectCategory(Categories category)
     {
         if (category == _activeCategory)

@@ -8,6 +8,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Window;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -75,7 +76,17 @@ internal sealed class MissingOperatorsDialog : ModalDialog
             ImGui.EndChild();
 
             FormInputs.AddVerticalSpace(6);
-            AlignCtaButtons("Close");
+            CustomComponents.StylizedText("Ableton Link, NDI and MediaPipe operators come from extensions you can install.",
+                                          Fonts.FontSmall, UiColors.TextMuted);
+
+            AlignCtaButtons(ManageExtensionsLabel, "Close");
+            if (CustomComponents.DrawCtaButton(ManageExtensionsLabel, Icon.None, CustomComponents.ButtonStates.Default))
+            {
+                ImGui.CloseCurrentPopup();
+                WindowManager.SettingsWindow.ShowExtensionsCategory();
+            }
+
+            ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Close", Icon.None, CustomComponents.ButtonStates.Default))
                 ImGui.CloseCurrentPopup();
 
@@ -88,7 +99,7 @@ internal sealed class MissingOperatorsDialog : ModalDialog
     private void DrawEntries()
     {
         EditorSymbolPackage? lastPackage = null;
-        var buttonWidth = 110 * T3Ui.UiScaleFactor;
+        var buttonWidth = ImGui.CalcTextSize(ShowInGraphLabel).X + 2 * ImGui.GetStyle().FramePadding.X;
         var iconSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
         var buttonsWidth = buttonWidth + iconSize.X + spacing;
@@ -118,7 +129,7 @@ internal sealed class MissingOperatorsDialog : ModalDialog
             ImGui.PopStyleColor();
 
             ImGui.SameLine(ImGui.GetWindowWidth() - buttonsWidth - ImGui.GetStyle().WindowPadding.X - ImGui.GetStyle().ScrollbarSize);
-            if (ImGui.Button("Show in Graph", new Vector2(buttonWidth, 0)))
+            if (ImGui.Button(ShowInGraphLabel, new Vector2(buttonWidth, 0)))
             {
                 if (TryOpenInGraph(entry))
                     ImGui.CloseCurrentPopup();
@@ -216,6 +227,9 @@ internal sealed class MissingOperatorsDialog : ModalDialog
     private const string HelpUrl = "https://help.tixl.app/using/Pitfalls/#missing-operators";
 
     private sealed record Entry(EditorSymbolPackage Package, Guid SymbolId, string SymbolName, string? FilePath, string MissingNames);
+
+    private const string ManageExtensionsLabel = "Manage Extensions...";
+    private const string ShowInGraphLabel = "Show in Graph";
 
     private readonly List<Entry> _entries = [];
     private int _missingOperatorCount;
