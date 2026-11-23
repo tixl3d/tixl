@@ -163,8 +163,8 @@ def check_dependencies_folder():
             elif not is_allowed(entry["licence"]):
                 problems.append(f"Dependencies/{relative} is licensed '{entry['licence']}'")
 
-    for relative in listed:
-        if not os.path.exists(os.path.join(dependencies, relative)):
+    for relative, entry in listed.items():
+        if not entry.get("builtInCi") and not os.path.exists(os.path.join(dependencies, relative)):
             problems.append(f"Dependencies/third-party.json lists {relative}, which does not exist")
     return problems
 
