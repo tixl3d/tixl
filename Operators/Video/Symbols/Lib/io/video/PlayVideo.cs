@@ -20,8 +20,13 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
     [Output(Guid = "C89EA3AE-82FF-4791-B755-7B7D9EDDF8A7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> HasCompleted = new();
 
-    [Output(Guid = "732FC715-A8B5-438F-A607-EE1B8B080C04", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<int> UpdateCount = new();
+    /// <summary>
+    /// Source frame number of the current texture, counted from the start of the video. Use it with
+    /// [HasIntChanged] (mode Changed) to react to new frames; it stays correct across scrubbing, looping and
+    /// dropped frames. -1 until the first frame is decoded.
+    /// </summary>
+    [Output(Guid = "1796c70e-f5d6-49d8-9453-c0581c64a874", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> FrameIndex = new();
 
     /// <summary>
     /// AudioReference for the audio-processing graph. Wire it into an [AudioBus] (directly or through a
@@ -34,7 +39,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
     public PlayVideo()
     {
         Texture.UpdateAction = Update;
-        UpdateCount.UpdateAction = Update;
+        FrameIndex.UpdateAction = Update;
 
         // The decode side owns the stream's lifetime and feed position; the graph only decides which mixer it
         // joins and at what gain.
@@ -60,14 +65,12 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
         var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath!, requestedTime,
                                                                loop, context.Playback.IsRenderingToFile,
                                                                (VideoPlaybackOptimization)OptimizeFor.GetValue(context));
-        if (result.Produced)
-            UpdateCount.Value++;
-
         UpdateAudioTrack(context, absolutePath!, requestedTime, loop);
 
         _statusMessage = result.ErrorMessage;
         HasCompleted.Value = result.HasCompleted;
         Texture.Value = result.Texture;
+        FrameIndex.Value = (int)result.FrameIndex;
         Duration.Value = result.Duration;
 
         // Only stall the exporter for the exact frame; realtime keeps showing the last valid texture.
@@ -77,7 +80,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider, IAudioSo
         Texture.DirtyFlag.Clear();
         Duration.DirtyFlag.Clear();
         HasCompleted.DirtyFlag.Clear();
-        UpdateCount.DirtyFlag.Clear();
+        FrameIndex.DirtyFlag.Clear();
     }
 
     Slot<AudioGraphNode> IAudioSource.AudioReferenceOutput => AudioReference;

@@ -23,6 +23,10 @@ namespace T3.VideoServices;
 public sealed class VideoPlaybackController : IDisposable
 {
     public CoreTexture2D? Texture { get; private set; }
+
+    /// <summary>Source frame number of <see cref="Texture"/>, or -1 before the first frame.</summary>
+    public long FrameIndex { get; private set; } = -1;
+
     public float Duration { get; private set; }
     public bool HasCompleted { get; private set; }
 
@@ -58,6 +62,7 @@ public sealed class VideoPlaybackController : IDisposable
 
         var produced = false;
         var gotGpuFrame = false;
+        var publishedFrameIndex = -1L;
         double duration;
         bool isOpen;
         long readyTarget;
@@ -69,6 +74,7 @@ public sealed class VideoPlaybackController : IDisposable
                 {
                     unsafe { ffmpeg.av_frame_move_ref(_renderGpuFrame, _pendingGpuFrame); }
                     _lastUploadedTarget = _pendingTarget;
+                    publishedFrameIndex = _pendingFrameIndex;
                     _hasPendingGpuFrame = false;
                     gotGpuFrame = true;
                     // This frame's surface belongs to the current session. Claim it so a concurrent mode/source
@@ -82,6 +88,7 @@ public sealed class VideoPlaybackController : IDisposable
                 _lastUploadedTarget = _pendingTarget;
                 _hasPendingFrame = false;
                 produced = true;
+                FrameIndex = _pendingFrameIndex;
             }
 
             duration = _duration;
@@ -106,6 +113,7 @@ public sealed class VideoPlaybackController : IDisposable
                 if (converted != null)
                 {
                     Texture = converted;
+                    FrameIndex = publishedFrameIndex;
                     produced = true;
                 }
             }
@@ -510,6 +518,7 @@ public sealed class VideoPlaybackController : IDisposable
                 _pendingGpuFrame.Unref();                     // drop the previous un-shown frame (latest-wins)
                 ffmpeg.av_frame_ref(_pendingGpuFrame, frame); // pin the decoder's GPU surface for the render thread
                 _pendingTarget = target;
+                _pendingFrameIndex = FrameIndexForPts(target);
                 _hasPendingGpuFrame = true;
             }
 
@@ -530,6 +539,7 @@ public sealed class VideoPlaybackController : IDisposable
             _pendingHeight = rgba.Height;
             _pendingIsHdr = _session!.IsHdr;
             _pendingTarget = target;
+            _pendingFrameIndex = FrameIndexForPts(target);
             _hasPendingFrame = true;
         }
 
@@ -574,6 +584,9 @@ public sealed class VideoPlaybackController : IDisposable
     private int _pendingHeight;
     private bool _pendingIsHdr;
     private long _pendingTarget;
+
+    /** Computed on the worker with the session that decoded the frame, so a later source switch can't skew it. */
+    private long _pendingFrameIndex;
     private bool _hasPendingFrame;
 
     // Zero-copy GPU handoff (worker → render thread). _zeroCopy is set at open under _lock; the pending GPU

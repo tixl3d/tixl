@@ -45,7 +45,7 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
         // Reported ready and completed on purpose: no frame will ever arrive, and an exporter or test that
         // waits for one would wait forever.
         if (!FfmpegLibrary.EnsureInitialized())
-            return new VideoFrameResult(false, null, 0, true, true, FfmpegLibrary.StatusError);
+            return new VideoFrameResult(false, null, -1, 0, true, true, FfmpegLibrary.StatusError);
 
         var now = Environment.TickCount64;
         var stream = GetOrCreateStream(streamId, now);
@@ -55,8 +55,8 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
         var controller = stream.Controller;
         var effectivePath = ResolveEffectivePath(absolutePath, renderingToFile);
         var produced = controller.Update(effectivePath, requestedSeconds, loop, renderingToFile, optimization);
-        return new VideoFrameResult(produced, controller.Texture, controller.Duration, controller.HasCompleted,
-                                    controller.IsReady, controller.ErrorMessage);
+        return new VideoFrameResult(produced, controller.Texture, controller.FrameIndex, controller.Duration,
+                                    controller.HasCompleted, controller.IsReady, controller.ErrorMessage);
     }
 
     public AudioHandle RequestAudio(Guid streamId, string absolutePath, double sourceSeconds, bool loop, bool renderingToFile)
