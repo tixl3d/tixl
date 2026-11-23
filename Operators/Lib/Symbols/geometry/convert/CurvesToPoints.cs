@@ -144,7 +144,7 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
     /// below 1 only sharp edges are emitted: open borders and edges whose two faces' normals differ by more than the
     /// angle, so flat regions (like a subdivided cap) stay clean.
     /// </summary>
-    private void AppendPolygonEdges(Geometry geometry, float maxCos, GeometryAttribute<Vector4>? primitiveColors, GeometryAttribute<Vector4>? partColors)
+    private void AppendPolygonEdges(Geometry geometry, float maxCos, GeometryAttribute<Vector4> primitiveColors, GeometryAttribute<Vector4> partColors)
     {
         var edges = geometry.Edges.Edges;
         if (edges.Length == 0)

@@ -12,7 +12,7 @@ namespace Skills._{
         public readonly Slot<Texture2D> Output = new Slot<Texture2D>();
 
         [Input(Guid = "fcd39ec2-c822-43f1-b79a-4266cde3787b")]
-        public readonly InputSlot<int> Type = new InputSlot<int>();
+        public new readonly InputSlot<int> Type = new InputSlot<int>();
 
 
     }

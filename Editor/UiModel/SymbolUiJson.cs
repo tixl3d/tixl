@@ -777,11 +777,11 @@ internal static class SymbolUiJson
                 writer.WriteValue(symbolUi.WindowLayoutImGuiVersion);
             }
 
-            if (hasWindowVisibility)
+            if (hasWindowVisibility && symbolUi.WindowVisibility is { } windowVisibility)
             {
                 writer.WritePropertyName("WindowVisibility");
                 writer.WriteStartObject();
-                foreach (var (title, visible) in symbolUi.WindowVisibility)
+                foreach (var (title, visible) in windowVisibility)
                 {
                     writer.WritePropertyName(title);
                     writer.WriteValue(visible);

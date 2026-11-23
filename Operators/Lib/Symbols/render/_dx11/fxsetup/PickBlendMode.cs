@@ -81,7 +81,7 @@ internal sealed class PickBlendMode : Instance<PickBlendMode>
                 BlendOption.One, BlendOption.Zero, BlendOperation.Add, ColorWriteMaskFlags.All),
         ];
 
-    private static BlendState[]? _blendStates;
+    private static BlendState[] _blendStates;
 
     [Input(Guid = "30b58444-0485-4116-8b15-7e62fee69eaa", MappedType = typeof(SharedEnums.BlendModes))]
     public readonly InputSlot<int> BlendMode = new();

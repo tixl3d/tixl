@@ -1087,6 +1087,8 @@ internal static class TransformGizmoHandling
     /** Swings the aim target captured at drag start around the operator's position. */
     private static void SetRotatedAimTarget(Vector3 axis, float angleDeg)
     {
+        Debug.Assert(_transformable != null);
+        Debug.Assert(_inputCommandInFlight != null);
         var rotation = Quaternion.CreateFromAxisAngle(axis, angleDeg * MathF.PI / 180f);
         var newTarget = _initialOrigin + Vector3.Transform(_initialRotation - _initialOrigin, rotation);
         TrySetVector3ToInput(_transformable.AimTargetInput, newTarget);

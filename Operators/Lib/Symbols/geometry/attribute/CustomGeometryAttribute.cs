@@ -422,7 +422,7 @@ internal sealed class CustomGeometryAttribute : Instance<CustomGeometryAttribute
     public readonly InputSlot<string> Name = new();
 
     [Input(Guid = "f1f1fde1-9f97-4618-a020-aa6c800b7466", MappedType = typeof(Types))]
-    public readonly InputSlot<int> Type = new();
+    public new readonly InputSlot<int> Type = new();
 
     [Input(Guid = "837cd3ee-d92e-46c3-8d42-69f438c81e50")]
     public readonly InputSlot<string> Code = new();
