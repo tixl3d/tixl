@@ -28,6 +28,8 @@ It is muted when neither side has keyframes.
 
 Hold `Shift` while scrubbing to snap to the bar raster and other timeline elements.
 
+The current time field in the timeline toolbar works like any numeric parameter: drag it to scrub, or click it to type a time. The value uses the unit of the timeline format — frames in **F30** / **F60**, seconds in **Secs** (e.g. `83.5` for 01:23:50) and bars in **Bars**.
+
 ### Snapping and the time raster
 
 In the background the **time raster** shows the current grid. Switch between:

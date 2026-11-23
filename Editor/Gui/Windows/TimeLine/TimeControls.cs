@@ -210,48 +210,64 @@ internal static class TimeControls
     /** Current playback time and the button that switches its display format. */
     internal static void DrawCurrentTime(Playback playback, CompositionSettings settings)
     {
-        // Current Time
-        var delta = 0.0;
-        string formattedTime = "";
-        switch (UserSettings.Config.TimeDisplayMode)
+        // The value is edited in the unit of the display mode, so dragging and typed input match what is shown.
+        var displayMode = UserSettings.Config.TimeDisplayMode;
+        var framesPerSecond = displayMode switch
+                                  {
+                                      TimeFormat.TimeDisplayModes.F30 => 30,
+                                      TimeFormat.TimeDisplayModes.F60 => 60,
+                                      _ => 0,
+                                  };
+
+        double value;
+        InputEditStateFlags result;
+        var size = new Vector2(StandardWidth, ControlSize.Y);
+
+        // SingleValueEdit derives its id from a fixed label; scope it so it can't collide with the BPM field.
+        ImGui.PushID("currentTime");
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        switch (displayMode)
         {
             case TimeFormat.TimeDisplayModes.Bars:
-                formattedTime = TimeFormat.FormatTimeInBars(playback.TimeInBars, 0);
+                value = playback.TimeInBars;
+                result = SingleValueEdit.Draw(ref value, size, scale: 0.05f, format: "{0:0.000}", horizontalAlign: 1,
+                                              formatLabel: _formatBarsLabel);
                 break;
 
             case TimeFormat.TimeDisplayModes.Secs:
-                var ts = TimeSpan.FromSeconds(playback.TimeInSecs);
-
-                formattedTime = ts.Hours > 0
-                                           ? ts.ToString(@"hh\:mm\:ss\:ff")
-                                           : ts.ToString(@"mm\:ss\:ff");
+                value = playback.TimeInSecs;
+                result = SingleValueEdit.Draw(ref value, size, scale: 0.05f, format: "{0:0.00}", horizontalAlign: 1,
+                                              formatLabel: _formatSecondsLabel);
                 break;
 
-            case TimeFormat.TimeDisplayModes.F30:
-                var frames = playback.TimeInSecs * 30;
-                formattedTime = $"{frames:0}f ";
+            default:
+                value = playback.TimeInSecs * framesPerSecond;
+                result = SingleValueEdit.Draw(ref value, size, scale: 0.5f, format: "{0:0}f", useIntegers: true, horizontalAlign: 1);
                 break;
-            
-            case TimeFormat.TimeDisplayModes.F60:
-                var frames60 = playback.TimeInSecs * 60;
-                formattedTime = $"{frames60:0}f ";
-                break;
-        }
-
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        if (JogDial(formattedTime, ref delta, new Vector2(StandardWidth, ControlSize.Y)))
-        {
-            playback.PlaybackSpeed = 0;
-            playback.TimeInBars += delta;
-            if (UserSettings.Config.TimeDisplayMode == TimeFormat.TimeDisplayModes.F30)
-            {
-                playback.TimeInSecs = Math.Floor(playback.TimeInSecs * 30) / 30;
-            }
         }
         ImGui.PopStyleColor();
+        ImGui.PopID();
 
-        if(ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Playback.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
+        if ((result & InputEditStateFlags.Modified) != 0)
+        {
+            playback.PlaybackSpeed = 0;
+            switch (displayMode)
+            {
+                case TimeFormat.TimeDisplayModes.Bars:
+                    playback.TimeInBars = value;
+                    break;
+                case TimeFormat.TimeDisplayModes.Secs:
+                    playback.TimeInSecs = value;
+                    break;
+                default:
+                    playback.TimeInSecs = Math.Round(value) / framesPerSecond;
+                    break;
+            }
+        }
+
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Playback.Bpm:0.0} BPM.",
+                                                "Drag to scrub, click to enter a time. Click the mode button to toggle between timeline formats.");
 
         ImGui.SameLine();
 
@@ -659,36 +675,25 @@ internal static class TimeControls
 
 
 
-    public static bool JogDial(string label, ref double delta, Vector2 size)
+    private static string FormatSecondsLabel(double seconds)
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1, 0.5f));
-        var isActive = ImGui.Button(label + "###dummy", size);
-        ImGui.PopStyleVar();
-        var io = ImGui.GetIO();
-        if (ImGui.IsItemActive())
-        {
-            var center = (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) * 0.5f;
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            ImGui.GetForegroundDrawList().AddCircle(center, 100, UiColors.Gray, 50);
-            isActive = true;
+        // Typed input can exceed TimeSpan's range, which would throw while drawing the label.
+        if (!(Math.Abs(seconds) < MaxLabelSeconds))
+            return seconds.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
 
-            var pLast = io.MousePos - io.MouseDelta - center;
-            var pNow = io.MousePos - center;
-            var aLast = Math.Atan2(pLast.X, pLast.Y);
-            var aNow = Math.Atan2(pNow.X, pNow.Y);
-            delta = aLast - aNow;
-            if (delta > 1.5)
-            {
-                delta -= 2 * Math.PI;
-            }
-            else if (delta < -1.5)
-            {
-                delta += 2 * Math.PI;
-            }
-        }
-
-        return isActive;
+        var timeSpan = TimeSpan.FromSeconds(seconds);
+        return timeSpan.Hours > 0
+                   ? timeSpan.ToString(@"hh\:mm\:ss\:ff")
+                   : timeSpan.ToString(@"mm\:ss\:ff");
     }
+
+    private static string FormatBarsLabel(double bars) => TimeFormat.FormatTimeInBars(bars, 0);
+
+    private const double MaxLabelSeconds = 1e9;
+
+    // Cached so the per-frame draw doesn't allocate a delegate.
+    private static readonly Func<double, string> _formatSecondsLabel = FormatSecondsLabel;
+    private static readonly Func<double, string> _formatBarsLabel = FormatBarsLabel;
 
     private static string FormatBars(float bars) => bars.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
 }

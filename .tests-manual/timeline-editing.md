@@ -163,6 +163,21 @@ Then right-click a clip of any other type.
   under **Delete**.
 - For the other clip, that row is absent and no leftover separator remains.
 
+## Step: Edit the current time field
+
+**Action:**
+In the timeline toolbar, set the format button to **F60**. Drag the current time field left and right, then
+click it without dragging, type `600` and press `Return`. Switch the format to **Secs**, click the field, type
+`2.5` and press `Return`. Repeat with **Bars** and `4`. Finally click the field, type `abc` and press `Esc`.
+
+**Expected:**
+- Dragging opens the value slider (the one set in the settings) and scrubs time; playback stops.
+- In F60 the field shows `600f` and the playhead is at 10 s. In Secs it shows `00:02:50`, in Bars the label
+  for bar 4.
+- Clicking opens a text field with the plain number (no `f` suffix or timecode).
+- Invalid text is shown in the error color and `Esc` leaves the time unchanged.
+- Changing the BPM field next to it does not affect the time field, and vice versa.
+
 ## Step: Remove gaps
 
 **Action:**
