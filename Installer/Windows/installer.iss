@@ -9,9 +9,13 @@
   #endif
 #endif
 
-; Overridable from the command line: iscc /DMyAppVersion=4.4.0.5 /DMyAppName=TiXL-v4.4.0.5
+; The version is the file version of the built editor, which comes from TixlVersion in Tixl.props, so it is set in
+; one place only. Overridable from the command line: iscc /DMyAppVersion=4.4.0.5 /DMyAppName=TiXL-v4.4.0.5
 #ifndef MyAppVersion
-  #define MyAppVersion "4.4.0.5"
+  #define MyAppVersion GetVersionNumbersString(SourcePath + "..\..\Editor\bin\Release\net10.0\TiXL.dll")
+  #if MyAppVersion == ""
+    #error Could not read the version of Editor\bin\Release\net10.0\TiXL.dll. Build the Editor in Release first.
+  #endif
 #endif
 #ifndef MyAppName
   #define MyAppName "TiXL-v" + MyAppVersion
