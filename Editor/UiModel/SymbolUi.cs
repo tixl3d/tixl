@@ -331,13 +331,15 @@ public sealed partial class SymbolUi : ISelectionContainer
 
     internal const SymbolTags WorkStateTags = SymbolTags.Planned | SymbolTags.Draft | SymbolTags.Done | SymbolTags.Tested;
 
-    /// <summary>Replaces the work state, or clears it if the given state is already set.</summary>
-    internal void ToggleWorkState(SymbolTags workState)
+    /// <summary>Toggles a tag. Work states are exclusive: setting one replaces the current work state.</summary>
+    internal static SymbolTags ToggleTag(SymbolTags tags, SymbolTags tag)
     {
-        var wasSet = Tags.HasFlag(workState);
-        Tags &= ~WorkStateTags;
-        if (!wasSet)
-            Tags |= workState;
+        if ((tag & WorkStateTags) == 0)
+            return tags ^ tag;
+
+        var wasSet = tags.HasFlag(tag);
+        tags &= ~WorkStateTags;
+        return wasSet ? tags : tags | tag;
     }
 
     internal bool ReadOnly;

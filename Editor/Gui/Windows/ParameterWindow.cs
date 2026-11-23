@@ -375,9 +375,18 @@ internal sealed class ParameterWindow : Window
 
     public static bool DrawSymbolTagsButton(SymbolUi symbolUi)
     {
+        var tags = symbolUi.Tags;
+        if (!DrawSymbolTagsButton(ref tags, "##Tags" + symbolUi.Symbol.Id))
+            return false;
+
+        symbolUi.Tags = tags;
+        return true;
+    }
+
+    /// <summary>Bookmark button that opens a popup for toggling tags, for symbols that don't exist yet.</summary>
+    public static bool DrawSymbolTagsButton(ref SymbolUi.SymbolTags symbolUiTags, string tagsPopupId)
+    {
         var modified = false;
-        var tagsPopupId = "##Tags" + symbolUi.Symbol.Id;
-        var symbolUiTags = symbolUi.Tags;
         var state = GetButtonStatesForSymbolTags(symbolUiTags);
 
         if (CustomComponents.IconButton(Icon.Bookmark, Vector2.Zero, state))
@@ -435,10 +444,7 @@ internal sealed class ParameterWindow : Window
                 if (DrawSymbolTag(symbolUiTags, tagValue))
                 {
                     modified = true;
-                    if ((tagValue & SymbolUi.WorkStateTags) != 0)
-                        symbolUi.ToggleWorkState(tagValue);
-                    else
-                        symbolUi.Tags ^= tagValue;
+                    symbolUiTags = SymbolUi.ToggleTag(symbolUiTags, tagValue);
                 }
             }
             
