@@ -214,6 +214,41 @@ For panning footage, the fixed targets generalize to a world anchor per marker; 
 - Live connection only. No keyframe generation in the tracker; if keys are needed later, the existing
   `[SetKeyframes]` op can record the solved outputs.
 
+### Depth and parallax
+
+Markers at different depths move differently once the camera translates: near points move more than far ones.
+No single 2D transform matches them all. How much this matters depends on the use:
+
+- **Stabilization: mostly harmless.** Handheld jitter is almost all small camera rotation, and rotation moves
+  every point the same way whatever its depth. The translation (following the cat) is slow, and path smoothing
+  keeps it. What gets removed is the difference between the actual and the smoothed path, which is mostly
+  rotation. The parallax of the intended move stays in the picture, where it looks natural.
+- **Pinning a layer to a spot: matters.** A plain least-squares fit over mixed depths is a compromise that is
+  exact nowhere. The focus point below fixes that.
+
+**Focus point.** `FocusPoint` (video space) and `FocusRadius` weight each marker by
+`confidence × exp(-(distance / FocusRadius)²)`. The transform then matches the scene's motion at that spot and
+depth: in the walking-cat shot, the ground where the cat runs. Markers elsewhere count less and drift relative
+to the layer, which is correct parallax. `FocusRadius` 0 means equal weights, the plain fit and the default. The
+focus point can be any value, including a tracked marker's position from `[SampleTrack]`, so it can move with the
+shot.
+
+**Outlier rejection.** After the first weighted fit, two or three reweighting passes (iteratively reweighted
+least squares with Tukey or Huber weights on each marker's residual) push markers that disagree with the
+majority toward zero weight: another depth, the cat itself, or a slip the forward-backward check missed. The
+threshold is relative to the median residual, so it adapts to the footage. All passes run in the same one-group
+compute pass, still a fraction of a millisecond. `OutlierRejection` toggles it, default on.
+
+Order: focus weights × confidence first, then outlier reweighting within those weights. The focus point chooses
+the depth; outlier rejection cleans up within it.
+
+**Out of scope.**
+- A receding ground plane moves in perspective, which move, rotation and uniform scale match only locally. The
+  focus point makes that local fit exact. Matching the whole plane needs a homography (corner pin), listed under
+  later work, and a layer that can draw it.
+- A full 3D camera solve (camera path plus marker depths, bundle adjustment), rendering the video behind a 3D
+  camera, is the proper match-move. It is a separate, much larger project.
+
 ### `[StabilizeImage]`
 
 `[StabilizeImage]` image op: image + track buffer + `MarkerCount` + `FrameIndex` + `ReferenceFrame`.
@@ -300,9 +335,23 @@ usually replaced instead.
      a marker the frame already has is kept, a missing one is tracked from the neighboring frame. This fills in
      re-seeded markers without touching the others.
    - Lost points keep their last searched position and their confidence in F1 for diagnosis (Scale.X is still NaN).
-3. Forward-backward check in `[TrackMarkers]`.
-4. `[SolveLayerTransform]` with a world anchor per marker, a cache per frame, and path smoothing. Test on static
-   footage (the fence) first.
+3. ~~Forward-backward check in `[TrackMarkers]`~~ (done 2026-11-23, not yet run in the editor). Two luma pyramids
+   are swapped each processed frame. The check runs when the source is the previous processed frame (normal
+   playback, including gaps up to 8 frames) and is skipped otherwise. The limit is the `MaxRoundTripError` input
+   (default 1.5 px, 0 turns the check off).
+4. ~~Solve~~ (done 2026-11-23 as `[SolveTrackTransform]`, math checked on the CPU, not yet run in the editor).
+   Instead of Layer2d values read back to the CPU, it solves on the GPU and outputs a single point
+   (Position = translation, Rotation around Z, Scale = uniform scale, F1 = markers used). The video is drawn as a
+   quad at that point in the graph, e.g. with `[DrawBillboards]` (PointRotation, Use Point Scale, Scale 100). No
+   readback, no lag, and export is exact. It has focus-point weighting, Tukey outlier rejection with a
+   median-relative cutoff, and Lock / Smooth modes (a Gaussian window of up to ±31 frames). Not yet:
+   - Anchors for markers not valid on `ReferenceFrame` (needed for the automatic mode). They need state across
+     frames.
+   - Layer2d Position/Rotate/Scale outputs (would need readback).
+   - More than 64 markers per solve.
+   First test on the walking-cat shot: works with 4–6 spread markers. With only 2 left (one far, one near), parallax
+   read as ~30° rotation and 1.5× zoom. Below 3 weighted markers it now solves translation only. The shot loses its
+   seeds within about 100 frames, so phase 5 is the real fix.
 5. `SeedMode` Automatic: corner detection on a grid, slot refill, unique marker ids. Test on panning footage.
 6. Re-acquiring lost markers (shared similarity solve; skip predictions outside the image).
 7. `[StabilizeImage]` (GPU resample) if driving Layer2d isn't enough.

@@ -1,0 +1,168 @@
+{
+  "FormatVersion": 3,
+  "Id": "a9cd6b25-2f20-431a-8a0f-2e21b011099d"/*SolveTrackTransform*/,
+  "Description": "Solves the 2D transform that keeps tracked markers on their anchors and outputs it as a single point.\n\nThe point's position is the translation, its rotation the rotation around Z and its scale the uniform scale, so drawing the video as a quad at this point stabilizes or pins it. F1 holds the number of markers used. The solve runs on the GPU, so the result is exact for every frame without readback delay.\n\nAnchors are the markers' positions on ReferenceFrame, placed by ReferencePosition, ReferenceRotation and ReferenceScale: on that frame the output equals the reference transform. Lock pins the features to their anchors. Smooth keeps the camera path, averaged over SmoothFrames frames on each side, and removes only the jitter around it; it needs the frames around the current one to be tracked already.\n\nEach marker is weighted by its confidence. A FocusRadius above 0 also weights markers by their distance to FocusPoint, so the transform matches the motion at that spot and depth rather than an average over everything. RejectOutliers fades out markers that disagree with the others, such as markers at another depth or on a moving object. Frames that can't be solved keep the previous transform and report 0 markers.\n\nAKA: stabilize, match move, pin, camera solve\n\nTips:\n- To draw the video, use [DrawBillboards] with Orientation PointRotation, Use Point Scale on, Scale 100 and the video as texture: its quad then spans the image height from -1 to 1, the video space of [TrackMarkers].\n- Set ReferenceFrame to the SeedFrame of [TrackMarkers].\n- Put FocusPoint where the action happens, or connect it to a tracked marker.\n\nSee also: [TrackMarkers], [SampleTrack]",
+  "InputUis": [
+    {
+      "InputId": "2c95dbea-4e7f-4d6c-8ac2-4bd896461826"/*ReferenceScale*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 700.0
+      },
+      "Description": "Scale of the video on ReferenceFrame.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "31108d92-9069-41a9-aa65-1dc14abd5949"/*AllowRotation*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1000.0
+      },
+      "Description": "Solve rotation. Turn off to solve only translation and scale."
+    },
+    {
+      "InputId": "3f59928c-7b9c-4c56-a74f-10fc04aa31d3"/*RejectOutliers*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1400.0
+      },
+      "Description": "Fades out markers that disagree with the others, e.g. at another depth or on a moving object."
+    },
+    {
+      "InputId": "528c9c13-5156-48e9-bb63-4c1c021c64f5"/*MarkerCount*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 100.0
+      },
+      "Description": "Number of markers per frame in TrackBuffer.",
+      "Min": 1,
+      "Max": 64,
+      "ClampMin": true
+    },
+    {
+      "InputId": "6443bfd2-8245-424c-87cd-3812b04b4dfe"/*ReferenceRotation*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 600.0
+      },
+      "Description": "Rotation of the video in degrees on ReferenceFrame.",
+      "Min": -180.0,
+      "Max": 180.0
+    },
+    {
+      "InputId": "6abd8504-cccb-49e1-a051-e7f44900f270"/*SmoothFrames*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 900.0
+      },
+      "Description": "Frames on each side of the current one that Smooth averages over (up to 31).",
+      "Min": 1,
+      "Max": 31,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "6c6e02f3-97f6-4f9d-b547-54ee42efae82"/*FocusPoint*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1200.0
+      },
+      "GroupTitle": "Weighting",
+      "Description": "Video-space point where the transform should fit best.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "7f115321-1297-4caa-9b2d-762ba8462dfd"/*ReferencePosition*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 500.0
+      },
+      "Description": "Where the video sits on ReferenceFrame.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "87d19f66-2f7d-4430-b87a-a1b55d57774a"/*FocusRadius*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1300.0
+      },
+      "Description": "Falloff of the focus weighting in video space. 0 weights all markers equally.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "8e669835-798c-4c9f-96c4-f6de357a64d0"/*ReferenceFrame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 400.0
+      },
+      "GroupTitle": "Reference",
+      "Description": "The frame whose marker positions become the anchors, usually the SeedFrame of [TrackMarkers].",
+      "Min": 0,
+      "Max": 1000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "9f51487e-13f2-4fc3-8830-41a859cdbd4f"/*Mode*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 800.0
+      },
+      "GroupTitle": "Solve",
+      "Description": "Lock pins the tracked features to their anchors. Smooth keeps the smoothed camera path and removes only the jitter."
+    },
+    {
+      "InputId": "ad8d0120-cb49-4eba-802c-a7fc56b1a15e"/*AllowScale*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1100.0
+      },
+      "Description": "Solve uniform scale. Turn off for footage without zoom or forward motion."
+    },
+    {
+      "InputId": "d09fc392-83ce-4082-9f8f-ba2953f7ec2e"/*FirstFrame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 200.0
+      },
+      "Description": "Frame number of the track's first frame. Match the FirstFrame of [TrackMarkers].",
+      "Min": 0,
+      "Max": 1000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "dd31b7de-46fc-4d7c-ae51-dc93f23d2ae0"/*FrameIndex*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 300.0
+      },
+      "Description": "Frame to solve, e.g. the FrameIndex output of [PlayVideo]."
+    },
+    {
+      "InputId": "ec6cf73b-2b92-4f4a-b5a9-5eed3567c5b2"/*TrackBuffer*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Description": "Frame-major track points, e.g. the TrackBuffer of [TrackMarkers]."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a1aa6b7b-bd2b-41bd-88b1-b0191325101e"/*Transform*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

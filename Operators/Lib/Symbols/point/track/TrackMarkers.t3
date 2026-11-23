@@ -35,6 +35,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "a563515e-aee8-4f4b-b564-70d31da045b3"/*MaxRoundTripError*/,
+      "DefaultValue": 1.5
+    },
+    {
       "Id": "b888df98-6cf6-4152-a8bc-9f12c43d5c9c"/*MinConfidence*/,
       "DefaultValue": 0.6
     },

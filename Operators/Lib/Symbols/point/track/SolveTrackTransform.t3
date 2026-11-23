@@ -1,0 +1,74 @@
+{
+  "FormatVersion": 3,
+  "Id": "a9cd6b25-2f20-431a-8a0f-2e21b011099d"/*SolveTrackTransform*/,
+  "Inputs": [
+    {
+      "Id": "2c95dbea-4e7f-4d6c-8ac2-4bd896461826"/*ReferenceScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "31108d92-9069-41a9-aa65-1dc14abd5949"/*AllowRotation*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "3f59928c-7b9c-4c56-a74f-10fc04aa31d3"/*RejectOutliers*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "528c9c13-5156-48e9-bb63-4c1c021c64f5"/*MarkerCount*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "6443bfd2-8245-424c-87cd-3812b04b4dfe"/*ReferenceRotation*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "6abd8504-cccb-49e1-a051-e7f44900f270"/*SmoothFrames*/,
+      "DefaultValue": 12
+    },
+    {
+      "Id": "6c6e02f3-97f6-4f9d-b547-54ee42efae82"/*FocusPoint*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "7f115321-1297-4caa-9b2d-762ba8462dfd"/*ReferencePosition*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "87d19f66-2f7d-4430-b87a-a1b55d57774a"/*FocusRadius*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8e669835-798c-4c9f-96c4-f6de357a64d0"/*ReferenceFrame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "9f51487e-13f2-4fc3-8830-41a859cdbd4f"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ad8d0120-cb49-4eba-802c-a7fc56b1a15e"/*AllowScale*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "d09fc392-83ce-4082-9f8f-ba2953f7ec2e"/*FirstFrame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "dd31b7de-46fc-4d7c-ae51-dc93f23d2ae0"/*FrameIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ec6cf73b-2b92-4f4a-b5a9-5eed3567c5b2"/*TrackBuffer*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

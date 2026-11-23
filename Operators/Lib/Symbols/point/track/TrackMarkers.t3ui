@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "39658ad0-96cf-49c3-9b38-b8c1c32f2a6b"/*TrackMarkers*/,
-  "Description": "Tracks hand-placed image features through a video and records one point per marker and frame.\n\nPlace SeedPoints on distinctive spots (knots, holes, corners) of the image on SeedFrame. Positions are in video space: centered, y up, y from -1 to 1 over the image height and x from -aspect to aspect. A [Layer2d] with Scale Mode FitHeight and Scale 1 shows the video in that same space. Connect FrameIndex from [PlayVideo]. Tracking starts once the video reaches SeedFrame and then follows each feature from frame to frame with pyramidal Lucas-Kanade on a small patch around it.\n\nTrackBuffer holds MarkerCount points per frame for FrameCount frames, one frame after another. It doubles as a cache: frames that were tracked already are read back when scrubbing, and scrubbing backward tracks backward. In each point F1 is the confidence (the correlation with the patch from SeedFrame) and F2 the marker index. A marker whose confidence drops below MinConfidence is lost and written as a separator. Points holds the current frame.\n\nSeedQuality rates each seed in F1 and colors it from red to green. Low values mark flat areas and straight edges, which can only be followed across the edge but not along it. Seeds whose patch leaves the image are invalid.\n\nChanging the seeds, PatchSize, FirstFrame, FrameCount or SeedFrame restarts the track.\n\nAKA: motion tracking, match move, feature tracking, KLT\n\nTips:\n- Prefer corners and spots over edges, and check SeedQuality before tracking.\n- Keep seeds away from the image border and from objects moving in front of the background.\n- To check the result, draw Points with [DrawPoints] in the same transform as the video layer.\n\nSee also: [SampleTrack], [PlayVideo]",
+  "Description": "Tracks hand-placed image features through a video and records one point per marker and frame.\n\nPlace SeedPoints on distinctive spots (knots, holes, corners) of the image on SeedFrame. Positions are in video space: centered, y up, y from -1 to 1 over the image height and x from -aspect to aspect. A [Layer2d] with Scale Mode FitHeight and Scale 1 shows the video in that same space. Connect FrameIndex from [PlayVideo]. Tracking starts once the video reaches SeedFrame and then follows each feature from frame to frame with pyramidal Lucas-Kanade on a small patch around it.\n\nTrackBuffer holds MarkerCount points per frame for FrameCount frames, one frame after another. It doubles as a cache: frames that were tracked already are read back when scrubbing, and scrubbing backward tracks backward. In each point F1 is the confidence (the correlation with the patch from SeedFrame) and F2 the marker index. A marker whose confidence drops below MinConfidence is lost and written as a separator. Points holds the current frame.\n\nSeedQuality rates each seed in F1 and colors it from red to green. Low values mark flat areas and straight edges, which can only be followed across the edge but not along it. Seeds whose patch leaves the image are invalid.\n\nA marker is also lost when tracking it back to the previous frame misses its start by more than MaxRoundTripError. Lost points keep their last searched position and confidence for diagnosis.\n\nMoving a seed re-seeds only that marker the next time the video is on SeedFrame. Changing PatchSize, FirstFrame, FrameCount, SeedFrame or the number of seeds restarts the track.\n\nAKA: motion tracking, match move, feature tracking, KLT\n\nTips:\n- Prefer corners and spots over edges, and check SeedQuality before tracking.\n- Keep seeds away from the image border and from objects moving in front of the background.\n- To check the result, draw Points with [DrawPoints] in the same transform as the video layer.\n\nSee also: [SampleTrack], [PlayVideo]",
   "InputUis": [
     {
       "InputId": "0b2c74e1-aa56-454e-95a0-6ac3eeea7e14"/*IsEnabled*/,
@@ -86,6 +86,17 @@
         "Y": 100.0
       },
       "Description": "Source frame number of Image, e.g. the FrameIndex output of [PlayVideo]. Tracking advances only when it changes."
+    },
+    {
+      "InputId": "a563515e-aee8-4f4b-b564-70d31da045b3"/*MaxRoundTripError*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 850.0
+      },
+      "Description": "How far in pixels tracking a marker back to the previous frame may miss its start before it counts as lost. Catches markers that get covered or slip along repeated texture. 0 turns the check off.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
     },
     {
       "InputId": "b888df98-6cf6-4152-a8bc-9f12c43d5c9c"/*MinConfidence*/,

@@ -26,6 +26,10 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     [Output(Guid = "9916fcc6-4ab9-4e75-b1b9-d2702c1b8d71", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<int> TrackedFrameCount = new();
 
+    /// <summary>Frame number of the track's first slot, to pass on to ops that read TrackBuffer.</summary>
+    [Output(Guid = "f8d50cf0-858e-49dc-9e61-7a3f34fa3780", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> FirstFrameOutput = new();
+
     public TrackMarkers()
     {
         Points.UpdateAction += Update;
@@ -33,6 +37,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         SeedQuality.UpdateAction += Update;
         MarkerCount.UpdateAction += Update;
         TrackedFrameCount.UpdateAction += Update;
+        FirstFrameOutput.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
@@ -49,12 +54,13 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         var patchSize = PatchSize.GetValue(context).Clamp(MinPatchSize, MaxPatchSize) | 1;
         var searchRadius = MathF.Max(1, SearchRadius.GetValue(context));
         var minConfidence = MinConfidence.GetValue(context);
+        var maxRoundTripError = MaxRoundTripError.GetValue(context);
         var reset = MathUtils.WasTriggered(Reset.GetValue(context), ref _resetTriggered);
         var isEnabled = IsEnabled.GetValue(context);
 
         _statusMessage = null;
         TrackFrame(image, frameIndex, seeds, seedFrame, firstFrame, frameCount, patchSize, searchRadius, minConfidence,
-                   reset, seedsChanged, isEnabled);
+                   maxRoundTripError, reset, seedsChanged, isEnabled);
 
         var isSetUp = _layout.MarkerCount > 0;
         Points.Value = isSetUp ? _currentPoints : null;
@@ -62,17 +68,19 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         SeedQuality.Value = isSetUp ? _seedQuality : null;
         MarkerCount.Value = _layout.MarkerCount;
         TrackedFrameCount.Value = _trackedFrameCount;
+        FirstFrameOutput.Value = firstFrame;
 
         Points.DirtyFlag.Clear();
         TrackBuffer.DirtyFlag.Clear();
         SeedQuality.DirtyFlag.Clear();
         MarkerCount.DirtyFlag.Clear();
         TrackedFrameCount.DirtyFlag.Clear();
+        FirstFrameOutput.DirtyFlag.Clear();
     }
 
     private void TrackFrame(Texture2D? image, int frameIndex, BufferWithViews? seeds, int seedFrame, int firstFrame,
-                            int frameCount, int patchSize, float searchRadius, float minConfidence, bool reset,
-                            bool seedsChanged, bool isEnabled)
+                            int frameCount, int patchSize, float searchRadius, float minConfidence,
+                            float maxRoundTripError, bool reset, bool seedsChanged, bool isEnabled)
     {
         if (!isEnabled)
             return;
@@ -133,9 +141,11 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _lastFrameIndex = frameIndex;
         _needsFrameUpdate = false;
 
+        var slot = frameIndex - firstFrame;
+
         var context = ResourceManager.Device.ImmediateContext;
         context.PushState(StateGroups.ComputeShader);
-        UpdateLumaPyramid(context, image);
+        UpdateLumaPyramid(context, image, slot);
 
         var parameters = new Params
                              {
@@ -152,9 +162,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                                  PreviousSlot = -1,
                                  TargetSlot = -1,
                                  IterationsPerLevel = IterationsPerLevel,
+                                 MaxRoundTripError = maxRoundTripError,
                              };
 
-        var slot = frameIndex - firstFrame;
         if (slot < 0 || slot >= frameCount)
         {
             _statusMessage = $"Frame {frameIndex} lies outside the tracked range {firstFrame}–{firstFrame + frameCount - 1}.";
@@ -195,6 +205,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                     parameters.PreviousSlot = isAdjacent && IsFilled(previousSlot) ? previousSlot : -1;
                     parameters.UseRecentTemplate = _recentTemplateSlot == sourceSlot ? 1 : 0;
 
+                    // The round trip needs the source frame's image, which is kept only for the previous frame.
+                    parameters.CheckRoundTrip = maxRoundTripError > 0 && _previous.Slot == sourceSlot ? 1 : 0;
+
                     // Motion across a gap is unknown, so search one pyramid level wider.
                     if (!isAdjacent)
                         parameters.Levels = Math.Min(parameters.Levels + 1, TemplateLevelCount);
@@ -213,8 +226,12 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         context.PopState();
     }
 
-    private void UpdateLumaPyramid(DeviceContext context, Texture2D image)
+    /** Keeps the previous frame's pyramid for the forward-backward check, so the two are swapped each frame. */
+    private void UpdateLumaPyramid(DeviceContext context, Texture2D image, int slot)
     {
+        (_previous, _current) = (_current, _previous);
+        _current.Slot = slot;
+
         var stage = context.ComputeShader;
         _lumaParams.ImageSize = new Vector2(_layout.ImageSize.Width, _layout.ImageSize.Height);
         UploadParams(_lumaParams);
@@ -222,12 +239,12 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         stage.Set(_shaderResources!.Luma.Value);
         stage.SetConstantBuffer(0, _paramsBuffer);
         stage.SetShaderResource(0, SrvManager.GetSrvForTexture(image));
-        stage.SetUnorderedAccessView(5, _lumaUav);
+        stage.SetUnorderedAccessView(5, _current.Uav);
         context.Dispatch((_layout.ImageSize.Width + 7) / 8, (_layout.ImageSize.Height + 7) / 8, 1);
         stage.SetUnorderedAccessView(5, null);
         stage.SetShaderResource(0, null);
 
-        context.GenerateMips(_lumaSrv!);
+        context.GenerateMips(_current.Srv!);
     }
 
     private void DispatchTrack(DeviceContext context, Params parameters, Texture2D image, BufferWithViews seeds)
@@ -238,8 +255,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         stage.Set(_shaderResources!.Track.Value);
         stage.SetConstantBuffer(0, _paramsBuffer);
         stage.SetShaderResource(0, SrvManager.GetSrvForTexture(image));
-        stage.SetShaderResource(1, _lumaSrv);
+        stage.SetShaderResource(1, _current.Srv);
         stage.SetShaderResource(2, seeds.Srv);
+        stage.SetShaderResource(3, _previous.Srv);
         stage.SetUnorderedAccessView(0, _trackPoints.Uav);
         stage.SetUnorderedAccessView(1, _currentPoints.Uav);
         stage.SetUnorderedAccessView(2, _seedQuality.Uav);
@@ -254,7 +272,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
         stage.SetUnorderedAccessView(CapturedSeedsUavSlot, null);
 
-        for (var srvSlot = 0; srvSlot < 3; srvSlot++)
+        for (var srvSlot = 0; srvSlot < 4; srvSlot++)
             stage.SetShaderResource(srvSlot, null);
     }
 
@@ -266,6 +284,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _seedsPendingCapture = false;
         _recentTemplateSlot = -1;
         _lastProcessedSlot = -1;
+        _current.Slot = -1;
+        _previous.Slot = -1;
         _needsFrameUpdate = true;
 
         var trackPointCount = _layout.MarkerCount * _layout.FrameCount;
@@ -297,7 +317,10 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
             SetupBuffer(_recentTemplates, templateFloatCount, sizeof(float));
 
             if (layout.ImageSize != _layout.ImageSize)
-                SetupLumaTexture(layout.ImageSize);
+            {
+                _current.Setup(layout.ImageSize);
+                _previous.Setup(layout.ImageSize);
+            }
 
             if (_filledSlots.Length != layout.FrameCount)
                 _filledSlots = new bool[layout.FrameCount];
@@ -311,28 +334,6 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
         _layout = layout;
         return true;
-    }
-
-    private void SetupLumaTexture(Int2 size)
-    {
-        DisposeLumaTexture();
-        var device = ResourceManager.Device;
-        _lumaTexture = Texture2D.CreateTexture2D(new Texture2DDescription
-                                                     {
-                                                         ArraySize = 1,
-                                                         BindFlags = BindFlags.ShaderResource | BindFlags.UnorderedAccess
-                                                                                              | BindFlags.RenderTarget,
-                                                         CpuAccessFlags = CpuAccessFlags.None,
-                                                         Format = Format.R32_Float,
-                                                         Width = size.Width,
-                                                         Height = size.Height,
-                                                         MipLevels = TemplateLevelCount,
-                                                         OptionFlags = ResourceOptionFlags.GenerateMipMaps,
-                                                         SampleDescription = new SampleDescription(1, 0),
-                                                         Usage = ResourceUsage.Default,
-                                                     });
-        _lumaSrv = new ShaderResourceView(device, _lumaTexture);
-        _lumaUav = new UnorderedAccessView(device, _lumaTexture);
     }
 
     private static void SetupBuffer(BufferWithViews buffer, int elementCount, int stride)
@@ -397,13 +398,6 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _trackedFrameCount++;
     }
 
-    private void DisposeLumaTexture()
-    {
-        GraphicsUtilities.Dispose(ref _lumaUav);
-        GraphicsUtilities.Dispose(ref _lumaSrv);
-        GraphicsUtilities.Dispose(ref _lumaTexture);
-    }
-
     protected override void Dispose(bool isDisposing)
     {
         if (!isDisposing)
@@ -415,7 +409,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _capturedSeeds.Dispose();
         _keyTemplates.Dispose();
         _recentTemplates.Dispose();
-        DisposeLumaTexture();
+        _current.Dispose();
+        _previous.Dispose();
         GraphicsUtilities.Dispose(ref _paramsBuffer);
     }
 
@@ -429,6 +424,46 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         Capture = 0,
         Advance = 1,
         Hide = 2,
+    }
+
+    /** A luma image with the mip levels the tracker searches, and the track slot it was made from. */
+    private sealed class LumaPyramid : IDisposable
+    {
+        public ShaderResourceView? Srv;
+        public UnorderedAccessView? Uav;
+        public int Slot = -1;
+
+        public void Setup(Int2 size)
+        {
+            Dispose();
+            var device = ResourceManager.Device;
+            _texture = Texture2D.CreateTexture2D(new Texture2DDescription
+                                                     {
+                                                         ArraySize = 1,
+                                                         BindFlags = BindFlags.ShaderResource | BindFlags.UnorderedAccess
+                                                                                              | BindFlags.RenderTarget,
+                                                         CpuAccessFlags = CpuAccessFlags.None,
+                                                         Format = Format.R32_Float,
+                                                         Width = size.Width,
+                                                         Height = size.Height,
+                                                         MipLevels = TemplateLevelCount,
+                                                         OptionFlags = ResourceOptionFlags.GenerateMipMaps,
+                                                         SampleDescription = new SampleDescription(1, 0),
+                                                         Usage = ResourceUsage.Default,
+                                                     });
+            Srv = new ShaderResourceView(device, _texture);
+            Uav = new UnorderedAccessView(device, _texture);
+            Slot = -1;
+        }
+
+        public void Dispose()
+        {
+            GraphicsUtilities.Dispose(ref Uav);
+            GraphicsUtilities.Dispose(ref Srv);
+            GraphicsUtilities.Dispose(ref _texture);
+        }
+
+        private Texture2D? _texture;
     }
 
     private readonly record struct TrackLayout(int MarkerCount, int FrameCount, int FirstFrame, int SeedFrame,
@@ -453,6 +488,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         [FieldOffset(56)] public int ClearCount;
         [FieldOffset(60)] public int FrameCount;
         [FieldOffset(64)] public int ForceCapture;
+        [FieldOffset(68)] public int CheckRoundTrip;
+        [FieldOffset(72)] public float MaxRoundTripError;
     }
 
     /** Loaded on first use with this instance as owner, so the package resolves the shader's includes. */
@@ -468,6 +505,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private const int MaxPatchSize = 31;
     private const int TemplateLevelCount = 5;
     private const int CapturedSeedsUavSlot = 6;
+
     private const int IterationsPerLevel = 4;
     private const int MaxFrameCount = 1_000_000;
 
@@ -489,9 +527,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private readonly BufferWithViews _capturedSeeds = new();
     private readonly BufferWithViews _keyTemplates = new();
     private readonly BufferWithViews _recentTemplates = new();
-    private Texture2D? _lumaTexture;
-    private ShaderResourceView? _lumaSrv;
-    private UnorderedAccessView? _lumaUav;
+    private LumaPyramid _current = new();
+    private LumaPyramid _previous = new();
     private Buffer? _paramsBuffer;
     private Params _lumaParams;
 
@@ -533,6 +570,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
     [Input(Guid = "b888df98-6cf6-4152-a8bc-9f12c43d5c9c")]
     public readonly InputSlot<float> MinConfidence = new();
+
+    [Input(Guid = "a563515e-aee8-4f4b-b564-70d31da045b3")]
+    public readonly InputSlot<float> MaxRoundTripError = new();
 
     [Input(Guid = "2f715dd9-5cdb-41f4-81ce-f9b53de2639f")]
     public readonly InputSlot<bool> Reset = new();

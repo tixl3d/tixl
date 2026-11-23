@@ -31,7 +31,9 @@ cbuffer Params : register(b0)
     int FrameCount;
 
     int ForceCapture;
-    int3 __padding;
+    int CheckRoundTrip;
+    float MaxRoundTripError;
+    int __padding;
 }
 
 #define MODE_CAPTURE 0
@@ -44,6 +46,7 @@ cbuffer Params : register(b0)
 
 Texture2D<float4> Image : register(t0);
 Texture2D<float> Luma : register(t1);
+Texture2D<float> PreviousLuma : register(t3);
 StructuredBuffer<Point> SeedPoints : register(t2);
 
 RWStructuredBuffer<Point> TrackPoints : register(u0);
@@ -111,7 +114,7 @@ float2 PixelToVideo(float2 pixel)
 }
 
 // Bilinear sample of a pyramid level; positions are continuous pixel coordinates of that level.
-float SampleLuma(float2 position, uint level)
+float SampleLuma(Texture2D<float> luma, float2 position, uint level)
 {
     int2 size = max(int2(1, 1), int2(ImageSize) >> level);
     float2 p = position - 0.5;
@@ -119,10 +122,10 @@ float SampleLuma(float2 position, uint level)
     float2 f = p - i0;
     int2 a = clamp(i0, int2(0, 0), size - 1);
     int2 b = clamp(i0 + 1, int2(0, 0), size - 1);
-    float v00 = Luma.Load(int3(a.x, a.y, level));
-    float v10 = Luma.Load(int3(b.x, a.y, level));
-    float v01 = Luma.Load(int3(a.x, b.y, level));
-    float v11 = Luma.Load(int3(b.x, b.y, level));
+    float v00 = luma.Load(int3(a.x, a.y, level));
+    float v10 = luma.Load(int3(b.x, a.y, level));
+    float v01 = luma.Load(int3(a.x, b.y, level));
+    float v11 = luma.Load(int3(b.x, b.y, level));
     return lerp(lerp(v00, v10, f.x), lerp(v01, v11, f.x), f.y);
 }
 
@@ -172,7 +175,7 @@ void CaptureTemplates(uint marker, float2 pixelPosition, bool alsoKey, uint thre
         int offset = TemplateOffset(marker, level);
         for (int cell = threadIndex; cell < cellCount; cell += GROUP_SIZE)
         {
-            float value = SampleLuma(center + TemplateCellOffset(cell), level);
+            float value = SampleLuma(Luma, center + TemplateCellOffset(cell), level);
             RecentTemplates[offset + cell] = value;
             if (alsoKey)
                 KeyTemplates[offset + cell] = value;
@@ -278,11 +281,11 @@ float ComputeSeedQuality(uint marker, uint threadIndex)
 
 //--- Tracking ------------------------------------------------------------------------------
 
-float2 TrackLucasKanade(uint marker, float2 startPosition, uint threadIndex)
+// Searches luma for the marker's key or recent template, coarse to fine, starting at startPosition.
+float2 TrackLucasKanade(Texture2D<float> luma, uint marker, bool fromRecent, float2 startPosition, uint threadIndex)
 {
     float2 position = startPosition;
     int patchCellCount = PatchSize * PatchSize;
-    bool fromRecent = UseRecentTemplate != 0;
 
     for (int level = Levels - 1; level >= 0; level--)
     {
@@ -325,7 +328,7 @@ float2 TrackLucasKanade(uint marker, float2 startPosition, uint threadIndex)
             float4 imageSums = 0; // ΣI, ΣI², ΣgxI, ΣgyI
             for (int cell = threadIndex; cell < patchCellCount; cell += GROUP_SIZE)
             {
-                float i = SampleLuma(levelPosition + PatchCellOffset(cell), level);
+                float i = SampleLuma(luma, levelPosition + PatchCellOffset(cell), level);
                 imageSums += float4(i, i * i, GradientX[cell] * i, GradientY[cell] * i);
             }
 
@@ -363,7 +366,7 @@ float KeyTemplateCorrelation(uint marker, float2 position, uint threadIndex)
         int x = cell % PatchSize + 1;
         int y = cell / PatchSize + 1;
         float k = KeyTemplates[offset + y * templateSize + x];
-        float i = SampleLuma(position + PatchCellOffset(cell), 0);
+        float i = SampleLuma(Luma, position + PatchCellOffset(cell), 0);
         sums += float4(k, k * k, i, i * i);
         crossSum += k * i;
     }
@@ -455,21 +458,26 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
     }
 
     // Runs for kept markers as well, because the reductions inside must be reached by the whole group.
-    float2 tracked = TrackLucasKanade(marker, predicted, threadIndex);
+    float2 tracked = TrackLucasKanade(Luma, marker, UseRecentTemplate != 0, predicted, threadIndex);
     bool isInside = IsPatchInsideImage(tracked);
     float confidence = KeyTemplateCorrelation(marker, tracked, threadIndex);
-    bool isLost = !hasSource || !isInside || confidence < MinConfidence;
 
-    // All reads of the recent template are done; replace it with this frame's patch for the next step.
+    // All reads of the recent template are done; replace it with this frame's patch. It is the template for
+    // the next frame and for the round trip below.
     DeviceMemoryBarrierWithGroupSync();
-    if (hasTarget)
+    CaptureTemplates(marker, hasTarget ? VideoToPixel(target.Position.xy) : tracked, false, threadIndex);
+    DeviceMemoryBarrierWithGroupSync();
+
+    // Forward-backward check: tracking this frame's patch back into the source frame must land where the
+    // marker started. Occlusion and slipping on repeated texture break that.
+    float roundTripError = 0;
+    if (CheckRoundTrip != 0)
     {
-        CaptureTemplates(marker, VideoToPixel(target.Position.xy), false, threadIndex);
+        float2 returned = TrackLucasKanade(PreviousLuma, marker, true, tracked, threadIndex);
+        roundTripError = length(returned - sourcePosition);
     }
-    else if (!isLost)
-    {
-        CaptureTemplates(marker, tracked, false, threadIndex);
-    }
+
+    bool isLost = !hasSource || !isInside || confidence < MinConfidence || roundTripError > MaxRoundTripError;
 
     if (threadIndex == 0)
     {
