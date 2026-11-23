@@ -8,7 +8,7 @@ internal sealed class FixtureProject : IDisposable
 {
     public FixtureProject(string fixtureName)
     {
-        Directory = Path.Combine(Path.GetTempPath(), "tixl-operator-compiler-tests", Guid.NewGuid().ToString("N")[..8], fixtureName);
+        Directory = Path.Combine(ResolveSymlinks(Path.GetTempPath()), "tixl-operator-compiler-tests", Guid.NewGuid().ToString("N")[..8], fixtureName);
         CopyDirectory(Path.Combine(AppContext.BaseDirectory, "Fixtures", fixtureName), Directory);
         ProjectPath = Path.Combine(Directory, fixtureName + ".csproj");
     }
@@ -94,6 +94,23 @@ internal sealed class FixtureProject : IDisposable
         {
             return (-1, e.Message);
         }
+    }
+
+    /// <summary>
+    /// macOS's temp folder (/var/folders/...) is a symlink into /private. MSBuild works with the resolved path, and
+    /// generated type names hash the path, so the fixtures must sit in the resolved one for the builds to match.
+    /// </summary>
+    private static string ResolveSymlinks(string path)
+    {
+        var resolved = Path.GetPathRoot(Path.GetFullPath(path))!;
+        foreach (var part in Path.GetFullPath(path).Substring(resolved.Length).Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries))
+        {
+            resolved = Path.Combine(resolved, part);
+            if (new DirectoryInfo(resolved).ResolveLinkTarget(returnFinalTarget: true) is { } target)
+                resolved = target.FullName;
+        }
+
+        return resolved;
     }
 
     private static void CopyDirectory(string source, string destination)
