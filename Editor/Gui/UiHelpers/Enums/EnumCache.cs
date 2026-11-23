@@ -68,6 +68,8 @@ public sealed class EnumCache
             DisplayNames = new string[values.Length];
             SelectableIds = new string[values.Length];
             DisplayOrder = new int[values.Length];
+            IsUnavailable = new bool[values.Length];
+            Tooltips = new string[values.Length];
 
             var provider = EnumOptionHintRegistry.Find(enumType);
             HasHints = provider != null;
@@ -77,6 +79,8 @@ public sealed class EnumCache
                 var hint = provider?.GetHint(ValueNames[i], values.GetValue(i)) ?? default;
                 Hints[i] = hint;
                 DisplayNames[i] = hint.Label ?? ValueNames[i];
+                IsUnavailable[i] = hint.Relevance == OptionRelevance.Unavailable;
+                Tooltips[i] = hint.Tooltip;
 
                 // Two values may share a label, so the popup id keeps the value name.
                 SelectableIds[i] = hint.Label != null ? $"{hint.Label}##{ValueNames[i]}" : ValueNames[i];
@@ -109,6 +113,11 @@ public sealed class EnumCache
         internal string[] DisplayNames { get; }
 
         internal string[] SelectableIds { get; }
+
+        /** Per value, whether this machine can't use it, e.g. a texture format of another backend. */
+        internal bool[] IsUnavailable { get; }
+
+        internal string[] Tooltips { get; }
 
         /** Value indices with the important values first; <see cref="ImportantCount"/> of them. */
         internal int[] DisplayOrder { get; }

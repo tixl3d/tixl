@@ -529,11 +529,8 @@ internal static partial class CustomComponents
     public static bool SegmentedButton<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null,
                                           Func<T, string?>? tooltipForItem = null) where T : struct, Enum
     {
-        var scale = T3Ui.UiScaleFactor;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
         var h = ImGui.GetFrameHeight();
-        var segPadding = 14 * scale;
-        var rounding = 4 * scale;
-        var inset = 2 * scale;
 
         var values = Enum.GetValues<T>();
         var selectedString = selectedValue.ToString();
@@ -547,7 +544,7 @@ internal static partial class CustomComponents
             total += ImGui.CalcTextSize(name).X + segPadding * 2;
         }
 
-        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, rounding);
+        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, SegmentRounding * T3Ui.UiScaleFactor);
 
         // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
         ImGui.PushID(typeof(T).Name);
@@ -565,48 +562,11 @@ internal static partial class CustomComponents
             if (!isFirst)
                 ImGui.SameLine(0, 0);
 
-            // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
-            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)) && !isDisabled)
+            if (DrawSegment(dl, name, new Vector2(x, start.Y), segWidth, isSelected, isDisabled, tooltipForItem?.Invoke(value)))
             {
                 selectedValue = value;
                 modified = true;
             }
-
-            // Tooltips are shown for disabled segments too — that is where they matter most.
-            if (tooltipForItem != null)
-            {
-                var tooltip = tooltipForItem(value);
-                if (!string.IsNullOrEmpty(tooltip))
-                    TooltipForLastItem(tooltip);
-            }
-
-            var isHovered = !isDisabled && ImGui.IsItemHovered();
-
-            var segMin = new Vector2(x, start.Y);
-            if (isSelected)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton, rounding);
-            }
-            else if (isHovered)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton.Fade(0.4f), rounding);
-            }
-
-            var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
-            var textColor = isDisabled
-                                ? UiColors.TextMuted.Fade(0.25f)
-                                : isSelected
-                                    ? UiColors.ForegroundFull
-                                    : (isHovered ? UiColors.Text : UiColors.TextMuted);
-            ImGui.PushFont(font);
-            var textSize = ImGui.CalcTextSize(name);
-            var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
-            dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), name);
-            ImGui.PopFont();
 
             x += segWidth;
             isFirst = false;
@@ -615,6 +575,105 @@ internal static partial class CustomComponents
         ImGui.PopID();
         return modified;
     }
+
+    /// <summary>
+    /// <see cref="SegmentedButton{T}"/> for options given by label, e.g. from a cached enum entry, so it draws without
+    /// allocating. The segments share the extra space when <paramref name="width"/> is wider than their labels need.
+    /// </summary>
+    public static bool SegmentedButton(string[] labels, ref int selectedIndex, float width = 0,
+                                       bool[]? disabledItems = null, string?[]? tooltips = null)
+    {
+        var h = ImGui.GetFrameHeight();
+        var naturalWidth = GetSegmentedButtonWidth(labels);
+        var totalWidth = MathF.Round(MathF.Max(width, naturalWidth));
+        var extraPerSegment = labels.Length > 0 ? (totalWidth - naturalWidth) / labels.Length : 0;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+
+        var dl = ImGui.GetWindowDrawList();
+        var start = ImGui.GetCursorScreenPos();
+        dl.AddRectFilled(start, start + new Vector2(totalWidth, h), UiColors.BackgroundInputField, SegmentRounding * T3Ui.UiScaleFactor);
+
+        var modified = false;
+        var unroundedX = start.X;
+        var x = start.X;
+        for (var index = 0; index < labels.Length; index++)
+        {
+            // Accumulate unrounded and round each edge, so segments sit on whole pixels and still add up to the track.
+            unroundedX += ImGui.CalcTextSize(labels[index]).X + segPadding * 2 + extraPerSegment;
+            var nextX = index == labels.Length - 1 ? start.X + totalWidth : MathF.Round(unroundedX);
+
+            if (index > 0)
+                ImGui.SameLine(0, 0);
+
+            ImGui.PushID(index);
+            var isDisabled = disabledItems != null && disabledItems[index];
+            if (DrawSegment(dl, labels[index], new Vector2(x, start.Y), nextX - x, index == selectedIndex, isDisabled, tooltips?[index]))
+            {
+                selectedIndex = index;
+                modified = true;
+            }
+
+            ImGui.PopID();
+            x = nextX;
+        }
+
+        return modified;
+    }
+
+    /** The width <see cref="SegmentedButton(string[], ref int, float, bool[], string[])"/> needs to fit all labels. */
+    public static float GetSegmentedButtonWidth(string[] labels)
+    {
+        var width = 0f;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+        foreach (var label in labels)
+        {
+            width += ImGui.CalcTextSize(label).X + segPadding * 2;
+        }
+
+        return width;
+    }
+
+    /** One option of a segmented track. Returns true when an enabled segment was clicked. */
+    private static bool DrawSegment(ImDrawListPtr dl, string label, Vector2 segMin, float segWidth, bool isSelected, bool isDisabled,
+                                    string? tooltip)
+    {
+        var h = ImGui.GetFrameHeight();
+        var rounding = SegmentRounding * T3Ui.UiScaleFactor;
+        var inset = SegmentInset * T3Ui.UiScaleFactor;
+
+        // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
+        var clicked = ImGui.InvisibleButton(label, new Vector2(segWidth, h)) && !isDisabled;
+
+        // Tooltips are shown for disabled segments too — that is where they matter most.
+        if (!string.IsNullOrEmpty(tooltip))
+            TooltipForLastItem(tooltip);
+
+        var isHovered = !isDisabled && ImGui.IsItemHovered();
+        if (isSelected || isHovered)
+        {
+            dl.AddRectFilled(segMin + new Vector2(inset, inset),
+                             segMin + new Vector2(segWidth - inset, h - inset),
+                             isSelected ? UiColors.BackgroundButton : UiColors.BackgroundButton.Fade(0.4f),
+                             rounding);
+        }
+
+        var textColor = isDisabled
+                            ? UiColors.TextMuted.Fade(0.25f)
+                            : isSelected
+                                ? UiColors.ForegroundFull
+                                : (isHovered ? UiColors.Text : UiColors.TextMuted);
+        ImGui.PushFont(isSelected ? Fonts.FontBold : Fonts.FontNormal);
+        var textSize = ImGui.CalcTextSize(label);
+        var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
+        dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), label);
+        ImGui.PopFont();
+
+        return clicked;
+    }
+
+    private const float SegmentPadding = 14;
+    private const float SegmentRounding = 4;
+    private const float SegmentInset = 2;
 
     private static bool DrawSelectButton(string name, bool isSelected, float width = 0)
     {
