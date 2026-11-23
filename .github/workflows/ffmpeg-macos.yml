@@ -12,6 +12,10 @@ on:
         type: boolean
         default: false
   push:
+    # Any branch, but not tags: a version push sends commit and tag together, and the tag run would repeat the
+    # branch run of the same commit
+    branches:
+      - '**'
     paths:
       - 'Native/FFmpeg/**'
       - '.github/workflows/ffmpeg-macos.yml'

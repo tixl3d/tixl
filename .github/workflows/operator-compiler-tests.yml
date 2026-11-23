@@ -6,6 +6,10 @@ name: Operator Compiler Tests
 on:
   workflow_dispatch:
   push:
+    # Any branch, but not tags: a version push sends commit and tag together, and the tag run would repeat the
+    # branch run of the same commit
+    branches:
+      - '**'
     paths:
       - 'OperatorCompiler/**'
       - 'OperatorCompiler.Tests/**'
