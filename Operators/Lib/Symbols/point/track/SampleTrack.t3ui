@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 3,
+  "Id": "1aa5c0f4-ff12-4ac0-aa49-d5d3d0bd2d9f"/*SampleTrack*/,
+  "Description": "Reads the points of one frame from a track buffer, interpolated between frames.\n\nThe track buffer holds MarkerCount points per frame, one frame after another, as written by [TrackMarkers]. Frame may be fractional: position, confidence (F1), color and scale are blended between the two neighboring frames. A marker lost in either frame stays lost and is returned as a separator, and so is every marker for frames outside the track.\n\nAKA: play track, read track, marker playback\n\nSee also: [TrackMarkers]",
+  "InputUis": [
+    {
+      "InputId": "060ef64c-35f1-48ac-9029-af47a426ccab"/*FirstFrame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 300.0
+      },
+      "Description": "Frame number of the track's first frame. Match the FirstFrame of [TrackMarkers].",
+      "Min": 0,
+      "Max": 1000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "9fefd12d-f090-44f7-ad19-c45d4834b7e7"/*Frame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 200.0
+      },
+      "Description": "Frame to read, numbered like the FrameIndex of [TrackMarkers]. Fractional values interpolate.",
+      "Min": 0.0,
+      "Max": 1000.0
+    },
+    {
+      "InputId": "d7960316-c9a3-4414-b6e5-7f4419d71320"/*TrackBuffer*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Description": "Frame-major track points, e.g. the TrackBuffer of [TrackMarkers]."
+    },
+    {
+      "InputId": "e9252f0b-f389-456f-8696-7825f95d7920"/*MarkerCount*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 100.0
+      },
+      "Description": "Number of markers per frame in TrackBuffer.",
+      "Min": 1,
+      "Max": 100,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "bef5bc51-d338-43cc-9cf2-344dc1fe42e5"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

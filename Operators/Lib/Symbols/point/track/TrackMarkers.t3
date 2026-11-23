@@ -1,0 +1,52 @@
+{
+  "FormatVersion": 3,
+  "Id": "39658ad0-96cf-49c3-9b38-b8c1c32f2a6b"/*TrackMarkers*/,
+  "Inputs": [
+    {
+      "Id": "0b2c74e1-aa56-454e-95a0-6ac3eeea7e14"/*IsEnabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "2f715dd9-5cdb-41f4-81ce-f9b53de2639f"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "47a01aa0-2b05-4c08-9683-8ffe1b6b3127"/*SearchRadius*/,
+      "DefaultValue": 30.0
+    },
+    {
+      "Id": "48bd87e4-8e48-4971-a0f5-78f59fe98254"/*FirstFrame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4e34e1a4-90dd-4581-8964-dc1c70627a64"/*FrameCount*/,
+      "DefaultValue": 3000
+    },
+    {
+      "Id": "6e618b85-7ffc-4d83-9410-5ebd4b01f0f2"/*PatchSize*/,
+      "DefaultValue": 15
+    },
+    {
+      "Id": "6ed43e2d-e061-4e6b-aafd-090e800f49ee"/*SeedFrame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7638ba90-9f7b-414e-bc69-33d9b22e1658"/*FrameIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b888df98-6cf6-4152-a8bc-9f12c43d5c9c"/*MinConfidence*/,
+      "DefaultValue": 0.6
+    },
+    {
+      "Id": "d2a48b9a-5f1f-47ef-b979-e86570fedfc7"/*Image*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e619480e-b793-4dee-9168-cc4cb8cb6621"/*SeedPoints*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

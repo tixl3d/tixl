@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "1aa5c0f4-ff12-4ac0-aa49-d5d3d0bd2d9f"/*SampleTrack*/,
+  "Inputs": [
+    {
+      "Id": "060ef64c-35f1-48ac-9029-af47a426ccab"/*FirstFrame*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "9fefd12d-f090-44f7-ad19-c45d4834b7e7"/*Frame*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d7960316-c9a3-4414-b6e5-7f4419d71320"/*TrackBuffer*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e9252f0b-f389-456f-8696-7825f95d7920"/*MarkerCount*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

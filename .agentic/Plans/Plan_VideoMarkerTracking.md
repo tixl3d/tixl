@@ -200,6 +200,9 @@ math.
 Inputs: track buffer + `MarkerCount` + `FrameIndex`, and `TargetPoints` (world space, one per marker; the
 crosshairs). Outputs: `Position` (Vector2), `Rotate` (degrees), `Scale` (float), ready to connect to Layer2d.
 
+For panning footage, the fixed targets generalize to a world anchor per marker; see
+[Anchors per marker](#anchors-per-marker). The crosshairs become the anchors of the hand-placed seeds.
+
 - Solve per frame: the similarity that moves the tracked features (video space) onto the targets, weighted by
   confidence, skipping lost markers. 1 marker: translation only. 2 or more: least squares (Umeyama 2D).
   Toggles turn off rotation or scale.
@@ -226,19 +229,82 @@ crosshairs). Outputs: `Position` (Vector2), `Rotate` (degrees), `Scale` (float),
 The same solve is the global-motion prediction used in step 3, so it is written once as a shared shader include.
 
 
+## Panning footage and automatic markers
+
+Decided 2026-11-23: the primary goal is **stabilization**; tracking specific features comes later. Automatic
+marker placement is a **mode of `[TrackMarkers]`**, not a separate op.
+
+### Backward tracking
+
+Already works in the tracker: an untracked frame next to a tracked one is tracked from it in either direction,
+and the velocity prediction follows the direction. Reverse playback itself is slow because each step back
+re-decodes from the previous keyframe (reverse read-behind is open in `Plan_VideoFollowups.md`). Until that
+lands, track from the `.proxy.mov` proxy, which seeks cheaply.
+
+### Forward-backward check
+
+After tracking `f → f+1`, track the result back to `f`. If it misses the start position by more than about a
+pixel, the marker is lost. This is the standard way to catch occlusion and slipping in Lucas-Kanade trackers. It
+costs one more Lucas-Kanade pass per marker.
+
+### `SeedMode`: Manual / Automatic
+
+- **Manual** (current): fixed markers from `SeedPoints` on `SeedFrame`.
+- **Automatic**: a pool of `MarkerCount` slots. Each frame, slots whose marker is lost or left the image are
+  refilled with new corners:
+  - Shi-Tomasi score (the same as `SeedQuality`), one best candidate per grid cell.
+  - Cells holding a live marker are skipped, so markers stay spread across the image.
+  - Refilling happens on the GPU, with no readback.
+- A refilled slot starts a new marker: the trail gets a separator, and F2 becomes a unique marker id (slot plus a
+  generation counter) instead of the slot index.
+- Later, both modes can share one buffer: hand-placed markers in the first slots, the automatic pool after them.
+
+### Anchors per marker
+
+With panning, fixed targets leave the view, so the solve fits each marker to its own **world anchor**, set when
+the marker starts:
+
+- Automatic mode: the anchor is the marker's position on its first frame, mapped through the transform already
+  solved for that frame. The first frame uses identity. No manual alignment is needed.
+- Manual mode: anchors come from the one manual alignment on `SeedFrame`, as before.
+
+The solved transform is then the accumulated camera motion over arbitrarily long pans. It drifts slowly with each
+handoff, which is normal for this method.
+
+### Stabilization means smoothing the path
+
+Pinning panning footage to its anchors would cancel the pan and push the picture out of frame. Stabilization
+applies `smoothed(path) ∘ inverse(path)`: it keeps the intended camera move and removes the jitter. Smoothing over
+a centered window needs frames ahead, which the track buffer has once a range has been tracked. In a live first
+pass, use a trailing window, which lags a little. Smoothing therefore belongs in the same phase as the solve.
+
+### Leaving the view vs. occlusion
+
+Both are handled by re-acquisition (predict from the global transform, then search). Leaving the view only adds a
+rule: don't search while the predicted position is outside the image. In automatic mode, a marker that left is
+usually replaced instead.
+
 ## Phases
 
-1. ~~`FrameIndex` on `PlayVideo`~~ (done 2026-11-23, not yet verified in the editor).
-2. `[TrackMarkers]`: translation LK with key-template NCC, seed quality, seeds from a buffer.
-   `[SampleTrack]`. Test with the cat/fence footage.
-3. `[SolveLayerTransform]` with per-frame cache. Replace the hand keys in `_ResearchCatAnimation`.
-4. Global-motion prediction + re-acquiring lost markers (same similarity solve).
-5. `.track.jsonl` save and load, `[TrackToTrails]`.
-6. `[StabilizeImage]` (GPU resample, smoothing).
-7. Seed editing in the output window (click to add, drag to move, on `SeedFrame`). Build it on the geometry
-   ops' point editing rather than a tracker-only editor.
-8. Later: blob mode for dots, affine LK (per-marker rotation and scale), homography / corner pin,
-   `[DetectMarkers]` auto-seeding.
+1. ~~`FrameIndex` on `PlayVideo`~~ (done, `d6bce9b43`).
+2. ~~`[TrackMarkers]` + `[SampleTrack]`~~ (done 2026-11-23 in `Lib/Symbols/point/track/`, shaders in
+   `shaders/points/track/`; works on the cat footage). Differences from the design above:
+   - No `OrientationFrom` yet; orientation is identity.
+   - Gaps up to 8 frames are bridged with one extra pyramid level. Larger jumps aren't tracked, so a failed
+     long-range track never gets cached; step or play from a tracked frame instead.
+   - Showing an already tracked frame refreshes the recent template, so tracking can continue from any
+     cached frame.
+   - The key template is never refreshed yet, so confidence drops on strong zoom or rotation.
+3. Forward-backward check in `[TrackMarkers]`.
+4. `[SolveLayerTransform]` with a world anchor per marker, a cache per frame, and path smoothing. Test on static
+   footage (the fence) first.
+5. `SeedMode` Automatic: corner detection on a grid, slot refill, unique marker ids. Test on panning footage.
+6. Re-acquiring lost markers (shared similarity solve; skip predictions outside the image).
+7. `[StabilizeImage]` (GPU resample) if driving Layer2d isn't enough.
+8. `.track.jsonl` save and load, `[TrackToTrails]`.
+9. Seed editing in the output window, built on the geometry ops' point editing.
+10. Later: per-marker seed frames for hand-picked features, blob mode for dots, affine Lucas-Kanade
+   (per-marker rotation and scale), homography / corner pin, reverse read-behind in the video decoder.
 
 ## Resolved
 
@@ -246,3 +312,5 @@ The same solve is the global-motion prediction used in step 3, so it is written 
   point editor comes later and overlaps with geometry point editing.
 - **Live vs. bake:** live connection to Layer2d only. No keyframe generation; `[SetKeyframes]` covers that as a
   workaround.
+- **Primary goal:** stabilization first; tracking specific features later.
+- **Automatic markers:** a `SeedMode` of `[TrackMarkers]`, not a separate op.
