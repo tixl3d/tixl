@@ -25,7 +25,7 @@ cbuffer Params : register(b1)
 
     float Scale;
     float AlphaCutOff;
-    float UseFlatShading;
+    float ShadingMode; // 0 default, 1 flat, 2 unlit
     float SpecularAA;
 };
 
@@ -258,7 +258,7 @@ static bool IsFrontFacing = true;
 float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 {
     float3 N;
-    if (UseFlatShading > 0.5)
+    if (ShadingMode > 0.5 && ShadingMode < 1.5)
     {
         // Flat shading: calculate geometric normal from world position derivatives
         float3 dpdx = ddx(pin.worldPosition);
@@ -328,7 +328,17 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
     float4 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);
     frag.Lo = normalize(eyePosition.xyz - frag.worldPosition);
 
-    float4 litColor = ComputePbr();
+    float4 litColor;
+    if (ShadingMode > 1.5)
+    {
+        // Unlit: the texture as it is, e.g. a video that must keep its exact colors.
+        litColor = frag.albedo * Color;
+        litColor.rgb = lerp(litColor.rgb, FogColor.rgb, frag.fog * FogColor.a);
+    }
+    else
+    {
+        litColor = ComputePbr();
+    }
 
     float4 fieldColor = GetField(float4(pin.worldPosition.xyz, 0));
     litColor.rgba *= fieldColor;

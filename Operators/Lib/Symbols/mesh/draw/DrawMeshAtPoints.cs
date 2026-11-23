@@ -69,6 +69,7 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
         {
             Default = 0,
             Flat = 1,
+            Unlit = 2,
         }
         private enum AtlasModes
         {
