@@ -7,7 +7,8 @@ namespace Lib.geometry.convert;
 /// <summary>
 /// Fills the closed curves of a Geometry with flat polygons, holes included, so they can be modelled further or
 /// rendered; the flat counterpart of [ExtrudeCurves] (Houdini's PolyFill). One output part per input part, with the
-/// input's part attributes. Polygons in the input are not passed through.
+/// input's part attributes. Polygons in the input are not passed through. Optionally insets the outline into a ring
+/// of quads with a smaller cap inside, for a boundary edge loop.
 /// </summary>
 [Guid("daab8738-babd-4036-8581-22e3dc55e4ba")]
 [ExportDependencies("LibTessDotNet.dll")]
@@ -26,6 +27,7 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
         var curves = Curves.GetValue(context);
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-5f);
         var weight = Weight.GetValue(context);
+        var inset = MathF.Max(Inset.GetValue(context), 0);
         var windingRule = EvenOdd.GetValue(context) ? WindingRule.EvenOdd : WindingRule.NonZero;
         var keepCurves = KeepCurves.GetValue(context);
         if (curves == null || curves.PrimitiveCount == 0)
@@ -35,8 +37,10 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
         }
 
         _builder.Lattice = MathF.Max(Lattice.GetValue(context), 0);
-        _builder.FillFlat(curves, tolerance, weight, windingRule, keepCurves, _output);
+        _builder.FillFlat(curves, tolerance, weight, windingRule, keepCurves, _output, inset: inset);
         _statusMessage = _builder.LatticeIssue ?? string.Empty;
+        if (!string.IsNullOrEmpty(_builder.InsetIssue))
+            _statusMessage = string.IsNullOrEmpty(_statusMessage) ? _builder.InsetIssue : $"{_statusMessage} {_builder.InsetIssue}";
         Result.Value = _output;
     }
 
@@ -59,6 +63,9 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
 
     [Input(Guid = "ac6b705b-b962-4f92-8e4a-451d787f57bb")]
     public readonly InputSlot<float> Weight = new();
+
+    [Input(Guid = "9e4961ef-ebd1-43d9-b505-bd591101551c")]
+    public readonly InputSlot<float> Inset = new();
 
     [Input(Guid = "02b5e3a3-064e-4e1b-85b9-1d3ca685958d")]
     public readonly InputSlot<bool> EvenOdd = new();

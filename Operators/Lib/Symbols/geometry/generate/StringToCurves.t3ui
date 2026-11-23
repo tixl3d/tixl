@@ -56,7 +56,7 @@
       },
       "Description": "Font file (.ttf, .otf or .ttc).",
       "Usage": "FilePath",
-      "FileFilter": "ttf;otf;ttc"
+      "FileFilter": "ttf,otf,ttc"
     },
     {
       "InputId": "8c5e1d7a-3f92-4a64-b0d8-6e2c9f4a1b57"/*Axis*/,

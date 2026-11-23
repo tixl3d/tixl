@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using LibTessDotNet;
 using T3.Core.DataTypes;
 
@@ -23,7 +24,7 @@ internal sealed class CurveSolidBuilder
     /// duplicate its front cap.
     /// </param>
     public void FillFlat(Geometry curves, float tolerance, float weight, WindingRule windingRule, bool keepCurves, Geometry target,
-                         bool skipPartsWithPolygons = false)
+                         bool skipPartsWithPolygons = false, float inset = 0)
     {
         Begin();
         var parts = curves.Parts;
@@ -40,7 +41,7 @@ internal sealed class CurveSolidBuilder
                 continue;
 
             BuildPart(curves, curveViews, primitiveStart, primitiveEnd, tolerance, depth: 0, bevel: 0, bevelSegments: 1, weight,
-                      flatShading: false, smoothAngle: 40, front: true, back: false, sides: false, windingRule, keepCurves, pivot, id, seed);
+                      flatShading: false, smoothAngle: 40, front: true, back: false, sides: false, windingRule, keepCurves, pivot, id, seed, inset);
         }
 
         Finish(target, curves);
@@ -68,9 +69,13 @@ internal sealed class CurveSolidBuilder
     /// <summary>Why the last build ignored <see cref="Lattice"/>, or null.</summary>
     public string? LatticeIssue { get; private set; }
 
+    /// <summary>Why the last build used a smaller inset than requested, or null.</summary>
+    public string? InsetIssue { get; private set; }
+
     public void Begin()
     {
         LatticeIssue = null;
+        InsetIssue = null;
         _pointSources.Clear();
         _primitiveSources.Clear();
         _carriesAttributes = false;
@@ -84,6 +89,11 @@ internal sealed class CurveSolidBuilder
         _kinds.Clear();
         _closed.Clear();
         _curvePointHandles.Clear();
+        _ringZeroSeed.Clear();
+        _innerLoops.Clear();
+        _innerAlignedIds.Clear();
+        _innerLoopSources.Clear();
+        _collapsedStrips.Clear();
     }
 
     public void Finish(Geometry target, Geometry source)
@@ -184,14 +194,14 @@ internal sealed class CurveSolidBuilder
 
     public void BuildPart(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
                           float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
-                          WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed)
+                          WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed, float inset = 0)
     {
         var partStart = _faceOffsets.Count - 1;
         var pointStart = _positions.Count;
         _carriesAttributes = HasAttributesToCarry(geometry);
         _samples.Clear();
         BuildFaces(geometry, curveViews, primitiveStart, primitiveEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle,
-                   front, back, sides, windingRule);
+                   front, back, sides, windingRule, inset);
         if (_carriesAttributes)
             MapToSamples(pointStart, partStart);
 
@@ -604,7 +614,7 @@ internal sealed class CurveSolidBuilder
 
     private void BuildFaces(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
                             float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
-                            WindingRule windingRule)
+                            WindingRule windingRule, float inset)
     {
         // Flatten the part's closed curves into 2D loops
         _loops.Clear();
@@ -660,12 +670,25 @@ internal sealed class CurveSolidBuilder
         if (Lattice > 0 && bevel > 0)
             LatticeIssue = "Lattice is ignored with a bevel.";
 
-        if (_usesLattice)
-            InsertGridCrossings(Lattice, Lattice * LatticeSnap);
-
         var hasWalls = sides && depth > 0;
         var profile = BuildProfile(depth, bevel, bevelSegments, hasWalls);
-        BuildRings(profile);
+        var useInset = inset > 1e-6f && front && !hasWalls;
+        if (useInset)
+        {
+            // The outline ring is built first so the inset strip can share its points; the caps then use the
+            // smaller inner rings, which BuildInsetBand builds its own rings for.
+            BuildRings(profile);
+            BuildInsetBand(inset);
+            if (_loops.Count == 0)
+                return; // the inset consumed the whole outline and the strip is all that is left
+        }
+        else
+        {
+            if (_usesLattice)
+                InsertGridCrossings(Lattice, Lattice * LatticeSnap);
+
+            BuildRings(profile);
+        }
 
         // Caps and walls share the ring points, so the solid closes without a weld
         if (front)
@@ -723,6 +746,329 @@ internal sealed class CurveSolidBuilder
             loop.Clear();
             loop.AddRange(_scratch2);
         }
+    }
+
+    /// <summary>
+    /// Replaces the part's outlines with the inner side of a boundary strip: every outline edge runs to the inset
+    /// ring, and the cap is tessellated inside the inset rings. The inset ring is the straight skeleton of each
+    /// loop, so corners keep their miter and short edges collapse to a point instead of folding. Loops are clamped
+    /// against each other first, so a thin stem leaves a cap between its sides.
+    /// </summary>
+    private void BuildInsetBand(float requested)
+    {
+        _innerLoops.Clear();
+        _innerAlignedIds.Clear();
+        _innerLoopSources.Clear();
+        _collapsedStrips.Clear();
+        _ringZeroSeed.Clear();
+
+        var width = requested;
+        var crossLoopDistance = MinDistanceBetweenLoops(_loops);
+        if (crossLoopDistance < float.MaxValue)
+        {
+            var safeWidth = crossLoopDistance * InsetOverlapSafety;
+            if (width > safeWidth)
+            {
+                width = safeWidth;
+                InsetIssue = $"Inset limited to {width:0.###} so opposite outlines stay apart.";
+            }
+        }
+
+        if (width <= 1e-6f)
+            return;
+
+        // BuildRings below replaces _loopRings, so keep the outline rings for the strip
+        var outlineRings = new List<int[]>(_loopRings);
+        for (var l = 0; l < _loops.Count; l++)
+        {
+            var loop = _loops[l];
+            var count = loop.Count;
+            BuildLoopSkeleton(loop);
+            var limit = _skeleton.Limit(width, Vector3.UnitZ, CancellationToken.None);
+
+            if (_insetSlotPointIds.Length < count)
+                _insetSlotPointIds = new int[count];
+
+            // Corners that arrive at the same spot after a collapse share one point
+            var weldDistanceSq = MathF.Max(limit * InsetCollapseWeldFactor, 1e-7f);
+            weldDistanceSq *= weldDistanceSq;
+            for (var slot = 0; slot < count; slot++)
+            {
+                var vertex = _skeleton[slot];
+                _insetSlotPointIds[slot] = -1;
+                if (!vertex.Alive)
+                    continue;
+
+                var position = vertex.Origin + vertex.Velocity * limit;
+                var previousSlot = _skeleton.ResolveSlot(vertex.Previous);
+                if (previousSlot < slot && _insetSlotPointIds[previousSlot] >= 0
+                    && Vector3.DistanceSquared(_positions[_insetSlotPointIds[previousSlot]], position) < weldDistanceSq)
+                {
+                    _insetSlotPointIds[slot] = _insetSlotPointIds[previousSlot];
+                    continue;
+                }
+
+                _insetSlotPointIds[slot] = AddPoint(position);
+            }
+
+            _insetInnerIds.Clear();
+            for (var i = 0; i < count; i++)
+                _insetInnerIds.Add(_insetSlotPointIds[_skeleton.ResolveSlot(i)]);
+
+            // The cap runs inside the unique inset points; collapsed runs of corners become one vertex
+            _scratch2.Clear();
+            _innerLoopIds.Clear();
+            for (var i = 0; i < count; i++)
+            {
+                var point = _insetInnerIds[i];
+                if (_innerLoopIds.Count > 0 && _innerLoopIds[^1] == point)
+                    continue;
+
+                _innerLoopIds.Add(point);
+                _scratch2.Add(new Vector2(_positions[point].X, _positions[point].Y));
+            }
+
+            while (_innerLoopIds.Count > 1 && _innerLoopIds[^1] == _innerLoopIds[0])
+            {
+                _innerLoopIds.RemoveAt(_innerLoopIds.Count - 1);
+                _scratch2.RemoveAt(_scratch2.Count - 1);
+            }
+
+            if (_innerLoopIds.Count < 3)
+            {
+                // The inset collapsed this loop to a point or ridge; it gets a closing fan but no cap
+                _collapsedStrips.Add((outlineRings[l], new List<int>(_insetInnerIds)));
+                continue;
+            }
+
+            _innerLoops.Add(new List<Vector2>(_scratch2));
+            _innerAlignedIds.Add(new List<int>(_insetInnerIds));
+            _innerLoopSources.Add(l);
+            for (var i = 0; i < _innerLoopIds.Count; i++)
+                _ringZeroSeed.Add((_scratch2[i], _innerLoopIds[i]));
+        }
+
+        _loops.Clear();
+        _loops.AddRange(_innerLoops);
+        if (_innerLoops.Count > 0)
+        {
+            // Lattice crossings go in before the strip is built, so the cap and the strip share every boundary edge
+            if (_usesLattice)
+                InsertGridCrossings(Lattice, Lattice * LatticeSnap);
+
+            BuildRings(_profile);
+            _ringZeroSeed.Clear();
+
+            for (var l = 0; l < _innerLoops.Count; l++)
+                AddInsetStrip(outlineRings[_innerLoopSources[l]], _innerAlignedIds[l], _loopRings[l]);
+        }
+        else
+        {
+            _ringZeroSeed.Clear();
+        }
+
+        foreach (var (outlineIds, alignedInnerIds) in _collapsedStrips)
+            AddCollapsedInsetStrip(outlineIds, alignedInnerIds);
+    }
+
+    /// <summary>Emits the strip of a loop whose inset collapsed: its inner points are already at a point or ridge.</summary>
+    private void AddCollapsedInsetStrip(int[] outlineIds, List<int> alignedInnerIds)
+    {
+        var count = alignedInnerIds.Count;
+        for (var i = 0; i < count; i++)
+        {
+            var next = i + 1 == count ? 0 : i + 1;
+            _polygon.Clear();
+            _polygon.Add(outlineIds[i]);
+            _polygon.Add(outlineIds[next]);
+            _polygon.Add(alignedInnerIds[next]);
+            _polygon.Add(alignedInnerIds[i]);
+            AddCapPolygon(Vector3.UnitZ, flip: false);
+        }
+    }
+
+    /// <summary>
+    /// Emits the strip around one loop: every outline edge becomes a polygon between the outline and its inset
+    /// edge, following any lattice crossings inserted into that inset edge. A collapsed inset edge leaves a
+    /// triangle that closes the strip at the collapsed corner.
+    /// </summary>
+    private void AddInsetStrip(int[] outlineIds, List<int> alignedInnerIds, int[] innerRing)
+    {
+        var count = alignedInnerIds.Count;
+        var innerCount = innerRing.Length / _profile.Count;
+        _ringIndexLookup.Clear();
+        for (var i = 0; i < innerCount; i++)
+            _ringIndexLookup[innerRing[i]] = i;
+
+        for (var i = 0; i < count; i++)
+        {
+            var next = i + 1 == count ? 0 : i + 1;
+            var insetStart = alignedInnerIds[i];
+            var insetEnd = alignedInnerIds[next];
+            _polygon.Clear();
+            _polygon.Add(outlineIds[i]);
+            _polygon.Add(outlineIds[next]);
+
+            if (insetStart == insetEnd || !_ringIndexLookup.TryGetValue(insetEnd, out var index) || !_ringIndexLookup.TryGetValue(insetStart, out var stop))
+            {
+                _polygon.Add(insetStart);
+            }
+            else
+            {
+                // Walk the inset loop back from this edge's end to its start, collecting lattice points
+                while (true)
+                {
+                    _polygon.Add(innerRing[index]);
+                    if (index == stop)
+                        break;
+
+                    index = index == 0 ? innerCount - 1 : index - 1;
+                }
+            }
+
+            AddCapPolygon(Vector3.UnitZ, flip: false);
+        }
+    }
+
+    /// <summary>Feeds one outline loop into <see cref="_skeleton"/> with its inward edge normals.</summary>
+    private void BuildLoopSkeleton(List<Vector2> loop)
+    {
+        _skeleton.Clear();
+        var count = loop.Count;
+        for (var i = 0; i < count; i++)
+        {
+            var current = loop[i];
+            var previous = loop[i == 0 ? count - 1 : i - 1];
+            var next = loop[i + 1 == count ? 0 : i + 1];
+            var position = new Vector3(current.X, current.Y, 0);
+            var previousNormal = StraightSkeletonInset.EdgeInwardNormal(new Vector3(previous.X, previous.Y, 0), position, Vector3.UnitZ);
+            var nextNormal = StraightSkeletonInset.EdgeInwardNormal(position, new Vector3(next.X, next.Y, 0), Vector3.UnitZ);
+            _skeleton.Add(new StraightSkeletonInset.Vertex(position,
+                                                           StraightSkeletonInset.MiterVelocity(previousNormal, nextNormal),
+                                                           previousNormal,
+                                                           nextNormal,
+                                                           i == 0 ? count - 1 : i - 1,
+                                                           i + 1 == count ? 0 : i + 1));
+        }
+    }
+
+    /// <summary>
+    /// Smallest distance between outlines of different loops, so an inset can be capped before holes grow
+    /// through their outer outline. Returns infinity with fewer than two loops.
+    /// </summary>
+    private static float MinDistanceBetweenLoops(List<List<Vector2>> loops)
+    {
+        if (loops.Count < 2)
+            return float.MaxValue;
+
+        var bounds = new (Vector2 Min, Vector2 Max)[loops.Count];
+        for (var l = 0; l < loops.Count; l++)
+        {
+            var min = new Vector2(float.MaxValue);
+            var max = new Vector2(float.MinValue);
+            foreach (var p in loops[l])
+            {
+                min = Vector2.Min(min, p);
+                max = Vector2.Max(max, p);
+            }
+
+            bounds[l] = (min, max);
+        }
+
+        var bestSq = float.MaxValue;
+        for (var a = 0; a < loops.Count; a++)
+        {
+            for (var b = a + 1; b < loops.Count; b++)
+            {
+                if (BoundsGapSquared(bounds[a], bounds[b]) >= bestSq)
+                    continue;
+
+                var first = loops[a];
+                var second = loops[b];
+                for (var i = 0; i < first.Count; i++)
+                {
+                    var a0 = first[i];
+                    var a1 = first[i + 1 == first.Count ? 0 : i + 1];
+                    for (var j = 0; j < second.Count; j++)
+                    {
+                        var b0 = second[j];
+                        var b1 = second[j + 1 == second.Count ? 0 : j + 1];
+                        if (SegmentBoundsGapSquared(a0, a1, b0, b1) >= bestSq)
+                            continue;
+
+                        var distanceSq = SegmentDistanceSquared(a0, a1, b0, b1);
+                        if (distanceSq < bestSq)
+                            bestSq = distanceSq;
+                    }
+                }
+            }
+        }
+
+        return bestSq == float.MaxValue ? float.MaxValue : MathF.Sqrt(bestSq);
+    }
+
+    private static float BoundsGapSquared((Vector2 Min, Vector2 Max) a, (Vector2 Min, Vector2 Max) b)
+    {
+        var dx = MathF.Max(0, MathF.Max(a.Min.X - b.Max.X, b.Min.X - a.Max.X));
+        var dy = MathF.Max(0, MathF.Max(a.Min.Y - b.Max.Y, b.Min.Y - a.Max.Y));
+        return dx * dx + dy * dy;
+    }
+
+    private static float SegmentBoundsGapSquared(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
+    {
+        var aMin = Vector2.Min(a0, a1);
+        var aMax = Vector2.Max(a0, a1);
+        var bMin = Vector2.Min(b0, b1);
+        var bMax = Vector2.Max(b0, b1);
+        return BoundsGapSquared((aMin, aMax), (bMin, bMax));
+    }
+
+    /** Squared distance between two segments, clamped to their ends. */
+    private static float SegmentDistanceSquared(Vector2 p1, Vector2 q1, Vector2 p2, Vector2 q2)
+    {
+        var d1 = q1 - p1;
+        var d2 = q2 - p2;
+        var r = p1 - p2;
+        var a = Vector2.Dot(d1, d1);
+        var e = Vector2.Dot(d2, d2);
+        var f = Vector2.Dot(d2, r);
+        float s, t;
+        if (a <= 1e-12f && e <= 1e-12f)
+            return Vector2.DistanceSquared(p1, p2);
+
+        if (a <= 1e-12f)
+        {
+            s = 0;
+            t = Math.Clamp(f / e, 0, 1);
+        }
+        else
+        {
+            var c = Vector2.Dot(d1, r);
+            if (e <= 1e-12f)
+            {
+                t = 0;
+                s = Math.Clamp(-c / a, 0, 1);
+            }
+            else
+            {
+                var b = Vector2.Dot(d1, d2);
+                var denominator = a * e - b * b;
+                s = denominator > 1e-12f ? Math.Clamp((b * f - c * e) / denominator, 0, 1) : 0;
+                t = (b * s + f) / e;
+                if (t < 0)
+                {
+                    t = 0;
+                    s = Math.Clamp(-c / a, 0, 1);
+                }
+                else if (t > 1)
+                {
+                    t = 1;
+                    s = Math.Clamp((b - c) / a, 0, 1);
+                }
+            }
+        }
+
+        return Vector2.DistanceSquared(p1 + d1 * s, p2 + d2 * t);
     }
 
     private void ResolveOverlaps(WindingRule windingRule)
@@ -847,6 +1193,11 @@ internal sealed class CurveSolidBuilder
     {
         _loopRings.Clear();
         _ringPointLookup.Clear();
+
+        // Inset strips already placed their inner ring points; reuse them so the cap shares the band's edge
+        foreach (var (position, point) in _ringZeroSeed)
+            _ringPointLookup[(0, (long)MathF.Round(position.X * 1e6f), (long)MathF.Round(position.Y * 1e6f))] = point;
+
         foreach (var loop in _loops)
         {
             var count = loop.Count;
@@ -1483,12 +1834,28 @@ internal sealed class CurveSolidBuilder
     private const int MaxLatticeCells = 40000;
     private const int MaxCapPolygonSize = 16;
 
+    /** An inset uses at most this share of the closest distance between two outlines. */
+    private const float InsetOverlapSafety = 0.45f;
+
+    /** Inset corners closer than this fraction of the width after the inset are welded. */
+    private const float InsetCollapseWeldFactor = 1e-3f;
+
     private bool _usesLattice;
+    private readonly StraightSkeletonInset _skeleton = new();
     private readonly List<Vector2> _crossingLoop = [];
     private readonly List<float> _crossings = [];
     private readonly List<int> _polygon = [];
     private readonly Dictionary<(long, long), int> _capPointLookup = [];
     private readonly List<List<Vector2>> _loops = [];
+    private readonly List<List<Vector2>> _innerLoops = [];
+    private readonly List<List<int>> _innerAlignedIds = [];
+    private readonly List<int> _innerLoopSources = [];
+    private readonly List<(int[] OutlineIds, List<int> AlignedInnerIds)> _collapsedStrips = [];
+    private readonly List<(Vector2 Position, int Point)> _ringZeroSeed = [];
+    private readonly List<int> _innerLoopIds = [];
+    private readonly List<int> _insetInnerIds = [];
+    private readonly Dictionary<int, int> _ringIndexLookup = [];
+    private int[] _insetSlotPointIds = [];
     private readonly List<Vector3> _scratch = [];
     private readonly List<Vector2> _scratch2 = [];
     private readonly List<(float Inset, float Z)> _profile = [];

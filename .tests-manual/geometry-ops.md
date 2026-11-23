@@ -512,6 +512,21 @@ Iterations 2) -> [GeometryToMesh] -> [DrawMesh], and compare with Lattice 0.
 - With a Bevel, or a Lattice so small that it needs more than 40000 cells, the op warns and builds the plain caps.
 - [FillCurves] with Lattice gives the same grid as a flat surface.
 
+## Step: Inset the filled outline
+
+**Action:**
+Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] (Inset 0.02)
+-> [GeometryToMesh] -> [DrawMesh] and look at the Stats of [FillCurves].
+
+**Expected:**
+- A ring of quads runs along every outline, with the fill inside it; the outer bounds and the silhouette don't change.
+- The Stats show no non-manifold edges; boundary edges are the outline edges, plus a few where a tiny counter collapses.
+- Set Lattice 0.05: the cap inside the ring becomes the same grid as a plain fill, the ring follows the grid crossings,
+  and no non-manifold edges appear. Without the ring, the letters show long triangles from the outline.
+- Set Inset 0.5 on letters with a thin stem: the op warns that the inset was limited, and the rings stop before
+  opposite outlines overlap.
+- Weight still offsets the whole letter first; the ring is built inside the offset outline.
+
 ## Step: Polygon edges as lines
 
 **Action:**
