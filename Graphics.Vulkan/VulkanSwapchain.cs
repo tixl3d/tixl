@@ -291,14 +291,50 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
         if (formats.Length > 0)
         {
-            GraphicsLog.WarnOnce($"The window cannot present {requested}; using {formats[0].format} instead.");
-            colorSpace = formats[0].colorSpace;
-            return formats[0].format;
+            var fallback = PickFallbackFormat(formats, wanted);
+            GraphicsLog.WarnOnce($"The window cannot present {requested}; using {fallback.format} instead.");
+            colorSpace = fallback.colorSpace;
+            return fallback.format;
         }
 
         colorSpace = VkColorSpaceKHR.SrgbNonLinear;
         return VkFormat.B8G8R8A8Unorm;
     }
+
+    /// <summary>
+    /// Keeps the requested encoding when the exact format is missing. X11 surfaces only offer BGRA and list
+    /// B8G8R8A8_SRGB first: taking that for a UNorm request makes the hardware gamma-encode colors the shaders
+    /// already wrote gamma-encoded, and the whole UI comes out washed out.
+    /// </summary>
+    private static VkSurfaceFormatKHR PickFallbackFormat(VkSurfaceFormatKHR[] formats, VkFormat wanted)
+    {
+        var swapped = wanted switch
+                          {
+                              VkFormat.R8G8B8A8Unorm => VkFormat.B8G8R8A8Unorm,
+                              VkFormat.B8G8R8A8Unorm => VkFormat.R8G8B8A8Unorm,
+                              VkFormat.R8G8B8A8Srgb  => VkFormat.B8G8R8A8Srgb,
+                              VkFormat.B8G8R8A8Srgb  => VkFormat.R8G8B8A8Srgb,
+                              _                      => VkFormat.Undefined,
+                          };
+
+        foreach (var candidate in formats)
+        {
+            if (candidate.format == swapped)
+                return candidate;
+        }
+
+        var wantsSrgb = IsSrgb(wanted);
+        foreach (var candidate in formats)
+        {
+            if (IsSrgb(candidate.format) == wantsSrgb)
+                return candidate;
+        }
+
+        return formats[0];
+    }
+
+    private static bool IsSrgb(VkFormat format)
+        => format is VkFormat.B8G8R8A8Srgb or VkFormat.R8G8B8A8Srgb or VkFormat.A8B8G8R8SrgbPack32;
 
     private VkPresentModeKHR PickPresentMode()
     {
