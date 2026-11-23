@@ -177,9 +177,11 @@ the package's `licenses/`. An export that contains a GPL package must say so in 
   missing operators; `UnresolvedChildren_SurviveLoadAndSave` passes.
 
 Follow-ups found during Phase 0:
-- **AbletonLinkDLL.dll is a GPL binary of unknown source.** Before the package is published (Phase 1), find the
-  source of that wrapper and ship a link to it (GPL), or rebuild it from Ableton's Link repo in CI (also gives
-  Linux/macOS natives).
+- ~~AbletonLinkDLL.dll of unknown source~~ Resolved 2026-11-24: byte-identical to
+  SpaceMusicZH/VL.IO.AbletonLink @ 2e2b2316 (wrapper, CC0) with Ableton/link @ 2641130b (GPL-2.0-or-later) and asio
+  @ 01b4e87c (BSL-1.0). Decided: ship a notice with the exact commits (`dependencies/licenses/AbletonLinkDLL-SOURCE.md`),
+  not the source archives. Stronger compliance and Linux/macOS versions come with building the wrapper from those
+  sources in CI later.
 - Replace `NDILibDotNet6` (no licence) with own MIT P/Invoke bindings.
 - `CopyLocalLockFileAssemblies` in Lib, Io, Video, Mediapipe copies the editor's own dependencies into each package
   (Debug outputs 881/218/397/241 MB; OnnxRuntime four times). `TixlCopyLocalPackages` can replace it; matters for the
