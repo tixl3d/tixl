@@ -151,20 +151,52 @@ the package's `licenses/`. An export that contains a GPL package must say so in 
 
 ## Phases
 
-### Phase 0: Move and gate (part of v4.4 milestone M0)
+### Phase 0: Move and gate (part of v4.4 milestone M0) — done 2026-11-23, uncommitted
 
-- [ ] `Operators/AbletonLink/`: move `AbletonLinkSync.{cs,t3,t3ui}` with `git mv` (GUIDs unchanged, namespace
-      kept), its three files from `Dependencies/` into `dependencies/`. Follow commit 5f945a2c8 (Video left Lib).
-- [ ] Mediapipe: move Emgu and `mediapipe_c.dll` into `Operators/Mediapipe/dependencies/`. Find out whether Lib
-      and Spout really use `CppSharp.Runtime`, `Google.Protobuf`, `OpenGL.Net`; drop the references if not, so
-      they stop shipping with the default install.
-- [ ] Owner + licence for every remaining `Dependencies/` file (DanceAi, ArtNet, libusb, …).
-- [ ] D2 metadata on every package; `PackageNames` → glob + filter; licence check script in all three CI
-      workflows.
-- Verify: release artifacts on all platforms contain no Link/Emgu/Mediapipe files; Debug editor still loads both
-  packages; a project using `[AbletonLinkSync]` opened in a Release build keeps the op through a save.
+- [x] `Operators/AbletonLink/`: `AbletonLinkSync` moved (GUIDs and `Lib.numbers.anim.time` namespace kept) with its
+      native `AbletonLinkDLL.dll` and the GPL-2.0 text. The managed `AbletonLink.dll` + `.deps.json` in
+      `Dependencies/` were an unused 2024 wrapper and are deleted.
+- [x] Mediapipe: `mediapipe_c.dll` + Apache-2.0 text moved into its `dependencies/`. **Emgu CV (`Emgu.CV.dll`,
+      `cvextern.dll`, GPLv3 text) deleted**: no code used it and `mediapipe_c.dll` doesn't link it.
+- [x] Ndi: NDI runtime + current licence text moved into `Operators/Ndi/dependencies/`.
+- [x] `Dependencies/` copies of NuGet assemblies deleted (ArtNet, CppSharp.Runtime, Google.Protobuf, OpenGL.Net,
+      NDILibDotNet6, Unsplasharp); Ndi, Unsplash and Spout now carry exactly those via `TixlCopyLocalPackages`
+      (root `Directory.Build.targets`), not the 140 MB that `CopyLocalLockFileAssemblies` would add. Also deleted:
+      `DirectShowLib.dll` (unused), the Kinect for Windows SDK 2.0 beta EULA (unused).
+- [x] What stays in `Dependencies/` is listed with owner and licence in `Dependencies/third-party.json`
+      (DanceAi + model, libusb, tixlaudio). LGPL-2.1 text added for libusb, BSD-2-Clause text for Spout.
+- [x] D2 metadata on all 11 packages. `Editor.csproj` ships packages with `TixlDistribution=Bundled` whose
+      `TixlPlatforms` include the build's platform (`TixlBuildPlatform`: `TixlEditorRuntime` or host OS).
+      Checked with the copy target alone: Linux/macOS ship Examples, Io, Lib, Skills, TypeOperators, Unsplash,
+      Video; Windows adds Spout; AbletonLink, Mediapipe, Ndi ship nowhere.
+- [x] `Installer/check-licences.py` (Editor + bundled packages: own expression, every restored NuGet package's
+      nuspec licence, `Dependencies/` inventory) in `linux-build`, `macos-build`, `windows-build` and `pr.yml`.
+      Passes; a deliberately bundled Ndi and a stray DLL are both reported.
+- [x] Startup log: missing operators in read-only (shipped) packages go to the debug log, like the dialog.
+- Verified: full solution build without warnings; Debug editor loads all 15 packages incl. AbletonLink with no
+  missing operators; `UnresolvedChildren_SurviveLoadAndSave` passes.
 
-### Phase 1: Pack and manual install (in 4.4 scope, decided 2026-11-23)
+Follow-ups found during Phase 0:
+- **AbletonLinkDLL.dll is a GPL binary of unknown source.** Before the package is published (Phase 1), find the
+  source of that wrapper and ship a link to it (GPL), or rebuild it from Ableton's Link repo in CI (also gives
+  Linux/macOS natives).
+- Replace `NDILibDotNet6` (no licence) with own MIT P/Invoke bindings.
+- `CopyLocalLockFileAssemblies` in Lib, Io, Video, Mediapipe copies the editor's own dependencies into each package
+  (Debug outputs 881/218/397/241 MB; OnnxRuntime four times). `TixlCopyLocalPackages` can replace it; matters for the
+  Mediapipe `.nupkg` (nuget.org limit 250 MB) and installer size.
+- Windows-only natives still in `Dependencies/` root (tixlaudio.dll, libusb) reach Linux/macOS builds as dead weight;
+  `Dependencies/win-x64/` like `linux-x64/`.
+- `licenses/BSD.txt` covers AvalonDock/AvalonEdit (Tooll 2, gone); generate THIRD-PARTY-NOTICES from
+  `third-party.json` plus the NuGet data the licence check already reads.
+- `PackageLicenseExpression` `LicenseRef-NDI-SDK` is not accepted by nuget.org; the Ndi `.nupkg` needs
+  `PackageLicenseFile` instead.
+
+### Phase 1: Pack, Extensions page, install on restart (in 4.4 scope, decided 2026-11-23)
+
+Decided 2026-11-23 (later the same day): installing must be as easy as *Settings → Extensions → tick a checkbox →
+Install & Restart*, so all optional packages (Ndi included) install the same way. The list comes from the
+`.nupkg`s attached to the GitHub release of the running version (no catalog, no nuget.org yet); the download is
+unpacked into `<SettingsDirectory>/Packages/` and applied on the restart, so live loading (Phase 2) isn't needed.
 
 - [ ] `pack` target per package → `TiXL.<Name>.<ver>.nupkg` from the Release folder; CI attaches the optional
       packages to each GitHub release.
@@ -211,3 +243,12 @@ the package's `licenses/`. An export that contains a GPL package must say so in 
 3. **Community packages in the catalog from the start** (`tier: community`), reviewed by catalog PR.
 4. **Restart for update and uninstall** is fine (D7).
 5. **Phase 1 is part of 4.4**, so Windows Mediapipe users can install it from the release page.
+
+## Decisions taken 2026-11-23 during Phase 0
+
+6. **Ndi is optional on all platforms.** Its C# wrapper `NDILibDotNet6` declares no licence (no author, no
+   repository) and the Windows runtime is proprietary, so with Ndi bundled no default build would be free
+   software. Follow-up: own MIT P/Invoke bindings to the NDI C API replace the wrapper.
+7. **MS-PL is allowed** for bundled packages (Svg, Svg.Custom in Lib; licence text already shipped).
+8. **SixLabors.Fonts** (Six Labors Split License) counts as Apache-2.0: TiXL is open source and users get it
+   transitively.

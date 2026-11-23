@@ -1,0 +1,11 @@
+{
+  "_about": "Every file in Dependencies/ that ships with TiXL, who uses it and under which licence. Installer/check-licences.py fails when a file is missing here or its licence is not allowed. Licence texts live in licenses/.",
+  "files": {
+    "DanceAi.dll": { "usedBy": "Core (beat phase tracking)", "licence": "MIT", "note": "TiXL's own library" },
+    "dance-phase/bar-phase.onnx": { "usedBy": "Core (beat phase tracking)", "licence": "MIT", "note": "TiXL's own model" },
+    "dance-phase/bar-phase.meta.json": { "usedBy": "Core (beat phase tracking)", "licence": "MIT" },
+    "libusb-1.0.dll": { "usedBy": "Lib [SwiftCamDevice], Windows", "licence": "LGPL-2.1-or-later", "note": "dynamically loaded" },
+    "tixlaudio.dll": { "usedBy": "Core audio engine, Windows", "licence": "MIT AND MIT-0", "note": "TiXL code plus miniaudio" },
+    "linux-x64/libtixlaudio.so": { "usedBy": "Core audio engine, Linux", "licence": "MIT AND MIT-0", "note": "TiXL code plus miniaudio" }
+  }
+}

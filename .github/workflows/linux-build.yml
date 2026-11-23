@@ -27,7 +27,7 @@ jobs:
       - name: Install Build Tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates curl file unzip libicu70 libssl3 zlib1g
+          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates curl file unzip libicu70 libssl3 zlib1g python3
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -49,6 +49,9 @@ jobs:
 
       - name: Build Tarball
         run: Installer/Linux/build-tarball.sh
+
+      - name: Check Licences
+        run: python3 Installer/check-licences.py
 
       - name: Upload Tarball
         uses: actions/upload-artifact@v4

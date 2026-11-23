@@ -93,6 +93,9 @@ jobs:
       - name: Build DMG
         run: Installer/macOS/build-dmg.sh
 
+      - name: Check Licences
+        run: python3 Installer/check-licences.py
+
       - name: Remove Signing Keychain
         if: always() && github.ref_type == 'tag'
         run: |

@@ -26,6 +26,11 @@
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Bundled: in release builds. Optional: installed on demand. DevOnly: never shipped. -->
+    <TixlDistribution>Bundled</TixlDistribution>
+    <TixlPlatforms>win-x64;linux-x64;osx-arm64</TixlPlatforms>
+    <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <!-- Set the output path based on the version and release mode -->
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>

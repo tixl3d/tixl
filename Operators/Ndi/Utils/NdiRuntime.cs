@@ -90,7 +90,7 @@ internal static class NdiRuntime
     private static string BuildMissingMessage()
     {
         if (OperatingSystem.IsWindows())
-            return $"NDI runtime not found. {WindowsLibraryName} should sit next to the editor; reinstalling TiXL restores it.";
+            return $"NDI runtime not found. {WindowsLibraryName} should sit next to the Ndi package; reinstalling it restores it.";
 
         if (OperatingSystem.IsMacOS())
             return $"NDI runtime not found. Install NDI Tools or the NDI SDK from ndi.video, or set {RuntimeDirVariable} to the folder containing {MacLibraryName}.";

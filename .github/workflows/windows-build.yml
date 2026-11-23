@@ -48,6 +48,9 @@ jobs:
         shell: powershell
         run: Installer/Windows/build-release.ps1
 
+      - name: Check Licences
+        run: python Installer/check-licences.py
+
       - name: Package Installer
         run: |
           $isccArgs = @("Installer\Windows\installer.iss", "/DSkipBuild")

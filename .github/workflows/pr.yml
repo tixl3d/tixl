@@ -15,3 +15,6 @@ jobs:
 
       - name: Build
         uses: ./.github/actions/build
+
+      - name: Check Licences
+        run: python Installer/check-licences.py

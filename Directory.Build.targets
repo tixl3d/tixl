@@ -8,4 +8,16 @@
                                     Condition="'%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'android' Or '%(RuntimeTargetsCopyLocalItems.RuntimeIdentifier)' == 'ios'" />
     </ItemGroup>
   </Target>
+
+  <!-- An operator package lists in TixlCopyLocalPackages the NuGet packages whose runtime assemblies it must carry
+       next to its own assembly. Unlike CopyLocalLockFileAssemblies this copies only those packages, not everything
+       that arrives transitively through Core (OnnxRuntime, SharpDX, ...), which the editor already provides. -->
+  <Target Name="CopySelectedPackageAssemblies" AfterTargets="ResolvePackageAssets" Condition="'$(TixlCopyLocalPackages)' != ''">
+    <ItemGroup>
+      <RuntimeCopyLocalItems>
+        <TixlSelected>$([System.String]::Copy(';$(TixlCopyLocalPackages);').ToLowerInvariant().Contains($([System.String]::Copy(';%(NuGetPackageId);').ToLowerInvariant())))</TixlSelected>
+      </RuntimeCopyLocalItems>
+      <ReferenceCopyLocalPaths Include="@(RuntimeCopyLocalItems)" Condition="'%(RuntimeCopyLocalItems.TixlSelected)' == 'True'" />
+    </ItemGroup>
+  </Target>
 </Project>

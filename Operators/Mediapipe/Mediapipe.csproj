@@ -20,6 +20,11 @@
     <RootNamespace>Mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
+    <!-- Bundled: in release builds. Optional: installed on demand. DevOnly: never shipped. -->
+    <TixlDistribution>Optional</TixlDistribution>
+    <TixlPlatforms>win-x64</TixlPlatforms>
+    <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
+    <PackageLicenseExpression>MIT AND Apache-2.0</PackageLicenseExpression>
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
   </PropertyGroup>
@@ -124,9 +129,6 @@
     <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
-    <None Update="Libs\mediapipe_c.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Remove="Examples\**" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other

@@ -151,6 +151,7 @@ internal static partial class ProjectSetup
         var affectedSymbols = 0;
         var totalChildren = 0;
         var details = new StringBuilder();
+        var readOnlyDetails = new StringBuilder();
         foreach (var package in packages)
         {
             foreach (var symbol in package.Symbols.Values)
@@ -161,20 +162,33 @@ internal static partial class ProjectSetup
                 if (package.TryGetSymbolFilePath(symbol, out var symbolFilePath))
                     PreV4_4ChildNameComments.ReadFor(symbol, symbolFilePath);
 
-                affectedSymbols++;
-                totalChildren += symbol.UnresolvedChildren.Count;
+                // Shipped packages such as Examples may use operators of optional packages; that is expected
+                // and can't be fixed by the user, so it only goes to the debug log.
+                var target = details;
+                if (package.IsReadOnly)
+                {
+                    target = readOnlyDetails;
+                }
+                else
+                {
+                    affectedSymbols++;
+                    totalChildren += symbol.UnresolvedChildren.Count;
+                }
 
-                details.Append($"\n  {package.DisplayName} / [{symbol.Name}]: ");
+                target.Append($"\n  {package.DisplayName} / [{symbol.Name}]: ");
                 for (var index = 0; index < symbol.UnresolvedChildren.Count; index++)
                 {
                     var child = symbol.UnresolvedChildren[index];
                     if (index > 0)
-                        details.Append(", ");
+                        target.Append(", ");
 
-                    details.Append(child.DisplayName);
+                    target.Append(child.DisplayName);
                 }
             }
         }
+
+        if (readOnlyDetails.Length > 0)
+            Log.Debug("Shipped packages use operators of packages that are not installed:" + readOnlyDetails);
 
         if (affectedSymbols == 0)
             return;
