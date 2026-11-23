@@ -23,15 +23,20 @@ jobs:
         shell: pwsh
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Fails in seconds when the tag, Tixl.props and the Linux metainfo disagree (Installer/RELEASING.md)
+      - name: Check Release Version
+        if: github.ref_type == 'tag'
+        run: python Installer/check-release-version.py ${{ github.ref_name }}
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: '10.0.x'
 
       - name: Cache NuGet Packages
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-windows-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
@@ -69,7 +74,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "iscc failed" }
 
       - name: Upload Installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixl-windows-x64
           path: Installer/Windows/Output/*.exe
@@ -77,7 +82,7 @@ jobs:
 
       - name: Attach Installer to Release
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ github.ref_name }}
           files: Installer/Windows/Output/*.exe
@@ -85,7 +90,7 @@ jobs:
           make_latest: false
 
       - name: Upload Extensions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixl-extensions
           path: Installer/Windows/Output/extensions/*
@@ -93,7 +98,7 @@ jobs:
 
       - name: Attach Extensions to Release
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ github.ref_name }}
           files: Installer/Windows/Output/extensions/*

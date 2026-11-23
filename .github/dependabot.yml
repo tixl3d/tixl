@@ -1,0 +1,18 @@
+# Keeps the GitHub Actions in the workflows pinned to current commits. Every external action is referenced by its
+# full commit SHA (a tag like @v4 can be moved to other code); Dependabot opens PRs that bump those SHAs and the
+# version comment next to them.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: monthly
+    # Don't propose a release before it has been public for a week, so a compromised release has time to be noticed
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
