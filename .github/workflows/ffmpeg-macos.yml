@@ -1,0 +1,67 @@
+name: FFmpeg for macOS
+
+# Builds the LGPL FFmpeg that the macOS DMG bundles (Native/FFmpeg/build-macos.sh). It changes only when the
+# FFmpeg version does and takes a while to compile, so release builds download the published archive instead
+# of building it. Pushes and pull requests that touch the script only check that it still builds; "Run workflow"
+# with publish attaches the archive to the deps-ffmpeg-<version> release.
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Attach the archive to the deps-ffmpeg-<version> release'
+        type: boolean
+        default: false
+  push:
+    paths:
+      - 'Native/FFmpeg/**'
+      - '.github/workflows/ffmpeg-macos.yml'
+  pull_request:
+    paths:
+      - 'Native/FFmpeg/**'
+      - '.github/workflows/ffmpeg-macos.yml'
+
+jobs:
+  macos:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build FFmpeg
+        id: build
+        run: |
+          Native/FFmpeg/build-macos.sh
+          echo "version=$(sed -n 's/^version=//p' Native/FFmpeg/build-macos.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-lgpl-macos-arm64
+          path: Native/FFmpeg/Output/ffmpeg-*-lgpl-macos-arm64.tar.gz*
+          retention-days: 14
+          # Already compressed.
+          compression-level: 0
+
+      # A published version is never replaced: a DMG built later must get the same bytes. Rebuilding with
+      # different flags needs a new version in the script, or the old release deleted by hand.
+      - name: Publish Release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.build.outputs.version }}
+        run: |
+          tag="deps-ffmpeg-$VERSION"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "Release $tag already exists." >&2
+            exit 1
+          fi
+          # A pre-release that is never "Latest", so it doesn't get in the way of TiXL's own releases.
+          gh release create "$tag" Native/FFmpeg/Output/ffmpeg-$VERSION-lgpl-macos-arm64.tar.gz* \
+            --target "$GITHUB_SHA" --prerelease --latest=false \
+            --title "FFmpeg $VERSION LGPL for macOS (build dependency)" \
+            --notes "Shared FFmpeg $VERSION libraries for Apple Silicon, LGPL-2.1-or-later, built by Native/FFmpeg/build-macos.sh. Installer/macOS/build-dmg.sh bundles them. Not a TiXL release. SOURCE.txt inside the archive names the exact source and configure flags."
