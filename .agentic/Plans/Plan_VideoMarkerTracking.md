@@ -295,6 +295,11 @@ usually replaced instead.
    - Showing an already tracked frame refreshes the recent template, so tracking can continue from any
      cached frame.
    - The key template is never refreshed yet, so confidence drops on strong zoom or rotation.
+   - Moving a seed re-seeds only that marker on the next visit to `SeedFrame`. Only `Reset`, a different marker
+     count, or a change to the range or patch size clears the whole track. Every frame shown is advanced per marker:
+     a marker the frame already has is kept, a missing one is tracked from the neighboring frame. This fills in
+     re-seeded markers without touching the others.
+   - Lost points keep their last searched position and their confidence in F1 for diagnosis (Scale.X is still NaN).
 3. Forward-backward check in `[TrackMarkers]`.
 4. `[SolveLayerTransform]` with a world anchor per marker, a cache per frame, and path smoothing. Test on static
    footage (the fence) first.

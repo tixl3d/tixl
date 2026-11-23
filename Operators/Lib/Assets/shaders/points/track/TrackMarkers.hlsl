@@ -28,13 +28,15 @@ cbuffer Params : register(b0)
     int UseRecentTemplate;
     int IterationsPerLevel;
     int ClearCount;
-    int __padding;
+    int FrameCount;
+
+    int ForceCapture;
+    int3 __padding;
 }
 
 #define MODE_CAPTURE 0
-#define MODE_TRACK 1
-#define MODE_REFRESH 2
-#define MODE_HIDE 3
+#define MODE_ADVANCE 1
+#define MODE_HIDE 2
 
 #define GROUP_SIZE 256
 #define MAX_TEMPLATE_SIZE 33
@@ -50,6 +52,7 @@ RWStructuredBuffer<Point> SeedQuality : register(u2);
 RWStructuredBuffer<float> KeyTemplates : register(u3);
 RWStructuredBuffer<float> RecentTemplates : register(u4);
 RWTexture2D<float> LumaOut : register(u5);
+RWStructuredBuffer<Point> CapturedSeeds : register(u6);
 
 groupshared float TemplateValues[MAX_TEMPLATE_SIZE * MAX_TEMPLATE_SIZE];
 groupshared float GradientX[MAX_PATCH_SIZE * MAX_PATCH_SIZE];
@@ -232,9 +235,12 @@ Point TrackedPoint(float2 pixelPosition, float confidence, uint marker)
     return p;
 }
 
-Point LostPoint(uint marker)
+// Keeps where the marker was last searched and how well it matched, so a lost marker can be diagnosed.
+Point LostPoint(uint marker, float2 pixelPosition, float confidence)
 {
     Point p = SeparatorPoint();
+    p.Position = float3(PixelToVideo(pixelPosition), 0);
+    p.FX1 = confidence;
     p.FX2 = marker;
     return p;
 }
@@ -245,11 +251,6 @@ bool IsPatchInsideImage(float2 pixelPosition)
     return all(pixelPosition >= extent) && all(pixelPosition <= ImageSize - extent);
 }
 
-void WriteResult(uint marker, Point p)
-{
-    TrackPoints[TargetSlot * MarkerCount + marker] = p;
-    CurrentPoints[marker] = p;
-}
 
 //--- Seed quality --------------------------------------------------------------------------
 
@@ -385,22 +386,35 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
     // One group per marker, dispatched exactly MarkerCount times. Group barriers must not sit under
     // data-dependent branches, so every thread runs every reduction and only the writes are gated.
     uint marker = groupId.x;
+    uint targetIndex = TargetSlot * MarkerCount + marker;
 
     if (Mode == MODE_HIDE)
     {
         if (threadIndex == 0)
-            CurrentPoints[marker] = LostPoint(marker);
+            CurrentPoints[marker] = LostPoint(marker, ImageSize * 0.5, 0);
 
         return;
     }
 
     if (Mode == MODE_CAPTURE)
     {
+        // Only seeds that moved are captured again, so editing one seed keeps every other marker's track.
         Point seed = SeedPoints[marker];
+        Point captured = CapturedSeeds[marker];
+        bool hasChanged = ForceCapture != 0
+                          || IsSeparator(seed) != IsSeparator(captured)
+                          || any(seed.Position.xy != captured.Position.xy);
+
         float2 pixelPosition = VideoToPixel(seed.Position.xy);
         bool isValid = !IsSeparator(seed) && IsPatchInsideImage(pixelPosition);
 
-        CaptureTemplates(marker, pixelPosition, true, threadIndex);
+        CaptureTemplates(marker, pixelPosition, hasChanged, threadIndex);
+        if (hasChanged)
+        {
+            for (int slot = threadIndex; slot < FrameCount; slot += GROUP_SIZE)
+                TrackPoints[slot * MarkerCount + marker] = LostPoint(marker, pixelPosition, 0);
+        }
+
         DeviceMemoryBarrierWithGroupSync();
 
         float quality = ComputeSeedQuality(marker, threadIndex) * (isValid ? 1 : 0);
@@ -413,26 +427,24 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
                 qualityPoint.Scale = NAN;
 
             SeedQuality[marker] = qualityPoint;
-            WriteResult(marker, isValid ? TrackedPoint(pixelPosition, 1, marker) : LostPoint(marker));
+
+            Point result = isValid ? TrackedPoint(pixelPosition, 1, marker) : LostPoint(marker, pixelPosition, 0);
+            TrackPoints[targetIndex] = result;
+            CurrentPoints[marker] = result;
+            CapturedSeeds[marker] = seed;
         }
 
         return;
     }
 
-    Point source = TrackPoints[SourceSlot * MarkerCount + marker];
-    bool isSourceValid = !IsSeparator(source);
-    float2 sourcePosition = isSourceValid ? VideoToPixel(source.Position.xy) : ImageSize * 0.5;
+    // MODE_ADVANCE: keep the marker if this frame already has it, otherwise track it from the source frame.
+    // Frames seen before are advanced too, so a re-seeded marker gets filled in without touching the others.
+    Point target = TrackPoints[targetIndex];
+    bool hasTarget = !IsSeparator(target);
 
-    if (Mode == MODE_REFRESH)
-    {
-        if (isSourceValid)
-            CaptureTemplates(marker, sourcePosition, false, threadIndex);
-
-        if (threadIndex == 0)
-            CurrentPoints[marker] = isSourceValid ? source : LostPoint(marker);
-
-        return;
-    }
+    Point source = TrackPoints[max(SourceSlot, 0) * MarkerCount + marker];
+    bool hasSource = SourceSlot >= 0 && !IsSeparator(source);
+    float2 sourcePosition = hasSource ? VideoToPixel(source.Position.xy) : ImageSize * 0.5;
 
     float2 predicted = sourcePosition;
     if (PreviousSlot >= 0)
@@ -442,16 +454,38 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
             predicted += sourcePosition - VideoToPixel(previous.Position.xy);
     }
 
+    // Runs for kept markers as well, because the reductions inside must be reached by the whole group.
     float2 tracked = TrackLucasKanade(marker, predicted, threadIndex);
     bool isInside = IsPatchInsideImage(tracked);
     float confidence = KeyTemplateCorrelation(marker, tracked, threadIndex);
-    bool isLost = !isSourceValid || !isInside || confidence < MinConfidence;
+    bool isLost = !hasSource || !isInside || confidence < MinConfidence;
 
     // All reads of the recent template are done; replace it with this frame's patch for the next step.
     DeviceMemoryBarrierWithGroupSync();
-    if (!isLost)
+    if (hasTarget)
+    {
+        CaptureTemplates(marker, VideoToPixel(target.Position.xy), false, threadIndex);
+    }
+    else if (!isLost)
+    {
         CaptureTemplates(marker, tracked, false, threadIndex);
+    }
 
     if (threadIndex == 0)
-        WriteResult(marker, isLost ? LostPoint(marker) : TrackedPoint(tracked, saturate(confidence), marker));
+    {
+        // Without a source the search started nowhere: carry over where the marker was lost, or keep this
+        // frame's own record when no source frame was given.
+        Point lostPoint = hasSource ? LostPoint(marker, tracked, confidence)
+                        : SourceSlot >= 0 ? source
+                        : target;
+        lostPoint.FX2 = marker;
+        lostPoint.Scale = NAN;
+        Point result = hasTarget ? target
+                       : isLost ? lostPoint
+                       : TrackedPoint(tracked, saturate(confidence), marker);
+        if (!hasTarget)
+            TrackPoints[targetIndex] = result;
+
+        CurrentPoints[marker] = result;
+    }
 }

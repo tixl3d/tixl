@@ -37,7 +37,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
     private void Update(EvaluationContext context)
     {
-        // Read before GetValue clears it: editing a seed point must restart the track.
+        // Read before GetValue clears it: edited seeds are captured again on SeedFrame.
         var seedsChanged = SeedPoints.DirtyFlag.IsDirty;
 
         var image = Image.GetValue(context);
@@ -54,7 +54,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
         _statusMessage = null;
         TrackFrame(image, frameIndex, seeds, seedFrame, firstFrame, frameCount, patchSize, searchRadius, minConfidence,
-                   reset || seedsChanged, isEnabled);
+                   reset, seedsChanged, isEnabled);
 
         var isSetUp = _layout.MarkerCount > 0;
         Points.Value = isSetUp ? _currentPoints : null;
@@ -71,8 +71,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     }
 
     private void TrackFrame(Texture2D? image, int frameIndex, BufferWithViews? seeds, int seedFrame, int firstFrame,
-                            int frameCount, int patchSize, float searchRadius, float minConfidence, bool restart,
-                            bool isEnabled)
+                            int frameCount, int patchSize, float searchRadius, float minConfidence, bool reset,
+                            bool seedsChanged, bool isEnabled)
     {
         if (!isEnabled)
             return;
@@ -112,12 +112,18 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
         var layout = new TrackLayout(markerCount, frameCount, firstFrame, seedFrame, patchSize,
                                      new Int2(image.Description.Width, image.Description.Height));
-        if (layout != _layout || restart)
+        if (layout != _layout || reset)
         {
             if (layout != _layout && !SetupResources(layout))
                 return;
 
             ClearTrack();
+        }
+        else if (seedsChanged && _isSeeded)
+        {
+            _seedsPendingCapture = true;
+            if (frameIndex == seedFrame)
+                _needsFrameUpdate = true;
         }
 
         // Repeated evaluations of one frame (motion blur, cube faces) must not track again.
@@ -141,6 +147,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                                  Levels = LevelsForSearchRadius(searchRadius, patchSize),
                                  TemplateLevels = TemplateLevelCount,
                                  Mode = (int)Modes.Hide,
+                                 FrameCount = frameCount,
                                  SourceSlot = -1,
                                  PreviousSlot = -1,
                                  TargetSlot = -1,
@@ -152,54 +159,54 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         {
             _statusMessage = $"Frame {frameIndex} lies outside the tracked range {firstFrame}–{firstFrame + frameCount - 1}.";
         }
+        else if (frameIndex == seedFrame && (!_isSeeded || _seedsPendingCapture))
+        {
+            parameters.Mode = (int)Modes.Capture;
+            parameters.TargetSlot = slot;
+            parameters.ForceCapture = _isSeeded ? 0 : 1;
+            _isSeeded = true;
+            _seedsPendingCapture = false;
+            MarkFilled(slot);
+            _recentTemplateSlot = slot;
+            _lastProcessedSlot = slot;
+        }
         else if (!_isSeeded)
         {
-            if (frameIndex == seedFrame)
-            {
-                parameters.Mode = (int)Modes.Capture;
-                parameters.TargetSlot = slot;
-                _isSeeded = true;
-                MarkFilled(slot);
-                _recentTemplateSlot = slot;
-            }
-            else
-            {
-                _statusMessage = $"Go to SeedFrame {seedFrame} to start tracking.";
-            }
-        }
-        else if (_filledSlots[slot])
-        {
-            parameters.Mode = (int)Modes.Refresh;
-            parameters.SourceSlot = slot;
-            parameters.TargetSlot = slot;
-            _recentTemplateSlot = slot;
+            _statusMessage = $"Go to SeedFrame {seedFrame} to start tracking.";
         }
         else
         {
-            var sourceSlot = FindNearestFilledSlot(slot);
-            if (sourceSlot < 0 || Math.Abs(slot - sourceSlot) > MaxTrackingGapFrames)
+            var isFilled = _filledSlots[slot];
+            var sourceSlot = FindSourceSlot(slot);
+            if (sourceSlot < 0 && !isFilled)
             {
                 _statusMessage = "Play or step from a tracked frame to continue tracking.";
             }
             else
             {
-                var direction = Math.Sign(slot - sourceSlot);
-                var isAdjacent = Math.Abs(slot - sourceSlot) == 1;
-                var previousSlot = sourceSlot - direction;
-
-                parameters.Mode = (int)Modes.Track;
-                parameters.SourceSlot = sourceSlot;
+                parameters.Mode = (int)Modes.Advance;
                 parameters.TargetSlot = slot;
-                parameters.PreviousSlot = isAdjacent && IsFilled(previousSlot) ? previousSlot : -1;
-                parameters.UseRecentTemplate = _recentTemplateSlot == sourceSlot ? 1 : 0;
+                parameters.SourceSlot = sourceSlot;
+                if (sourceSlot >= 0)
+                {
+                    var direction = Math.Sign(slot - sourceSlot);
+                    var isAdjacent = Math.Abs(slot - sourceSlot) == 1;
+                    var previousSlot = sourceSlot - direction;
+                    parameters.PreviousSlot = isAdjacent && IsFilled(previousSlot) ? previousSlot : -1;
+                    parameters.UseRecentTemplate = _recentTemplateSlot == sourceSlot ? 1 : 0;
 
-                // Motion across a gap is unknown, so search one pyramid level wider.
-                if (!isAdjacent)
-                    parameters.Levels = Math.Min(parameters.Levels + 1, TemplateLevelCount);
+                    // Motion across a gap is unknown, so search one pyramid level wider.
+                    if (!isAdjacent)
+                        parameters.Levels = Math.Min(parameters.Levels + 1, TemplateLevelCount);
+                }
 
                 MarkFilled(slot);
                 _recentTemplateSlot = slot;
+                _lastProcessedSlot = slot;
             }
+
+            if (_seedsPendingCapture)
+                _statusMessage = $"Seeds were edited. Go to SeedFrame {seedFrame} to apply them.";
         }
 
         DispatchTrack(context, parameters, image, seeds);
@@ -238,11 +245,14 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         stage.SetUnorderedAccessView(2, _seedQuality.Uav);
         stage.SetUnorderedAccessView(3, _keyTemplates.Uav);
         stage.SetUnorderedAccessView(4, _recentTemplates.Uav);
+        stage.SetUnorderedAccessView(CapturedSeedsUavSlot, _capturedSeeds.Uav);
 
         context.Dispatch(parameters.MarkerCount, 1, 1);
 
         for (var uavSlot = 0; uavSlot < 5; uavSlot++)
             stage.SetUnorderedAccessView(uavSlot, null);
+
+        stage.SetUnorderedAccessView(CapturedSeedsUavSlot, null);
 
         for (var srvSlot = 0; srvSlot < 3; srvSlot++)
             stage.SetShaderResource(srvSlot, null);
@@ -253,7 +263,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         Array.Clear(_filledSlots);
         _trackedFrameCount = 0;
         _isSeeded = false;
+        _seedsPendingCapture = false;
         _recentTemplateSlot = -1;
+        _lastProcessedSlot = -1;
         _needsFrameUpdate = true;
 
         var trackPointCount = _layout.MarkerCount * _layout.FrameCount;
@@ -280,6 +292,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
             SetupBuffer(_trackPoints, layout.MarkerCount * layout.FrameCount, Point.Stride);
             SetupBuffer(_currentPoints, layout.MarkerCount, Point.Stride);
             SetupBuffer(_seedQuality, layout.MarkerCount, Point.Stride);
+            SetupBuffer(_capturedSeeds, layout.MarkerCount, Point.Stride);
             SetupBuffer(_keyTemplates, templateFloatCount, sizeof(float));
             SetupBuffer(_recentTemplates, templateFloatCount, sizeof(float));
 
@@ -354,9 +367,14 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         return TemplateLevelCount;
     }
 
-    private int FindNearestFilledSlot(int slot)
+    /** Prefers the frame processed last, whose recent templates are current; otherwise the nearest tracked one. */
+    private int FindSourceSlot(int slot)
     {
-        for (var distance = 1; distance < _filledSlots.Length; distance++)
+        if (_lastProcessedSlot != slot && IsFilled(_lastProcessedSlot)
+            && Math.Abs(slot - _lastProcessedSlot) <= MaxTrackingGapFrames)
+            return _lastProcessedSlot;
+
+        for (var distance = 1; distance <= MaxTrackingGapFrames; distance++)
         {
             if (IsFilled(slot - distance))
                 return slot - distance;
@@ -394,6 +412,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _trackPoints.Dispose();
         _currentPoints.Dispose();
         _seedQuality.Dispose();
+        _capturedSeeds.Dispose();
         _keyTemplates.Dispose();
         _recentTemplates.Dispose();
         DisposeLumaTexture();
@@ -408,15 +427,14 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private enum Modes
     {
         Capture = 0,
-        Track = 1,
-        Refresh = 2,
-        Hide = 3,
+        Advance = 1,
+        Hide = 2,
     }
 
     private readonly record struct TrackLayout(int MarkerCount, int FrameCount, int FirstFrame, int SeedFrame,
                                                int PatchSize, Int2 ImageSize);
 
-    [StructLayout(LayoutKind.Explicit, Size = 64)]
+    [StructLayout(LayoutKind.Explicit, Size = 80)]
     private struct Params
     {
         [FieldOffset(0)] public Vector2 ImageSize;
@@ -433,6 +451,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         [FieldOffset(48)] public int UseRecentTemplate;
         [FieldOffset(52)] public int IterationsPerLevel;
         [FieldOffset(56)] public int ClearCount;
+        [FieldOffset(60)] public int FrameCount;
+        [FieldOffset(64)] public int ForceCapture;
     }
 
     /** Loaded on first use with this instance as owner, so the package resolves the shader's includes. */
@@ -447,6 +467,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private const int MinPatchSize = 7;
     private const int MaxPatchSize = 31;
     private const int TemplateLevelCount = 5;
+    private const int CapturedSeedsUavSlot = 6;
     private const int IterationsPerLevel = 4;
     private const int MaxFrameCount = 1_000_000;
 
@@ -463,6 +484,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private readonly BufferWithViews _trackPoints = new();
     private readonly BufferWithViews _currentPoints = new();
     private readonly BufferWithViews _seedQuality = new();
+
+    /** The seeds as last captured, so the shader can re-seed only the markers that moved. */
+    private readonly BufferWithViews _capturedSeeds = new();
     private readonly BufferWithViews _keyTemplates = new();
     private readonly BufferWithViews _recentTemplates = new();
     private Texture2D? _lumaTexture;
@@ -475,6 +499,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private bool[] _filledSlots = [];
     private int _trackedFrameCount;
     private bool _isSeeded;
+    private bool _seedsPendingCapture;
+    private int _lastProcessedSlot = -1;
     private int _recentTemplateSlot = -1;
     private int _lastFrameIndex = int.MinValue;
     private bool _needsFrameUpdate;
