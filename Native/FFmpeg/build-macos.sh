@@ -65,6 +65,8 @@ configure_flags=(
     --enable-zlib
     --enable-bzlib
     --enable-iconv
+    # iconv lives in its own system library on macOS; with autodetect off, configure doesn't add it to the link
+    --extra-libs=-liconv
     --install-name-dir=@loader_path
     --extra-cflags="-mmacosx-version-min=$min_macos"
     --extra-ldflags="-mmacosx-version-min=$min_macos"
