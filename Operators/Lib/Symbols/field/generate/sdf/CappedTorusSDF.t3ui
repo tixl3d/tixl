@@ -18,7 +18,8 @@
         "X": -200.0,
         "Y": 210.0
       },
-      "Description": "Axis around which the ring is oriented."
+      "Description": "Axis around which the ring is oriented.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "d37914dd-7bbd-47fa-ad90-9921621afb9e"/*Fill*/,

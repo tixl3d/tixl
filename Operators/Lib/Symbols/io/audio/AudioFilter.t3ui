@@ -40,7 +40,8 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "LowPass keeps what is below Cutoff, HighPass what is above it."
+      "Description": "LowPass keeps what is below Cutoff, HighPass what is above it.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "eecb4b94-5069-4a81-b1b8-79b7b9fabd91"/*Resonance*/,

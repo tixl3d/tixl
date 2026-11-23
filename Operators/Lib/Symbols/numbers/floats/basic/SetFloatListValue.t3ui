@@ -39,7 +39,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Set: replace the entry with Value.\nAdd: add Value to the entry.\nMultiply: multiply the entry with Value."
+      "Description": "Set: replace the entry with Value.\nAdd: add Value to the entry.\nMultiply: multiply the entry with Value.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

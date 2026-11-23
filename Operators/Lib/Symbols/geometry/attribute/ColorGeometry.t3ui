@@ -62,7 +62,8 @@
         "Y": 225.0
       },
       "GroupTitle": "Mapping",
-      "Description": "How the value is mapped onto the gradient, as in [MapPointAttributes]: Centered around the middle, FromStart, PingPong or Repeat."
+      "Description": "How the value is mapped onto the gradient, as in [MapPointAttributes]: Centered around the middle, FromStart, PingPong or Repeat.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "80562710-c60c-4748-8450-1a559f63789a"/*Phase*/,
@@ -89,7 +90,8 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "What drives the gradient: a numeric Attribute of the domain (vectors use X), the element Index, a Random value, or a scalar Field sampled at each element."
+      "Description": "What drives the gradient: a numeric Attribute of the domain (vectors use X), the element Index, a Random value, or a scalar Field sampled at each element.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "d45c60d5-a982-4b55-a7c7-13917c9c3fa9"/*Range*/,

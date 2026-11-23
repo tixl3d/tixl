@@ -28,7 +28,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "GroupTitle": "Shader Variation"
+      "GroupTitle": "Shader Variation",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

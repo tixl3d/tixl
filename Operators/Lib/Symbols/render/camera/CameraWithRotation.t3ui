@@ -124,7 +124,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Euler: uses Rotation * RotationFactor + RotationOffset2 in degrees.\nQuaternion: uses RotationQuaternion (X, Y, Z, W), which should be normalized."
+      "Description": "Euler: uses Rotation * RotationFactor + RotationOffset2 in degrees.\nQuaternion: uses RotationQuaternion (X, Y, Z, W), which should be normalized.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

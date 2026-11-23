@@ -10,7 +10,8 @@
         "X": 630.759,
         "Y": 220.82883
       },
-      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
+      "Description": "Point attribute that multiplies the line width: None, F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,

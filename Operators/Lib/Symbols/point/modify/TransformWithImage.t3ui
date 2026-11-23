@@ -46,7 +46,8 @@
       "Position": {
         "X": 360.54407,
         "Y": 1967.5037
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1a3cde2d-2d12-475f-ab6b-ea44494c5aa0"/*TextureMode*/,

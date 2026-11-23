@@ -111,7 +111,8 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Accumulate applies the transform once more per copy. Lerp interpolates from the original to the transform of the last copy."
+      "Description": "Accumulate applies the transform once more per copy. Lerp interpolates from the original to the transform of the last copy.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a1d06737-6411-4021-a3c4-fcf973866c0c"/*ScatterScale*/,

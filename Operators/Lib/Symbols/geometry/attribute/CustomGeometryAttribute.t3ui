@@ -34,7 +34,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Which elements get the attribute: points, vertices, primitives (polygons and curves) or parts."
+      "Description": "Which elements get the attribute: points, vertices, primitives (polygons and curves) or parts.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "837cd3ee-d92e-46c3-8d42-69f438c81e50"/*Code*/,

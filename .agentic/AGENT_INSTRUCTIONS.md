@@ -92,6 +92,12 @@ Set these in the `.t3ui` (or the editor's parameter settings) when designing an 
 - **Group related parameters.** Set `GroupTitle` ("Display as: Start with group") on the first parameter of each group once an operator has more than a handful, for example `Occlusion`, `Ray Tracing`, `Temporal Accumulation`. Keep required inputs ungrouped at the top.
 - **Give numeric parameters a reasonable `Min` and `Max`.** The range drives the virtual slider and the drag speed, so it should span the values people actually use, not everything that is technically valid.
 - **Clamp only real limits.** `ClampMin` / `ClampMax` are for values that break or lose their meaning outside the range, such as a negative radius or a blend factor above 1. Leave the other end open where larger values remain useful.
+- **Show an enum as a segmented switch only where seeing the options helps.** `"DisplayAs": "SegmentedSwitch"` puts every option side by side. That surfaces the choice, but every switch makes the parameter list busier, so it is the exception:
+  - *Only if* the enum has at most 4 short options, is a fixed list (not a shared, growing enum like `BlendModes` or texture formats), and is not a flag enum. Too-wide switches fall back to a dropdown on their own.
+  - *Use it for* a mode switch that changes how the operator works or which other parameters matter (`MapPointAttributes.InputMode`, `RepeatAtPoints.CombineMode`, `VolumeShape`), or the primary choice of a small operator whose options explain themselves (`TorusSDF.Axis`, `RepeatAxis.Axis`).
+  - *Keep a dropdown for* settings that are set once and forgotten (`FillMode`, `Shading`, `CullMode`, `ShowGizmo`), and for options whose labels mean nothing without the docs (`AllowSpeedFactor`: `FactorA` / `FactorB`).
+  - *At most one or two per operator.* A switch helps only while it stands out; if more qualify, keep the mode switch.
+  - *Decide per enum family, not per operator.* The `None / F1 / F2` attribute selectors (`StrengthFactor`, `ScaleFactor`, …) are segmented everywhere, because showing F1 and F2 teaches point attributes. They count toward the budget.
 
 ### Operators vs. helper classes in an operator package
 

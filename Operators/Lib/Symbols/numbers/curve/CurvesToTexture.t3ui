@@ -18,7 +18,8 @@
         "X": 36.0,
         "Y": 469.0
       },
-      "Description": "Horizontal: one row per curve. Vertical: one column per curve."
+      "Description": "Horizontal: one row per curve. Vertical: one column per curve.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "74a9437b-a3cd-46c8-aa14-7c45fa629933"/*ExportGrayScale*/,

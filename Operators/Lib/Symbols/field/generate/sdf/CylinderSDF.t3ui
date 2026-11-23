@@ -20,7 +20,8 @@
         "Y": 0.0
       },
       "GroupTitle": "Shader Variations",
-      "Description": "Axis along which the cylinder is aligned."
+      "Description": "Axis along which the cylinder is aligned.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "29d6303f-34ba-4e1e-a910-3366104e26e3"/*Center*/,

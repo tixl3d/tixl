@@ -82,7 +82,8 @@
         "X": 2059.2307,
         "Y": 4210.0303
       },
-      "Description": "WorldUnits: PointSize 1 is 0.2 units across, so points shrink with distance. Pixels: PointSize is the diameter in pixels on the output, e.g. for markers that keep their size while zooming."
+      "Description": "WorldUnits: PointSize 1 is 0.2 units across, so points shrink with distance. Pixels: PointSize is the diameter in pixels on the output, e.g. for markers that keep their size while zooming.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
@@ -107,7 +108,8 @@
         "X": 2059.2305,
         "Y": 4140.0303
       },
-      "Description": "Point attribute that multiplies the size: None, F1 or F2."
+      "Description": "Point attribute that multiplies the size: None, F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "fe99f40a-607a-4f62-9949-17f4715db859"/*ColorField*/,

@@ -41,7 +41,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Which elements the attribute decides on. Auto uses the attribute's own domain. A primitive stays only with all its points; kept points without a primitive stay as loose points."
+      "Description": "Which elements the attribute decides on. Auto uses the attribute's own domain. A primitive stays only with all its points; kept points without a primitive stay as loose points.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "c8509292-8e2b-4af2-9c51-6b4f7c4ebe2b"/*Attribute*/,

@@ -32,7 +32,8 @@
         "X": -200.0,
         "Y": 525.0
       },
-      "GroupTitle": "Interpolation method"
+      "GroupTitle": "Interpolation method",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "3ad1c6ab-c91a-4261-aea5-29394d2926df"/*MinValue*/,
@@ -97,7 +98,8 @@
         "Y": 450.0
       },
       "Description": "Defines how the sequence is executed",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "e45c6abf-df32-47cf-833d-e1391749b8f4"/*RecordingMode*/,

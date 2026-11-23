@@ -26,7 +26,8 @@
         "X": 36.0,
         "Y": 469.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

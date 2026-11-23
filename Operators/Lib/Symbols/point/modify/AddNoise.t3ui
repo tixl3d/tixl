@@ -54,7 +54,8 @@
         "X": 70.217224,
         "Y": 1386.7686
       },
-      "Description": "Optionally scales the strength per point with its F1 or F2 attribute."
+      "Description": "Optionally scales the strength per point with its F1 or F2 attribute.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "97c25ec6-ef71-42f8-9352-52baf2ce41a4"/*RotationLookupDistance*/,

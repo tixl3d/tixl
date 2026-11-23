@@ -38,7 +38,8 @@
         "X": 1361.3712,
         "Y": 1289.3162
       },
-      "Description": "Currently has no effect."
+      "Description": "Currently has no effect.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

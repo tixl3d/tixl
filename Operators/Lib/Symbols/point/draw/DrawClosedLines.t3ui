@@ -78,7 +78,8 @@
         "X": 630.759,
         "Y": 220.82883
       },
-      "Description": "Point attribute that multiplies the line width: None, F1 or F2."
+      "Description": "Point attribute that multiplies the line width: None, F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "d0a13a9f-3f20-4202-b599-7c0b7f03ff9c"/*GPoints*/,

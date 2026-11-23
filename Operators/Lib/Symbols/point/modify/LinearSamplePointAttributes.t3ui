@@ -16,7 +16,8 @@
       "Position": {
         "X": -711.2682,
         "Y": 1038.8619
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "159bf880-b6b7-413b-afc9-acdc1b87a9e4"/*RedFactor*/,

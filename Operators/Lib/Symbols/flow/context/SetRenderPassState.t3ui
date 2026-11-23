@@ -18,7 +18,8 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Which value of the render pass to set."
+      "Description": "Which value of the render pass to set.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "bc20ab5d-79dd-4aab-93ff-6e0e8bef2000"/*Offset*/,

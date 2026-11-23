@@ -10,7 +10,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Axis pointing to the tip."
+      "Description": "Axis pointing to the tip.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "471d9c3b-ba5e-4b73-93cf-fb8ba76bf70e"/*UniformScale*/,

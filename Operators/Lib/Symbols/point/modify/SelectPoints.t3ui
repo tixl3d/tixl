@@ -16,7 +16,8 @@
       "Position": {
         "X": 35.242065,
         "Y": 2074.432
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1b762425-c35a-4ba0-bbed-71d6c42a082b"/*VolumeRotate*/,
@@ -115,7 +116,8 @@
         "X": 35.242065,
         "Y": 2119.432
       },
-      "GroupTitle": "Selection"
+      "GroupTitle": "Selection",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "e577a3fb-0655-48b2-998a-1080e872c2cd"/*DiscardNonSelected*/,

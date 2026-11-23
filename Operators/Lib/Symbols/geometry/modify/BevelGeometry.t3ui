@@ -33,7 +33,8 @@
         "X": 0.0,
         "Y": 315.0
       },
-      "Description": "Fast limits the width per point: a corner uses at most about half of each adjacent edge, so a short edge only narrows the bevel around it. Straight Skeleton shrinks each face and removes edges that shrink to nothing, so the bevel keeps its full width past short edges; slower, and concave faces stop short where a corner would split them."
+      "Description": "Fast limits the width per point: a corner uses at most about half of each adjacent edge, so a short edge only narrows the bevel around it. Straight Skeleton shrinks each face and removes edges that shrink to nothing, so the bevel keeps its full width past short edges; slower, and concave faces stop short where a corner would split them.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "88b2db34-b099-4fa6-8875-743dc40fd367"/*FlatAngle*/,

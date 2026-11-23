@@ -27,7 +27,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Which elements to select: points, vertices, primitives (polygons and curves) or parts."
+      "Description": "Which elements to select: points, vertices, primitives (polygons and curves) or parts.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "4dba7742-653a-4ad5-9e21-0ea557865bcd"/*Offset*/,
@@ -98,7 +99,8 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "IndexPattern selects every Nth element from Offset, optionally only Count of them. Custom runs the C# snippet in Code for each element."
+      "Description": "IndexPattern selects every Nth element from Offset, optionally only Count of them. Custom runs the C# snippet in Code for each element.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "ec982690-0ef4-4b25-83d8-ddddb2c2d24e"/*Combine*/,

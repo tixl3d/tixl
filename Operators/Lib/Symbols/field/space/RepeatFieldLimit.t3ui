@@ -10,7 +10,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Defines along which axis the field is to be repeated"
+      "Description": "Defines along which axis the field is to be repeated",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "073ac201-6be4-495c-9c6d-cfa26c9b1035"/*InputField*/,

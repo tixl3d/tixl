@@ -17,7 +17,8 @@
       "Position": {
         "X": 0.0,
         "Y": 90.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

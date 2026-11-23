@@ -32,7 +32,8 @@
       "Position": {
         "X": 1079.8354,
         "Y": -25.989014
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

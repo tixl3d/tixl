@@ -9,7 +9,8 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "How outer corners are filled: Miter keeps them sharp, Round rounds them with the offset as radius, Bevel cuts them flat."
+      "Description": "How outer corners are filled: Miter keeps them sharp, Round rounds them with the offset as radius, Bevel cuts them flat.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1d3a918c-cdb2-4fa5-a74d-57c7743e5140"/*Tolerance*/,

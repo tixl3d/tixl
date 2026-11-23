@@ -74,7 +74,8 @@
         "X": 903.1979,
         "Y": 1678.0997
       },
-      "Description": "Multiplies Strength with F1 or F2 of each point."
+      "Description": "Multiplies Strength with F1 or F2 of each point.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "ccc4cb54-af87-4c3d-9759-c4409b092281"/*ScaleLength*/,

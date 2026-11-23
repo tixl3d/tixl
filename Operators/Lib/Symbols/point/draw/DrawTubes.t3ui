@@ -131,7 +131,8 @@
         "X": 841.1759,
         "Y": 2637.7163
       },
-      "Description": "Selects the point attribute used as a per-point width weight. None = uniform width, F1/F2 = use the point's FX1/FX2 value (NaN falls back to 1)."
+      "Description": "Selects the point attribute used as a per-point width weight. None = uniform width, F1/F2 = use the point's FX1/FX2 value (NaN falls back to 1).",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "c7562da2-b723-46fc-9f28-e12f7ed52bb0"/*FlatAlong*/,

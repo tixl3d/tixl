@@ -19,7 +19,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Characters, Words, Lines or Sentences.\nWords are split at whitespace and punctuation, so punctuation is removed."
+      "Description": "Characters, Words, Lines or Sentences.\nWords are split at whitespace and punctuation, so punctuation is removed.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "7520db6d-7855-40e1-bb81-ead290815435"/*FragmentCount*/,

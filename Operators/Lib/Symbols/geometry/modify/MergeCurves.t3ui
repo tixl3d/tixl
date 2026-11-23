@@ -17,7 +17,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Union removes the segments inside other shapes, Xor turns overlapping areas into holes, Intersect keeps only the areas where shapes overlap."
+      "Description": "Union removes the segments inside other shapes, Xor turns overlapping areas into holes, Intersect keeps only the areas where shapes overlap.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "db5a0ef8-d464-4606-a7c4-4a57063deb27"/*Curves*/,

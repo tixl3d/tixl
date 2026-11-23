@@ -51,7 +51,8 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "Flattened samples each curve into a polyline for drawing lines. Points emits only the curves' own points, without separators, e.g. to mark or instance on them. AllPoints outputs every point of the geometry once, also points without primitives, e.g. a selection of points."
+      "Description": "Flattened samples each curve into a polyline for drawing lines. Points emits only the curves' own points, without separators, e.g. to mark or instance on them. AllPoints outputs every point of the geometry once, also points without primitives, e.g. a selection of points.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

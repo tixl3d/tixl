@@ -19,7 +19,8 @@
         "Y": 1035.0
       },
       "GroupTitle": "Recovery",
-      "Description": "Curve recovers fully within Duration, shaped by GainAndBias. HalfLife recovers exponentially, halving the flash every Duration."
+      "Description": "Curve recovers fully within Duration, shaped by GainAndBias. HalfLife recovers exponentially, halving the flash every Duration.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "14e19d37-c921-4a0d-9254-cda8870764c0"/*Points*/,
@@ -205,7 +206,8 @@
         "X": -300.0,
         "Y": 360.0
       },
-      "Description": "Multiplies Strength with the F1 or F2 attribute of the source points."
+      "Description": "Multiplies Strength with the F1 or F2 attribute of the source points.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "d7760cca-c53d-4024-b945-14a804db9598"/*RotationAxis*/,

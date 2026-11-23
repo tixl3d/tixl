@@ -24,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "f590393a-c318-4254-91b3-4f8e3d3de937"/*Mirror*/,

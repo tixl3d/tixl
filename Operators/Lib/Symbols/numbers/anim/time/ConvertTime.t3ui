@@ -9,7 +9,8 @@
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "dd9b7590-9d1f-4a3a-afe7-fa37fefd5798"/*Time*/,

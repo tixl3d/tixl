@@ -25,7 +25,8 @@
       "Position": {
         "X": 6.076416,
         "Y": 1423.134
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "4d7f1f34-ca1b-43ee-803f-cbc14bcc8679"/*GridScale*/,

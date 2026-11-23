@@ -55,7 +55,8 @@
       "Position": {
         "X": -871.4209,
         "Y": 1009.55225
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "9df1f57c-a079-49c1-b537-d8eb08f2d0d3"/*Scale*/,

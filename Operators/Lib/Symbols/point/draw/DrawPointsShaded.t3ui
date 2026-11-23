@@ -75,7 +75,8 @@
         "X": 2345.8533,
         "Y": 3733.3735
       },
-      "Description": "Point attribute that multiplies the size: None, F1 or F2."
+      "Description": "Point attribute that multiplies the size: None, F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "f5b4e08b-a49a-47ac-838d-577b621005b2"/*Color*/,

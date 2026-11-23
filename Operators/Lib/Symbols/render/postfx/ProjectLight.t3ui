@@ -44,7 +44,8 @@
         "Y": 859.917
       },
       "GroupTitle": "Light Position",
-      "Description": "0 = Orthographic projection with parallel rays\n1 = Perspective projection with rays spreading from the Position"
+      "Description": "0 = Orthographic projection with parallel rays\n1 = Perspective projection with rays spreading from the Position",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "584ded98-20a2-4ee3-963d-168fc9920abe"/*AmbientColor*/,
