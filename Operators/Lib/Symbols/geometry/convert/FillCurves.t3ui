@@ -63,7 +63,7 @@
       },
       "Min": 0.0,
       "Max": 0.2,
-      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. Not combined with a bevel."
+      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. With Inset, the cap's border cells snap to the nearest inset point instead, so the inset ring keeps its quads. Not combined with a bevel."
     }
   ],
   "SymbolChildUis": [],

@@ -94,6 +94,7 @@ internal sealed class CurveSolidBuilder
         _innerAlignedIds.Clear();
         _innerLoopSources.Clear();
         _collapsedStrips.Clear();
+        _capBoundaryIsInset = false;
     }
 
     public void Finish(Geometry target, Geometry source)
@@ -673,6 +674,7 @@ internal sealed class CurveSolidBuilder
         var hasWalls = sides && depth > 0;
         var profile = BuildProfile(depth, bevel, bevelSegments, hasWalls);
         var useInset = inset > 1e-6f && front && !hasWalls;
+        _capBoundaryIsInset = false;
         if (useInset)
         {
             // The outline ring is built first so the inset strip can share its points; the caps then use the
@@ -850,17 +852,16 @@ internal sealed class CurveSolidBuilder
 
         _loops.Clear();
         _loops.AddRange(_innerLoops);
+        _capBoundaryIsInset = _innerLoops.Count > 0;
         if (_innerLoops.Count > 0)
         {
-            // Lattice crossings go in before the strip is built, so the cap and the strip share every boundary edge
-            if (_usesLattice)
-                InsertGridCrossings(Lattice, Lattice * LatticeSnap);
-
+            // No grid crossings are inserted into the inset ring: the cap resolves its intersections with the
+            // ring onto the nearest inset point instead, so the strip stays one quad per outline edge.
             BuildRings(_profile);
             _ringZeroSeed.Clear();
 
             for (var l = 0; l < _innerLoops.Count; l++)
-                AddInsetStrip(outlineRings[_innerLoopSources[l]], _innerAlignedIds[l], _loopRings[l]);
+                AddInsetStrip(outlineRings[_innerLoopSources[l]], _innerAlignedIds[l]);
         }
         else
         {
@@ -888,18 +889,13 @@ internal sealed class CurveSolidBuilder
     }
 
     /// <summary>
-    /// Emits the strip around one loop: every outline edge becomes a polygon between the outline and its inset
-    /// edge, following any lattice crossings inserted into that inset edge. A collapsed inset edge leaves a
-    /// triangle that closes the strip at the collapsed corner.
+    /// Emits the strip around one loop: every outline edge becomes a quad between the outline and its inset edge.
+    /// A collapsed inset edge leaves a triangle that closes the strip at the collapsed corner. The inset ring is
+    /// not split by lattice crossings; the cap snaps its border cells to these points instead.
     /// </summary>
-    private void AddInsetStrip(int[] outlineIds, List<int> alignedInnerIds, int[] innerRing)
+    private void AddInsetStrip(int[] outlineIds, List<int> alignedInnerIds)
     {
         var count = alignedInnerIds.Count;
-        var innerCount = innerRing.Length / _profile.Count;
-        _ringIndexLookup.Clear();
-        for (var i = 0; i < innerCount; i++)
-            _ringIndexLookup[innerRing[i]] = i;
-
         for (var i = 0; i < count; i++)
         {
             var next = i + 1 == count ? 0 : i + 1;
@@ -908,23 +904,9 @@ internal sealed class CurveSolidBuilder
             _polygon.Clear();
             _polygon.Add(outlineIds[i]);
             _polygon.Add(outlineIds[next]);
-
-            if (insetStart == insetEnd || !_ringIndexLookup.TryGetValue(insetEnd, out var index) || !_ringIndexLookup.TryGetValue(insetStart, out var stop))
-            {
+            _polygon.Add(insetEnd);
+            if (insetStart != insetEnd)
                 _polygon.Add(insetStart);
-            }
-            else
-            {
-                // Walk the inset loop back from this edge's end to its start, collecting lattice points
-                while (true)
-                {
-                    _polygon.Add(innerRing[index]);
-                    if (index == stop)
-                        break;
-
-                    index = index == 0 ? innerCount - 1 : index - 1;
-                }
-            }
 
             AddCapPolygon(Vector3.UnitZ, flip: false);
         }
@@ -1521,15 +1503,16 @@ internal sealed class CurveSolidBuilder
     }
 
     /// <summary>
-    /// Where the cell's square crosses an outline segment: the segment's nearest ring point within the snap distance.
-    /// Grid crossings were inserted into the outlines or snapped onto a point next to them, so one is always there; deciding
-    /// by the segment rather than by distance alone keeps neighbouring cells from picking two different points that lie
-    /// close together, which would make them overlap.
+    /// Where the cell's square crosses an outline segment: the segment's nearest ring point. Normally that is a
+    /// crossing inserted into the outline within the snap distance; on an inset cap the crossing snaps to the
+    /// nearest inset point, so the inset strip keeps its quads. Deciding by the segment's points rather than by
+    /// distance alone keeps neighbouring cells from picking two different points that lie close together, which
+    /// would make them overlap.
     /// </summary>
     private object? CombineCapVertex(Vec3 position, object[] data, float[] weights)
     {
         var best = -1;
-        var bestDistance = _combineSnap * _combineSnap;
+        var bestDistance = _capBoundaryIsInset ? float.MaxValue : _combineSnap * _combineSnap;
         foreach (var entry in data)
         {
             if (entry is not int pointId)
@@ -1537,7 +1520,7 @@ internal sealed class CurveSolidBuilder
 
             var p = _positions[pointId];
             var distance = (p.X - position.X) * (p.X - position.X) + (p.Y - position.Y) * (p.Y - position.Y);
-            if (distance > bestDistance)
+            if (distance > bestDistance || (distance == bestDistance && best >= 0 && pointId > best))
                 continue;
 
             bestDistance = distance;
@@ -1548,15 +1531,16 @@ internal sealed class CurveSolidBuilder
     }
 
     /// <summary>
-    /// For a position on an outline segment: the segment's nearer ring point within the snap distance (grid crossings
-    /// were inserted into the outline or snapped onto such a point), otherwise -1. Depends only on the position, so all
-    /// cells sharing a corner agree.
+    /// For a position on an outline segment: the segment's nearer ring point. Normally only within the snap
+    /// distance (grid crossings were inserted into the outline or snapped onto such a point); on an inset cap the
+    /// nearer inset point is always used, so the cap meets the strip without subdividing it. Depends only on the
+    /// position, so all cells sharing a corner agree.
     /// </summary>
     private int FindRingPointOnOutline(Vector2 position)
     {
         var onLine = 1e-4f * Lattice;
         var best = -1;
-        var bestDistance = _capSnap * _capSnap;
+        var bestDistance = _capBoundaryIsInset ? float.MaxValue : _capSnap * _capSnap;
         for (var l = 0; l < _loops.Count; l++)
         {
             var loop = _loops[l];
@@ -1579,11 +1563,12 @@ internal sealed class CurveSolidBuilder
                 var distanceB = Vector2.DistanceSquared(b, position);
                 var nearer = distanceA <= distanceB ? i : (i + 1) % count;
                 var distance = MathF.Min(distanceA, distanceB);
-                if (distance > bestDistance)
+                var pointId = _loopRings[l][_capRingIndex * count + nearer];
+                if (distance > bestDistance || (distance == bestDistance && best >= 0 && pointId > best))
                     continue;
 
                 bestDistance = distance;
-                best = _loopRings[l][_capRingIndex * count + nearer];
+                best = pointId;
             }
         }
 
@@ -1841,6 +1826,7 @@ internal sealed class CurveSolidBuilder
     private const float InsetCollapseWeldFactor = 1e-3f;
 
     private bool _usesLattice;
+    private bool _capBoundaryIsInset;
     private readonly StraightSkeletonInset _skeleton = new();
     private readonly List<Vector2> _crossingLoop = [];
     private readonly List<float> _crossings = [];
@@ -1854,7 +1840,6 @@ internal sealed class CurveSolidBuilder
     private readonly List<(Vector2 Position, int Point)> _ringZeroSeed = [];
     private readonly List<int> _innerLoopIds = [];
     private readonly List<int> _insetInnerIds = [];
-    private readonly Dictionary<int, int> _ringIndexLookup = [];
     private int[] _insetSlotPointIds = [];
     private readonly List<Vector3> _scratch = [];
     private readonly List<Vector2> _scratch2 = [];

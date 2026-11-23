@@ -521,8 +521,9 @@ Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength
 **Expected:**
 - A ring of quads runs along every outline, with the fill inside it; the outer bounds and the silhouette don't change.
 - The Stats show no non-manifold edges; boundary edges are the outline edges, plus a few where a tiny counter collapses.
-- Set Lattice 0.05: the cap inside the ring becomes the same grid as a plain fill, the ring follows the grid crossings,
-  and no non-manifold edges appear. Without the ring, the letters show long triangles from the outline.
+- Set Lattice 0.05: the cap inside the ring becomes a grid, but the ring stays one quad per outline edge: the cap's
+  border cells snap to the nearest inset point instead of adding points on the ring. No non-manifold edges appear.
+  Without the ring, the letters show long triangles from the outline.
 - Set Inset 0.5 on letters with a thin stem: the op warns that the inset was limited, and the rings stop before
   opposite outlines overlap.
 - Weight still offsets the whole letter first; the ring is built inside the offset outline.
