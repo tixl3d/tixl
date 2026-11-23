@@ -433,6 +433,11 @@ internal static class AppMenuBar
             if (ProjectView.Focused?.GraphView is MagGraphView { Context: not null } magGraphView)
                 GraphEditMenu.Draw(magGraphView.Context);
 
+            // The clip area only reflects the focused composition while the timeline is drawn.
+            var isTimelineVisible = UserSettings.Config.ShowTimeline || WindowManager.TimelineWindow.IsDetached;
+            if (isTimelineVisible && ProjectView.Focused is { CompositionInstance: { } composition } focusedView)
+                focusedView.TimeLineCanvas.ClipArea.OpClips.DrawEditMenuItems(composition);
+
             ImGui.EndMenu();
         }
 

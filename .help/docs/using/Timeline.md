@@ -244,6 +244,12 @@ Ways to edit the remap:
 
 Select one or more clips and run **Cut at Time** from the context menu. Each clip splits at the current playback time; the new clip is renamed and reconnected to the same target group.
 
+### Removing gaps and reordering clips
+
+**Remove Gaps** in the clip context menu (also under **Edit → Timeline Clips**) slides clips to the left so that each one starts where the previous clip on its layer ends. With several clips selected, only the selected clips move and the earliest one on each layer stays in place; otherwise all clips are packed. Clips that are not moved still block the ones behind them.
+
+To reorder clips that sit back to back, hold `Alt` and hover one of them: a hollow circle appears on it. Drag the circle sideways and the clip hops past its neighbor once its leading edge passes the neighbor's center; the neighbor moves into the freed space. If the hovered clip is part of a selection of back-to-back clips, the circle appears on all of them and they move together. Reordering never opens a gap: the clips keep their total span, only their order changes. Clips separated by a gap can't be swapped — use **Remove Gaps** first.
+
 ### Nesting timing
 
 If an operator symbol has an output flagged as **time clip**, instances of that operator also appear in the time clip area. Unlike `[TimeClip]`, nested time-clip operators do **not** link their source time to the clip time — moving such an operator from `t=0` to `t=1` bar leaves its source time at `0`.

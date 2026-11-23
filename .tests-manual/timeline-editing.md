@@ -140,8 +140,8 @@ playhead inside it, and right-click the clip.
 
 **Expected:**
 - The rows appear in this order, top to bottom: **Select Following Clips**,
-  **Cut at Time**, **Duplicate**, **Edit Clip Times**, **Clear Time Stretch**,
-  **Delete**.
+  **Cut at Time**, **Duplicate**, **Duplicate to Current Time**, **Remove Gaps**,
+  **Edit Clip Times**, **Clear Time Stretch**, **Delete**.
 - Every label is Title Case, and the labels all start on the same x-position —
   including the keyframe rows further down (**Paste Keyframes**, **View All**).
 - Shortcuts are right-aligned and dimmed: `Ctrl+Shift+A` on Select Following
@@ -162,6 +162,41 @@ Then right-click a clip of any other type.
 - For the audio clip, a **Set as Main Soundtrack** row appears below a separator,
   under **Delete**.
 - For the other clip, that row is absent and no leftover separator remains.
+
+## Step: Remove gaps
+
+**Action:**
+Place four clips on one layer with gaps of different sizes between them, and a fifth clip with a gap on a
+second layer. Select only the second and fourth clip of the first layer and choose **Remove Gaps** from the
+context menu. Undo. Then select a single clip and run **Remove Gaps** again, this time from
+**Edit → Timeline Clips**.
+
+**Expected:**
+- With two clips selected, the second clip stays in place and the fourth clip moves left until it touches the
+  third clip. The unselected clips don't move.
+- With a single clip selected, all clips on both layers close up to their predecessor; the first clip of each
+  layer keeps its start.
+- Video clips keep showing the same footage after the move.
+- Each run is undone in one step.
+
+## Step: Reorder clips with the swap handle
+
+**Action:**
+Place four clips of different lengths back to back on one layer (A B C D), and a fifth clip E after a gap.
+With nothing selected, hold `Alt`, hover B and drag its circle to the right past C, then release. Undo.
+Select C and D, hold `Alt`, hover C and drag its circle to the left past A. Undo. Finally hover E with `Alt`
+held, and hold `Ctrl + Alt` over B.
+
+**Expected:**
+- With `Alt` held, a hollow circle appears on the hovered clip; the cursor changes to a horizontal resize
+  cursor over it and a tooltip says "Drag to reorder".
+- B stays in place until its right edge passes C's center, then jumps to the other side of C; C moves into the
+  freed space. The order becomes A C B D and the run still ends where D ended.
+- With C and D selected, hovering C shows circles on both; they move together and the order becomes C D A B.
+- Releasing `Alt` mid-drag doesn't end the drag. One undo restores the order; a drag that ends where it
+  started adds no undo step.
+- E, which touches no other clip, shows no circle.
+- With `Ctrl + Alt` held, no circles appear and dragging a clip body slips its footage as before.
 
 ## Step: Trimming previews the cut frame
 

@@ -35,6 +35,9 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 /// </summary>
 internal sealed class TimeClipInteractions
 {
+    /** A swap handle submitted this frame, drawn once the clip bodies are drawn. */
+    private readonly record struct SwapHandle(Guid ClipId, bool IsHighlighted);
+
     public TimeClipInteractions(ClipArea.LayerContext context, Func<Instance> getCompositionOp)
     {
         _context = context;
@@ -78,8 +81,14 @@ internal sealed class TimeClipInteractions
             }
         }
 
+        // ImGui gives the hover to the first item submitted under the mouse, so the swap handles must be
+        // submitted before the clip bodies to win the click — and drawn after them to stay visible.
+        SubmitSwapHandles(compositionOp, layerRect, minLayerIndex);
+
         foreach (var clip in clips)
             TimeClipItem.DrawClip(clip, ref drawAttributes);
+
+        DrawSwapHandleCircles(layerRect, minLayerIndex, drawList);
     }
 
     public void DrawContextMenuItems(Instance compositionOp)
@@ -123,6 +132,11 @@ internal sealed class TimeClipInteractions
             if (DrawClipMenuItem(_duplicateClipsToTimeId, "Duplicate to Current Time", UserActions.DuplicateWithConnections.ListShortcuts()))
             {
                 DuplicateSelectedClipsToCurrentTime(compositionOp);
+            }
+
+            if (DrawClipMenuItem(_removeGapsId, "Remove Gaps"))
+            {
+                RemoveGaps(compositionOp);
             }
 
             if (DrawClipMenuItem(_editClipTimesId, "Edit Clip Times"))
@@ -185,6 +199,127 @@ internal sealed class TimeClipInteractions
             _contextMenuIsOpen = false;
         }
         ImGui.PopStyleVar(3);
+    }
+
+    /// <summary>
+    /// The clip actions of the app menu's Edit menu. They mirror the clip context menu, minus the rows the
+    /// graph part of the Edit menu already offers for the selected ops (Duplicate, Delete).
+    /// </summary>
+    public void DrawEditMenuItems(Instance compositionOp)
+    {
+        if (!HasAnyClips)
+            return;
+
+        var hasSelection = _context.ClipSelection.Count > 0;
+        var hasPlayback = _playback != null;
+
+        CustomComponents.SeparatorLine();
+        CustomComponents.DrawMenuGroupLabel("Timeline Clips");
+
+        if (AppMenuBar.MenuItem("Select Following Clips", UserActions.SelectFollowingClips.ListShortcuts(), isEnabled: hasPlayback)
+            && _playback != null)
+        {
+            SelectClipsStartingAfter(_playback.TimeInBars, _playback.BarsFromSeconds(1 / 30.0));
+        }
+
+        if (AppMenuBar.MenuItem("Cut at Time", UserActions.SplitSelectedOrHoveredClips.ListShortcuts(), isEnabled: hasPlayback))
+        {
+            SplitClipsAtTime(compositionOp);
+        }
+
+        if (AppMenuBar.MenuItem("Duplicate to Current Time", UserActions.DuplicateWithConnections.ListShortcuts(),
+                                isEnabled: hasSelection && hasPlayback))
+        {
+            DuplicateSelectedClipsToCurrentTime(compositionOp);
+        }
+
+        if (AppMenuBar.MenuItem("Remove Gaps"))
+        {
+            RemoveGaps(compositionOp);
+        }
+
+        if (AppMenuBar.MenuItem("Clear Time Stretch"))
+        {
+            ClearTimeStretchOfSelectedClips(compositionOp);
+        }
+    }
+
+    /// <summary>
+    /// Closes the gaps between clips on each layer by moving every clip left onto the end of its predecessor.
+    /// With several clips selected only those move, and the earliest selected clip of each layer stays in place;
+    /// otherwise all clips are packed. Clips that don't move still block the ones after them.
+    /// </summary>
+    public void RemoveGaps(Instance compositionOp)
+    {
+        var onlySelected = _context.ClipSelection.Count > 1;
+        var sortedClips = _context.ClipSelection.CompositionTimeClips.Values.ToList();
+        sortedClips.Sort(_byLayerAndStart);
+
+        var movableClips = new List<TimeClip>();
+        foreach (var clip in sortedClips)
+        {
+            if (!onlySelected || _context.ClipSelection.Contains(clip))
+                movableClips.Add(clip);
+        }
+
+        if (movableClips.Count < 2)
+            return;
+
+        var command = new MoveTimeClipsCommand(compositionOp, movableClips);
+        var anyMoved = false;
+        var layerIndex = int.MinValue;
+        var hasPredecessor = false;
+        var predecessorEnd = 0f;
+
+        foreach (var clip in sortedClips)
+        {
+            if (clip.LayerIndex != layerIndex)
+            {
+                layerIndex = clip.LayerIndex;
+                hasPredecessor = false;
+            }
+
+            var isMovable = !onlySelected || _context.ClipSelection.Contains(clip);
+            if (!hasPredecessor)
+            {
+                // A gap in front of the first movable clip is not between clips.
+                if (!isMovable)
+                    continue;
+
+                hasPredecessor = true;
+                predecessorEnd = clip.TimeRange.End;
+                continue;
+            }
+
+            if (isMovable && clip.TimeRange.Start > predecessorEnd + GapToleranceInBars)
+            {
+                MoveClipInTime(clip, predecessorEnd - clip.TimeRange.Start);
+                anyMoved = true;
+            }
+
+            predecessorEnd = MathF.Max(predecessorEnd, clip.TimeRange.End);
+        }
+
+        if (!anyMoved)
+            return;
+
+        command.StoreCurrentValues();
+        UndoRedoStack.AddAndExecute(command);
+    }
+
+    /// <summary>
+    /// Moves a clip like a plain body drag: a clip that doesn't map its source region keeps its content
+    /// locked to timeline time, so its source range moves along.
+    /// </summary>
+    private static void MoveClipInTime(TimeClip clip, float deltaInBars)
+    {
+        clip.TimeRange.Start += deltaInBars;
+        clip.TimeRange.End += deltaInBars;
+        if (clip.UsedForRegionMapping)
+            return;
+
+        clip.SourceRange.Start += deltaInBars;
+        clip.SourceRange.End += deltaInBars;
     }
 
     /// <summary>
@@ -587,7 +722,7 @@ internal sealed class TimeClipInteractions
         foreach (var clip in _context.ClipSelection.GetAllOrSelectedClips().ToList())
         {
             if (!clip.TimeRange.Contains(timeInBars))
-                return;
+                continue;
 
             if (timeInBars - clip.TimeRange.Start < 0.01
                 || clip.TimeRange.End - timeInBars < 0.01)
@@ -640,6 +775,332 @@ internal sealed class TimeClipInteractions
         _context.ClipSelection.Clear();
         foreach (var clip in clips)
             _context.ClipSelection.AddSelection(clip);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Swap handles: reorder back-to-back clips on a layer
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// Holding Alt shows a hollow circle on the hovered clip — or on the selected clips, if they sit back to
+    /// back on one layer — when it touches neighboring clips. Dragging a circle moves that block within its
+    /// run of touching clips: it hops past a neighbor once its leading edge passes the neighbor's center, so the
+    /// run keeps its span and stays gapless; only the order changes.
+    /// </summary>
+    private void SubmitSwapHandles(Instance compositionOp, ImRect layerRect, int minLayerIndex)
+    {
+        _swapHandleCount = 0;
+        if (_swapCommand == null)
+        {
+            // Alt alone: Ctrl+Alt is the slip drag.
+            var io = ImGui.GetIO();
+            var showHandles = io.KeyAlt && !io.KeyCtrl && !io.KeyShift && _moveClipsCommand == null;
+            if (!showHandles || !TryFindSwapBlock(layerRect, minLayerIndex))
+                return;
+        }
+
+        var clips = _context.ClipSelection.CompositionTimeClips;
+        for (var runIndex = _swapBlockStart; runIndex < _swapBlockStart + _swapBlockCount; runIndex++)
+        {
+            if (!clips.TryGetValue(_swapRunIds[runIndex], out var clip))
+            {
+                // The block changed under a running drag (e.g. an undo); continuing would act on stale ids.
+                CancelSwapDrag();
+                _swapHandleCount = 0;
+                return;
+            }
+
+            SubmitSwapHandle(compositionOp, clip, layerRect, minLayerIndex);
+        }
+    }
+
+    private void SubmitSwapHandle(Instance compositionOp, TimeClip clip, ImRect layerRect, int minLayerIndex)
+    {
+        var isSwapping = _swapCommand != null;
+        GetSwapHandleGeometry(clip, layerRect, minLayerIndex, out var center, out var radius, out var fits);
+
+        // A running drag keeps its handle even on a narrow clip, so ImGui doesn't end the drag.
+        if (!fits && !isSwapping)
+            return;
+
+        ImGui.PushID(clip.Id.GetHashCode());
+        ImGui.SetCursorScreenPos(center - new Vector2(radius));
+        ImGui.InvisibleButton("swapHandle", new Vector2(radius * 2));
+        var isHovered = ImGui.IsItemHovered();
+        var isActive = ImGui.IsItemActive();
+
+        if (ImGui.IsItemActivated())
+        {
+            StartSwapDrag(compositionOp);
+        }
+        else if (isActive && _swapCommand != null)
+        {
+            UpdateSwapDrag();
+        }
+
+        if (ImGui.IsItemDeactivated())
+        {
+            CompleteSwapDrag();
+        }
+
+        ImGui.PopID();
+
+        if (isHovered || isActive)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+
+        if (isHovered && !isActive)
+            CustomComponents.TooltipForLastItem("Drag to reorder");
+
+        if (_swapHandleCount < _swapHandles.Length)
+            _swapHandles[_swapHandleCount++] = new SwapHandle(clip.Id, isHovered || isActive);
+    }
+
+    private void DrawSwapHandleCircles(ImRect layerRect, int minLayerIndex, ImDrawListPtr drawList)
+    {
+        var clips = _context.ClipSelection.CompositionTimeClips;
+        var thickness = MathF.Max(1, MathF.Round(1.5f * T3Ui.UiScaleFactor));
+        for (var handleIndex = 0; handleIndex < _swapHandleCount; handleIndex++)
+        {
+            var handle = _swapHandles[handleIndex];
+
+            // Re-resolved: a swap update this frame has already moved the clips.
+            if (!clips.TryGetValue(handle.ClipId, out var clip))
+                continue;
+
+            GetSwapHandleGeometry(clip, layerRect, minLayerIndex, out var center, out var radius, out _);
+            var color = handle.IsHighlighted ? UiColors.ForegroundFull : UiColors.ForegroundFull.Fade(0.7f);
+
+            // The dark halo keeps the circle readable over bright video thumbnails.
+            drawList.AddCircle(center, radius, UiColors.BackgroundFull.Fade(0.5f), 0, thickness + 2);
+            drawList.AddCircle(center, radius, color, 0, thickness);
+        }
+    }
+
+    private void GetSwapHandleGeometry(TimeClip clip, ImRect layerRect, int minLayerIndex, out Vector2 center, out float radius, out bool fits)
+    {
+        GetClipScreenRect(clip, layerRect, minLayerIndex, out var clipMin, out var clipMax);
+        var clipHeight = clipMax.Y - clipMin.Y;
+        radius = MathF.Max(MathF.Min(SwapHandleRadius * T3Ui.UiScaleFactor, clipHeight * 0.5f - 1), 2);
+        fits = clipMax.X - clipMin.X >= radius * 4;
+        center = (clipMin + clipMax) * 0.5f;
+    }
+
+    /// <summary>Matches the body rect <see cref="TimeClipItem"/> draws.</summary>
+    private void GetClipScreenRect(TimeClip clip, ImRect layerRect, int minLayerIndex, out Vector2 min, out Vector2 max)
+    {
+        var xStart = _context.TimeCanvas.TransformX(clip.TimeRange.Start) + 1;
+        var xEnd = _context.TimeCanvas.TransformX(clip.TimeRange.End) + 1;
+        min = new Vector2(xStart, layerRect.Min.Y + (clip.LayerIndex - minLayerIndex) * ClipArea.LayerHeight);
+        max = new Vector2(MathF.Max(xEnd, xStart + 1) - 1, min.Y + ClipArea.LayerHeight - 2);
+    }
+
+    /// <summary>
+    /// Finds the run of touching clips around the hovered clip (or, without one, around the selection) and the
+    /// block within it that a drag would move: the selected clips if they form one unbroken stretch of the run
+    /// and include the anchor, otherwise the hovered clip alone. Fills <see cref="_swapRunIds"/> in time order.
+    /// </summary>
+    private bool TryFindSwapBlock(ImRect layerRect, int minLayerIndex)
+    {
+        _swapRunIds.Clear();
+        var selection = _context.ClipSelection;
+        var clips = selection.CompositionTimeClips;
+
+        TimeClip? anchor = null;
+        var anchorIsHovered = false;
+        if (ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem))
+        {
+            foreach (var clip in clips.Values)
+            {
+                GetClipScreenRect(clip, layerRect, minLayerIndex, out var clipMin, out var clipMax);
+                if (!ImGui.IsMouseHoveringRect(clipMin, clipMax))
+                    continue;
+
+                anchor = clip;
+                anchorIsHovered = true;
+                break;
+            }
+        }
+
+        if (anchor == null)
+        {
+            foreach (var id in selection.SelectedClipsIds)
+            {
+                if (clips.TryGetValue(id, out anchor))
+                    break;
+            }
+        }
+
+        if (anchor == null)
+            return false;
+
+        _swapLayerClips.Clear();
+        foreach (var clip in clips.Values)
+        {
+            if (clip.LayerIndex == anchor.LayerIndex)
+                _swapLayerClips.Add(clip);
+        }
+
+        _swapLayerClips.Sort(_byStart);
+        var anchorIndex = _swapLayerClips.IndexOf(anchor);
+
+        var runFirst = anchorIndex;
+        while (runFirst > 0 && AreTouching(_swapLayerClips[runFirst - 1], _swapLayerClips[runFirst]))
+            runFirst--;
+
+        var runLast = anchorIndex;
+        while (runLast < _swapLayerClips.Count - 1 && AreTouching(_swapLayerClips[runLast], _swapLayerClips[runLast + 1]))
+            runLast++;
+
+        var blockFirst = anchorIndex;
+        var blockLast = anchorIndex;
+        if (selection.Contains(anchor))
+        {
+            var selectedInRun = 0;
+            var firstSelected = int.MaxValue;
+            var lastSelected = -1;
+            for (var index = runFirst; index <= runLast; index++)
+            {
+                if (!selection.Contains(_swapLayerClips[index]))
+                    continue;
+
+                selectedInRun++;
+                firstSelected = Math.Min(firstSelected, index);
+                lastSelected = Math.Max(lastSelected, index);
+            }
+
+            var selectionIsBlock = selectedInRun == selection.Count && lastSelected - firstSelected + 1 == selectedInRun;
+            if (selectionIsBlock)
+            {
+                blockFirst = firstSelected;
+                blockLast = lastSelected;
+            }
+            else if (!anchorIsHovered)
+            {
+                _swapLayerClips.Clear();
+                return false;
+            }
+        }
+
+        // Nothing to swap with when the block is the whole run.
+        var hasNeighbor = blockLast - blockFirst < runLast - runFirst;
+        if (hasNeighbor)
+        {
+            for (var index = runFirst; index <= runLast; index++)
+                _swapRunIds.Add(_swapLayerClips[index].Id);
+
+            _swapBlockStart = blockFirst - runFirst;
+            _swapBlockCount = blockLast - blockFirst + 1;
+        }
+
+        _swapLayerClips.Clear();
+        return hasNeighbor;
+    }
+
+    private static bool AreTouching(TimeClip earlier, TimeClip later)
+    {
+        return MathF.Abs(later.TimeRange.Start - earlier.TimeRange.End) <= TouchToleranceInBars;
+    }
+
+    private void StartSwapDrag(Instance compositionOp)
+    {
+        var clips = _context.ClipSelection.CompositionTimeClips;
+        var runClips = new List<TimeClip>(_swapRunIds.Count);
+        foreach (var id in _swapRunIds)
+        {
+            if (clips.TryGetValue(id, out var clip))
+                runClips.Add(clip);
+        }
+
+        if (runClips.Count != _swapRunIds.Count)
+            return;
+
+        _swapRunStart = runClips[0].TimeRange.Start;
+        _swapOtherCenters.Clear();
+        var blockStartTime = runClips[_swapBlockStart].TimeRange.Start;
+        var blockEndTime = runClips[_swapBlockStart + _swapBlockCount - 1].TimeRange.End;
+        for (var runIndex = 0; runIndex < runClips.Count; runIndex++)
+        {
+            if (runIndex >= _swapBlockStart && runIndex < _swapBlockStart + _swapBlockCount)
+                continue;
+
+            var range = runClips[runIndex].TimeRange;
+            _swapOtherCenters.Add((range.Start + range.End) * 0.5);
+        }
+
+        _swapBlockStartOnDragStart = blockStartTime;
+        _swapBlockEndOnDragStart = blockEndTime;
+        _swapMouseTimeOnStart = _context.TimeCanvas.InverseTransformX(ImGui.GetMousePos().X);
+        _swapInsertIndex = _swapBlockStart;
+        _swapCommand = new MoveTimeClipsCommand(compositionOp, runClips);
+    }
+
+    private void UpdateSwapDrag()
+    {
+        _context.TimeCanvas.RequestEdgeScrolling();
+
+        var mouseTime = _context.TimeCanvas.InverseTransformX(ImGui.GetMousePos().X);
+        var dragDelta = mouseTime - _swapMouseTimeOnStart;
+
+        // The leading edge decides: a long block hops past a short neighbor as soon as it covers half of it.
+        var insertIndex = _swapBlockStart;
+        for (var otherIndex = 0; otherIndex < _swapOtherCenters.Count; otherIndex++)
+        {
+            var isLeftOfBlock = otherIndex < _swapBlockStart;
+            if (isLeftOfBlock && _swapBlockStartOnDragStart + dragDelta < _swapOtherCenters[otherIndex])
+                insertIndex--;
+            else if (!isLeftOfBlock && _swapBlockEndOnDragStart + dragDelta > _swapOtherCenters[otherIndex])
+                insertIndex++;
+        }
+
+        if (insertIndex == _swapInsertIndex)
+            return;
+
+        _swapInsertIndex = insertIndex;
+
+        var clips = _context.ClipSelection.CompositionTimeClips;
+        var cursor = _swapRunStart;
+        for (var orderIndex = 0; orderIndex < _swapRunIds.Count; orderIndex++)
+        {
+            var isBlock = orderIndex >= insertIndex && orderIndex < insertIndex + _swapBlockCount;
+            int runIndex;
+            if (isBlock)
+            {
+                runIndex = _swapBlockStart + orderIndex - insertIndex;
+            }
+            else
+            {
+                var otherIndex = orderIndex < insertIndex ? orderIndex : orderIndex - _swapBlockCount;
+                runIndex = otherIndex < _swapBlockStart ? otherIndex : otherIndex + _swapBlockCount;
+            }
+
+            if (!clips.TryGetValue(_swapRunIds[runIndex], out var clip))
+                continue;
+
+            var duration = clip.TimeRange.Duration;
+            MoveClipInTime(clip, cursor - clip.TimeRange.Start);
+            cursor += duration;
+        }
+    }
+
+    private void CompleteSwapDrag()
+    {
+        if (_swapCommand == null)
+            return;
+
+        if (_swapInsertIndex != _swapBlockStart)
+        {
+            _swapCommand.StoreCurrentValues();
+            UndoRedoStack.Add(_swapCommand);
+            _getCompositionOp().GetSymbolUi().FlagAsModified();
+        }
+
+        _swapCommand = null;
+    }
+
+    private void CancelSwapDrag()
+    {
+        _swapCommand?.Undo();
+        _swapCommand = null;
     }
 
     // ---------------------------------------------------------------------------
@@ -956,6 +1417,15 @@ internal sealed class TimeClipInteractions
     public ClipSelection Selection => _context.ClipSelection;
 
     private const float MinDuration = 1 / 60f; // In bars
+    private const float GapToleranceInBars = 0.0001f;
+    private const float TouchToleranceInBars = 0.001f;
+    private const float SwapHandleRadius = 6;
+
+    private static readonly Comparison<TimeClip> _byStart = static (a, b) => a.TimeRange.Start.CompareTo(b.TimeRange.Start);
+
+    private static readonly Comparison<TimeClip> _byLayerAndStart = static (a, b) => a.LayerIndex != b.LayerIndex
+                                                                                          ? a.LayerIndex.CompareTo(b.LayerIndex)
+                                                                                          : a.TimeRange.Start.CompareTo(b.TimeRange.Start);
 
     private readonly ClipArea.LayerContext _context;
     private readonly Func<Instance> _getCompositionOp;
@@ -972,10 +1442,25 @@ internal sealed class TimeClipInteractions
 
     private static MoveTimeClipsCommand? _moveClipsCommand;
 
+    private MoveTimeClipsCommand? _swapCommand;
+    private readonly SwapHandle[] _swapHandles = new SwapHandle[32];
+    private int _swapHandleCount;
+    private readonly List<TimeClip> _swapLayerClips = new(64);
+    private readonly List<Guid> _swapRunIds = new(16);
+    private int _swapBlockStart;
+    private int _swapBlockCount;
+    private readonly List<double> _swapOtherCenters = new(16);
+    private float _swapRunStart;
+    private double _swapBlockStartOnDragStart;
+    private double _swapBlockEndOnDragStart;
+    private double _swapMouseTimeOnStart;
+    private int _swapInsertIndex;
+
     private static readonly int _selectFollowingClipsId = nameof(_selectFollowingClipsId).GetHashCode();
     private static readonly int _cutAtTimeId = nameof(_cutAtTimeId).GetHashCode();
     private static readonly int _duplicateClipsId = nameof(_duplicateClipsId).GetHashCode();
     private static readonly int _duplicateClipsToTimeId = nameof(_duplicateClipsToTimeId).GetHashCode();
+    private static readonly int _removeGapsId = nameof(_removeGapsId).GetHashCode();
     private static readonly int _editClipTimesId = nameof(_editClipTimesId).GetHashCode();
     private static readonly int _clearTimeStretchId = nameof(_clearTimeStretchId).GetHashCode();
     private static readonly int _resetSourceToExtentId = nameof(_resetSourceToExtentId).GetHashCode();
