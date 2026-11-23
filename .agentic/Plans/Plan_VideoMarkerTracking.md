@@ -319,6 +319,68 @@ Both are handled by re-acquisition (predict from the global transform, then sear
 rule: don't search while the predicted position is outside the image. In automatic mode, a marker that left is
 usually replaced instead.
 
+## Safe playback (frame-exact)
+
+Realtime playback lets the video decoder drop frames. For tracking that causes two problems:
+- `SeedFrame` can be skipped, so seeding after `Reset` looks random.
+- A skip of several frames makes all markers jump or get lost at once, which the chained solve turns into a jerk.
+
+The track depends on decode timing. Safe playback advances one frame at a time and waits until every op is ready,
+like render export.
+
+**How export does it today:**
+- `RenderTiming` sets `Playback.FixedFrameDurationSec = 1/fps`, so `Playback.Update` advances one frame per
+  update.
+- Ops that aren't ready set `Playback.OpNotReady`, and `RenderProcess.SaveVideoFrameAndAdvance` re-evaluates the
+  same frame until it clears.
+- `PlayVideo` / `VideoClip` block on the exact frame (`VideoPlaybackController.WaitForRequestedFrame`) only while
+  `IsRenderingToFile` is set.
+
+**Design:**
+1. `Playback.IsFrameExact` in Core. Not `IsRenderingToFile`, which also switches audio into export mode and
+   forces playback speed to 0.
+2. While it is on and playing, `Playback.Update` advances by a fixed step, and not at all if any op reported
+   `OpNotReady` in the previous frame. Capture the flag before the reset at the end of `T3Ui.Update`.
+3. `Playback.WaitsForOps` (rendering to file or frame-exact) replaces the `IsRenderingToFile` checks that control
+   waiting:
+   - blocking decode and `OpNotReady` in `PlayVideo`, `VideoClip` and `VideoPlaybackEngine`;
+   - `AsyncComputation`.
+
+   Audio checks stay on `IsRenderingToFile`.
+4. A toggle in `TimeControls.DrawTransport` next to loop, using the same `IconButton` pattern, saved in user
+   settings.
+5. Playback audio is muted while active (it can't follow a variable-speed timeline). Beat-tap timing is excluded.
+
+**Open: what is "a frame"?** Video clips don't match the project frame rate, and several clips may play at once.
+Options:
+- **Timeline frame rate** (the `F60` in the toolbar). Simple and the same as export. A 30 fps clip shows each
+  source frame twice (the tracker idles on repeats, fine). A 120 fps slow-motion clip skips every other source
+  frame, so the tracker bridges gaps of 2 (works, but not frame-exact for the tracker).
+- **Source frames of one chosen clip.** Every source frame is visited exactly once, which is ideal for tracking.
+  Needs a way to pick the driving clip (selected op, or a setting on `[PlayVideo]`) and clashes with other clips.
+- **Smallest source frame duration among the playing clips.** Automatic, but other clips repeat frames, and the
+  step size changes when clips start and end.
+
+## Marker count and spawn regions
+
+**How many markers.** 20–50 usable markers in the region the solve weights is the sweet spot:
+- The solve averages noise, so error falls with the square root of the count; beyond ~30–50, parallax and chain
+  drift dominate.
+- Outlier rejection needs a clear majority, about 8–10 or more in the weighted region.
+- Cost is linear per marker (one GPU work group each, doubled by the round trip), and the solve is capped at 64.
+- 1000 markers × 3000 frames hits the 256 MB track buffer limit.
+
+**Spawn mask.** Automatic markers spread evenly over the image (about 2 grid cells per marker). A focus radius of
+0.3 covers about 4 % of the frame, so with 32 markers only 1–2 sit in the solved region at any time. On the
+walking-cat track, only 14 markers stayed near the feet long enough to measure. Raising the pool wastes almost all
+of it. Instead:
+- `[TrackMarkers]` gets a `SpawnMask` texture input. The corner score is multiplied by the mask's luminance, and
+  cells whose mask is 0 never start a marker.
+- The detection grid becomes finer than 2 cells per marker (for example 8× the pool size), so a small masked area
+  still has enough cells. Occupancy keeps markers spread within the mask.
+- A radial gradient that follows the feet, a painted shape or any animated texture can drive it, so the whole pool
+  gathers where it is useful. A pool of 32–64 should then be enough.
+
 ## Phases
 
 1. ~~`FrameIndex` on `PlayVideo`~~ (done, `d6bce9b43`).
@@ -339,7 +401,7 @@ usually replaced instead.
    are swapped each processed frame. The check runs when the source is the previous processed frame (normal
    playback, including gaps up to 8 frames) and is skipped otherwise. The limit is the `MaxRoundTripError` input
    (default 1.5 px, 0 turns the check off).
-4. ~~Solve~~ (done 2026-11-23 as `[SolveTrackTransform]`, math checked on the CPU, not yet run in the editor).
+4. ~~Solve~~ (done 2026-11-23 as `[SolveTrackTransform]`; used in the editor on the walking-cat footage).
    Instead of Layer2d values read back to the CPU, it solves on the GPU and outputs a single point
    (Position = translation, Rotation around Z, Scale = uniform scale, F1 = markers used). The video is drawn as a
    quad at that point in the graph, e.g. with `[DrawBillboards]` (PointRotation, Use Point Scale, Scale 100). No
@@ -352,12 +414,34 @@ usually replaced instead.
    First test on the walking-cat shot: works with 4–6 spread markers. With only 2 left (one far, one near), parallax
    read as ~30° rotation and 1.5× zoom. Below 3 weighted markers it now solves translation only. The shot loses its
    seeds within about 100 frames, so phase 5 is the real fix.
-5. `SeedMode` Automatic: corner detection on a grid, slot refill, unique marker ids. Test on panning footage.
-6. Re-acquiring lost markers (shared similarity solve; skip predictions outside the image).
-7. `[StabilizeImage]` (GPU resample) if driving Layer2d isn't enough.
-8. `.track.jsonl` save and load, `[TrackToTrails]`.
-9. Seed editing in the output window, built on the geometry ops' point editing.
-10. Later: per-marker seed frames for hand-picked features, blob mode for dots, affine Lucas-Kanade
+5. ~~`SeedMode` Automatic~~ (done 2026-11-23; used in the editor on the walking-cat footage).
+   - `[TrackMarkers]`: `PoolSize` slots. On `SeedFrame` and on every frame tracked for the first time, three passes
+     run:
+     - `detect`: one group per grid cell, about 2 cells per marker. Best Shi-Tomasi corner of 16×16 samples, cell
+       marked occupied if a live marker sits in it.
+     - `assign`: one group, greedy, the strongest free cell per empty slot, quality ≥ 0.3.
+     - Spawn: captures the key and recent templates.
+   - Ids are `slot + generation × PoolSize` in F2. Generations persist across Reset, so ids stay unique per op
+     instance. Velocity prediction and `[SampleTrack]` interpolation ignore neighbors with another id.
+   - Revised after the first test: `[SolveTrackTransform]` no longer keeps anchors. Anchoring late markers through
+     the current solve depended on playback order and could deadlock: a frame without anchored markers anchors
+     nothing new. It now chains steps instead. Each tracked frame is fitted to the previous tracked frame (within
+     8 frames) from all shared markers (same id), and the steps are composed outward from the reference frame. On
+     the walking-cat track (654 frames, 32 markers, 392 marker lifetimes), an offline replay gave 3–6× lower median
+     and 5–15× lower 99th-percentile frame-to-frame jitter than anchors, with no order dependence. Both still drift
+     about 1 rad of rotation over the shot: a receding ground plane forced into a similarity transform. Smooth
+     mode tolerates that; Lock doesn't.
+   - (Superseded) `[SolveTrackTransform]` kept an anchor per marker (position plus id). Reference-frame markers are re-anchored
+     every dispatch. A marker first seen later is anchored through the current frame's solved transform (not the
+     smoothed one) and joins on the next frame. Anchors reset when the reference setup, the marker count or the
+     track buffer change. The anchoring of late markers depends on playback order, so play forward and backward
+     from the reference frame rather than jumping around.
+6. Safe playback (frame-exact), once the frame-rate question is settled. `SpawnMask` for `[TrackMarkers]`.
+7. Re-acquiring lost markers (shared similarity solve; skip predictions outside the image).
+8. `[StabilizeImage]` (GPU resample) if driving Layer2d isn't enough.
+9. `.track.jsonl` save and load, `[TrackToTrails]`.
+10. Seed editing in the output window, built on the geometry ops' point editing.
+11. Later: per-marker seed frames for hand-picked features, blob mode for dots, affine Lucas-Kanade
    (per-marker rotation and scale), homography / corner pin, reverse read-behind in the video decoder.
 
 ## Resolved

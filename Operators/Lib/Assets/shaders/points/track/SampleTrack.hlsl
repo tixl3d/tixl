@@ -31,7 +31,8 @@ void main(uint3 id : SV_DispatchThreadID)
     Point b = TrackPoints[frameB * MarkerCount + marker];
 
     bool outsideTrack = Frame < 0 || Frame > FrameCount - 1;
-    if (outsideTrack || IsSeparator(a) || (blend > 0 && IsSeparator(b)))
+    // A different id means the slot was reused by a new marker in between.
+    if (outsideTrack || IsSeparator(a) || (blend > 0 && (IsSeparator(b) || b.FX2 != a.FX2)))
     {
         Point lost = a;
         lost.Scale = NAN;

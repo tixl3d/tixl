@@ -55,12 +55,14 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         var searchRadius = MathF.Max(1, SearchRadius.GetValue(context));
         var minConfidence = MinConfidence.GetValue(context);
         var maxRoundTripError = MaxRoundTripError.GetValue(context);
+        var isAutomatic = SeedMode.GetValue(context) == (int)SeedModes.Automatic;
+        var poolSize = PoolSize.GetValue(context);
         var reset = MathUtils.WasTriggered(Reset.GetValue(context), ref _resetTriggered);
         var isEnabled = IsEnabled.GetValue(context);
 
         _statusMessage = null;
         TrackFrame(image, frameIndex, seeds, seedFrame, firstFrame, frameCount, patchSize, searchRadius, minConfidence,
-                   maxRoundTripError, reset, seedsChanged, isEnabled);
+                   maxRoundTripError, isAutomatic, poolSize, reset, seedsChanged, isEnabled);
 
         var isSetUp = _layout.MarkerCount > 0;
         Points.Value = isSetUp ? _currentPoints : null;
@@ -80,18 +82,26 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
     private void TrackFrame(Texture2D? image, int frameIndex, BufferWithViews? seeds, int seedFrame, int firstFrame,
                             int frameCount, int patchSize, float searchRadius, float minConfidence,
-                            float maxRoundTripError, bool reset, bool seedsChanged, bool isEnabled)
+                            float maxRoundTripError, bool isAutomatic, int poolSize, bool reset, bool seedsChanged,
+                            bool isEnabled)
     {
         if (!isEnabled)
             return;
 
-        if (image == null || image.IsDisposed || seeds?.Srv == null || seeds.Srv.IsDisposed)
+        if (image == null || image.IsDisposed)
         {
-            _statusMessage = "Connect an Image and SeedPoints.";
+            _statusMessage = "Connect an Image.";
             return;
         }
 
-        var markerCount = seeds.Srv.Description.Buffer.ElementCount;
+        var hasSeeds = seeds?.Srv != null && !seeds.Srv.IsDisposed;
+        if (!isAutomatic && !hasSeeds)
+        {
+            _statusMessage = "Connect SeedPoints, or set SeedMode to Automatic.";
+            return;
+        }
+
+        var markerCount = isAutomatic ? poolSize.Clamp(1, MaxPoolSize) : seeds!.Srv!.Description.Buffer.ElementCount;
         if (markerCount <= 0)
         {
             _statusMessage = "SeedPoints is empty.";
@@ -112,14 +122,15 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         }
 
         _shaderResources ??= new ShaderResources(this);
-        if (_shaderResources.Luma.Value == null || _shaderResources.Clear.Value == null || _shaderResources.Track.Value == null)
+        if (_shaderResources.Luma.Value == null || _shaderResources.Clear.Value == null || _shaderResources.Track.Value == null
+            || _shaderResources.Detect.Value == null || _shaderResources.Assign.Value == null)
         {
             _statusMessage = "TrackMarkers compute shader is not available.";
             return;
         }
 
         var layout = new TrackLayout(markerCount, frameCount, firstFrame, seedFrame, patchSize,
-                                     new Int2(image.Description.Width, image.Description.Height));
+                                     new Int2(image.Description.Width, image.Description.Height), isAutomatic);
         if (layout != _layout || reset)
         {
             if (layout != _layout && !SetupResources(layout))
@@ -127,7 +138,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
             ClearTrack();
         }
-        else if (seedsChanged && _isSeeded)
+        else if (seedsChanged && _isSeeded && !isAutomatic)
         {
             _seedsPendingCapture = true;
             if (frameIndex == seedFrame)
@@ -163,13 +174,29 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                                  TargetSlot = -1,
                                  IterationsPerLevel = IterationsPerLevel,
                                  MaxRoundTripError = maxRoundTripError,
+                                 CellCount = _cellCount,
+                                 GridColumns = _gridColumns,
+                                 GridRows = _gridRows,
+                                 MinSpawnQuality = MinSpawnQuality,
                              };
+        var spawnMarkers = false;
 
         if (slot < 0 || slot >= frameCount)
         {
             _statusMessage = $"Frame {frameIndex} lies outside the tracked range {firstFrame}–{firstFrame + frameCount - 1}.";
         }
-        else if (frameIndex == seedFrame && (!_isSeeded || _seedsPendingCapture))
+        else if (isAutomatic && frameIndex == seedFrame && !_isSeeded)
+        {
+            // Nothing to track yet: every slot is empty, so all markers start from detected corners.
+            parameters.Mode = (int)Modes.Advance;
+            parameters.TargetSlot = slot;
+            spawnMarkers = true;
+            _isSeeded = true;
+            MarkFilled(slot);
+            _recentTemplateSlot = slot;
+            _lastProcessedSlot = slot;
+        }
+        else if (!isAutomatic && frameIndex == seedFrame && (!_isSeeded || _seedsPendingCapture))
         {
             parameters.Mode = (int)Modes.Capture;
             parameters.TargetSlot = slot;
@@ -213,6 +240,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                         parameters.Levels = Math.Min(parameters.Levels + 1, TemplateLevelCount);
                 }
 
+                // Markers start only on frames tracked for the first time, so revisiting a frame never changes it.
+                spawnMarkers = isAutomatic && !isFilled;
                 MarkFilled(slot);
                 _recentTemplateSlot = slot;
                 _lastProcessedSlot = slot;
@@ -222,8 +251,21 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
                 _statusMessage = $"Seeds were edited. Go to SeedFrame {seedFrame} to apply them.";
         }
 
-        DispatchTrack(context, parameters, image, seeds);
+        DispatchTrack(context, _shaderResources.Track.Value, parameters, markerCount, image, seeds);
+        if (spawnMarkers)
+            SpawnMarkers(context, parameters, image, seeds);
+
         context.PopState();
+    }
+
+    /** Detects corners in free grid cells, assigns them to empty slots and starts a marker at each. */
+    private void SpawnMarkers(DeviceContext context, Params parameters, Texture2D image, BufferWithViews? seeds)
+    {
+        DispatchTrack(context, _shaderResources!.Detect.Value, parameters, _cellCount, image, seeds);
+        DispatchTrack(context, _shaderResources.Assign.Value, parameters, 1, image, seeds);
+
+        parameters.Mode = (int)Modes.Spawn;
+        DispatchTrack(context, _shaderResources.Track.Value, parameters, parameters.MarkerCount, image, seeds);
     }
 
     /** Keeps the previous frame's pyramid for the forward-backward check, so the two are swapped each frame. */
@@ -247,16 +289,17 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         context.GenerateMips(_current.Srv!);
     }
 
-    private void DispatchTrack(DeviceContext context, Params parameters, Texture2D image, BufferWithViews seeds)
+    private void DispatchTrack(DeviceContext context, ComputeShader? shader, Params parameters, int groupCount,
+                               Texture2D image, BufferWithViews? seeds)
     {
         UploadParams(parameters);
 
         var stage = context.ComputeShader;
-        stage.Set(_shaderResources!.Track.Value);
+        stage.Set(shader);
         stage.SetConstantBuffer(0, _paramsBuffer);
         stage.SetShaderResource(0, SrvManager.GetSrvForTexture(image));
         stage.SetShaderResource(1, _current.Srv);
-        stage.SetShaderResource(2, seeds.Srv);
+        stage.SetShaderResource(2, seeds?.Srv);
         stage.SetShaderResource(3, _previous.Srv);
         stage.SetUnorderedAccessView(0, _trackPoints.Uav);
         stage.SetUnorderedAccessView(1, _currentPoints.Uav);
@@ -264,13 +307,15 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         stage.SetUnorderedAccessView(3, _keyTemplates.Uav);
         stage.SetUnorderedAccessView(4, _recentTemplates.Uav);
         stage.SetUnorderedAccessView(CapturedSeedsUavSlot, _capturedSeeds.Uav);
+        stage.SetUnorderedAccessView(AutoStateUavSlot, _autoState.Uav);
 
-        context.Dispatch(parameters.MarkerCount, 1, 1);
+        context.Dispatch(groupCount, 1, 1);
 
         for (var uavSlot = 0; uavSlot < 5; uavSlot++)
             stage.SetUnorderedAccessView(uavSlot, null);
 
         stage.SetUnorderedAccessView(CapturedSeedsUavSlot, null);
+        stage.SetUnorderedAccessView(AutoStateUavSlot, null);
 
         for (var srvSlot = 0; srvSlot < 4; srvSlot++)
             stage.SetShaderResource(srvSlot, null);
@@ -313,6 +358,14 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
             SetupBuffer(_currentPoints, layout.MarkerCount, Point.Stride);
             SetupBuffer(_seedQuality, layout.MarkerCount, Point.Stride);
             SetupBuffer(_capturedSeeds, layout.MarkerCount, Point.Stride);
+
+            // About two cells per marker, shaped like the image, so new markers spread over the whole frame.
+            var aspect = (float)layout.ImageSize.Width / Math.Max(1, layout.ImageSize.Height);
+            var targetCellCount = layout.MarkerCount * 2;
+            _gridRows = Math.Max(1, (int)MathF.Round(MathF.Sqrt(targetCellCount / aspect)));
+            _gridColumns = Math.Max(1, (targetCellCount + _gridRows - 1) / _gridRows);
+            _cellCount = _gridColumns * _gridRows;
+            SetupBuffer(_autoState, _cellCount + 2 * layout.MarkerCount, AutoStateStride);
             SetupBuffer(_keyTemplates, templateFloatCount, sizeof(float));
             SetupBuffer(_recentTemplates, templateFloatCount, sizeof(float));
 
@@ -407,6 +460,7 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         _currentPoints.Dispose();
         _seedQuality.Dispose();
         _capturedSeeds.Dispose();
+        _autoState.Dispose();
         _keyTemplates.Dispose();
         _recentTemplates.Dispose();
         _current.Dispose();
@@ -424,6 +478,13 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         Capture = 0,
         Advance = 1,
         Hide = 2,
+        Spawn = 3,
+    }
+
+    private enum SeedModes
+    {
+        Manual,
+        Automatic,
     }
 
     /** A luma image with the mip levels the tracker searches, and the track slot it was made from. */
@@ -467,9 +528,9 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     }
 
     private readonly record struct TrackLayout(int MarkerCount, int FrameCount, int FirstFrame, int SeedFrame,
-                                               int PatchSize, Int2 ImageSize);
+                                               int PatchSize, Int2 ImageSize, bool IsAutomatic);
 
-    [StructLayout(LayoutKind.Explicit, Size = 80)]
+    [StructLayout(LayoutKind.Explicit, Size = 96)]
     private struct Params
     {
         [FieldOffset(0)] public Vector2 ImageSize;
@@ -490,6 +551,10 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         [FieldOffset(64)] public int ForceCapture;
         [FieldOffset(68)] public int CheckRoundTrip;
         [FieldOffset(72)] public float MaxRoundTripError;
+        [FieldOffset(76)] public int CellCount;
+        [FieldOffset(80)] public int GridColumns;
+        [FieldOffset(84)] public int GridRows;
+        [FieldOffset(88)] public float MinSpawnQuality;
     }
 
     /** Loaded on first use with this instance as owner, so the package resolves the shader's includes. */
@@ -498,6 +563,8 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
         public readonly Resource<ComputeShader> Luma = ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, owner, () => "luma");
         public readonly Resource<ComputeShader> Clear = ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, owner, () => "clear");
         public readonly Resource<ComputeShader> Track = ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, owner, () => "track");
+        public readonly Resource<ComputeShader> Detect = ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, owner, () => "detect");
+        public readonly Resource<ComputeShader> Assign = ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, owner, () => "assign");
     }
 
     private const string ShaderPath = "Lib:shaders/points/track/TrackMarkers.hlsl";
@@ -505,6 +572,12 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
     private const int MaxPatchSize = 31;
     private const int TemplateLevelCount = 5;
     private const int CapturedSeedsUavSlot = 6;
+    private const int AutoStateUavSlot = 7;
+    private const int AutoStateStride = 16;
+    private const int MaxPoolSize = 256;
+
+    /** Corner quality (as in SeedQuality) a detected corner needs before a new marker starts on it. */
+    private const float MinSpawnQuality = 0.3f;
 
     private const int IterationsPerLevel = 4;
     private const int MaxFrameCount = 1_000_000;
@@ -525,6 +598,10 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
     /** The seeds as last captured, so the shader can re-seed only the markers that moved. */
     private readonly BufferWithViews _capturedSeeds = new();
+    private readonly BufferWithViews _autoState = new();
+    private int _gridColumns = 1;
+    private int _gridRows = 1;
+    private int _cellCount = 1;
     private readonly BufferWithViews _keyTemplates = new();
     private readonly BufferWithViews _recentTemplates = new();
     private LumaPyramid _current = new();
@@ -573,6 +650,12 @@ internal sealed class TrackMarkers : Instance<TrackMarkers>, IStatusProvider
 
     [Input(Guid = "a563515e-aee8-4f4b-b564-70d31da045b3")]
     public readonly InputSlot<float> MaxRoundTripError = new();
+
+    [Input(Guid = "ba9ff29c-5a39-44cb-9948-43c72c45b753", MappedType = typeof(SeedModes))]
+    public readonly InputSlot<int> SeedMode = new();
+
+    [Input(Guid = "91f1ac00-8f97-458e-9e18-affd80d201c7")]
+    public readonly InputSlot<int> PoolSize = new();
 
     [Input(Guid = "2f715dd9-5cdb-41f4-81ce-f9b53de2639f")]
     public readonly InputSlot<bool> Reset = new();

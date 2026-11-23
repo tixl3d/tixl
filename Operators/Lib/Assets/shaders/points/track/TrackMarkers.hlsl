@@ -33,12 +33,18 @@ cbuffer Params : register(b0)
     int ForceCapture;
     int CheckRoundTrip;
     float MaxRoundTripError;
+    int CellCount;
+
+    int GridColumns;
+    int GridRows;
+    float MinSpawnQuality;
     int __padding;
 }
 
 #define MODE_CAPTURE 0
 #define MODE_ADVANCE 1
 #define MODE_HIDE 2
+#define MODE_SPAWN 3
 
 #define GROUP_SIZE 256
 #define MAX_TEMPLATE_SIZE 33
@@ -56,6 +62,12 @@ RWStructuredBuffer<float> KeyTemplates : register(u3);
 RWStructuredBuffer<float> RecentTemplates : register(u4);
 RWTexture2D<float> LumaOut : register(u5);
 RWStructuredBuffer<Point> CapturedSeeds : register(u6);
+
+// Automatic mode state, one buffer because compute shaders get only eight UAV slots:
+//   [0, CellCount)                          best corner per grid cell: position, score (-1 occupied or claimed)
+//   [CellCount, CellCount + MarkerCount)    spawn position per slot: position, 1 if a new marker starts there
+//   [CellCount + MarkerCount, + MarkerCount) generation per slot in x, so every new marker gets a fresh id
+RWStructuredBuffer<float4> AutoState : register(u7);
 
 groupshared float TemplateValues[MAX_TEMPLATE_SIZE * MAX_TEMPLATE_SIZE];
 groupshared float GradientX[MAX_PATCH_SIZE * MAX_PATCH_SIZE];
@@ -224,7 +236,9 @@ float2 PatchCellOffset(int patchCell)
     return float2(patchCell % PatchSize - halfSize, patchCell / PatchSize - halfSize);
 }
 
-Point TrackedPoint(float2 pixelPosition, float confidence, uint marker)
+// The id in FX2 is the marker index for seeded markers; automatic markers add a generation per slot, so two
+// markers that use the same slot one after the other never look like the same marker.
+Point TrackedPoint(float2 pixelPosition, float confidence, float id)
 {
     int2 texel = clamp((int2)pixelPosition, int2(0, 0), int2(ImageSize) - 1);
 
@@ -234,7 +248,7 @@ Point TrackedPoint(float2 pixelPosition, float confidence, uint marker)
     p.Rotation = float4(0, 0, 0, 1);
     p.Color = float4(Image.Load(int3(texel, 0)).rgb, 1);
     p.Scale = 1;
-    p.FX2 = marker;
+    p.FX2 = id;
     return p;
 }
 
@@ -399,6 +413,27 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
         return;
     }
 
+    if (Mode == MODE_SPAWN)
+    {
+        float4 spawn = AutoState[CellCount + marker];
+        bool isSpawning = spawn.z > 0.5;
+        if (isSpawning)
+            CaptureTemplates(marker, spawn.xy, true, threadIndex);
+
+        if (threadIndex == 0 && isSpawning)
+        {
+            uint generationIndex = CellCount + MarkerCount + marker;
+            float generation = AutoState[generationIndex].x + 1;
+            AutoState[generationIndex] = float4(generation, 0, 0, 0);
+
+            Point p = TrackedPoint(spawn.xy, 1, marker + generation * MarkerCount);
+            TrackPoints[targetIndex] = p;
+            CurrentPoints[marker] = p;
+        }
+
+        return;
+    }
+
     if (Mode == MODE_CAPTURE)
     {
         // Only seeds that moved are captured again, so editing one seed keeps every other marker's track.
@@ -453,7 +488,7 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
     if (PreviousSlot >= 0)
     {
         Point previous = TrackPoints[PreviousSlot * MarkerCount + marker];
-        if (!IsSeparator(previous))
+        if (!IsSeparator(previous) && previous.FX2 == source.FX2)
             predicted += sourcePosition - VideoToPixel(previous.Position.xy);
     }
 
@@ -486,14 +521,127 @@ void track(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
         Point lostPoint = hasSource ? LostPoint(marker, tracked, confidence)
                         : SourceSlot >= 0 ? source
                         : target;
-        lostPoint.FX2 = marker;
+        lostPoint.FX2 = hasSource ? source.FX2 : lostPoint.FX2;
         lostPoint.Scale = NAN;
         Point result = hasTarget ? target
                        : isLost ? lostPoint
-                       : TrackedPoint(tracked, saturate(confidence), marker);
+                       : TrackedPoint(tracked, saturate(confidence), source.FX2);
         if (!hasTarget)
             TrackPoints[targetIndex] = result;
 
         CurrentPoints[marker] = result;
+    }
+}
+
+//--- Automatic markers ---------------------------------------------------------------------
+
+#define DETECT_SAMPLES_PER_AXIS 16
+
+// Same measure as the seed quality, computed straight from the image instead of a captured template.
+float CornerScore(float2 pixelPosition)
+{
+    int radius = (PatchSize - 1) / 2;
+    int2 center = (int2)pixelPosition;
+    float3 tensor = 0;
+    for (int y = -radius; y <= radius; y++)
+    {
+        for (int x = -radius; x <= radius; x++)
+        {
+            int2 p = center + int2(x, y);
+            float gx = (Luma.Load(int3(p + int2(1, 0), 0)) - Luma.Load(int3(p - int2(1, 0), 0))) * 0.5;
+            float gy = (Luma.Load(int3(p + int2(0, 1), 0)) - Luma.Load(int3(p - int2(0, 1), 0))) * 0.5;
+            tensor += float3(gx * gx, gx * gy, gy * gy);
+        }
+    }
+
+    tensor /= (2 * radius + 1) * (2 * radius + 1);
+    float halfTrace = (tensor.x + tensor.z) * 0.5;
+    float halfDifference = (tensor.x - tensor.z) * 0.5;
+    float smallerEigenvalue = halfTrace - sqrt(halfDifference * halfDifference + tensor.y * tensor.y);
+    return saturate(sqrt(max(smallerEigenvalue, 0)) * QualityScale);
+}
+
+// New markers keep a full patch of distance to the border, so they don't leave the image on the next frame.
+bool IsSpawnInsideImage(float2 pixelPosition)
+{
+    float margin = PatchSize * 1.5;
+    return all(pixelPosition >= margin) && all(pixelPosition <= ImageSize - margin);
+}
+
+// Must be reached by every thread of the group. Keeps the value with the largest x.
+float4 ReduceMaxByX(float4 value, uint threadIndex)
+{
+    ReduceValues[threadIndex] = value;
+    GroupMemoryBarrierWithGroupSync();
+
+    [unroll]
+    for (uint stride = GROUP_SIZE / 2; stride > 0; stride >>= 1)
+    {
+        if (threadIndex < stride && ReduceValues[threadIndex + stride].x > ReduceValues[threadIndex].x)
+            ReduceValues[threadIndex] = ReduceValues[threadIndex + stride];
+
+        GroupMemoryBarrierWithGroupSync();
+    }
+
+    float4 result = ReduceValues[0];
+    GroupMemoryBarrierWithGroupSync();
+    return result;
+}
+
+// One group per grid cell: finds the cell's best corner, or marks the cell occupied if a live marker sits in it.
+[numthreads(GROUP_SIZE, 1, 1)]
+void detect(uint3 groupId : SV_GroupID, uint threadIndex : SV_GroupIndex)
+{
+    uint cell = groupId.x;
+    float2 cellSize = ImageSize / float2(GridColumns, GridRows);
+    float2 cellOrigin = float2(cell % (uint)GridColumns, cell / (uint)GridColumns) * cellSize;
+
+    float occupied = 0;
+    for (int marker = threadIndex; marker < MarkerCount; marker += GROUP_SIZE)
+    {
+        Point p = TrackPoints[TargetSlot * MarkerCount + marker];
+        float2 pixel = VideoToPixel(p.Position.xy);
+        if (!IsSeparator(p) && all(pixel >= cellOrigin) && all(pixel < cellOrigin + cellSize))
+            occupied = 1;
+    }
+
+    occupied = ReduceSum(float4(occupied, 0, 0, 0), threadIndex).x;
+
+    float2 sample = float2(threadIndex % DETECT_SAMPLES_PER_AXIS, threadIndex / DETECT_SAMPLES_PER_AXIS);
+    float2 position = floor(cellOrigin + (sample + 0.5) / DETECT_SAMPLES_PER_AXIS * cellSize) + 0.5;
+    float score = IsSpawnInsideImage(position) ? CornerScore(position) : 0;
+
+    float4 best = ReduceMaxByX(float4(score, position, 0), threadIndex);
+    if (threadIndex == 0)
+        AutoState[cell] = float4(best.yz, occupied > 0 ? -1 : best.x, 0);
+}
+
+// One group: gives every slot without a live marker the best free cell's corner, strongest first per slot.
+[numthreads(GROUP_SIZE, 1, 1)]
+void assign(uint threadIndex : SV_GroupIndex)
+{
+    for (int marker = 0; marker < MarkerCount; marker++)
+    {
+        bool isFree = IsSeparator(TrackPoints[TargetSlot * MarkerCount + marker]);
+
+        float4 best = float4(-1, 0, 0, 0); // score, position, cell
+        for (int cell = threadIndex; cell < CellCount; cell += GROUP_SIZE)
+        {
+            float4 candidate = AutoState[cell];
+            if (candidate.z > best.x)
+                best = float4(candidate.z, candidate.xy, cell);
+        }
+
+        best = ReduceMaxByX(best, threadIndex);
+
+        if (threadIndex == 0)
+        {
+            bool isSpawning = isFree && best.x >= MinSpawnQuality;
+            AutoState[CellCount + marker] = float4(best.yz, isSpawning ? 1 : 0, 0);
+            if (isSpawning)
+                AutoState[(uint)best.w].z = -1;
+        }
+
+        DeviceMemoryBarrierWithGroupSync();
     }
 }

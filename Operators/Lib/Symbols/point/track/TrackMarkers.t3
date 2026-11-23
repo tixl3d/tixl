@@ -35,12 +35,20 @@
       "DefaultValue": 0
     },
     {
+      "Id": "91f1ac00-8f97-458e-9e18-affd80d201c7"/*PoolSize*/,
+      "DefaultValue": 32
+    },
+    {
       "Id": "a563515e-aee8-4f4b-b564-70d31da045b3"/*MaxRoundTripError*/,
       "DefaultValue": 1.5
     },
     {
       "Id": "b888df98-6cf6-4152-a8bc-9f12c43d5c9c"/*MinConfidence*/,
       "DefaultValue": 0.6
+    },
+    {
+      "Id": "ba9ff29c-5a39-44cb-9948-43c72c45b753"/*SeedMode*/,
+      "DefaultValue": 0
     },
     {
       "Id": "d2a48b9a-5f1f-47ef-b979-e86570fedfc7"/*Image*/,

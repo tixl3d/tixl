@@ -5,7 +5,7 @@ using T3.Graphics.Compat;
 namespace Lib.point.track;
 
 /// <summary>
-/// Solves the 2D transform that keeps tracked markers on their anchors and outputs it as a single point.
+/// Chains the frame-to-frame motion of tracked markers into a 2D transform and outputs it as a single point.
 /// </summary>
 [Guid("a9cd6b25-2f20-431a-8a0f-2e21b011099d")]
 internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStatusProvider
@@ -56,9 +56,11 @@ internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStat
         if (markerCount > MaxSolveMarkers)
             _statusMessage = $"Only the first {MaxSolveMarkers} of {markerCount} markers are used.";
 
+        _stepsShaderResource ??= ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, this, () => "steps");
         _shaderResource ??= ResourceManager.CreateShaderResource<ComputeShader>(ShaderPath, this, () => "main");
+        var stepsShader = _stepsShaderResource.Value;
         var shader = _shaderResource.Value;
-        if (shader == null)
+        if (shader == null || stepsShader == null)
         {
             _statusMessage = "SolveTrackTransform compute shader is not available.";
             Transform.Value = null;
@@ -70,6 +72,13 @@ internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStat
             ResourceManager.SetupStructuredBuffer(Point.Stride, Point.Stride, ref _result.Buffer);
             ResourceManager.CreateStructuredBufferSrv(_result.Buffer, ref _result.Srv);
             ResourceManager.CreateStructuredBufferUav(_result.Buffer, UnorderedAccessViewBufferFlags.None, ref _result.Uav);
+        }
+
+        if (slotCount != _stepCount)
+        {
+            ResourceManager.SetupStructuredBuffer(slotCount * StepStride, StepStride, ref _steps.Buffer);
+            ResourceManager.CreateStructuredBufferUav(_steps.Buffer, UnorderedAccessViewBufferFlags.None, ref _steps.Uav);
+            _stepCount = slotCount;
         }
 
         var parameters = new Params
@@ -101,12 +110,19 @@ internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStat
         var deviceContext = ResourceManager.Device.ImmediateContext;
         var stage = deviceContext.ComputeShader;
         deviceContext.PushState(StateGroups.ComputeShader);
-        stage.Set(shader);
         stage.SetConstantBuffer(0, _paramsBuffer);
         stage.SetShaderResource(0, track.Srv);
         stage.SetUnorderedAccessView(0, _result.Uav);
+        stage.SetUnorderedAccessView(1, _steps.Uav);
+
+        // Steps for every frame are cheap and keep the result independent of the order frames are visited in.
+        stage.Set(stepsShader);
+        deviceContext.Dispatch((slotCount + 63) / 64, 1, 1);
+
+        stage.Set(shader);
         deviceContext.Dispatch(1, 1, 1);
         stage.SetUnorderedAccessView(0, null);
+        stage.SetUnorderedAccessView(1, null);
         stage.SetShaderResource(0, null);
         deviceContext.PopState();
 
@@ -119,6 +135,7 @@ internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStat
             return;
 
         _result.Dispose();
+        _steps.Dispose();
         GraphicsUtilities.Dispose(ref _paramsBuffer);
     }
 
@@ -159,6 +176,12 @@ internal sealed class SolveTrackTransform : Instance<SolveTrackTransform>, IStat
 
     private Resource<ComputeShader>? _shaderResource;
     private readonly BufferWithViews _result = new();
+
+    /** Per frame: transform to the previous tracked frame, its slot and the shared marker count. */
+    private readonly BufferWithViews _steps = new();
+    private int _stepCount = -1;
+    private const int StepStride = 32;
+    private Resource<ComputeShader>? _stepsShaderResource;
     private Buffer? _paramsBuffer;
     private string? _statusMessage;
 

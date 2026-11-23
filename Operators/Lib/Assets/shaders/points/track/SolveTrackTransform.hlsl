@@ -1,10 +1,14 @@
 // Solves the 2D similarity transform (translation, rotation, uniform scale) that moves the tracked markers of
-// a frame onto their anchors, and writes it as a single point: Position = translation, Rotation = rotation
-// around Z, Scale = uniform scale, FX1 = number of markers used.
+// a frame back to where they were on the reference frame, and writes it as a single point: Position =
+// translation, Rotation = rotation around Z, Scale = uniform scale, FX1 = markers shared with the previous frame.
 //
-// Anchors are the markers' positions on the reference frame, placed by the reference transform. Lock mode
-// outputs the transform itself, which pins the features to their anchors. Smooth mode keeps the camera path
-// smoothed over a window of frames and removes only the jitter around it.
+// The transform is chained from frame to frame: each tracked frame is fitted to the previous tracked one using
+// every marker the two share, and the steps are composed outward from the reference frame. This uses every
+// marker from its first frame on, works after all reference markers have left the image, and gives the same
+// result whatever order frames are visited in. Like any chain it drifts slowly over long shots.
+//
+// Lock outputs the chained transform, which pins the reference view. Smooth keeps the camera path smoothed over a
+// window of frames and removes only the jitter around it.
 //
 // Similarity transforms are written as complex numbers: T(z) = c * z + t with c = scale * e^(i * angle).
 
@@ -42,8 +46,20 @@ cbuffer Params : register(b0)
 // Below this count only translation is solved.
 #define MIN_MARKERS_FOR_ROTATION_AND_SCALE 3
 
+// A step that is too far apart to chain: the previous tracked frame lies beyond this many frames.
+#define MAX_STEP_FRAMES 8
+
 StructuredBuffer<Point> TrackPoints : register(t0);
 RWStructuredBuffer<Point> Result : register(u0);
+
+// Per slot: the transform from this frame's video space to the previous tracked frame's, and in Info the
+// previous tracked slot (-1 if none within reach) and the number of markers the two frames share.
+struct Step
+{
+    float4 Transform; // c.xy, t.xy
+    float4 Info;
+};
+RWStructuredBuffer<Step> Steps : register(u1);
 
 struct Similarity
 {
@@ -161,8 +177,19 @@ float Median(float values[MAX_SOLVE_MARKERS], int count)
     return values[0];
 }
 
-// Fits the frame in the given slot. usedCount is the number of markers with a usable point and anchor.
-bool SolveSlot(int slot, out Similarity result, out int usedCount)
+bool IsTracked(int slot)
+{
+    for (int marker = 0; marker < MarkerCount; marker++)
+    {
+        if (!IsSeparator(TrackPoints[slot * MarkerCount + marker]))
+            return true;
+    }
+
+    return false;
+}
+
+// Fits the markers a frame shares with an earlier frame (same slot and id) onto their positions there.
+bool SolveStep(int slot, int previousSlot, out Similarity result, out int usedCount)
 {
     float2 points[MAX_SOLVE_MARKERS];
     float2 anchors[MAX_SOLVE_MARKERS];
@@ -170,17 +197,16 @@ bool SolveSlot(int slot, out Similarity result, out int usedCount)
     float weights[MAX_SOLVE_MARKERS];
     float residuals[MAX_SOLVE_MARKERS];
 
-    Similarity reference = ReferenceTransform();
     int markerLimit = min(MarkerCount, MAX_SOLVE_MARKERS);
     int count = 0;
     for (int marker = 0; marker < markerLimit; marker++)
     {
         Point current = TrackPoints[slot * MarkerCount + marker];
-        Point atReference = TrackPoints[ReferenceSlot * MarkerCount + marker];
-        if (IsSeparator(current) || IsSeparator(atReference))
+        Point previous = TrackPoints[previousSlot * MarkerCount + marker];
+        if (IsSeparator(current) || IsSeparator(previous) || current.FX2 != previous.FX2)
             continue;
 
-        float weight = saturate(current.FX1);
+        float weight = saturate(min(current.FX1, previous.FX1));
         if (FocusRadius > 0)
         {
             float distance = length(current.Position.xy - FocusPoint) / FocusRadius;
@@ -188,7 +214,7 @@ bool SolveSlot(int slot, out Similarity result, out int usedCount)
         }
 
         points[count] = current.Position.xy;
-        anchors[count] = Apply(reference, atReference.Position.xy);
+        anchors[count] = previous.Position.xy;
         baseWeights[count] = weight;
         weights[count] = weight;
         count++;
@@ -208,7 +234,7 @@ bool SolveSlot(int slot, out Similarity result, out int usedCount)
         for (int i = 0; i < count; i++)
             residuals[i] = length(Apply(result, points[i]) - anchors[i]);
 
-        float cutoff = max(4.685 * 1.4826 * Median(residuals, count), 1e-3);
+        float cutoff = max(4.685 * 1.4826 * Median(residuals, count), 1e-4);
         for (int k = 0; k < count; k++)
         {
             float u = residuals[k] / cutoff;
@@ -226,6 +252,111 @@ bool SolveSlot(int slot, out Similarity result, out int usedCount)
     return true;
 }
 
+// One thread per slot: the step from this frame to the previous tracked frame.
+[numthreads(64, 1, 1)]
+void steps(uint3 id : SV_DispatchThreadID)
+{
+    int slot = id.x;
+    if (slot >= SlotCount)
+        return;
+
+    Step step;
+    step.Transform = float4(1, 0, 0, 0);
+    step.Info = float4(-1, 0, 0, 0);
+
+    int previousSlot = -1;
+    for (int distance = 1; distance <= MAX_STEP_FRAMES && slot - distance >= 0; distance++)
+    {
+        if (IsTracked(slot - distance))
+        {
+            previousSlot = slot - distance;
+            break;
+        }
+    }
+
+    Similarity solved;
+    int usedCount = 0;
+    if (previousSlot >= 0 && IsTracked(slot) && SolveStep(slot, previousSlot, solved, usedCount))
+    {
+        step.Transform = float4(solved.C, solved.T);
+        step.Info = float4(previousSlot, usedCount, 0, 0);
+    }
+
+    Steps[slot] = step;
+}
+
+Similarity StepTransform(int slot)
+{
+    float4 t = Steps[slot].Transform;
+    Similarity s;
+    s.C = t.xy;
+    s.T = t.zw;
+    return s;
+}
+
+// Composes the steps between the reference frame and the slot. Returns false if the chain is broken.
+bool ChainToReference(int slot, out Similarity result)
+{
+    result = ReferenceTransform();
+    if (slot < 0 || slot >= SlotCount)
+        return false;
+
+    if (slot >= ReferenceSlot)
+    {
+        // Walk back from the slot; each step maps into the previous frame, so steps compose from the inside.
+        Similarity chain;
+        chain.C = float2(1, 0);
+        chain.T = 0;
+        int current = slot;
+        while (current > ReferenceSlot)
+        {
+            int previous = (int)Steps[current].Info.x;
+            if (previous < 0)
+                return false;
+
+            chain = Compose(StepTransform(current), chain);
+            current = previous;
+        }
+
+        if (current != ReferenceSlot)
+            return false;
+
+        result = Compose(ReferenceTransform(), chain);
+        return true;
+    }
+
+    // Before the reference frame: walk forward from the slot using each later frame's step back to it.
+    Similarity chain;
+    chain.C = float2(1, 0);
+    chain.T = 0;
+    int current = slot;
+    int guard = 0;
+    while (current < ReferenceSlot && guard++ < SlotCount)
+    {
+        int next = -1;
+        for (int distance = 1; distance <= MAX_STEP_FRAMES && current + distance < SlotCount; distance++)
+        {
+            if ((int)Steps[current + distance].Info.x == current)
+            {
+                next = current + distance;
+                break;
+            }
+        }
+
+        if (next < 0)
+            return false;
+
+        chain = Compose(Inverse(StepTransform(next)), chain);
+        current = next;
+    }
+
+    if (current != ReferenceSlot)
+        return false;
+
+    result = Compose(ReferenceTransform(), chain);
+    return true;
+}
+
 groupshared float4 WindowTransforms[GROUP_SIZE]; // log scale, angle, translation
 groupshared float WindowWeights[GROUP_SIZE];
 
@@ -240,11 +371,7 @@ void main(uint threadIndex : SV_GroupIndex)
     WindowTransforms[threadIndex] = 0;
 
     Similarity solved;
-    int usedCount = 0;
-    bool isSolved = false;
-    if (abs(offset) <= halfWindow && slot >= 0 && slot < SlotCount)
-        isSolved = SolveSlot(slot, solved, usedCount);
-
+    bool isSolved = abs(offset) <= halfWindow && ChainToReference(slot, solved);
     if (isSolved)
     {
         float sigma = max(halfWindow * 0.5, 1);
@@ -291,6 +418,7 @@ void main(uint threadIndex : SV_GroupIndex)
 
     float angle = atan2(output.C.y, output.C.x);
     float scale = length(output.C);
+    int usedCount = CurrentSlot == ReferenceSlot ? MarkerCount : (int)Steps[CurrentSlot].Info.y;
 
     Point p;
     p.Position = float3(output.T, 0);
