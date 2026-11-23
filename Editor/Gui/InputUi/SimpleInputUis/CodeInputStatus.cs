@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using ImGuiNET;
+using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
@@ -27,7 +28,7 @@ internal static partial class CodeInputStatus
         Update(instance);
         if (_message != null && _inputId == inputId)
         {
-            status = new InputStatus(_message, _line);
+            status = new InputStatus(_message, _line, _isError);
             return true;
         }
 
@@ -100,6 +101,7 @@ internal static partial class CodeInputStatus
 
         _rawMessage = rawMessage;
         _source = source;
+        _isError = !rawMessage.StartsWith(IShaderCodeOperator<AbstractShader>.SlowCompilePrefix, StringComparison.Ordinal);
         MapToCodeInput(instance, rawMessage, source);
     }
 
@@ -306,6 +308,7 @@ internal static partial class CodeInputStatus
     private static string? _source;
     private static string? _message;
     private static int _line;
+    private static bool _isError;
     private static Guid _inputId;
 
     private static string? _contextSource;

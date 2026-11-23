@@ -544,7 +544,7 @@ internal static partial class CustomComponents
             total += ImGui.CalcTextSize(name).X + segPadding * 2;
         }
 
-        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, SegmentRounding * T3Ui.UiScaleFactor);
+        DrawSegmentTrack(dl, start, total, h);
 
         // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
         ImGui.PushID(typeof(T).Name);
@@ -562,7 +562,8 @@ internal static partial class CustomComponents
             if (!isFirst)
                 ImGui.SameLine(0, 0);
 
-            if (DrawSegment(dl, name, new Vector2(x, start.Y), segWidth, isSelected, isDisabled, tooltipForItem?.Invoke(value)))
+            if (DrawSegment(dl, name, new Vector2(x, start.Y), segWidth, isSelected, isDisabled, tooltipForItem?.Invoke(value),
+                            ImGui.GetColorU32(UiColors.ForegroundFull.Rgba)))
             {
                 selectedValue = value;
                 modified = true;
@@ -579,6 +580,7 @@ internal static partial class CustomComponents
     /// <summary>
     /// <see cref="SegmentedButton{T}"/> for options given by label, e.g. from a cached enum entry, so it draws without
     /// allocating. The segments share the extra space when <paramref name="width"/> is wider than their labels need.
+    /// The selected label uses the current text color, so parameter inputs show it muted, changed or animated like other values.
     /// </summary>
     public static bool SegmentedButton(string[] labels, ref int selectedIndex, float width = 0,
                                        bool[]? disabledItems = null, string?[]? tooltips = null)
@@ -591,8 +593,9 @@ internal static partial class CustomComponents
 
         var dl = ImGui.GetWindowDrawList();
         var start = ImGui.GetCursorScreenPos();
-        dl.AddRectFilled(start, start + new Vector2(totalWidth, h), UiColors.BackgroundInputField, SegmentRounding * T3Ui.UiScaleFactor);
+        DrawSegmentTrack(dl, start, totalWidth, h);
 
+        var selectedTextColor = ImGui.GetColorU32(ImGuiCol.Text);
         var modified = false;
         var unroundedX = start.X;
         var x = start.X;
@@ -607,7 +610,8 @@ internal static partial class CustomComponents
 
             ImGui.PushID(index);
             var isDisabled = disabledItems != null && disabledItems[index];
-            if (DrawSegment(dl, labels[index], new Vector2(x, start.Y), nextX - x, index == selectedIndex, isDisabled, tooltips?[index]))
+            if (DrawSegment(dl, labels[index], new Vector2(x, start.Y), nextX - x, index == selectedIndex, isDisabled, tooltips?[index],
+                            selectedTextColor))
             {
                 selectedIndex = index;
                 modified = true;
@@ -633,9 +637,18 @@ internal static partial class CustomComponents
         return width;
     }
 
+    /** The input field tint is faded over a button fill, so the track recedes behind the selected segment. */
+    private static void DrawSegmentTrack(ImDrawListPtr dl, Vector2 start, float width, float height)
+    {
+        var max = start + new Vector2(width, height);
+        var rounding = SegmentRounding * T3Ui.UiScaleFactor;
+        dl.AddRectFilled(start, max, UiColors.BackgroundButton, rounding);
+        dl.AddRectFilled(start, max, UiColors.BackgroundInputField.Fade(SegmentTrackInputFieldOpacity), rounding);
+    }
+
     /** One option of a segmented track. Returns true when an enabled segment was clicked. */
     private static bool DrawSegment(ImDrawListPtr dl, string label, Vector2 segMin, float segWidth, bool isSelected, bool isDisabled,
-                                    string? tooltip)
+                                    string? tooltip, uint selectedTextColor)
     {
         var h = ImGui.GetFrameHeight();
         var rounding = SegmentRounding * T3Ui.UiScaleFactor;
@@ -658,14 +671,14 @@ internal static partial class CustomComponents
         }
 
         var textColor = isDisabled
-                            ? UiColors.TextMuted.Fade(0.25f)
+                            ? ImGui.GetColorU32(UiColors.TextMuted.Fade(0.25f).Rgba)
                             : isSelected
-                                ? UiColors.ForegroundFull
-                                : (isHovered ? UiColors.Text : UiColors.TextMuted);
+                                ? selectedTextColor
+                                : ImGui.GetColorU32((isHovered ? UiColors.Text : UiColors.TextMuted).Rgba);
         ImGui.PushFont(isSelected ? Fonts.FontBold : Fonts.FontNormal);
         var textSize = ImGui.CalcTextSize(label);
         var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
-        dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), label);
+        dl.AddText(textPos, textColor, label);
         ImGui.PopFont();
 
         return clicked;
@@ -674,6 +687,7 @@ internal static partial class CustomComponents
     private const float SegmentPadding = 14;
     private const float SegmentRounding = 4;
     private const float SegmentInset = 2;
+    private const float SegmentTrackInputFieldOpacity = 0.5f;
 
     private static bool DrawSelectButton(string name, bool isSelected, float width = 0)
     {

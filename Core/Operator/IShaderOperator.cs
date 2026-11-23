@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Diagnostics;
 using T3.Core.DataTypes;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
@@ -86,7 +87,9 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
                                                                        OldBytecode: currentShader?.CompiledBytecode);
         
         // The cache key is the full source text, so a hit is always correct - no need to force recompilation.
+        var startTime = Stopwatch.GetTimestamp();
         var compiled = ShaderCompiler.TryCompileShaderFromSource(compilationArgs, useCache: true, forceRecompile: false, out currentShader, out var errorMessage);
+        var compileMilliseconds = Stopwatch.GetElapsedTime(startTime).TotalMilliseconds;
                 
         shaderSlot.Value = currentShader!;
         shaderSlot.DirtyFlag.Clear();
@@ -94,15 +97,21 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
         if (!compiled)
         {
             instance.LogErrorState(errorMessage);
+            SetWarning(errorMessage);
+            return;
         }
-        else
-        {
-            instance.ClearErrorState();
-            currentShader!.Name = debugName;
-        }
-        
-        SetWarning(errorMessage);
+
+        instance.ClearErrorState();
+        currentShader!.Name = debugName;
+
+        // Only a slow compile is worth a note: the time of every successful one would show as a warning on the op and its code.
+        SetWarning(compileMilliseconds >= SlowCompileThresholdMs ? $"{SlowCompilePrefix}{compileMilliseconds:0}ms" : string.Empty);
     }
+
+    /// <summary>Starts the note set for a successful but slow compile, so the editor can show it as a note instead of a problem.</summary>
+    public const string SlowCompilePrefix = "Compiling took ";
+
+    private const double SlowCompileThresholdMs = 500;
 }
 
 public interface IShaderOperator<T> : IDescriptiveFilename where T : AbstractShader
