@@ -330,6 +330,7 @@ internal sealed partial class OutputWindow
         if (!RenderProcess.TryGetRenderResolution(s, out var res))
             return string.Empty;
 
+        RenderTiming.ApplyTimeRange(s);
         var mode = s.TimeRange.ToString(); // Custom / Loop / Soundtrack / Continuous
 
         // Continuous has no fixed end, so a duration / size estimate would be meaningless.

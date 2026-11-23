@@ -616,7 +616,7 @@ internal sealed partial class MagGraphView
             // Pinned indicator. Focus mode has no output window, so the background takes its place.
             var isPinned = LayoutHandling.FocusMode
                                ? context.ProjectView.GraphImageBackground.OutputSymbolChildId == item.Instance.SymbolChildId
-                               : context.Selector.PinnedIds.Contains(item.Instance.SymbolChildId);
+                               : context.Selector.IsPinned(item.Instance.SymbolChildId);
             if (isPinned)
             {
                 DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is pinned");

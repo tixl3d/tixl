@@ -38,10 +38,9 @@ internal sealed class ViewSelectionPinning
         var selectedOp = nodeSelection.GetFirstSelectedInstance();
         var isPinnedToSelected = pinnedOrSelectedInstance == selectedOp;
 
-        // FIXME: This is a hack and will only work with a single output window...
-        nodeSelection.PinnedIds.Clear();
         if (_isPinned)
-            nodeSelection.PinnedIds.Add(pinnedOrSelectedInstance.SymbolChildId);
+            nodeSelection.MarkPinned(pinnedOrSelectedInstance.SymbolChildId);
+
         var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
         if (CustomComponents.IconButton(Icon.Pin,
                                         iconSize,

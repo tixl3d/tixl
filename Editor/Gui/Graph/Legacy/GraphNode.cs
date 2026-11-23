@@ -355,7 +355,7 @@ internal sealed class GraphNode
                 }
 
                 // Pinned indicator
-                if (_projectView.NodeSelection.PinnedIds.Contains(instance.SymbolChildId))
+                if (_projectView.NodeSelection.IsPinned(instance.SymbolChildId))
                 {
                     DrawIndicator(drawList, UiColors.Selection, opacity, ref indicatorCount);
                 }
