@@ -42,7 +42,7 @@ contents="$app/Contents"
 
 # The Editor lives in Resources/TiXL, not in MacOS: signing seals Contents/MacOS as code and takes every folder
 # with a dot in its name for a nested bundle - NuGet's runtimes/*/lib/net10.0 folders are full of them. In
-# Resources the same files are sealed as data. MacOS holds only a launcher that starts the real executable.
+# Resources the same files are sealed as data. MacOS holds only the launcher, which runs the Editor's TiXL.dll.
 payload="$contents/Resources/TiXL"
 
 # The Vulkan loader and MoltenVK ship inside the bundle; a development machine has them from Homebrew or the
@@ -234,15 +234,17 @@ PLIST
 
 cp "$root/LICENSE.txt" "$contents/Resources/LICENSE.txt"
 
-# The launcher: the app's executable as far as macOS is concerned. It hands over to the Editor with exec, so the
-# Editor keeps the launcher's process and with it the app's identity in the Dock.
-cat > "$contents/MacOS/TiXL" <<'LAUNCHER'
-#!/bin/sh
-resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
-export VK_DRIVER_FILES="${VK_DRIVER_FILES:-$resources/vulkan/icd.d/MoltenVK_icd.json}"
-exec "$resources/TiXL/TiXL" "$@"
-LAUNCHER
-chmod +x "$contents/MacOS/TiXL"
+# The launcher (launcher.c) is the app's executable and runs the Editor's TiXL.dll on .NET in its own process.
+# Exec'ing the Editor's apphost instead makes macOS refuse microphone and camera access without asking. It links
+# nethost from the SDK's apphost pack, which finds .NET the same way the apphost does.
+dotnet_root="$(dirname "$(realpath "$(command -v dotnet)")")"
+nethost_dir="$(ls -d "$dotnet_root"/packs/Microsoft.NETCore.App.Host.$rid/*/runtimes/$rid/native 2>/dev/null | sort -V | tail -n 1)"
+if [[ ! -f "$nethost_dir/libnethost.a" ]]; then
+    echo "No libnethost.a for $rid in $dotnet_root/packs" >&2
+    exit 1
+fi
+clang -O2 -Wall -Wextra -arch arm64 -mmacosx-version-min=14.0 -I"$nethost_dir" \
+    -o "$contents/MacOS/TiXL" "$script_dir/launcher.c" "$nethost_dir/libnethost.a" -lc++
 
 # Apple Silicon refuses unsigned native code; an ad-hoc signature satisfies that without an identity. Every
 # Mach-O file gets its own, then the app seals the rest as resources. A Developer ID signature for notarization

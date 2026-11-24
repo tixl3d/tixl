@@ -24,6 +24,17 @@ Add a `[WebcamInput]`, pin it to the output and enable `Active`.
 - `Status` shows `Running at <width>x<height>`, with a height of 1080 or less.
 - The frame rate of the editor does not drop noticeably.
 
+## Step: Camera permission on macOS
+
+**Action:**
+On macOS, reset the permission with `tccutil reset Camera app.tixl.TiXL`, start TiXL from Finder, and enable
+`Active` on a `[WebcamInput]`.
+
+**Expected:**
+- macOS asks whether TiXL may use the camera, and `Status` says it is waiting for the permission.
+- After allowing it, the image appears within a few seconds without pressing `Reconnect`.
+- TiXL is listed under System Settings > Privacy & Security > Camera.
+
 ## Step: Choosing a device and mode
 
 **Action:**
