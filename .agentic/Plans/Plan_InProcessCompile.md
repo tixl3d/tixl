@@ -25,7 +25,10 @@ CI: `.github/workflows/operator-compiler-tests.yml` runs the tests on Linux, Win
 `dotnet build` required there, not skipped).
 
 Open: Windows and macOS runs of the editor, Player export (`TryCompileRelease`) in the live editor, Rider debugging of a user op,
-Phase 3 (installers and install docs still list the SDK).
+Phase 3 written 2026-11-24, untested on Windows and macOS: the Windows editor ships self-contained
+(`TixlEditorRuntime=win-x64`) and the installer no longer runs the SDK installer; `install-dependencies.sh`, AUR
+(`dotnet-runtime`, SDK optional) and the install docs drop the SDK. Nix and Flatpak keep it, so projects that
+need the SDK still compile there.
 **Related:** [Plan_Release_v4.4](Plan_Release_v4.4.md) ("Embedding the .NET SDK" was out of scope; this removes the
 need), [Plan_OptionalPackages](Plan_OptionalPackages.md) (packages are precompiled, so they never need this).
 

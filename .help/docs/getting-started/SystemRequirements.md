@@ -32,8 +32,8 @@ card. See [Install on macOS](../install/InstallMacOS.md).
 
 ## On every system
 
-- **.NET 10 SDK**, not just the runtime: TiXL compiles operators while it runs. The Windows installer
-  includes it; on Linux and macOS you install it once.
+- **.NET:** nothing to install. TiXL brings its own runtime and compiles operators itself. Only projects that
+  use NuGet packages, embedded resources or custom build steps need the .NET 10 SDK.
 - **RAM:** 16 GB comfortable. Large video assets push memory use up quickly.
 - **Disk:** about 600 MB for TiXL itself. Projects with video and image assets grow fast — keep those on a
   fast SSD.
@@ -44,6 +44,6 @@ card. See [Install on macOS](../install/InstallMacOS.md).
 
 - Visual Studio 2022, Visual Studio Code or JetBrains Rider (free for non-commercial use). On Linux and macOS,
   Rider or Visual Studio Code.
-- The .NET 10 SDK — the same one TiXL needs to run.
+- The .NET 10 SDK.
 
 See [Set up a development environment](../install/InstallDev.md) for the full walk-through.

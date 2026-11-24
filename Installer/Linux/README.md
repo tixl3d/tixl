@@ -22,7 +22,7 @@ It publishes the Player (self-contained) and builds `t3.sln` in Release, like th
 single source of truth for the layout. Distro packages should copy it, not re-derive it.
 
 - `TiXL`: the Editor. It bundles the .NET runtime, so it always starts and can report missing dependencies
-  in a dialog. Distro packages that depend on the SDK anyway can pass `--system-dotnet` to skip the bundle.
+  in a dialog. Distro packages that depend on the system .NET runtime can pass `--system-dotnet` to skip the bundle.
 - `Player/`: self-contained Player, copied into exports.
 - `Operators/`: precompiled read-only operator packages (Lib, Examples, ...).
 - `share/`: `.desktop`, AppStream metainfo and icon, laid out like `/usr/share`.
@@ -33,9 +33,9 @@ The app id is `app.tixl.TiXL` (reverse DNS of tixl.app).
 
 The full list with package names per distro is in [`DEPENDENCIES.md`](DEPENDENCIES.md). In short:
 
-- **The .NET 10 SDK, not just the runtime.** TiXL runs `dotnet restore` and `dotnet build` on user
-  operator projects while it runs, calling `dotnet` from `PATH`. Restore needs network access to NuGet
-  and writes to `~/.nuget`.
+- No .NET SDK: the editor compiles operator projects itself. Only projects with NuGet packages, embedded
+  resources or custom build steps fall back to `dotnet build` from `PATH`, which needs the SDK and network
+  access to NuGet.
 - Vulkan loader and driver.
 - `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`. A package that
   ships its distribution's Slang instead sets `TIXL_SLANGC_UNPINNED=1`, which turns the startup check's

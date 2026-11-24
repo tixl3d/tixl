@@ -12,7 +12,6 @@ The native Linux version is a preview. Expect rough edges, and please report pro
 - A 64-bit x86 PC (`x86_64`). ARM machines like Raspberry Pi or Apple Silicon aren't supported.
 - A graphics card with a Vulkan driver: Mesa (AMD, Intel) or NVIDIA's proprietary driver.
 - A distribution from late 2023 or later: Ubuntu 24.04, Debian 13, Fedora 39, Linux Mint 22, or a current Arch.
-- The **.NET 10 SDK**. TiXL compiles operators while it runs, so the runtime alone isn't enough.
 - The **Slang shader compiler** (`slangc`). TiXL uses it to compile shaders for Vulkan.
 
 ## The easy way: Flatpak
@@ -38,8 +37,8 @@ Audio goes through PipeWire or PulseAudio where they run, and ALSA otherwise. Th
 
 ## Install the dependencies
 
-TiXL needs the .NET 10 SDK, the Vulkan loader and the Slang shader compiler (`slangc`). Most desktop
-installs already have the Vulkan driver.
+TiXL needs the Vulkan loader and the Slang shader compiler (`slangc`). Most desktop installs already have
+the Vulkan driver. TiXL brings its own .NET runtime and compiles operators itself.
 
 ### With the setup script
 
@@ -54,7 +53,7 @@ cd ~/Apps/tixl-*-linux-x64
 The script recognizes Arch, Debian/Ubuntu and Fedora (and their derivatives), lists what's missing and
 asks before it installs anything:
 
-- The .NET SDK and the Vulkan loader come from your package manager, which asks for your password.
+- The Vulkan loader comes from your package manager, which asks for your password.
 - `slangc` is downloaded in the tested version (2026.18) into `~/.local/opt/slang-2026.18`, the folder
   TiXL looks in first. This step needs no password.
 
@@ -67,7 +66,7 @@ To install the dependencies by hand, use the commands for your distribution belo
 ### Arch, Manjaro, EndeavourOS
 
 ```bash
-sudo pacman -S dotnet-sdk vulkan-icd-loader shader-slang
+sudo pacman -S vulkan-icd-loader shader-slang
 ```
 
 `shader-slang` from the official `extra` repository provides `slangc`. TiXL is tested with the Slang
@@ -78,17 +77,13 @@ unrelated S-Lang interpreter.
 ### Ubuntu, Debian, Linux Mint, Pop!_OS
 
 ```bash
-sudo apt install dotnet-sdk-10.0 libvulkan1 mesa-vulkan-drivers
+sudo apt install libvulkan1 mesa-vulkan-drivers
 ```
-
-If `apt` can't find `dotnet-sdk-10.0`, your release doesn't ship it yet. On Ubuntu, add the .NET
-backports archive with `sudo add-apt-repository ppa:dotnet/backports` and try again. On Debian, follow
-[Microsoft's instructions for Debian](https://learn.microsoft.com/dotnet/core/install/linux-debian).
 
 ### Fedora
 
 ```bash
-sudo dnf install dotnet-sdk-10.0 vulkan-loader mesa-vulkan-drivers
+sudo dnf install vulkan-loader mesa-vulkan-drivers
 ```
 
 ### NixOS
@@ -152,16 +147,19 @@ you.
    ~/Apps/tixl-*-linux-x64/TiXL
    ```
 
-TiXL brings its own copy of the .NET runtime, so it always starts, even before the SDK is installed.
+TiXL brings its own copy of the .NET runtime, so it always starts and can tell you what's missing.
+
+Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL
+tells you when a project needs it and why; install it from
+[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ### Missing dependencies
 
-At startup, TiXL checks for the .NET SDK, the Vulkan loader and `slangc`. If one is missing, a dialog
+At startup, TiXL checks for the Vulkan loader and `slangc`. If one is missing, a dialog
 lists it together with the install command for your distribution:
 
 - Without Vulkan, TiXL can't render and quits after the dialog.
-- Without the .NET SDK or `slangc`, you can choose **Continue**. The built-in operators still load, but
-  your own operators won't compile without the SDK, and shaders won't compile without `slangc`.
+- Without `slangc`, you can choose **Continue**. The operators still load, but shaders won't compile.
 - If `slangc` is missing, the dialog also offers **Download and install**. It downloads the tested Slang
   release into `~/.local/opt/slang-2026.18` and checks again.
 
@@ -324,7 +322,7 @@ operators compile, because TiXL runs `dotnet` through Wine, which can have certi
 5. Place the installer somewhere inside your Wine prefix:
     - In Bottles, click the three dots next to the power icon in the toolbar, then **Browse Files...**. That folder is your prefix's `C:` drive; bookmarking it in your file manager helps.
     - `$WINE_PREFIX/drive_c/users/Public/Desktop` works well, for example.
-6. In Bottles, click **Run Executable...** and run the TiXL installer. It also installs the .NET 10 SDK.
+6. In Bottles, click **Run Executable...** and run the TiXL installer.
 7. When it's done, let it start TiXL, or run the executable via Bottles. Unless you changed the default location, it's in `$WINE_PREFIX/drive_c/TiXL`.
 8. Add the program executable as a shortcut, then click the three dots next to its entry and select **Add Desktop Entry**. TiXL now shows up with your other apps.
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# Installs what TiXL needs that it cannot bundle: the .NET SDK, the Vulkan loader and the Slang
-# shader compiler. A stopgap until distribution packages exist - see DEPENDENCIES.md for the table
-# this script is derived from, and aur/PKGBUILD for the Arch package.
+# Installs what TiXL needs that it cannot bundle: the Vulkan loader and the Slang shader compiler.
+# TiXL brings its own .NET runtime and compiles operators without the .NET SDK. A stopgap until
+# distribution packages exist - see DEPENDENCIES.md for the table this script is derived from, and
+# aur/PKGBUILD for the Arch package.
 #
 # Run it as yourself, NOT with sudo: it calls sudo only for the package manager, so that slangc lands
 # in your home directory rather than root's.
@@ -15,7 +16,6 @@ set -uo pipefail
 
 SLANG_VERSION="2026.18"
 SLANG_DIR="$HOME/.local/opt/slang-$SLANG_VERSION"
-DOTNET_MAJOR="10"
 
 mode="ask"
 case "${1:-}" in
@@ -55,13 +55,6 @@ install_slang="no"
 # Note: no "grep -q" inside these pipelines. It exits on the first match, the writer upstream takes
 # SIGPIPE, and under "set -o pipefail" a successful match would be reported as a failed check.
 
-have_dotnet_sdk() {
-    command -v dotnet >/dev/null 2>&1 || return 1
-    local sdks
-    sdks="$(dotnet --list-sdks 2>/dev/null)" || return 1
-    awk -F. -v want="$DOTNET_MAJOR" '{ if ($1+0 >= want) found=1 } END { exit !found }' <<<"$sdks"
-}
-
 have_vulkan_loader() {
     local libraries
     libraries="$( { /sbin/ldconfig -p || ldconfig -p; } 2>/dev/null )"
@@ -73,18 +66,11 @@ have_slangc() {
 }
 
 case "$family" in
-    arch)   dotnet_pkg="dotnet-sdk";                vulkan_pkg="vulkan-icd-loader" ;;
-    debian) dotnet_pkg="dotnet-sdk-${DOTNET_MAJOR}.0"; vulkan_pkg="libvulkan1" ;;
-    fedora) dotnet_pkg="dotnet-sdk-${DOTNET_MAJOR}.0"; vulkan_pkg="vulkan-loader" ;;
-    *)      dotnet_pkg=""; vulkan_pkg="" ;;
+    arch)   vulkan_pkg="vulkan-icd-loader" ;;
+    debian) vulkan_pkg="libvulkan1" ;;
+    fedora) vulkan_pkg="vulkan-loader" ;;
+    *)      vulkan_pkg="" ;;
 esac
-
-if have_dotnet_sdk; then
-    printf "  %-18s found\n" ".NET ${DOTNET_MAJOR} SDK"
-else
-    printf "  %-18s MISSING\n" ".NET ${DOTNET_MAJOR} SDK"
-    missing_packages+=("$dotnet_pkg")
-fi
 
 if have_vulkan_loader; then
     printf "  %-18s found\n" "Vulkan loader"
@@ -115,7 +101,7 @@ fi
 if [ "$family" = "nixos" ]; then
     echo
     echo "On NixOS, add these to your configuration instead of installing them imperatively:"
-    echo "  dotnetCorePackages.sdk_${DOTNET_MAJOR}_0, vulkan-loader, shader-slang"
+    echo "  vulkan-loader, shader-slang"
     echo "  and hardware.graphics.enable = true;"
     exit 0
 fi
@@ -123,7 +109,7 @@ fi
 if [ "$family" = "other" ] && [ ${#packages[@]} -gt 0 ]; then
     echo
     echo "Unknown distribution - install these yourself, then re-run:"
-    echo "  .NET ${DOTNET_MAJOR} SDK and the Vulkan loader (see DEPENDENCIES.md)"
+    echo "  the Vulkan loader (see DEPENDENCIES.md)"
     [ "$install_slang" = "yes" ] && echo "slangc can still be installed below."
 fi
 

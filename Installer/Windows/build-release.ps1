@@ -16,9 +16,12 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 $root = Resolve-Path "$PSScriptRoot/../.."
 
+# The Editor ships with its own .NET runtime, as on Linux and macOS, so users install nothing for it.
+$editorRuntime = "-p:TixlEditorRuntime=win-x64"
+
 if (-not $SkipRestore) {
     Write-Host "Restoring dependencies..." -ForegroundColor Cyan
-    dotnet restore "$root/t3.sln"
+    dotnet restore "$root/t3.sln" $editorRuntime
     if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed" }
 }
 
@@ -27,7 +30,7 @@ dotnet publish "$root/Player/Player.csproj" -c Release -p:PublishProfile=FolderP
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish Player failed" }
 
 Write-Host "Building solution in Release mode..." -ForegroundColor Cyan
-dotnet build "$root/t3.sln" -c Release --no-restore
+dotnet build "$root/t3.sln" -c Release --no-restore $editorRuntime
 if ($LASTEXITCODE -ne 0) { throw "dotnet build failed" }
 
 # Download installer dependencies if missing
@@ -35,8 +38,7 @@ $downloadsDir = "$PSScriptRoot/dependencies/downloads"
 New-Item -ItemType Directory -Force -Path $downloadsDir | Out-Null
 
 $deps = @(
-    @{ File = "dotnet-sdk-10.0.201-win-x64.exe"; Url = "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.201/dotnet-sdk-10.0.201-win-x64.exe" },
-    @{ File = "VC_redist.x64.exe";              Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" }
+    @{ File = "VC_redist.x64.exe"; Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" }
 )
 
 # The Vulkan backend compiles shaders with slangc. The version comes from the compiler's pin so the two can't drift.

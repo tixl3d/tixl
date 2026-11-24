@@ -65,7 +65,7 @@ int main(int argc, const char** argv)
     struct get_hostfxr_parameters hostfxr_query = { sizeof(struct get_hostfxr_parameters), app_path, NULL };
     if (get_hostfxr_path(hostfxr_path, &hostfxr_path_size, &hostfxr_query) != 0)
     {
-        fprintf(stderr, "TiXL: .NET was not found. Install the .NET 10 SDK from https://dotnet.microsoft.com/download\n");
+        fprintf(stderr, "TiXL: the .NET runtime was not found next to %s.\n", app_path);
         return 1;
     }
 

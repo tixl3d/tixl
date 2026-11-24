@@ -18,18 +18,17 @@ Installer/Linux/install-dependencies.sh           # ask, then install
 
 ## Required
 
-At startup the Editor checks for the .NET SDK, the Vulkan loader and slangc, and shows the install command
+At startup the Editor checks for the Vulkan loader and slangc, and shows the install command
 for the user's distribution when one is missing. It can download slangc itself, since that one needs no
 package manager.
 
 | Component | Why | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|
-| **.NET 10 SDK** (not just the runtime) | Runs the Editor and compiles operator projects at runtime (`dotnet restore` / `dotnet build`, needs network for NuGet) | `dotnet-sdk` | `dotnet-sdk-10.0` (Ubuntu archive or `ppa:dotnet/backports`; Debian via packages.microsoft.com) | `dotnet-sdk-10.0` | `dotnetCorePackages.sdk_10_0` |
 | **Vulkan loader** | Rendering | `vulkan-icd-loader` | `libvulkan1` | `vulkan-loader` | `vulkan-loader` |
 | **Vulkan driver** | Rendering | `vulkan-radeon` / `vulkan-intel` / `nvidia-utils` | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `hardware.graphics.enable = true;` |
 | **slangc** | Shader compilation. Found via `TIXL_SLANGC`, `~/.local/opt/slang-2026.18/bin`, or `PATH`. Tested with 2026.18 | `shader-slang` (extra; `slang` is the unrelated S-Lang) | GitHub release of shader-slang | GitHub release of shader-slang | `shader-slang` |
 | **ALSA library** | Audio, where no PipeWire or PulseAudio runs (loaded at runtime) | `alsa-lib` | `libasound2t64` (older: `libasound2`) | `alsa-lib` | `alsa-lib` |
-| **ICU, OpenSSL** | .NET globalization and HTTPS | pulled in by the SDK package | pulled in by the SDK package | pulled in by the SDK package | pulled in by the SDK package |
+| **ICU, OpenSSL** | .NET globalization and HTTPS (loaded by the bundled runtime) | `icu`, `openssl` | `libicu*`, `libssl3` | `libicu`, `openssl-libs` | `icu`, `openssl` |
 | **X11 or Wayland client libs, libGL/EGL** | Windows (SDL3), startup dialog (GLFW) | present on any desktop | present on any desktop | present on any desktop | present on any desktop |
 
 **Always present** on desktop Linux (found by `ldd`): glibc 2.38 or newer (the prebuilt `libcimgui.so` from
@@ -47,6 +46,7 @@ compile differently — that is what the pin is about — so prefer the pinned l
 | Component | Enables | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|
 | NDI runtime (`libndi.so.6`) | Ndi operators and NDI output streams. Found via `NDI_RUNTIME_DIR_V6` or the system library path; source discovery needs `avahi-daemon` | AUR `ndi-sdk` | vendor download (ndi.video) | vendor download | `ndi` (unfree) |
+| .NET 10 SDK | Compiling projects that use NuGet packages, embedded resources or custom build steps. The editor compiles all other projects itself and names the reason when it needs the SDK | `dotnet-sdk` | `dotnet-sdk-10.0` (Ubuntu archive or `ppa:dotnet/backports`) | `dotnet-sdk-10.0` | `dotnetCorePackages.sdk_10_0` |
 | Vulkan validation layers | GPU debugging | `vulkan-validation-layers` | `vulkan-validationlayers` | `vulkan-validation-layers` | `vulkan-validation-layers` |
 
 ## Bundled in the tarball

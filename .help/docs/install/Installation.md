@@ -11,6 +11,10 @@ Download the [latest release](https://github.com/tixl3d/tixl/releases) and run t
 
 The installer bundles all required dependencies, including .NET and the Visual C++ runtime. Start the installer, dismiss the untrusted-source warning, and proceed.
 
+Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL
+tells you when a project needs it and why; install it from
+[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0).
+
 ## Sync tools and the projects folder
 
 By default, TiXL stores projects in your Documents folder. On many Windows machines, sync tools like OneDrive manage that folder without users being aware of it. Syncing can lock project files while TiXL reads or saves them, which makes projects fail to load — they then appear as "Broken" in the project list.

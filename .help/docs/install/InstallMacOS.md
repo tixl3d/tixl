@@ -11,18 +11,14 @@ The native macOS version is an early preview. Expect rough edges, and please rep
 
 - A Mac with Apple Silicon (M1 or newer). Intel Macs aren't supported.
 - macOS 14 Sonoma or newer.
-- The **.NET 10 SDK**. TiXL compiles operators while it runs, so the runtime alone isn't enough.
 - 16 GB of memory is comfortable. The graphics chip shares the Mac's memory, so large projects use more of it.
 
-Graphics run on Vulkan through MoltenVK, which translates it to Metal. The app brings both along.
+Graphics run on Vulkan through MoltenVK, which translates it to Metal. The app brings both along, as well as its
+own .NET runtime, so there's nothing else to install.
 
-## Install the .NET 10 SDK
-
-Download the **macOS Arm64 installer** for the .NET 10 SDK from
-[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0) and run it. TiXL looks for
-it in `/usr/local/share/dotnet`, where the installer puts it.
-
-If you use Homebrew, `brew install --cask dotnet-sdk` installs the same package.
+Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL
+tells you when a project needs it and why; install it from
+[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ## Download and run TiXL
 
@@ -59,9 +55,8 @@ When TiXL first opens your projects, macOS asks whether it may access your **Doc
 
 ### Missing dependencies
 
-At startup, TiXL checks for the .NET SDK and the Slang shader compiler (`slangc`). If one is missing, a
-dialog explains what to do. TiXL offers to download `slangc` for you. Without the .NET SDK the built-in
-operators still load, but your own operators won't compile.
+At startup, TiXL checks for the Slang shader compiler (`slangc`). If it's missing, a dialog explains what to
+do and offers to download it for you.
 
 ### Video playback
 

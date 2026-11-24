@@ -34,7 +34,6 @@ set `TIXL_EXTENSIONS_INDEX` to the `extensions` folder before starting `TiXL.exe
 
 The build script automatically downloads these into `Installer/Windows/dependencies/downloads/` if not already present:
 
-* [.NET SDK 10.0.201](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 * [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 The installer bundles them and installs them on the user's machine if needed.
