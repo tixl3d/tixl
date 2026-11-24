@@ -122,7 +122,27 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
                                                pImageIndices = &imageIndex,
                                            };
 
+        // Asks the display to report when this frame's first pixel went out; ReadShownFrames collects it.
+        VkPresentTimingInfoEXT timingInfo = new()
+                                                {
+                                                    timeDomainId = _timingDomainId,
+                                                    presentStageQueries = _shownStage,
+                                                    targetTimeDomainPresentStage = _shownStage,
+                                                };
+        VkPresentTimingsInfoEXT timingsInfo = new() { swapchainCount = 1, pTimingInfos = &timingInfo };
+        VkPresentId2KHR presentId2Info = new() { pNext = &timingsInfo, swapchainCount = 1, pPresentIds = &presentId };
+        if (_reportsShownFrames)
+            presentIdInfo.pNext = &presentId2Info;
+
         var result = _backend.Api.vkQueuePresentKHR(queue, &presentInfo);
+
+        // Only if reports were left unread: the frame is still worth showing without one.
+        if (result == VkResult.ErrorPresentTimingQueueFullEXT)
+        {
+            presentIdInfo.pNext = null;
+            result = _backend.Api.vkQueuePresentKHR(queue, &presentInfo);
+        }
+
         if (result is VkResult.Success or VkResult.SuboptimalKHR)
             _lastPresentId = presentId;
         _acquired = false;
@@ -132,6 +152,40 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
             _needsRecreation = true;
 
         return result;
+    }
+
+    public override int ReadShownFrames(Span<ShownFrame> frames)
+    {
+        if (!_reportsShownFrames || _swapchain.IsNull || frames.Length == 0)
+            return 0;
+
+        var capacity = Math.Min(frames.Length, PresentTimingQueueSize);
+        var stages = stackalloc VkPresentStageTimeEXT[capacity];
+        var timings = stackalloc VkPastPresentationTimingEXT[capacity];
+        for (var index = 0; index < capacity; index++)
+        {
+            timings[index] = new VkPastPresentationTimingEXT { presentStageCount = 1, pPresentStages = &stages[index] };
+        }
+
+        VkPastPresentationTimingInfoEXT info = new() { swapchain = _swapchain };
+        VkPastPresentationTimingPropertiesEXT properties = new() { presentationTimingCount = (uint)capacity, pPresentationTimings = timings };
+        var result = _backend.Api.vkGetPastPresentationTimingEXT(&info, &properties);
+        if (result is not (VkResult.Success or VkResult.Incomplete))
+            return 0;
+
+        var written = 0;
+        for (var index = 0; index < properties.presentationTimingCount && index < capacity; index++)
+        {
+            ref var timing = ref timings[index];
+
+            // A present replaced before it was shown reports no time; the next shown frame covers its refreshes.
+            if (!timing.reportComplete || timing.presentStageCount == 0 || stages[index].time == 0)
+                continue;
+
+            frames[written++] = new ShownFrame(timing.presentId, (long)stages[index].time);
+        }
+
+        return written;
     }
 
     internal bool WasAcquired => _acquired;
@@ -218,7 +272,14 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
                                                       oldSwapchain = VkSwapchainKHR.Null,
                                                   };
 
+        // Only Fifo paces frames to refreshes, so only there do reports say anything about dropped ones. With
+        // present timing on every mode, RADV on Wayland hung in vkQueuePresentKHR after vsync was turned off and on.
+        _shownStage = _backend.SupportsPresentTiming && _presentMode == VkPresentModeKHR.Fifo ? QueryShownStage() : VkPresentStageFlagsEXT.None;
+        if (_shownStage != VkPresentStageFlagsEXT.None)
+            createInfo.flags |= VkSwapchainCreateFlagsKHR.PresentTimingEXT | VkSwapchainCreateFlagsKHR.PresentId2;
+
         api.vkCreateSwapchainKHR(&createInfo, null, out _swapchain).CheckResult();
+        _reportsShownFrames = _shownStage != VkPresentStageFlagsEXT.None && TrySetUpPresentTiming();
 
         uint actualCount = 0;
         api.vkGetSwapchainImagesKHR(_swapchain, &actualCount, null).CheckResult();
@@ -265,6 +326,56 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
 
         // Present ids count per swapchain object.
         _lastPresentId = 0;
+    }
+
+    /// <summary>
+    /// The earliest stage this surface can report that marks a frame reaching the display: its first pixel going
+    /// out, or failing that, becoming visible. None if the surface reports no presentation timing, or can't take the
+    /// present ids the reports are matched by.
+    /// </summary>
+    private VkPresentStageFlagsEXT QueryShownStage()
+    {
+        VkSurfaceCapabilitiesPresentId2KHR presentId2Capabilities = new();
+        VkPresentTimingSurfaceCapabilitiesEXT timingCapabilities = new() { pNext = &presentId2Capabilities };
+        VkSurfaceCapabilities2KHR capabilities = new() { pNext = &timingCapabilities };
+        VkPhysicalDeviceSurfaceInfo2KHR surfaceInfo = new() { surface = _surface };
+        var result = _backend.InstanceApi.vkGetPhysicalDeviceSurfaceCapabilities2KHR(_backend.PhysicalDevice, &surfaceInfo, &capabilities);
+        if (result != VkResult.Success || !timingCapabilities.presentTimingSupported || !presentId2Capabilities.presentId2Supported)
+            return VkPresentStageFlagsEXT.None;
+
+        if ((timingCapabilities.presentStageQueries & VkPresentStageFlagsEXT.ImageFirstPixelOut) != 0)
+            return VkPresentStageFlagsEXT.ImageFirstPixelOut;
+
+        return (timingCapabilities.presentStageQueries & VkPresentStageFlagsEXT.ImageFirstPixelVisible) != 0
+                   ? VkPresentStageFlagsEXT.ImageFirstPixelVisible
+                   : VkPresentStageFlagsEXT.None;
+    }
+
+    /// <summary>Sizes the swapchain's report queue and picks the clock reports are given in. False if either fails.</summary>
+    private bool TrySetUpPresentTiming()
+    {
+        var api = _backend.Api;
+        if (api.vkSetSwapchainPresentTimingQueueSizeEXT(_swapchain, PresentTimingQueueSize) != VkResult.Success)
+            return false;
+
+        ulong counter = 0;
+        VkSwapchainTimeDomainPropertiesEXT domains = new();
+        if (api.vkGetSwapchainTimeDomainPropertiesEXT(_swapchain, &domains, &counter) is not (VkResult.Success or VkResult.Incomplete)
+            || domains.timeDomainCount == 0)
+            return false;
+
+        // Only differences between reports are used, so any one clock will do.
+        var count = domains.timeDomainCount;
+        var timeDomains = stackalloc VkTimeDomainKHR[(int)count];
+        var timeDomainIds = stackalloc ulong[(int)count];
+        domains.pTimeDomains = timeDomains;
+        domains.pTimeDomainIds = timeDomainIds;
+        if (api.vkGetSwapchainTimeDomainPropertiesEXT(_swapchain, &domains, &counter) is not (VkResult.Success or VkResult.Incomplete))
+            return false;
+
+        _timingDomainId = timeDomainIds[0];
+        GraphicsLog.Debug?.Invoke($"Present timing: reporting {_shownStage} in {timeDomains[0]} for '{Label}'.");
+        return true;
     }
 
     private VkFormat PickFormat(Format requested, out VkColorSpaceKHR colorSpace)
@@ -437,6 +548,14 @@ internal sealed unsafe class VulkanSwapchain : GpuSwapchain
     private ulong _lastPresentId;
 
     private const ulong PresentWaitTimeoutNs = 1_000_000_000;
+
+    /** Reports are read every frame, so a handful of frames' worth covers the delay until the display reports. */
+    private const int PresentTimingQueueSize = 16;
+
+    /** The stage reported for each present, or None when this swapchain doesn't report presentation timing. */
+    private VkPresentStageFlagsEXT _shownStage;
+    private ulong _timingDomainId;
+    private bool _reportsShownFrames;
 
     /** A resize that arrived while an image was in flight, applied at the next acquire. Zero when none. */
     private int _requestedWidth;

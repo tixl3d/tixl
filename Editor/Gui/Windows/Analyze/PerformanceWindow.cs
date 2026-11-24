@@ -52,6 +52,17 @@ internal sealed class PerformanceWindow : Window
                                           Rates the display can't divide into round to the nearest one it can.
                                           Needs vsync; the pacing display is the first bound output, otherwise the editor window.
                                           """);
+        changed |= FormInputs.AddCheckBox("Lock Animation Step",
+                                          ref UserSettings.Config.UseLockedFrameDuration,
+                                          """
+                                          Damping, springs and simulations advance by the locked frame duration (one refresh, or
+                                          one frame of the Frame Rate setting) even when a frame was dropped. Particle paths stay
+                                          even, and a dropped frame makes them lag for that frame instead of catching up.
+                                          Off, they advance by the time each frame really stayed on screen, which keeps their
+                                          speed through drops but makes them jump after one. Playback time and audio always
+                                          keep real time. On by default.
+                                          """,
+                                          UserSettings.Defaults.UseLockedFrameDuration);
         changed |= FormInputs.AddDropdown(ref UserSettings.Config.FrameLatency,
                                           FrameLatencies,
                                           "Frame Latency",

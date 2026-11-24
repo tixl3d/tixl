@@ -10,6 +10,7 @@ using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Graphics;
 
 namespace T3.Editor.Gui.Windows.Analyze;
 
@@ -23,6 +24,14 @@ internal static class T3Metrics
     {
         PerformanceMetrics.RecordFrame(ImGui.GetIO().DeltaTime * 1000);
         FrameTiming.SetRefreshRateFromDisplay(ProgramWindows.Main.DisplayRefreshRate);
+
+        var shownCount = ProgramWindows.Main.SwapChain.ReadShownFrames(_shownFrames);
+        for (var index = 0; index < shownCount; index++)
+        {
+            FrameTiming.RecordShownFrame(_shownFrames[index].PresentId, _shownFrames[index].ShownTimeNs);
+        }
+
+        Playback.UseLockedFrameDuration = UserSettings.Config.UseLockedFrameDuration;
         FrameTiming.RecordFrameStart(Playback.RunTimeInSecs, T3Ui.IsPacedByDisplay);
     }
 
@@ -504,4 +513,8 @@ internal static class T3Metrics
     // Scratch buffer for plot-line copy-out (and reused by the tooltip's occurrence strip).
     // Sized to match PerformanceMetrics.WindowSize.
     private static readonly float[] _floatGraphBuffer = new float[PerformanceMetrics.WindowSize];
+
+    /** Reused every frame for the display's reports of shown frames. */
+    private static readonly ShownFrame[] _shownFrames = new ShownFrame[16];
 }
+

@@ -301,7 +301,7 @@ internal static partial class Program
                         // Pre-register every clip so all streams load before the first frame.
                         foreach (var h in _allSoundtrackHandles)
                             AudioEngine.UseSoundtrackClip(h, 0);
-                        AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration); // Initialize
+                        AudioEngine.CompleteFrame(_playback, Playback.LastPlaybackStepSec); // Initialize
                         prerenderRequired = true;
                     }
                     else

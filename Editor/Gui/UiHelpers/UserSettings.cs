@@ -144,6 +144,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /** Frames the loop may run ahead of the display: 1 for the lowest input latency, 2 to absorb late frames. */
         public int FrameLatency = 1;
 
+        /** Damping and simulations step by the locked frame duration even when a frame was dropped. */
+        public bool UseLockedFrameDuration = true;
+
         public bool EnableKeyboardShortCuts = true;
 
         /** Whether a connected game controller drives operators like [Gamepad] or the editor (its camera). */

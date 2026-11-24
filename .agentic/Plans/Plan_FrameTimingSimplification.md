@@ -1,7 +1,27 @@
 # Frame Timing Simplification — One Constant Frame Duration
 
-Status (2026-11-24): Phase 0 measured (§2a). Uncommitted: the 144 Hz lock clamp (`MaxVblanksPerFrame` 4 → 12) and a
-constant visual clock (§2a). `present_wait` lock pacing was tried and reverted (§2a).
+Status (2026-11-24): Phase 0 measured (§2a). Uncommitted: the 144 Hz lock clamp (`MaxVblanksPerFrame` 4 → 12), a
+constant visual clock (§2a) and most of Phases 1–2 as "Lock Animation Step" (§2b). `present_wait` lock pacing was tried
+and reverted (§2a).
+
+## 2b. Done: one frame duration, user choice on drops (2026-11-24, uncommitted)
+
+The user decided open question 2 is a user choice: *frame duration* (better overall look, sims catch up after a drop)
+or *locked frame duration* (even particle paths, lag on a drop). Implemented as **Lock Animation Step** in the
+Performance window (`UserSettings.Config.UseLockedFrameDuration`, default off; the Player always uses off for now).
+
+- `FrameTiming`: averaging window, `FramePeriodSec` and `FrameRateRelativeTo60` deleted; new `LockedFrameDurationSec`
+  (refresh × refreshes per frame; raw interval without vsync).
+- `Playback.LastFrameDuration`: `VisualDeltaSec`, or `LockedFrameDurationSec` with the setting. New
+  `Playback.LastPlaybackStepSec` is always the real step: timeline advance and `AudioEngine.CompleteFrame` use it, so
+  audio never desyncs. `FrameSpeedFactor` = (1/60) / `LastFrameDuration` instead of the 2 s average.
+  `GetLiveFrameDuration` replaced by `UpdateFrameDurations` (also used by `BeatTimingPlayback`).
+- Motion blur: `GetShutterScale` deleted, the shutter is used as is.
+- Bridge `getMetrics`: `framePeriodMs` → `lockedFrameDurationMs`, plus `lastFrameDurationMs`.
+- Measured at 120 Hz with a project playing: off, `LastFrameDuration` and `FrameSpeedFactor` follow drops exactly;
+  on, they stay at 8.333 ms / 2.0 (Match Display) and 33.333 ms / 0.5 (lock 30) on all 300 frames while the display
+  clock shows 25 ms drops.
+- Not done from Phase 2: editor UI damping and camera/gamepad sites still use ImGui's delta time.
 Grounded in `main` at `9e203d9b5`. §2 lists the hypotheses as first written; §2a says which held.
 Background and earlier measurements: [`Plan_FrameTiming.md`](Plan_FrameTiming.md) (research report, partly
 superseded by this plan: its visual-clock design is what this plan removes).
@@ -110,6 +130,41 @@ Consequences for §3:
   the 18 ms load case would run integrators at 8.3 / 20 ≈ 42 % speed. Open question 2 now needs an explicit answer:
   either accept slow motion until the user locks, or make "Match display" choose the display-divided rate the loop
   holds. The second is a heuristic, which §3 otherwise avoids.
+
+## 2c. Drops under vsync come from compositor GPU contention (2026-11-24)
+
+On the 120 Hz panel (KWin 6.7.5, RADV), a scene that renders in ~5 ms without vsync dropped frames with vsync. The
+loop ran in `14.8 / 1.9 ms` pairs with flat CPU time: the compositor reported presents in pairs, most likely
+compositing only every second refresh.
+
+- GPU load decides it: near-zero GPU → 400/400 clean; ~4–5.5 ms GPU → 30–50 % of intervals long.
+- **Fullscreen output (no compositing, direct scanout): 0 of 1,200 dropped at the same 5.7 ms GPU.**
+- Cause: KWin composites on the same GPU just before each refresh and can't get ahead of work already running.
+  Frame timing cannot fix this.
+- Split submits (temporary `TIXL_SPLIT_SUBMITS=N`, submit every N render passes): a 300-pass benchmark load went
+  from 127–160/400 dropped to 0/400 with N=16 and no CPU cost. It cannot help scenes whose GPU time sits in a few
+  long passes (the user's scene: 10 draws, one render target).
+- Moving the mouse over a fullscreen output still drops frames; presumably the moving cursor makes KWin composite
+  again. TiXL does not hide the cursor over fullscreen outputs.
+- Plasma 6 has no compositor latency setting any more.
+
+## 2d. Drops from display reports (VK_EXT_present_timing, 2026-11-24, uncommitted)
+
+The visual clock no longer guesses drops from frame starts where the display can report them. Each Fifo swapchain
+asks for the time its frames' first pixel went out (`GpuSwapchain.ReadShownFrames`, Vulkan only); `FrameTiming.
+RecordShownFrame` turns consecutive reports into refreshes passed minus refreshes planned and adds the difference
+to the next frame's step. Without reports for 30 frames the old inference is the fallback. Needs
+`VK_EXT_present_timing`, `VK_KHR_present_id2`, `VK_KHR_calibrated_timestamps` and the instance extension
+`VK_KHR_get_surface_capabilities2`; `TIXL_PRESENT_TIMING=0` turns it off. Bridge: `isShownByDisplayReports`,
+`droppedRefreshes`.
+
+- RADV 26.2 / KWin 6.7.5: reports `ImageFirstPixelOut`; validation clean.
+- Present timing on a Mailbox swapchain hung in `vkQueuePresentKHR` after a vsync off/on toggle; limited to Fifo,
+  10 toggles then pass.
+- Reported drops match real throughput loss (83 vs 77 long intervals, 138 vs 136) and are 0–2 in clean runs.
+  Drops come in phase-dependent episodes with and without present timing; it measures them, it doesn't cause or
+  cure them. Not yet observed: a `14.8 / 1.9` pair episode with reports on, to confirm they say "no drop" there.
+- Not done: D3D11 (`GetFrameStatistics`), the Player, a drop counter in the Performance window.
 
 ## 3. Design
 

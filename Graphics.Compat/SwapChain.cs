@@ -81,6 +81,9 @@ public sealed class SwapChain : IDisposable
 
     public void WaitForFrameLatency() => _swapchain.WaitForFrameLatency();
 
+    /// <inheritdoc cref="GpuSwapchain.ReadShownFrames"/>
+    public int ReadShownFrames(Span<ShownFrame> frames) => _swapchain.ReadShownFrames(frames);
+
     public bool TryGetPresentationStatistics(out PresentationStatistics statistics) => _swapchain.TryGetPresentationStatistics(out statistics);
 
     public void Dispose()

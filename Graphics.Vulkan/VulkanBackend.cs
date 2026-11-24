@@ -62,6 +62,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         // MoltenVK is not a conformant driver, and the loader hides such drivers unless the instance opts in.
         // SDL already asks for the extension on macOS; the flag is ours to set.
+        // Reading a surface's present-timing capabilities needs the extended capability query.
+        _hasSurfaceCapabilities2 = options.InstanceExtensions.Count > 0 && IsInstanceExtensionAvailable(SurfaceCapabilities2Name);
+        if (_hasSurfaceCapabilities2 && !extensions.Contains(SurfaceCapabilities2Name))
+            extensions.Add(SurfaceCapabilities2Name);
+
         var enumeratePortability = IsInstanceExtensionAvailable(PortabilityEnumerationName);
         if (enumeratePortability && !extensions.Contains(PortabilityEnumerationName))
             extensions.Add(PortabilityEnumerationName);
@@ -184,6 +189,23 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
             deviceExtensions.Add(VK_KHR_PRESENT_WAIT_EXTENSION_NAME);
         }
 
+        // Reports when each present actually reached the screen, so frame timing can count dropped refreshes
+        // instead of guessing them from when frames start.
+        // TIXL_PRESENT_TIMING=0 turns it off, for a driver whose reports or present path misbehave with it.
+        SupportsPresentTiming = SupportsPresentWait
+                                && Environment.GetEnvironmentVariable("TIXL_PRESENT_TIMING") != "0"
+                                && _hasSurfaceCapabilities2
+                                && HasDeviceExtension(PhysicalDevice, PresentTimingName)
+                                && HasDeviceExtension(PhysicalDevice, PresentId2Name)
+                                && HasDeviceExtension(PhysicalDevice, CalibratedTimestampsName)
+                                && HasPresentTimingFeatures();
+        if (SupportsPresentTiming)
+        {
+            deviceExtensions.Add(PresentTimingName);
+            deviceExtensions.Add(PresentId2Name);
+            deviceExtensions.Add(CalibratedTimestampsName);
+        }
+
         using var deviceExtensionNames = new VkStringArray(deviceExtensions);
 
         VkPhysicalDevicePortabilitySubsetFeaturesKHR portabilityFeatures = new();
@@ -201,9 +223,17 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
         _supportsMipLodBias = !isPortabilitySubset || portabilityFeatures.samplerMipLodBias;
 
+        VkPhysicalDevicePresentTimingFeaturesEXT presentTimingFeatures = new()
+                                                                             {
+                                                                                 pNext = isPortabilitySubset ? &portabilityFeatures : null,
+                                                                                 presentTiming = true,
+                                                                             };
+        VkPhysicalDevicePresentId2FeaturesKHR presentId2Features = new() { pNext = &presentTimingFeatures, presentId2 = true };
         VkPhysicalDevicePresentWaitFeaturesKHR presentWaitFeatures = new()
                                                                          {
-                                                                             pNext = isPortabilitySubset ? &portabilityFeatures : null,
+                                                                             pNext = SupportsPresentTiming
+                                                                                         ? &presentId2Features
+                                                                                         : isPortabilitySubset ? &portabilityFeatures : null,
                                                                              presentWait = true,
                                                                          };
         VkPhysicalDevicePresentIdFeaturesKHR presentIdFeatures = new() { pNext = &presentWaitFeatures, presentId = true };
@@ -294,6 +324,20 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     /// <summary>Whether swapchains can wait for a present to reach the display (VK_KHR_present_wait).</summary>
     internal bool SupportsPresentWait { get; }
+
+    /// <summary>VK_EXT_present_timing is enabled; whether a surface supports it is up to the swapchain to ask.</summary>
+    internal bool SupportsPresentTiming { get; }
+
+    private bool HasPresentTimingFeatures()
+    {
+        VkPhysicalDevicePresentTimingFeaturesEXT presentTiming = new();
+        VkPhysicalDevicePresentId2FeaturesKHR presentId2 = new() { pNext = &presentTiming };
+        VkPhysicalDeviceFeatures2 features = new() { pNext = &presentId2 };
+        InstanceApi.vkGetPhysicalDeviceFeatures2(PhysicalDevice, &features);
+        return presentTiming.presentTiming && presentId2.presentId2;
+    }
+
+    private readonly bool _hasSurfaceCapabilities2;
     public string BackendDescription { get; }
 
     public string DriverDescription { get; }
@@ -2062,6 +2106,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     private static readonly VkUtf8String ValidationLayerName = "VK_LAYER_KHRONOS_validation"u8;
     private const string PortabilityEnumerationName = "VK_KHR_portability_enumeration";
+    private const string SurfaceCapabilities2Name = "VK_KHR_get_surface_capabilities2";
+    private static readonly VkUtf8String PresentTimingName = "VK_EXT_present_timing"u8;
+    private static readonly VkUtf8String PresentId2Name = "VK_KHR_present_id2"u8;
+    private static readonly VkUtf8String CalibratedTimestampsName = "VK_KHR_calibrated_timestamps"u8;
 
     private readonly VkInstance _instance;
     private readonly VkDevice _device;

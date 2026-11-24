@@ -1437,7 +1437,10 @@ internal static class DebugServer
                          {
                              ["frameDeltaSeconds"] = io.DeltaTime,
                              ["fps"] = io.DeltaTime > 0 ? Math.Round(1f / io.DeltaTime, 1) : 0,
-                             ["framePeriodMs"] = Math.Round(FrameTiming.FramePeriodSec * 1000, 3),
+                             ["lockedFrameDurationMs"] = Math.Round(FrameTiming.LockedFrameDurationSec * 1000, 3),
+                             ["lastFrameDurationMs"] = Math.Round(Playback.LastFrameDuration * 1000, 3),
+                             ["isShownByDisplayReports"] = FrameTiming.IsShownByDisplayReports,
+                             ["droppedRefreshes"] = FrameTiming.DroppedRefreshCount,
                              ["refreshRateHz"] = Math.Round(FrameTiming.RefreshRate, 3),
                              ["visualDeltaMs"] = Math.Round(FrameTiming.VisualDeltaSec * 1000, 3),
                              ["vblanksPerFrame"] = FrameTiming.VblanksPerFrame,
