@@ -63,7 +63,15 @@
       },
       "Min": 0.0,
       "Max": 0.2,
-      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. With Inset, the cap's border cells snap to the nearest inset point instead, so the inset ring keeps its quads. Not combined with a bevel."
+      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. With Inset, the cap's border cells snap to the nearest inset point instead, so the inset ring keeps its quads. With ConstrainedDelaunay, the grid points become vertices of the Delaunay triangulation instead. Not combined with a bevel."
+    },
+    {
+      "InputId": "c78b348e-1e02-492e-be16-b70c5994f88d"/*ConstrainedDelaunay*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "Triangulates the caps with a constrained Delaunay triangulation instead of the default fill. Its triangles have better shapes, avoiding the long thin ones that fold when the cap is subdivided or deformed. With Lattice, the lattice's grid points become additional interior vertices, so the cap keeps its point density. Falls back to a regular cap and warns where the outlines can't be constrained, such as self-intersecting inset rings."
     }
   ],
   "SymbolChildUis": [],

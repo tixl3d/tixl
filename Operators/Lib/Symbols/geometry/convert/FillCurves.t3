@@ -29,6 +29,10 @@
     {
       "Id": "eff0d217-6548-4871-aa00-31c85029e69c"/*Lattice*/,
       "DefaultValue": 0.0
+    },
+    {
+      "Id": "c78b348e-1e02-492e-be16-b70c5994f88d"/*ConstrainedDelaunay*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

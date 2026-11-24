@@ -8,10 +8,11 @@ namespace Lib.geometry.convert;
 /// Fills the closed curves of a Geometry with flat polygons, holes included, so they can be modelled further or
 /// rendered; the flat counterpart of [ExtrudeCurves] (Houdini's PolyFill). One output part per input part, with the
 /// input's part attributes. Polygons in the input are not passed through. Optionally insets the outline into a ring
-/// of quads with a smaller cap inside, for a boundary edge loop.
+/// of quads with a smaller cap inside, for a boundary edge loop, and can triangulate the caps with a constrained
+/// Delaunay triangulation instead of the plain fill, using the lattice's points when both are on.
 /// </summary>
 [Guid("daab8738-babd-4036-8581-22e3dc55e4ba")]
-[ExportDependencies("LibTessDotNet.dll")]
+[ExportDependencies("LibTessDotNet.dll", "CDT.Core.dll")]
 internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
 {
     [Output(Guid = "4dfc042d-c7fa-4ce1-b774-2892a67f1d6c")]
@@ -28,6 +29,7 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-5f);
         var weight = Weight.GetValue(context);
         var inset = MathF.Max(Inset.GetValue(context), 0);
+        var constrainedDelaunay = ConstrainedDelaunay.GetValue(context);
         var windingRule = EvenOdd.GetValue(context) ? WindingRule.EvenOdd : WindingRule.NonZero;
         var keepCurves = KeepCurves.GetValue(context);
         if (curves == null || curves.PrimitiveCount == 0)
@@ -37,10 +39,13 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
         }
 
         _builder.Lattice = MathF.Max(Lattice.GetValue(context), 0);
-        _builder.FillFlat(curves, tolerance, weight, windingRule, keepCurves, _output, inset: inset);
+        _builder.FillFlat(curves, tolerance, weight, windingRule, keepCurves, _output, inset: inset,
+                          constrainedDelaunay: constrainedDelaunay);
         _statusMessage = _builder.LatticeIssue ?? string.Empty;
         if (!string.IsNullOrEmpty(_builder.InsetIssue))
             _statusMessage = string.IsNullOrEmpty(_statusMessage) ? _builder.InsetIssue : $"{_statusMessage} {_builder.InsetIssue}";
+        if (!string.IsNullOrEmpty(_builder.DelaunayIssue))
+            _statusMessage = string.IsNullOrEmpty(_statusMessage) ? _builder.DelaunayIssue : $"{_statusMessage} {_builder.DelaunayIssue}";
         Result.Value = _output;
     }
 
@@ -75,4 +80,7 @@ internal sealed class FillCurves : Instance<FillCurves>, IStatusProvider
 
     [Input(Guid = "eff0d217-6548-4871-aa00-31c85029e69c")]
     public readonly InputSlot<float> Lattice = new();
+
+    [Input(Guid = "c78b348e-1e02-492e-be16-b70c5994f88d")]
+    public readonly InputSlot<bool> ConstrainedDelaunay = new();
 }

@@ -528,6 +528,21 @@ Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength
   opposite outlines overlap.
 - Weight still offsets the whole letter first; the ring is built inside the offset outline.
 
+## Step: Constrained Delaunay caps
+
+**Action:**
+Connect [StringToCurves] (text `aeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] -> [GeometryToMesh]
+-> [DrawMesh]. Toggle ConstrainedDelaunay and compare, also with Inset and Lattice on.
+
+**Expected:**
+- With ConstrainedDelaunay on, the caps show fewer and less extreme long thin triangles than the default fill; holes
+  stay open and the Stats keep the same area.
+- Turning it off restores the default fill. With Lattice and ConstrainedDelaunay on, the cap keeps the lattice's point
+  density but is triangulated into better-shaped triangles instead of quads; with Lattice alone it stays a grid of
+  quads. With Inset the cap still meets the ring without gaps or non-manifold edges. Where the inset rings cross, the
+  op warns and falls back to the regular cap (the lattice grid if it is on, otherwise the default fill).
+- On very thin stems some slivers can remain because the outline points are fixed; the op does not warn.
+
 ## Step: Polygon edges as lines
 
 **Action:**

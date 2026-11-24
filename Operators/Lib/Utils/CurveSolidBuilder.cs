@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
+using CDT;
 using LibTessDotNet;
 using T3.Core.DataTypes;
 
@@ -15,6 +16,8 @@ namespace Lib.Utils;
 /// so the solid lies on their left (outers counter-clockwise, holes clockwise, by
 /// nesting parity), inset by the bevel for the caps, tessellated with the fill
 /// rule, and connected by profile rings for bevel and wall faces.
+/// Caps can alternatively be triangulated with a constrained Delaunay triangulation
+/// for better-shaped triangles.
 /// </summary>
 internal sealed class CurveSolidBuilder
 {
@@ -24,7 +27,7 @@ internal sealed class CurveSolidBuilder
     /// duplicate its front cap.
     /// </param>
     public void FillFlat(Geometry curves, float tolerance, float weight, WindingRule windingRule, bool keepCurves, Geometry target,
-                         bool skipPartsWithPolygons = false, float inset = 0)
+                         bool skipPartsWithPolygons = false, float inset = 0, bool constrainedDelaunay = false)
     {
         Begin();
         var parts = curves.Parts;
@@ -41,7 +44,8 @@ internal sealed class CurveSolidBuilder
                 continue;
 
             BuildPart(curves, curveViews, primitiveStart, primitiveEnd, tolerance, depth: 0, bevel: 0, bevelSegments: 1, weight,
-                      flatShading: false, smoothAngle: 40, front: true, back: false, sides: false, windingRule, keepCurves, pivot, id, seed, inset);
+                      flatShading: false, smoothAngle: 40, front: true, back: false, sides: false, windingRule, keepCurves, pivot, id, seed, inset,
+                      constrainedDelaunay);
         }
 
         Finish(target, curves);
@@ -72,10 +76,14 @@ internal sealed class CurveSolidBuilder
     /// <summary>Why the last build used a smaller inset than requested, or null.</summary>
     public string? InsetIssue { get; private set; }
 
+    /// <summary>Why the last build fell back to a regular cap, or null.</summary>
+    public string? DelaunayIssue { get; private set; }
+
     public void Begin()
     {
         LatticeIssue = null;
         InsetIssue = null;
+        DelaunayIssue = null;
         _pointSources.Clear();
         _primitiveSources.Clear();
         _carriesAttributes = false;
@@ -195,14 +203,14 @@ internal sealed class CurveSolidBuilder
 
     public void BuildPart(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
                           float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
-                          WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed, float inset = 0)
+                          WindingRule windingRule, bool keepCurves, Vector3 pivot, int id, int seed, float inset = 0, bool constrainedDelaunay = false)
     {
         var partStart = _faceOffsets.Count - 1;
         var pointStart = _positions.Count;
         _carriesAttributes = HasAttributesToCarry(geometry);
         _samples.Clear();
         BuildFaces(geometry, curveViews, primitiveStart, primitiveEnd, tolerance, depth, bevel, bevelSegments, weight, flatShading, smoothAngle,
-                   front, back, sides, windingRule, inset);
+                   front, back, sides, windingRule, inset, constrainedDelaunay);
         if (_carriesAttributes)
             MapToSamples(pointStart, partStart);
 
@@ -615,7 +623,7 @@ internal sealed class CurveSolidBuilder
 
     private void BuildFaces(Geometry geometry, Geometry.CurveEnumerable curveViews, int primitiveStart, int primitiveEnd, float tolerance, float depth,
                             float bevel, int bevelSegments, float weight, bool flatShading, float smoothAngle, bool front, bool back, bool sides,
-                            WindingRule windingRule, float inset)
+                            WindingRule windingRule, float inset, bool constrainedDelaunay)
     {
         // Flatten the part's closed curves into 2D loops
         _loops.Clear();
@@ -694,10 +702,10 @@ internal sealed class CurveSolidBuilder
 
         // Caps and walls share the ring points, so the solid closes without a weld
         if (front)
-            AddCap(ringIndex: 0, windingRule, flip: false);
+            AddCap(ringIndex: 0, windingRule, flip: false, constrainedDelaunay);
 
         if (back && depth > 0)
-            AddCap(ringIndex: profile.Count - 1, windingRule, flip: true);
+            AddCap(ringIndex: profile.Count - 1, windingRule, flip: true, constrainedDelaunay);
 
         if (hasWalls)
             AddWalls(profile, flatShading, MathF.Cos(smoothAngle * MathF.PI / 180f));
@@ -1207,11 +1215,25 @@ internal sealed class CurveSolidBuilder
         }
     }
 
-    private void AddCap(int ringIndex, WindingRule windingRule, bool flip)
+    private void AddCap(int ringIndex, WindingRule windingRule, bool flip, bool constrainedDelaunay)
     {
-        if (_usesLattice && TryAddLatticeCap(ringIndex, flip))
+        if (_usesLattice)
+        {
+            if (constrainedDelaunay && TryAddDelaunayCap(ringIndex, flip, includeLatticePoints: true))
+                return;
+
+            if (TryAddLatticeCap(ringIndex, flip))
+                return;
+        }
+
+        if (constrainedDelaunay && TryAddDelaunayCap(ringIndex, flip, includeLatticePoints: false))
             return;
 
+        AddTessellatedCap(ringIndex, windingRule, flip);
+    }
+
+    private void AddTessellatedCap(int ringIndex, WindingRule windingRule, bool flip)
+    {
         var tess = new Tess();
         for (var l = 0; l < _loops.Count; l++)
         {
@@ -1247,6 +1269,165 @@ internal sealed class CurveSolidBuilder
             _capTriangles.Add(CounterClockwise(p0, p1, p2));
         }
 
+        EmitCap(flip);
+    }
+
+    /// <summary>
+    /// Triangulates the cap with a constrained Delaunay triangulation (CDT.NET): the ring points become vertices and
+    /// the loop segments constraint edges, so the result maximizes the smallest angle instead of leaving long thin
+    /// triangles that fold when the cap is subdivided or deformed. Holes and disjoint outlines are erased by the
+    /// even-odd depth of their contours. With <paramref name="includeLatticePoints"/>, the lattice's interior grid
+    /// points are added as free vertices, so the cap keeps its point density and still gets Delaunay triangles.
+    /// Returns false when the loops can't be triangulated, so the caller can fall back to the next cap method.
+    /// </summary>
+    private bool TryAddDelaunayCap(int ringIndex, bool flip, bool includeLatticePoints)
+    {
+        _delaunayPointIds.Clear();
+        _delaunayIndices.Clear();
+        _delaunayVertices.Clear();
+        _delaunayEdges.Clear();
+
+        for (var l = 0; l < _loops.Count; l++)
+        {
+            var loop = _loops[l];
+            var count = loop.Count;
+            var first = -1;
+            var previous = -1;
+            for (var i = 0; i < count; i++)
+            {
+                var pointId = _loopRings[l][ringIndex * count + i];
+                if (!_delaunayIndices.TryGetValue(pointId, out var vertex))
+                {
+                    vertex = _delaunayVertices.Count;
+                    _delaunayIndices.Add(pointId, vertex);
+                    _delaunayPointIds.Add(pointId);
+                    var p = _positions[pointId];
+                    _delaunayVertices.Add(new V2d<double>(p.X, p.Y));
+                }
+
+                if (first < 0)
+                    first = vertex;
+
+                // Loops that touch share a point; dropping the zero length edge keeps the constraints valid
+                if (previous >= 0 && previous != vertex)
+                    _delaunayEdges.Add(new Edge(previous, vertex));
+
+                previous = vertex;
+            }
+
+            if (first >= 0 && previous >= 0 && previous != first)
+                _delaunayEdges.Add(new Edge(previous, first));
+        }
+
+        if (_delaunayVertices.Count < 3 || _delaunayEdges.Count < 3)
+            return false;
+
+        if (includeLatticePoints && !AddLatticePoints(ringIndex))
+            return false;
+
+        try
+        {
+            var triangulation = new Triangulation<double>();
+            triangulation.InsertVertices(_delaunayVertices);
+            triangulation.InsertEdges(_delaunayEdges);
+            triangulation.EraseOuterTrianglesAndHoles();
+
+            _capTriangles.Clear();
+            foreach (var triangle in triangulation.Triangles.Span)
+            {
+                if (triangle.V0 >= _delaunayPointIds.Count || triangle.V1 >= _delaunayPointIds.Count
+                    || triangle.V2 >= _delaunayPointIds.Count)
+                    continue;
+
+                var p0 = _delaunayPointIds[triangle.V0];
+                var p1 = _delaunayPointIds[triangle.V1];
+                var p2 = _delaunayPointIds[triangle.V2];
+                _capTriangles.Add(CounterClockwise(p0, p1, p2));
+            }
+        }
+        catch (Exception exception)
+        {
+            DelaunayIssue = $"Constrained Delaunay triangulation failed ({exception.Message}); falling back to the regular cap.";
+            Log.Warning(DelaunayIssue);
+            return false;
+        }
+
+        EmitCap(flip);
+        return true;
+    }
+
+    /// <summary>
+    /// Adds the lattice's interior grid points as free vertices: all corners of cells wholly inside the cap and, for
+    /// cells the outline crosses, the corners inside. Corners on the outline are skipped because the cap boundary has
+    /// to keep the ring points it shares with walls and inset strips. The grid corners are shared between cells.
+    /// </summary>
+    /// <returns>False when the grid would need more than <see cref="MaxLatticeCells"/> and the lattice is ignored.</returns>
+    private bool AddLatticePoints(int ringIndex)
+    {
+        var cell = Lattice;
+        var min = new Vector2(float.MaxValue);
+        var max = new Vector2(float.MinValue);
+        foreach (var loop in _loops)
+        {
+            foreach (var p in loop)
+            {
+                min = Vector2.Min(min, p);
+                max = Vector2.Max(max, p);
+            }
+        }
+
+        var cellMinX = (int)MathF.Floor(min.X / cell);
+        var cellMinY = (int)MathF.Floor(min.Y / cell);
+        var cellMaxX = (int)MathF.Floor(max.X / cell);
+        var cellMaxY = (int)MathF.Floor(max.Y / cell);
+        if ((long)(cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1) > MaxLatticeCells)
+        {
+            LatticeIssue = $"Lattice is ignored: more than {MaxLatticeCells} cells. Use a larger cell size.";
+            return false;
+        }
+
+        var firstLoop = _loopRings.Count > 0 && _loops[0].Count > 0 ? _loopRings[0][ringIndex * _loops[0].Count] : -1;
+        var z = firstLoop >= 0 ? _positions[firstLoop].Z : 0f;
+        var onLine = 1e-4f * cell;
+        _latticeCornerKeys.Clear();
+        for (var cy = cellMinY; cy <= cellMaxY; cy++)
+        {
+            for (var cx = cellMinX; cx <= cellMaxX; cx++)
+            {
+                var cellMin = new Vector2(cx * cell, cy * cell);
+                var cellMax = cellMin + new Vector2(cell);
+                var touchesOutline = CellTouchesOutline(cellMin, cellMax);
+                var cellInside = !touchesOutline && IsInside((cellMin + cellMax) * 0.5f);
+                if (!touchesOutline && !cellInside)
+                    continue;
+
+                for (var corner = 0; corner < 4; corner++)
+                {
+                    var cornerX = cx + (corner == 1 || corner == 2 ? 1 : 0);
+                    var cornerY = cy + (corner == 2 || corner == 3 ? 1 : 0);
+                    if (_latticeCornerKeys.Contains((cornerX, cornerY)))
+                        continue;
+
+                    var position = new Vector2(cornerX * cell, cornerY * cell);
+                    if (touchesOutline && (!IsInside(position) || IsPointOnOutline(position, onLine)))
+                        continue;
+
+                    _latticeCornerKeys.Add((cornerX, cornerY));
+                    var pointId = AddPoint(new Vector3(position.X, position.Y, z));
+                    _delaunayPointIds.Add(pointId);
+                    _delaunayIndices[pointId] = _delaunayVertices.Count;
+                    _delaunayVertices.Add(new V2d<double>(position.X, position.Y));
+                    if (_carriesAttributes)
+                        _interiorCapPoints.Add(pointId);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void EmitCap(bool flip)
+    {
         RemoveSlivers();
 
         // Front cap counter-clockwise seen from +Z, back cap the other way
@@ -1342,6 +1523,11 @@ internal sealed class CurveSolidBuilder
     }
 
     private readonly List<(int A, int B, int C)> _capTriangles = [];
+    private readonly List<int> _delaunayPointIds = [];
+    private readonly Dictionary<int, int> _delaunayIndices = [];
+    private readonly List<V2d<double>> _delaunayVertices = [];
+    private readonly List<Edge> _delaunayEdges = [];
+    private readonly HashSet<(int X, int Y)> _latticeCornerKeys = [];
 
     /// <summary>Splits every loop segment where it crosses a grid line, unless the crossing is within <paramref name="snap"/> of a point already there.</summary>
     private void InsertGridCrossings(float cell, float snap)
@@ -1672,6 +1858,31 @@ internal sealed class CurveSolidBuilder
         }
 
         return inside;
+    }
+
+    /** True when the position lies on one of the outline segments, within the tolerance. */
+    private bool IsPointOnOutline(Vector2 position, float tolerance)
+    {
+        var toleranceSquared = tolerance * tolerance;
+        foreach (var loop in _loops)
+        {
+            for (var i = 0; i < loop.Count; i++)
+            {
+                var a = loop[i];
+                var b = loop[(i + 1) % loop.Count];
+                if (position.X < MathF.Min(a.X, b.X) - tolerance || position.X > MathF.Max(a.X, b.X) + tolerance
+                    || position.Y < MathF.Min(a.Y, b.Y) - tolerance || position.Y > MathF.Max(a.Y, b.Y) + tolerance)
+                    continue;
+
+                var segment = b - a;
+                var lengthSquared = segment.LengthSquared();
+                var u = lengthSquared > 1e-12f ? Math.Clamp(Vector2.Dot(position - a, segment) / lengthSquared, 0, 1) : 0;
+                if (Vector2.DistanceSquared(a + segment * u, position) <= toleranceSquared)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool BoundsOverlap(List<Vector2> loop, Vector2 cellMin, Vector2 cellMax)
