@@ -174,39 +174,6 @@ internal static class TimeControls
             ProjectView.Focused?.TimeLineCanvas.DopeSheetArea.PinnedParametersHashes.Clear();
     }
 
-    /// <summary>
-    /// The transport controls in one row, as shown at the bottom of the graph window while the timeline is attached.
-    /// </summary>
-    internal static void DrawTimeControls(TimeLineCanvas timeLineCanvas, Instance composition)
-    {
-        var playback = Playback.Current;
-        PlaybackUtils.FindCompositionSettingsForInstance(composition, out _, out var settings);
-
-        DrawCurrentTime(playback, settings);
-        ImGui.SameLine();
-        DrawIdleMotionToggle(playback);
-        ImGui.SameLine();
-        DrawIoIndicator();
-        ImGui.SameLine();
-        if (settings.Playback.UsesBeatTapping)
-        {
-            DrawBeatTapping(composition);
-        }
-        else
-        {
-            DrawTransport(playback);
-            ImGui.SameLine();
-            DrawModeToggle(timeLineCanvas);
-        }
-
-        ImGui.SameLine();
-        DrawMuteToggle();
-        ImGui.SameLine();
-        DrawPinToggle();
-
-        ImGui.SameLine();
-    }
-
     /** Current playback time and the button that switches its display format. */
     internal static void DrawCurrentTime(Playback playback, CompositionSettings settings)
     {

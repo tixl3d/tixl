@@ -23,7 +23,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// </summary>
 internal sealed class ClipRange : IValueSnapAttractor
 {
-    public void Draw(TimeLineCanvas canvas, Instance composition, TimeClip timeClip, ImDrawListPtr drawlist)
+    /// <param name="shadeTop">Screen y where the outside shading starts, so it leaves the ruler above untouched.</param>
+    public void Draw(TimeLineCanvas canvas, Instance composition, TimeClip timeClip, ImDrawListPtr drawlist, float shadeTop)
     {
         if (timeClip == null)
             return;
@@ -43,9 +44,9 @@ internal sealed class ClipRange : IValueSnapAttractor
         var xEnd = canvas.TransformX((float)windowEnd);
         var windowMaxX = ImGui.GetContentRegionAvail().X + canvas.WindowPos.X;
 
-        drawlist.AddRectFilled(new Vector2(0, 0), new Vector2(xStart, OutsideHeight), _timeRangeOutsideColor);
+        drawlist.AddRectFilled(new Vector2(0, shadeTop), new Vector2(xStart, OutsideHeight), _timeRangeOutsideColor);
         if (xEnd < windowMaxX)
-            drawlist.AddRectFilled(new Vector2(xEnd, 0), new Vector2(windowMaxX, OutsideHeight), _timeRangeOutsideColor);
+            drawlist.AddRectFilled(new Vector2(xEnd, shadeTop), new Vector2(windowMaxX, OutsideHeight), _timeRangeOutsideColor);
     }
 
     /// <summary>

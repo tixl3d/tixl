@@ -8,7 +8,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 
 internal sealed class LoopRange : IValueSnapAttractor
 {
-    public void Draw(TimeLineCanvas canvas, Playback playback, ImDrawListPtr drawlist, ValueSnapHandler snapHandler)
+    /// <param name="shadeTop">Screen y where the outside shading starts, so it leaves the ruler above untouched.</param>
+    public void Draw(TimeLineCanvas canvas, Playback playback, ImDrawListPtr drawlist, ValueSnapHandler snapHandler, float shadeTop)
     {
         _playback = playback;
         
@@ -22,7 +23,7 @@ internal sealed class LoopRange : IValueSnapAttractor
 
             // Shade outside
             drawlist.AddRectFilled(
-                                   new Vector2(0, 0),
+                                   new Vector2(0, shadeTop),
                                    new Vector2(xRangeStart, _timeRangeShadowSize.Y),
                                    _timeRangeOutsideColor);
 
@@ -62,8 +63,8 @@ internal sealed class LoopRange : IValueSnapAttractor
             var windowMaxX = ImGui.GetContentRegionAvail().X + canvas.WindowPos.X;
             if (rangeEndX < windowMaxX)
                 drawlist.AddRectFilled(
-                                       rangeEndPos,
-                                       rangeEndPos + new Vector2(windowMaxX - rangeEndX, _timeRangeShadowSize.Y),
+                                       new Vector2(rangeEndX, shadeTop),
+                                       new Vector2(windowMaxX, _timeRangeShadowSize.Y),
                                        _timeRangeOutsideColor);
 
             // Shadow
