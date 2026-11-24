@@ -7,16 +7,19 @@
 #   Installer/Linux/build-tarball.sh --skip-build  # stage + pack an existing Release build
 #   Installer/Linux/build-tarball.sh --stage-only  # build + stage, no tarball (for distro packages)
 #   Installer/Linux/build-tarball.sh --system-dotnet  # don't bundle the .NET runtime with the editor
+#   Installer/Linux/build-tarball.sh --system-slang   # don't bundle slangc (the package depends on the distro's)
 set -euo pipefail
 
 skip_build=false
 stage_only=false
 system_dotnet=false
+system_slang=false
 for arg in "$@"; do
     case "$arg" in
         --skip-build) skip_build=true ;;
         --stage-only) stage_only=true ;;
         --system-dotnet) system_dotnet=true ;;
+        --system-slang) system_slang=true ;;
         *) echo "Unknown option: $arg" >&2; exit 2 ;;
     esac
 done
@@ -92,7 +95,46 @@ install -Dm644 "$script_dir/common/app.tixl.TiXL.desktop"       "$share/applicat
 install -Dm644 "$script_dir/common/app.tixl.TiXL.metainfo.xml"  "$share/metainfo/app.tixl.TiXL.metainfo.xml"
 install -Dm644 "$script_dir/common/app.tixl.TiXL.png"           "$share/icons/hicolor/256x256/apps/app.tixl.TiXL.png"
 cp "$root/LICENSE.txt" "$stage/LICENSE.txt"
-# Tarball users have no package manager pulling in the SDK, Vulkan and slangc; this does it for them.
+
+# Slang: only what slangc needs for HLSL -> SPIR-V (~43 MB; slang-llvm alone is 150 MB and only serves CPU
+# targets), the subset the Windows and macOS builds ship too. SlangShaderCompiler.FindCompiler looks in
+# <app>/slang/bin, and SlangLibrary loads ../lib/libslang-compiler.so from there to compile in-process. The
+# version comes from the compiler's pin; the checksum has to follow it by hand.
+if [[ "$system_slang" == false ]]; then
+    slang_version="$(sed -n 's/.*PinnedVersion = "\(.*\)";.*/\1/p' "$root/Core/Resource/ShaderCompiling/SlangShaderCompiler.cs")"
+    slang_sha256="e45ea4f117d51b8c1e84fa49f562081e73a9f29d02bd4f7fad20678603282829" # 2026.18
+    slang_archive="$script_dir/Output/downloads/slang-$slang_version-linux-x86_64-glibc-2.27.tar.gz"
+    if [[ ! -f "$slang_archive" ]]; then
+        echo "Downloading Slang $slang_version..."
+        mkdir -p "$(dirname "$slang_archive")"
+        curl -fsSL -o "$slang_archive.part" \
+            "https://github.com/shader-slang/slang/releases/download/v$slang_version/$(basename "$slang_archive")"
+        mv "$slang_archive.part" "$slang_archive"
+    fi
+    if [[ "$(sha256sum "$slang_archive" | cut -d' ' -f1)" != "$slang_sha256" ]]; then
+        echo "Checksum mismatch for $slang_archive. After changing PinnedVersion, update slang_sha256 here." >&2
+        exit 1
+    fi
+
+    slang_staging="$script_dir/Output/slang-staging"
+    rm -rf "$slang_staging"
+    mkdir -p "$slang_staging" "$stage/slang/bin" "$stage/slang/lib"
+    tar -xzf "$slang_archive" -C "$slang_staging"
+    cp "$slang_staging/bin/slangc" "$stage/slang/bin/"
+    for library in "libslang-compiler.so.0.$slang_version" "libslang-glslang-$slang_version.so" \
+                   "libslang-glsl-module-$slang_version.so"; do
+        cp "$slang_staging/lib/$library" "$stage/slang/lib/"
+    done
+    ln -s "libslang-compiler.so.0.$slang_version" "$stage/slang/lib/libslang-compiler.so"
+    cp "$slang_staging/LICENSE" "$stage/slang/"
+    rm -rf "$slang_staging"
+    if [[ "$("$stage/slang/bin/slangc" -v 2>&1)" != "$slang_version"* ]]; then
+        echo "Bundled slangc does not report version $slang_version" >&2
+        exit 1
+    fi
+fi
+
+# Tarball users have no package manager pulling in Vulkan; this does it for them.
 install -Dm755 "$script_dir/install-dependencies.sh" "$stage/install-dependencies.sh"
 install -Dm644 "$script_dir/DEPENDENCIES.md"         "$stage/DEPENDENCIES.md"
 

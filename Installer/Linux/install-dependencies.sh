@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Installs what TiXL needs that it cannot bundle: the Vulkan loader and the Slang shader compiler.
-# TiXL brings its own .NET runtime and compiles operators without the .NET SDK. A stopgap until
+# Installs what TiXL needs that it cannot bundle: the Vulkan loader, and the Slang shader compiler where the
+# download doesn't include it. TiXL brings its own .NET runtime and compiles operators without the .NET SDK. A stopgap until
 # distribution packages exist - see DEPENDENCIES.md for the table this script is derived from, and
 # aur/PKGBUILD for the Arch package.
 #
@@ -62,7 +62,7 @@ have_vulkan_loader() {
 }
 
 have_slangc() {
-    [ -x "$SLANG_DIR/bin/slangc" ] || [ -n "${TIXL_SLANGC:-}" ] || command -v slangc >/dev/null 2>&1
+    [ -x "$(dirname "${BASH_SOURCE[0]}")/slang/bin/slangc" ] || [ -x "$SLANG_DIR/bin/slangc" ] || [ -n "${TIXL_SLANGC:-}" ] || command -v slangc >/dev/null 2>&1
 }
 
 case "$family" in

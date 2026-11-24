@@ -37,8 +37,8 @@ The full list with package names per distro is in [`DEPENDENCIES.md`](DEPENDENCI
   resources or custom build steps fall back to `dotnet build` from `PATH`, which needs the SDK and network
   access to NuGet.
 - Vulkan loader and driver.
-- `slangc` (Slang 2026.18) for shader compilation, found on `PATH` or through `TIXL_SLANGC`. A package that
-  ships its distribution's Slang instead sets `TIXL_SLANGC_UNPINNED=1`, which turns the startup check's
+- `slangc` (Slang 2026.18) for shader compilation, bundled in `slang/`. A package built with `--system-slang`
+  finds its distribution's slangc on `PATH` or through `TIXL_SLANGC`, and sets `TIXL_SLANGC_UNPINNED=1`, which turns the startup check's
   version complaint into a log line and keys the shader cache on the version in use.
 - `libtixlaudio.so` for audio, committed under `Dependencies/linux-x64/` and built from `Native/TixlAudio/`.
 

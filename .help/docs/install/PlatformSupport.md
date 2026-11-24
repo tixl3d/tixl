@@ -32,8 +32,8 @@ The status describes the current development version. Please report anything tha
 | Video export | Works | Works | Partial |
 
 Windows renders with DirectX 11; Linux and macOS render with Vulkan (on macOS through MoltenVK, which
-translates Vulkan to Metal). Shaders are compiled with the Slang compiler on Linux and macOS, which TiXL
-offers to download on first start.
+translates Vulkan to Metal). Shaders are compiled with the Slang compiler on Linux and macOS, which comes with
+TiXL.
 
 On all three systems TiXL brings its own .NET runtime and compiles operators itself, so you don't install .NET.
 Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL

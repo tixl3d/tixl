@@ -12,7 +12,6 @@ The native Linux version is a preview. Expect rough edges, and please report pro
 - A 64-bit x86 PC (`x86_64`). ARM machines like Raspberry Pi or Apple Silicon aren't supported.
 - A graphics card with a Vulkan driver: Mesa (AMD, Intel) or NVIDIA's proprietary driver.
 - A distribution from late 2023 or later: Ubuntu 24.04, Debian 13, Fedora 39, Linux Mint 22, or a current Arch.
-- The **Slang shader compiler** (`slangc`). TiXL uses it to compile shaders for Vulkan.
 
 ## The easy way: Flatpak
 
@@ -37,8 +36,8 @@ Audio goes through PipeWire or PulseAudio where they run, and ALSA otherwise. Th
 
 ## Install the dependencies
 
-TiXL needs the Vulkan loader and the Slang shader compiler (`slangc`). Most desktop installs already have
-the Vulkan driver. TiXL brings its own .NET runtime and compiles operators itself.
+TiXL needs the Vulkan loader and a Vulkan driver, which most desktop installs already have. Everything else
+comes with the download: its own .NET runtime and the Slang shader compiler (`slangc`) in the tested version.
 
 ### With the setup script
 
@@ -54,25 +53,18 @@ The script recognizes Arch, Debian/Ubuntu and Fedora (and their derivatives), li
 asks before it installs anything:
 
 - The Vulkan loader comes from your package manager, which asks for your password.
-- `slangc` is downloaded in the tested version (2026.18) into `~/.local/opt/slang-2026.18`, the folder
-  TiXL looks in first. This step needs no password.
 
 `./install-dependencies.sh --check` only reports what's missing; `--yes` installs without asking. On
-NixOS the script prints what to add to your configuration instead. On other distributions it installs
-only `slangc` and tells you what's left.
+NixOS the script prints what to add to your configuration instead. On other distributions it tells you what's
+missing.
 
 To install the dependencies by hand, use the commands for your distribution below.
 
 ### Arch, Manjaro, EndeavourOS
 
 ```bash
-sudo pacman -S vulkan-icd-loader shader-slang
+sudo pacman -S vulkan-icd-loader
 ```
-
-`shader-slang` from the official `extra` repository provides `slangc`. TiXL is tested with the Slang
-2026.18 line; if Arch has moved past it and shaders misbehave, use the pinned download described under
-[Slang on other distributions](#slang-on-other-distributions). Don't confuse it with `slang`, which is the
-unrelated S-Lang interpreter.
 
 ### Ubuntu, Debian, Linux Mint, Pop!_OS
 
@@ -110,21 +102,12 @@ On other distributions you can use the same flake through [nixGL](https://github
 See [the flake's README](https://github.com/tixl3d/tixl/blob/feat/linux-port/Installer/Linux/nix/README.md)
 for more information on that.
 
-### Slang on other distributions
+### Using a different Slang
 
-If your distribution doesn't package Slang, download the release TiXL is tested with and unpack it
-into the folder TiXL looks in first. No `PATH` changes needed:
+The download brings the Slang release TiXL is tested with, in its `slang` folder. To try another `slangc`,
+point the `TIXL_SLANGC` environment variable at it.
 
-```bash
-mkdir -p ~/.local/opt/slang-2026.18
-curl -L https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2026.18-linux-x86_64.tar.gz \
-  | tar xz -C ~/.local/opt/slang-2026.18
-```
-
-If you keep `slangc` somewhere else, put it on your `PATH` or point the `TIXL_SLANGC` environment
-variable at it.
-
-If your distribution packages a *newer* Slang, TiXL says so at startup: it is tested with one release line,
+If that Slang is from a different release line, TiXL says so at startup: it is tested with one release line,
 because a different compiler can translate a shader differently. To use the packaged one anyway, start TiXL
 with `TIXL_SLANGC_UNPINNED=1` — the shader cache keeps its blobs apart from the pinned compiler's, so you can
 switch back at any time. Packages that ship their distribution's Slang (the Nix flake, for one) set this for
@@ -298,8 +281,8 @@ should list your graphics card. If it doesn't, install the Vulkan driver for you
 
 ### Shader operators show compile errors
 
-TiXL is tested with Slang 2026.18. Other versions usually work, but if shaders fail to compile, try
-the tested version as described in [Slang on other distributions](#slang-on-other-distributions).
+TiXL is tested with Slang 2026.18, which comes with the download. If you use another one (see
+[Using a different Slang](#using-a-different-slang)), unset `TIXL_SLANGC` to go back to the tested one.
 
 ## Run the Windows version under Wine
 

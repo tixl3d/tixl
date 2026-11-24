@@ -123,7 +123,7 @@
 
           # Stages the editor's build output together with the operator packages, resources and embedded help
           # its own MSBuild targets copy there - the layout every Linux package of TiXL shares.
-          bash Installer/Linux/build-tarball.sh --skip-build --stage-only
+          bash Installer/Linux/build-tarball.sh --skip-build --stage-only --system-slang
 
           runHook postBuild
         '';

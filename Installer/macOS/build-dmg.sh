@@ -148,6 +148,8 @@ for library in "libslang-compiler.0.$slang_version.dylib" "libslang-glslang-$sla
                "libslang-glsl-module-$slang_version.dylib"; do
     cp "$slang_staging/lib/$library" "$payload/slang/lib/"
 done
+# SlangLibrary loads the unversioned name to compile in-process instead of starting slangc for every shader.
+ln -s "libslang-compiler.0.$slang_version.dylib" "$payload/slang/lib/libslang-compiler.dylib"
 cp "$slang_staging/LICENSE" "$payload/slang/"
 rm -rf "$slang_staging"
 if [[ "$("$payload/slang/bin/slangc" -v 2>&1)" != "$slang_version"* ]]; then

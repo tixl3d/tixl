@@ -30,7 +30,7 @@ build() {
     cd tixl
     export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 NUGET_PACKAGES="$srcdir/nuget"
     # The editor runs on the system runtime; it compiles operators without the SDK.
-    Installer/Linux/build-tarball.sh --stage-only --system-dotnet
+    Installer/Linux/build-tarball.sh --stage-only --system-dotnet --system-slang
 }
 
 package() {

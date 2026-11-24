@@ -17,7 +17,7 @@ lists which features work where.
 - **GPU:** a Vulkan driver — Mesa for AMD and Intel, or NVIDIA's proprietary driver.
 - **Distribution:** from late 2023 or later, for example Ubuntu 24.04, Debian 13, Fedora 39, Linux Mint 22 or a
   current Arch.
-- The Slang shader compiler; TiXL offers to download it.
+- The Slang shader compiler comes with TiXL.
 
 See [Install on Linux](../install/InstallLinux.md) for the details per distribution.
 
@@ -25,7 +25,7 @@ See [Install on Linux](../install/InstallLinux.md) for the details per distribut
 
 - **Mac:** Apple Silicon (M1 or newer). Intel Macs aren't supported.
 - **OS:** macOS 14 Sonoma or newer.
-- The Slang shader compiler; TiXL offers to download it.
+- The Slang shader compiler comes with TiXL.
 
 The graphics chip shares the Mac's memory, so plan for more memory than on a PC with a separate graphics
 card. See [Install on macOS](../install/InstallMacOS.md).

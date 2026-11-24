@@ -7,9 +7,9 @@ runtime (`dlopen`), which `ldd` can't see.
 Package names: Arch, AUR and nixpkgs names were checked against the live repositories (2026-10).
 Debian/Ubuntu and Fedora names follow those distros' conventions but haven't been tested yet.
 
-Until distribution packages exist, `install-dependencies.sh` installs the three required components from
-this table for Arch, Debian/Ubuntu and Fedora. Run it as your normal user — it calls `sudo` only for the
-package manager, so slangc lands in your home rather than root's:
+Until distribution packages exist, `install-dependencies.sh` installs the required components from this
+table for Arch, Debian/Ubuntu and Fedora. Run it as your normal user — it calls `sudo` only for the package
+manager, and installs slangc into your home only where the download doesn't bring it:
 
 ```bash
 Installer/Linux/install-dependencies.sh --check   # report only
@@ -19,14 +19,13 @@ Installer/Linux/install-dependencies.sh           # ask, then install
 ## Required
 
 At startup the Editor checks for the Vulkan loader and slangc, and shows the install command
-for the user's distribution when one is missing. It can download slangc itself, since that one needs no
-package manager.
+for the user's distribution when one is missing. The tarball brings slangc along; without it, the Editor can
+download it itself, since that one needs no package manager.
 
 | Component | Why | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|
 | **Vulkan loader** | Rendering | `vulkan-icd-loader` | `libvulkan1` | `vulkan-loader` | `vulkan-loader` |
 | **Vulkan driver** | Rendering | `vulkan-radeon` / `vulkan-intel` / `nvidia-utils` | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `mesa-vulkan-drivers` (NVIDIA: proprietary driver) | `hardware.graphics.enable = true;` |
-| **slangc** | Shader compilation. Found via `TIXL_SLANGC`, `~/.local/opt/slang-2026.18/bin`, or `PATH`. Tested with 2026.18 | `shader-slang` (extra; `slang` is the unrelated S-Lang) | GitHub release of shader-slang | GitHub release of shader-slang | `shader-slang` |
 | **ALSA library** | Audio, where no PipeWire or PulseAudio runs (loaded at runtime) | `alsa-lib` | `libasound2t64` (older: `libasound2`) | `alsa-lib` | `alsa-lib` |
 | **ICU, OpenSSL** | .NET globalization and HTTPS (loaded by the bundled runtime) | `icu`, `openssl` | `libicu*`, `libssl3` | `libicu`, `openssl-libs` | `icu`, `openssl` |
 | **X11 or Wayland client libs, libGL/EGL** | Windows (SDL3), startup dialog (GLFW) | present on any desktop | present on any desktop | present on any desktop | present on any desktop |
@@ -57,6 +56,7 @@ version where one exists.
 | Component | Comes from | License |
 |---|---|---|
 | .NET runtime (Editor and Player; `--system-dotnet` leaves it out of the Editor) | Microsoft | MIT |
+| slangc 2026.18 (`slang/`; `--system-slang` leaves it out for packages that depend on their distribution's Slang, found via `TIXL_SLANGC` or `PATH`) | shader-slang GitHub release | Apache-2.0 WITH LLVM-exception |
 | SDL3 | `ppy.SDL3-CS` NuGet | Zlib |
 | SkiaSharp, HarfBuzzSharp | NuGet | MIT / BSD-3-Clause |
 | FFmpeg 7 (`libavcodec.so.61`, ...) | Video operator package | LGPL-3.0 |
