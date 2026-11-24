@@ -249,6 +249,15 @@
       }
     },
     {
+      "ChildId": "4deb5dcf-ab1b-4c0a-b064-e4ccbb075f1f",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "b114608d-f283-4c7c-960a-27e1f971b281",
+      "Position": {
+        "X": 807.6062,
+        "Y": 617.2435
+      }
+    },
+    {
       "ChildId": "54cb0215-30b4-47d7-afd7-b83dd2a1b435",
       "SymbolName": "Lib.field.space.RepeatPolar",
       "SectionId": "b114608d-f283-4c7c-960a-27e1f971b281",
@@ -354,6 +363,15 @@
       "Position": {
         "X": 593.4551,
         "Y": 3555.9917
+      }
+    },
+    {
+      "ChildId": "700d9cd5-2bfa-476c-b4d4-423966282c40",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "b114608d-f283-4c7c-960a-27e1f971b281",
+      "Position": {
+        "X": 807.6062,
+        "Y": 582.2435
       }
     },
     {
@@ -757,7 +775,7 @@
     {
       "OutputId": "790cb6f6-1d90-4f16-a4ec-d9cb88788406"/*ColorBuffer*/,
       "Position": {
-        "X": 1497.2969,
+        "X": 1602.9534,
         "Y": 2863.1025
       }
     }
@@ -837,7 +855,7 @@
     },
     {
       "Id": "b57cf2a0-bf7b-47dc-8ee8-d5dcacc23b73",
-      "Label": "texture instead of fresnel",
+      "Label": "texture instead of fresnel AKA MatCap",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
