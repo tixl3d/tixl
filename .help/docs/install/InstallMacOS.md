@@ -32,9 +32,12 @@ read-only copy of the app from a hidden location, which can stop TiXL from loadi
 
 ### Allow TiXL to open
 
-The app isn't signed with an Apple developer certificate yet, so macOS blocks it the first time with a
-message that it couldn't verify TiXL. Right-clicking the app and choosing **Open** no longer helps on
-macOS 15 and later. Instead:
+Releases are signed with an Apple developer certificate and notarized by Apple, so macOS only asks once
+whether you want to open an app downloaded from the internet.
+
+Builds from anywhere else, such as test builds from GitHub Actions, aren't signed. macOS blocks those the
+first time with a message that it couldn't verify TiXL. Right-clicking the app and choosing **Open** no longer
+helps on macOS 15 and later. Instead:
 
 1. Try to start TiXL once and close the message with **Done**.
 2. Open **System Settings → Privacy & Security** and scroll down to the message that TiXL was blocked.
@@ -53,26 +56,20 @@ xattr -dr com.apple.quarantine /Applications/TiXL.app
 When TiXL first opens your projects, macOS asks whether it may access your **Documents** folder. Click
 **Allow**: TiXL keeps your projects there, and it waits until you answer.
 
+macOS also asks the first time TiXL uses a microphone (live audio input) or a camera ([WebcamInput]). If you
+declined, allow TiXL under **System Settings → Privacy & Security → Microphone** or **Camera**, then restart
+TiXL. If TiXL isn't listed there and macOS never asked, `tccutil reset Microphone app.tixl.TiXL` (or `Camera`)
+in the Terminal makes macOS ask again on the next start.
+
 ### Missing dependencies
 
-At startup, TiXL checks for the Slang shader compiler (`slangc`). If it's missing, a dialog explains what to
-do and offers to download it for you.
+The Slang shader compiler (`slangc`) comes with the app. If it's missing anyway, a dialog at startup explains
+what to do and offers to download it.
 
-### Video playback
+### Video
 
-TiXL doesn't include FFmpeg on macOS yet, so video operators don't work out of the box. For now you can
-use Homebrew's FFmpeg 7:
-
-```bash
-brew install ffmpeg@7
-```
-
-Homebrew's FFmpeg is licensed differently from the version TiXL ships on other systems, so TiXL only uses
-it when you start it with `TIXL_FFMPEG_ALLOW_RESTRICTED=1`:
-
-```bash
-TIXL_FFMPEG_ALLOW_RESTRICTED=1 /Applications/TiXL.app/Contents/MacOS/TiXL
-```
+The app includes FFmpeg, so video playback works out of the box. Video export works too, except that there's
+no H.264 encoder on macOS yet: H.264 exports fall back to the older MPEG-4 codec for now.
 
 ## Using TiXL on a Mac
 
@@ -105,7 +102,7 @@ folders above until you delete them yourself.
 
 ## What doesn't work on macOS yet
 
-- **Video** without the Homebrew setup above, and hardware-accelerated video export.
+- **H.264 and hardware-accelerated video export.** H.264 exports fall back to MPEG-4.
 - **NDI, webcams and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
 - **Geometry shaders.** Apple's graphics chips don't have them. TiXL's own operators don't need them, but a
   custom shader with a geometry stage won't render.
