@@ -6,7 +6,13 @@ Checks, for the Editor and every operator package with TixlDistribution=Bundled:
   - the licence of every NuGet package it restores, read from the package's .nuspec,
   - every file in Dependencies/, which must be listed in Dependencies/third-party.json.
 Optional packages are installed on demand and not checked. Run after `dotnet restore t3.sln`.
+
+With --notices <file> --platform <rid>, a passing check also writes THIRD-PARTY-NOTICES.txt for that platform:
+the restored NuGet packages with licence, copyright and project URL, the files in Dependencies/, and what the
+release scripts add (installerAdditions in Dependencies/third-party.json). The release scripts put it next to
+the editor, where Help > Third-Party Licenses opens it.
 """
+import argparse
 import glob
 import json
 import os
@@ -50,8 +56,19 @@ NUGET_LICENCES_CHECKED_BY_HAND = {
 }
 
 
+PLATFORMS = ("win-x64", "linux-x64", "osx-arm64")
+
+
 def main() -> int:
+    arguments = argparse.ArgumentParser(description="Licence check for TiXL release builds.")
+    arguments.add_argument("--notices", help="write THIRD-PARTY-NOTICES.txt to this path when the check passes")
+    arguments.add_argument("--platform", choices=PLATFORMS, help="the platform the notices are for")
+    options = arguments.parse_args()
+    if options.notices and not options.platform:
+        arguments.error("--notices needs --platform")
+
     problems = []
+    shipped = {}
     nuget_root = os.environ.get("NUGET_PACKAGES") or os.path.join(os.path.expanduser("~"), ".nuget", "packages")
 
     projects = [("Editor", os.path.join(ROOT, "Editor", "Editor.csproj"))]
@@ -85,6 +102,8 @@ def main() -> int:
                                 f"in NUGET_LICENCES_CHECKED_BY_HAND")
             elif not is_allowed(licence):
                 problems.append(f"{name}: NuGet package {package} {version} is licensed '{licence}'")
+            else:
+                shipped[(package, version)] = licence
 
     problems.extend(check_dependencies_folder())
 
@@ -95,7 +114,83 @@ def main() -> int:
         return 1
 
     print(f"Licence check passed: Editor and {len(projects) - 1} bundled operator packages.")
+    if options.notices:
+        write_notices(options.notices, options.platform, shipped, nuget_root)
+        print(f"Wrote {options.notices} ({len(shipped)} NuGet packages).")
     return 0
+
+
+def write_notices(path, platform, shipped, nuget_root):
+    with open(os.path.join(ROOT, "Dependencies", "third-party.json"), encoding="utf-8") as file:
+        third_party = json.load(file)
+    version = re.search(r"<TixlVersion>([^<]+)</TixlVersion>",
+                        open(os.path.join(ROOT, "Tixl.props"), encoding="utf-8").read()).group(1)
+
+    lines = [
+        f"TiXL {version} ({platform}): third-party notices",
+        "",
+        "TiXL is licensed under the MIT licence (LICENSE.txt). It includes the components below, each under its",
+        "own licence. The licence texts are in the licenses folder next to this file and in the folders of the",
+        "components that bring their own.",
+        "",
+    ]
+
+    def add(name, licence, copyright_line, source, note=None):
+        lines.append(name)
+        lines.append(f"    Licence:   {licence}")
+        if copyright_line:
+            lines.append(f"    Copyright: {copyright_line}")
+        if source:
+            lines.append(f"    Source:    {source}")
+        if note:
+            lines.append(f"    Note:      {note}")
+        lines.append("")
+
+    lines += ["== Included by the installer", ""]
+    for entry in third_party.get("installerAdditions", []):
+        if platform in entry["platforms"]:
+            add(entry["name"], entry["licence"], entry.get("copyright"), entry.get("source"), entry.get("note"))
+
+    lines += ["== Native libraries and models", ""]
+    for relative, entry in sorted(third_party["files"].items()):
+        if platform in file_platforms(relative, entry):
+            add(relative, entry["licence"], None, None, "; ".join(filter(None, [entry.get("usedBy"), entry.get("note")])))
+
+    lines += ["== NuGet packages", ""]
+    for (package, package_version), licence in sorted(shipped.items(), key=lambda item: item[0][0].lower()):
+        metadata = nuspec_metadata(nuget_root, package, package_version)
+        add(f"{package} {package_version}", licence, metadata.get("copyright") or metadata.get("authors"),
+            metadata.get("projectUrl") or metadata.get("repository"))
+
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as file:
+        file.write("\n".join(lines).rstrip() + "\n")
+
+
+def file_platforms(relative, entry):
+    if "platforms" in entry:
+        return entry["platforms"]
+    if relative.startswith("linux-x64/"):
+        return ["linux-x64"]
+    if relative.startswith("osx/"):
+        return ["osx-arm64"]
+    return list(PLATFORMS)
+
+
+def nuspec_metadata(nuget_root, package, version):
+    for nuspec in glob.glob(os.path.join(nuget_root, package.lower(), version.lower(), "*.nuspec")):
+        with open(nuspec, encoding="utf-8", errors="ignore") as file:
+            text = file.read()
+        metadata = {}
+        for tag in ("copyright", "authors", "projectUrl"):
+            match = re.search(rf"<{tag}>([^<]+)</{tag}>", text)
+            if match:
+                metadata[tag] = " ".join(match.group(1).split())
+        match = re.search(r'<repository[^>]*\surl="([^"]+)"', text)
+        if match:
+            metadata["repository"] = match.group(1)
+        return metadata
+    return {}
 
 
 def read_properties(csproj):

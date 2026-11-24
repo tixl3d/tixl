@@ -95,6 +95,12 @@ install -Dm644 "$script_dir/common/app.tixl.TiXL.desktop"       "$share/applicat
 install -Dm644 "$script_dir/common/app.tixl.TiXL.metainfo.xml"  "$share/metainfo/app.tixl.TiXL.metainfo.xml"
 install -Dm644 "$script_dir/common/app.tixl.TiXL.png"           "$share/icons/hicolor/256x256/apps/app.tixl.TiXL.png"
 cp "$root/LICENSE.txt" "$stage/LICENSE.txt"
+# Help > Third-Party Licenses opens this. Nix builds have no python3 and go without it.
+if command -v python3 >/dev/null 2>&1; then
+    python3 "$root/Installer/check-licences.py" --notices "$stage/THIRD-PARTY-NOTICES.txt" --platform "$rid"
+else
+    echo "Warning: python3 not found - the release has no THIRD-PARTY-NOTICES.txt." >&2
+fi
 
 # Slang: only what slangc needs for HLSL -> SPIR-V (~43 MB; slang-llvm alone is 150 MB and only serves CPU
 # targets), the subset the Windows and macOS builds ship too. SlangShaderCompiler.FindCompiler looks in

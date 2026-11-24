@@ -90,12 +90,16 @@ foreach ($candidate in @("py", "python", "python3")) {
 }
 
 if ($python) {
+    # Next to the Editor, where Help > Third-Party Licenses looks for it.
+    & $python "$root/Installer/check-licences.py" --notices "$root/Editor/bin/Release/net10.0/THIRD-PARTY-NOTICES.txt" --platform win-x64
+    if ($LASTEXITCODE -ne 0) { throw "licence check failed" }
+
     $packArgs = @("$root/Installer/pack-extensions.py", $extensionsDir)
     if ($ExtensionVersion) { $packArgs += @("--version", $ExtensionVersion) }
     & $python @packArgs
     if ($LASTEXITCODE -ne 0) { throw "packing extensions failed" }
 } else {
-    Write-Warning "Python 3 not found: extensions were not packed. Install it (e.g. winget install Python.Python.3.12) to pack them."
+    Write-Warning "Python 3 not found: extensions were not packed and THIRD-PARTY-NOTICES.txt is missing. Install it (e.g. winget install Python.Python.3.12)."
 }
 
 Write-Host "Release build complete." -ForegroundColor Green

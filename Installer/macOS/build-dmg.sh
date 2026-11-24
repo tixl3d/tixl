@@ -235,6 +235,8 @@ cat > "$contents/Info.plist" <<PLIST
 PLIST
 
 cp "$root/LICENSE.txt" "$contents/Resources/LICENSE.txt"
+# Next to the Editor, where Help > Third-Party Licenses looks for it.
+python3 "$root/Installer/check-licences.py" --notices "$payload/THIRD-PARTY-NOTICES.txt" --platform "$rid"
 
 # The launcher (launcher.c) is the app's executable and runs the Editor's TiXL.dll on .NET in its own process.
 # Exec'ing the Editor's apphost instead makes macOS refuse microphone and camera access without asking. It links
