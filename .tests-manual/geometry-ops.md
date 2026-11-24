@@ -527,6 +527,10 @@ Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength
 - Set Inset 0.5 on letters with a thin stem: the op warns that the inset was limited, and the rings stop before
   opposite outlines overlap.
 - Weight still offsets the whole letter first; the ring is built inside the offset outline.
+- Add [ColorFacesFromAttribute] (Attribute `IsInset`, Colors white and blue): the ring faces become blue and the cap
+  stays white; with Inset 0 every face stays white.
+- With Lazenby Computer Liquid and text `Cc`, both letters get a complete inset ring: hairline edges in the outlines
+  are welded before insetting.
 
 ## Step: Constrained Delaunay caps
 

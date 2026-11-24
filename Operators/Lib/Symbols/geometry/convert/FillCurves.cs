@@ -8,8 +8,9 @@ namespace Lib.geometry.convert;
 /// Fills the closed curves of a Geometry with flat polygons, holes included, so they can be modelled further or
 /// rendered; the flat counterpart of [ExtrudeCurves] (Houdini's PolyFill). One output part per input part, with the
 /// input's part attributes. Polygons in the input are not passed through. Optionally insets the outline into a ring
-/// of quads with a smaller cap inside, for a boundary edge loop, and can triangulate the caps with a constrained
-/// Delaunay triangulation instead of the plain fill, using the lattice's points when both are on.
+/// of quads with a smaller cap inside, for a boundary edge loop; the ring faces carry the IsInset primitive attribute.
+/// The caps can be triangulated with a constrained Delaunay triangulation instead of the plain fill, using the
+/// lattice's points when both are on.
 /// </summary>
 [Guid("daab8738-babd-4036-8581-22e3dc55e4ba")]
 [ExportDependencies("LibTessDotNet.dll", "CDT.Core.dll")]

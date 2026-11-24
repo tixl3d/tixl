@@ -93,6 +93,7 @@ internal sealed class CurveSolidBuilder
         _faceOffsets.Clear();
         _faceOffsets.Add(0);
         _isSide.Clear();
+        _isInset.Clear();
         _parts.Clear();
         _kinds.Clear();
         _closed.Clear();
@@ -126,6 +127,8 @@ internal sealed class CurveSolidBuilder
         _normals.CopyTo(normals.Values);
         var isSide = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsSide, AttributeDomain.Primitive, primitiveCount);
         _isSide.CopyTo(isSide.Values);
+        var isInset = target.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsInset, AttributeDomain.Primitive, primitiveCount);
+        _isInset.CopyTo(isInset.Values);
 
         if (_curvePointHandles.Count > 0)
         {
@@ -246,6 +249,7 @@ internal sealed class CurveSolidBuilder
 
             _faceOffsets.Add(_corners.Count);
             _isSide.Add(0);
+            _isInset.Add(0);
             if (_carriesAttributes)
                 _primitiveSources.Add(primitive);
 
@@ -597,7 +601,7 @@ internal sealed class CurveSolidBuilder
     }
 
     private static readonly string[] _builderPointAttributes = [GeometryAttributeNames.HandleIn, GeometryAttributeNames.HandleOut, GeometryAttributeNames.Normal];
-    private static readonly string[] _builderPrimitiveAttributes = [GeometryAttributeNames.IsSide];
+    private static readonly string[] _builderPrimitiveAttributes = [GeometryAttributeNames.IsSide, GeometryAttributeNames.IsInset];
 
     private const float OnOutlineDistanceSquared = 1e-5f * 1e-5f;
 
@@ -685,6 +689,12 @@ internal sealed class CurveSolidBuilder
         _capBoundaryIsInset = false;
         if (useInset)
         {
+            // Fonts can contain hairline edges where a contour doubles back on itself. The straight skeleton sees
+            // those as an immediate split event and refuses to inset the whole loop, so weld them first.
+            WeldShortEdges(_loops, MathF.Max(tolerance, inset * 0.1f));
+            if (_loops.Count == 0)
+                return;
+
             // The outline ring is built first so the inset strip can share its points; the caps then use the
             // smaller inner rings, which BuildInsetBand builds its own rings for.
             BuildRings(profile);
@@ -743,6 +753,33 @@ internal sealed class CurveSolidBuilder
         }
 
         return _profile;
+    }
+
+    /// <summary>
+    /// Removes points closer than <paramref name="distance"/>. A contour that doubles back on itself leaves a
+    /// hairline edge, which the straight skeleton treats as an immediate split event and then refuses to inset at
+    /// all. Such edges are below the curve flattening and inset resolution, so welding them is not visible but lets
+    /// the inset run.
+    /// </summary>
+    private static void WeldShortEdges(List<List<Vector2>> loops, float distance)
+    {
+        var distanceSquared = distance * distance;
+        for (var l = loops.Count - 1; l >= 0; l--)
+        {
+            var loop = loops[l];
+            for (var i = loop.Count - 1; i >= 0 && loop.Count > 3; i--)
+            {
+                var previous = loop[(i - 1 + loop.Count) % loop.Count];
+                if (Vector2.DistanceSquared(loop[i], previous) < distanceSquared)
+                    loop.RemoveAt(i);
+            }
+
+            while (loop.Count > 3 && Vector2.DistanceSquared(loop[0], loop[^1]) < distanceSquared)
+                loop.RemoveAt(loop.Count - 1);
+
+            if (loop.Count < 3)
+                loops.RemoveAt(l);
+        }
     }
 
     private void OffsetLoops(float inset)
@@ -892,7 +929,7 @@ internal sealed class CurveSolidBuilder
             _polygon.Add(outlineIds[next]);
             _polygon.Add(alignedInnerIds[next]);
             _polygon.Add(alignedInnerIds[i]);
-            AddCapPolygon(Vector3.UnitZ, flip: false);
+            AddCapPolygon(Vector3.UnitZ, flip: false, isInset: true);
         }
     }
 
@@ -916,7 +953,7 @@ internal sealed class CurveSolidBuilder
             if (insetStart != insetEnd)
                 _polygon.Add(insetStart);
 
-            AddCapPolygon(Vector3.UnitZ, flip: false);
+            AddCapPolygon(Vector3.UnitZ, flip: false, isInset: true);
         }
     }
 
@@ -1794,7 +1831,7 @@ internal sealed class CurveSolidBuilder
     }
 
     /** Adds the collected polygon without repeated points, wound counter-clockwise from +Z for the front cap. */
-    private void AddCapPolygon(Vector3 normal, bool flip)
+    private void AddCapPolygon(Vector3 normal, bool flip, bool isInset = false)
     {
         for (var i = _polygon.Count - 1; i >= 0 && _polygon.Count > 0; i--)
         {
@@ -1828,6 +1865,7 @@ internal sealed class CurveSolidBuilder
 
         _faceOffsets.Add(_corners.Count);
         _isSide.Add(0);
+        _isInset.Add(isInset ? 1 : 0);
     }
 
     private bool CellTouchesOutline(Vector2 cellMin, Vector2 cellMax)
@@ -1962,6 +2000,7 @@ internal sealed class CurveSolidBuilder
         _corners.Add(b); _normals.Add(ProfileNormal(endOutward, profile, r, ringCount));
         _faceOffsets.Add(_corners.Count);
         _isSide.Add(1);
+        _isInset.Add(0);
     }
 
     /// <summary>Outward 2D normal of the outline at vertex index as seen from the given segment (index to index+1, or the one
@@ -2013,6 +2052,7 @@ internal sealed class CurveSolidBuilder
         _corners.Add(c); _normals.Add(normal);
         _faceOffsets.Add(_corners.Count);
         _isSide.Add(isSide ? 1 : 0);
+        _isInset.Add(0);
     }
 
     private void AddFace(int a, int b, int c, int d, Vector3 normal, bool isSide)
@@ -2023,6 +2063,7 @@ internal sealed class CurveSolidBuilder
         _corners.Add(d); _normals.Add(normal);
         _faceOffsets.Add(_corners.Count);
         _isSide.Add(isSide ? 1 : 0);
+        _isInset.Add(0);
     }
 
     /** Grid crossings closer than this share of a cell to an existing point use that point. */
@@ -2062,6 +2103,7 @@ internal sealed class CurveSolidBuilder
     private readonly List<Vector3> _normals = [];
     private readonly List<int> _faceOffsets = [];
     private readonly List<float> _isSide = [];
+    private readonly List<float> _isInset = [];
     private readonly List<PrimitivePart> _parts = [];
     private readonly List<PrimitiveKinds> _kinds = [];
     private readonly List<bool> _closed = [];
