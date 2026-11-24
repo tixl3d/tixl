@@ -401,8 +401,8 @@ internal static unsafe class ProgramWindows
 
     private const double VblankTimingTolerance = 0.25;
 
-    /** 30 fps on a 120 Hz display; lower rates don't need a frame-rate setting. */
-    private const int MaxVblanksPerFrame = 4;
+    /** 30 fps on a 360 Hz display. A lower cap would turn the slowest rates on fast displays into faster ones. */
+    private const int MaxVblanksPerFrame = 12;
     private static long _lastPacedFrameStart;
 
     public static void Present(bool useVSync)
