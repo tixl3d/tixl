@@ -34,6 +34,7 @@ public static partial class T3Ui
     {
         Profiling.KeepFrameData();
         App.DebugProtocol.DebugServer.ProcessMainThreadQueue();
+        Windows.Analyze.Benchmark.BenchmarkRunner.Update();
         //ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
         DragAndDropHandling.Update();
         MagGraph.Ui.DropHandling.DrawDragIndicator();

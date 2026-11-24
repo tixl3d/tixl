@@ -1,8 +1,11 @@
 #nullable enable
 
+using ImGuiNET;
 using T3.Core.Stats;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 
 namespace T3.Editor.Gui.Windows.Analyze;
 
@@ -24,6 +27,11 @@ internal sealed class PerformanceWindow : Window
     {
         DrawPresentationSettings();
         T3Metrics.DrawDetailedView();
+
+        if (ImGui.Button("Benchmark..."))
+            WindowManager.ToggleInstanceVisibility<Benchmark.BenchmarkWindow>();
+
+        CustomComponents.TooltipForLastItem("Measure how this machine handles CPU, compute and fill-rate load.");
     }
 
     /// <summary>The vsync and frame-rate settings, shared with the settings window.</summary>

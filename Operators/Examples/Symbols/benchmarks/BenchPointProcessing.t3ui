@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 3,
+  "Id": "22a202a0-7fde-5c9d-a6fb-813d8264c82a",
+  "Description": "Benchmark: generates points and runs them through two compute operators (noise and transform); the noise phase follows the BenchmarkFrame variable, so both run every frame. The Load input sets the point count; the benchmark suite sweeps it to measure compute shader and buffer throughput.",
+  "InputUis": [
+    {
+      "InputId": "f8da3b29-d83f-5ea8-9688-3dd3e1eecca2",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -750.0,
+        "Y": 0.0
+      },
+      "Description": "The amount the benchmark suite sweeps."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "dca166b0-60b2-5170-aee2-1e8d10cf83b9",
+      "SymbolName": "Lib.point.generate.LinePoints",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "cdf016df-e28e-5596-98ac-524944610c23",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
+      "Position": {
+        "X": -300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "ed514b86-034b-59dd-b689-3b1dc7a3ddf6",
+      "SymbolName": "Lib.point.modify.AddNoise",
+      "Position": {
+        "X": -150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ce2725cc-d60d-54a2-8627-f9dbd84d2d69",
+      "SymbolName": "Lib.point.transform.TransformPoints",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "eab8ac6b-f4c1-571e-9068-9676db4abc50",
+      "Position": {
+        "X": 450.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

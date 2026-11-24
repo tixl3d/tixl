@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "061cffbf-ba0e-515e-8342-0f940cde0c53",
+  "Description": "Benchmark: draws full-screen quads with additive blending into a render target at the requested resolution. The quad width (always 1) is read through the BenchmarkFrame variable, so the layers are drawn every frame. The Load input sets the number of layers; the benchmark suite sweeps it to measure pixel fill rate.",
+  "InputUis": [
+    {
+      "InputId": "a8af9219-f2e3-5b58-bc15-2a78e95797ac",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -750.0,
+        "Y": 0.0
+      },
+      "Description": "The amount the benchmark suite sweeps."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "36acc3e7-9c44-51e5-b54c-40024b52a4ab",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "4c044515-415d-5b0f-84be-dbcac870a724",
+      "SymbolName": "Lib.flow.Loop",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7daeae95-896d-54d2-85e2-3a85891ac6a7",
+      "SymbolName": "Lib.render.basic.DrawScreenQuad",
+      "Position": {
+        "X": -150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7428e642-684a-5b4f-adf0-76bb58c4e7c4",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "9be9761b-194f-5682-8da9-1ba41c3506db",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
+      "Position": {
+        "X": -450.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "39851ff3-0b82-54e4-a30f-7173e266face",
+      "Position": {
+        "X": 450.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

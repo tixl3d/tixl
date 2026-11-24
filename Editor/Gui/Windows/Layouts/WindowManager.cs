@@ -66,6 +66,7 @@ internal static partial class WindowManager
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
     internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
+    internal static readonly Analyze.Benchmark.BenchmarkWindow BenchmarkWindow = new();
 
     /// <summary>The version-welcome window matching the running build — only the "alpha" suffix gets the import/testing variant.</summary>
     internal static readonly WelcomeWindowBase WelcomeWindow = RuntimeAssemblies.IsAlpha
@@ -96,6 +97,7 @@ internal static partial class WindowManager
                 new RenderWindow(),
                 new IoViewWindow(),
                 new PerformanceWindow(),
+                BenchmarkWindow, // item shown in Help > Development Tools
                 HelpWindow, // item shown in Help menu
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu

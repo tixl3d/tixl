@@ -112,6 +112,14 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 - `setVSync` (`value`: bool, optional) switches the user's Use VSync setting and returns `useVSync`; without
   `value` it only reports. Restore the previous value after a measurement — the setting is saved.
   `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting.
+- `runBenchmark` (optional `note`, stored with the result: say what is uncommitted on top of the build's commit)
+  starts the Benchmark window's suite and returns at once; the run advances one measured frame per editor frame
+  (30–40 s). Poll `getBenchmarkStatus` (`isRunning`, `progress`, `resultPath`) until `isRunning` is false. The
+  finished status adds `comparison`: the previous run of the same label (OS, backend, configuration) and GPU, and
+  per test `previousMs`, `currentMs` (duration at the test's Reference), `changePercent`, `verdict`
+  (`Unchanged`, `Improved`, `Regressed`, `NotComparable`; changes count above 10 % and 0.05 ms) and `testChanged`.
+  `getBenchmarkHistory` (optional `label`, e.g. `linux-vulkan-debug`) lists saved runs newest first with `commit`,
+  `note` and `referenceMs` per test. The run switches VSync off and restores it at the end.
 - `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
   With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
   same key shows estimated progress. The overlay is presented by another thread, so neither

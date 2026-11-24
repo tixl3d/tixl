@@ -640,6 +640,7 @@ internal static class AppMenuBar
 
             WindowManager.UtilitiesWindow.DrawMenuItemToggle();
             WindowManager.GuidedFeatureTestsWindow.DrawMenuItemToggle();
+            WindowManager.BenchmarkWindow.DrawMenuItemToggle();
 
             ImGui.EndMenu();
         }

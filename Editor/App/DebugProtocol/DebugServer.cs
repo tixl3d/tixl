@@ -582,6 +582,22 @@ internal static class DebugServer
                 break;
             }
 
+            case "runBenchmark":
+            {
+                // Returns at once; the run advances one measured frame per editor frame. Poll getBenchmarkStatus.
+                Gui.Windows.Analyze.Benchmark.BenchmarkRunner.Start(request["note"]?.Value<string>() ?? string.Empty);
+                context.SendOk(new JObject { ["isRunning"] = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.IsRunning });
+                break;
+            }
+
+            case "getBenchmarkStatus":
+                HandleGetBenchmarkStatus(context);
+                break;
+
+            case "getBenchmarkHistory":
+                HandleGetBenchmarkHistory(request, context);
+                break;
+
             case "setFrameLatency":
             {
                 // 1 or 2 frames in flight; without a value it only reports.
@@ -1447,6 +1463,87 @@ internal static class DebugServer
     }
 
     /// <summary>The Performance window's rolling frame, CPU and present durations (oldest first), the data of its CSV export.</summary>
+    /// <summary>
+    /// Progress while running; once a run has finished, its result path and a comparison with the previous run of the
+    /// same machine and build configuration (duration at each test's Reference).
+    /// </summary>
+    private static void HandleGetBenchmarkStatus(RequestContext context)
+    {
+        var run = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.LatestRun;
+        var isRunning = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.IsRunning;
+        var result = new JObject
+                         {
+                             ["isRunning"] = isRunning,
+                             ["progress"] = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.Progress,
+                             ["resultPath"] = run?.FilePath ?? string.Empty,
+                         };
+
+        if (!isRunning && run != null && !string.IsNullOrEmpty(run.FilePath))
+        {
+            var previous = Gui.Windows.Analyze.Benchmark.BenchmarkHistory.FindPrevious(run, Gui.Windows.Analyze.Benchmark.BenchmarkRun.LoadAll());
+            if (previous != null)
+            {
+                var tests = new JArray();
+                foreach (var comparison in Gui.Windows.Analyze.Benchmark.BenchmarkHistory.Compare(previous, run))
+                {
+                    tests.Add(new JObject
+                                  {
+                                      ["test"] = comparison.Key,
+                                      ["previousMs"] = RoundOrNull(comparison.PreviousMs),
+                                      ["currentMs"] = RoundOrNull(comparison.CurrentMs),
+                                      ["changePercent"] = Math.Round(comparison.ChangePercent, 1),
+                                      ["verdict"] = comparison.Verdict.ToString(),
+                                      ["testChanged"] = comparison.TestChanged,
+                                  });
+                }
+
+                result["comparison"] = new JObject
+                                           {
+                                               ["previousPath"] = previous.FilePath,
+                                               ["previousCommit"] = previous.System.Commit,
+                                               ["previousNote"] = previous.Note,
+                                               ["tests"] = tests,
+                                           };
+            }
+        }
+
+        context.SendOk(result);
+    }
+
+    /// <summary>Saved runs, newest first, with commit, note and the duration at each test's Reference. Optional <c>label</c> filter.</summary>
+    private static void HandleGetBenchmarkHistory(JObject request, RequestContext context)
+    {
+        var label = request["label"]?.Value<string>();
+        var runs = new JArray();
+        foreach (var run in Gui.Windows.Analyze.Benchmark.BenchmarkRun.LoadAll())
+        {
+            if (!string.IsNullOrEmpty(label) && run.Label != label)
+                continue;
+
+            var referenceMs = new JObject();
+            foreach (var test in Gui.Windows.Analyze.Benchmark.BenchmarkSuite.Tests)
+            {
+                Gui.Windows.Analyze.Benchmark.BenchmarkHistory.TryGetReferenceMs(run, test, out var ms, out _);
+                referenceMs[test.Key] = RoundOrNull(ms);
+            }
+
+            runs.Add(new JObject
+                         {
+                             ["startedUtc"] = run.StartedUtc.ToString("o"),
+                             ["label"] = run.Label,
+                             ["adapter"] = run.System.Adapter,
+                             ["commit"] = run.System.Commit,
+                             ["note"] = run.Note,
+                             ["referenceMs"] = referenceMs,
+                             ["path"] = run.FilePath,
+                         });
+        }
+
+        context.SendOk(new JObject { ["runs"] = runs });
+    }
+
+    private static JToken RoundOrNull(double value) => double.IsNaN(value) ? JValue.CreateNull() : Math.Round(value, 3);
+
     private static void HandleGetFrameSamples(RequestContext context)
     {
         var frames = PerformanceMetrics.FrameDuration.AsOrderedSpan(new float[PerformanceMetrics.WindowSize]);
@@ -2771,7 +2868,7 @@ internal static class DebugServer
             "stopAudioRecording", "startRender", "getRenderStatus", "cancelRender", "connect", "deleteOp",
             "pin", "setBypass", "outputSetup", "resetView", "reload", "stallMainThread", "setVSync",
             "releaseGpuResources", "setTargetFrameRate", "setFrameLatency", "layoutSelection",
-            "deleteSelection", "undo", "redo", "setTime", "setPlayback"
+            "deleteSelection", "undo", "redo", "setTime", "setPlayback", "runBenchmark", "getBenchmarkStatus", "getBenchmarkHistory"
         ];
 
     private static readonly List<string> _recentMessages = new(RecentMessageCapacity);

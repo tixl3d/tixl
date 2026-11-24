@@ -139,6 +139,7 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         BackendDescription = $"Vulkan {properties.apiVersion.Major}.{properties.apiVersion.Minor}."
                              + $"{properties.apiVersion.Patch} on {AdapterName}";
         _limits = properties.limits;
+        DriverDescription = ReadDriverDescription(PhysicalDevice);
 
         var priority = 1f;
         VkDeviceQueueCreateInfo queueInfo = new()
@@ -294,6 +295,18 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
     /// <summary>Whether swapchains can wait for a present to reach the display (VK_KHR_present_wait).</summary>
     internal bool SupportsPresentWait { get; }
     public string BackendDescription { get; }
+
+    public string DriverDescription { get; }
+
+    private string ReadDriverDescription(VkPhysicalDevice physicalDevice)
+    {
+        VkPhysicalDeviceVulkan12Properties vulkan12 = new();
+        VkPhysicalDeviceProperties2 properties2 = new() { pNext = &vulkan12 };
+        InstanceApi.vkGetPhysicalDeviceProperties2(physicalDevice, &properties2);
+        var name = new VkUtf8String(vulkan12.driverName).ToString() ?? string.Empty;
+        var info = new VkUtf8String(vulkan12.driverInfo).ToString() ?? string.Empty;
+        return info.Length > 0 ? $"{name} {info}" : name;
+    }
 
     /// <summary>Zero: a VkDevice is not what the libraries asking for this expect.</summary>
     public IntPtr NativeDeviceHandle => IntPtr.Zero;
@@ -950,6 +963,8 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         return _commands;
     }
 
+    public void WaitForGpu() => FlushAndWait();
+
     public void EndFrame(ICommandList commands)
     {
         if (!_frameActive)
@@ -1234,6 +1249,9 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
             var fence = _frames[current].Fence;
             Api.vkWaitForFences(1, &fence, true, ulong.MaxValue).CheckResult();
+
+            // The queue retires in order, so this frame and every earlier one are done; their queries can be read now.
+            _completedFrameSerial = Math.Max(_completedFrameSerial, _frames[current].Serial);
 
             // D3D11's flush submits and the frame goes on. The caller keeps recording into the command list it
             // holds, so it has to be recording again, into the next slot, with its state intact.

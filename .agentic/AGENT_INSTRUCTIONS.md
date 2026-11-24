@@ -38,6 +38,16 @@ Allocations are acceptable for explicit user-triggered actions.
 
 Apply these rules where they matter — code that actually runs every frame and shows up in a profile. **Don't speculatively micro-optimise** cold paths: precomputed reciprocals (`inv = 1f / x`), hand-unrolled loops, or hoisting obvious divisions out of a small loop often hurt readability for a perf delta nobody will ever notice. Write the division the way you'd describe the math; reach for the optimised form only when a measurement says to.
 
+### Benchmark sanity check
+
+After a change to operator evaluation (slots, dirty flags, `Instance`), the render core, the graphics backends, or
+shaders and operators that most scenes use, run the benchmark suite over the debug bridge (`runBenchmark` with a
+`note` saying what is uncommitted, then poll `getBenchmarkStatus`; see [`DEBUG_PROTOCOL.md`](DEBUG_PROTOCOL.md)).
+The finished status compares the run with the previous one of the same machine and build configuration. Report
+every test marked `Regressed` or `Improved` with its change, and say when `testChanged` is set: then the test's
+operators changed and the numbers aren't comparable. Without an earlier run, run the suite on the unchanged build
+first. Compare Debug with Debug: CPU times differ by about 2.5× between configurations.
+
 ## State and Resource Handling
 - Avoid storing long-lived direct references to instances/resources.
 - Prefer storing and resolving by `Guid`.

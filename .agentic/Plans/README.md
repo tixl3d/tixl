@@ -137,6 +137,7 @@ These matter more than any filing decision.
 
 | Plan | State | Note |
 |---|---|---|
+| [Plan_PerformanceBenchmark](Plan_PerformanceBenchmark.md) | Phases 1–2 built 2026-11-24 (uncommitted), tested on Linux only | Benchmark window: CPU, Buffers & Compute, Draw & Fillrate sweeps graphed up to 50 ms with an authored Reference; needs runs on Windows (Vulkan, D3D11) and macOS |
 | [Plan_PreviewOverlays](Plan_PreviewOverlays.md) | Phases 1-4 shipped 2026-11-21 | Per-window overlay toggles and selection/hover in a typed context state (like RenderPassState) read by [GetPreviewState]; preview graphs draw them; new [FilterGeometry]; removes the ImGui overlays. Defaults per preview type open |
 | [Plan_MultiSelectionEditing](Plan_MultiSelectionEditing.md) | Nothing shipped; split out of Plan_KeyboardControl | Popover and Parameter window edit all selected ops; mixed-type rule undecided |
 | [Plan_AutomaticTests](Plan_AutomaticTests.md) | Some tests exist; runner phases don't | Start with CI. "No test projects" is false |
