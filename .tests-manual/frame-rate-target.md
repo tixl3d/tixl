@@ -51,6 +51,16 @@ setup that moves continuously. Check that *Lock Animation Step* is on by default
 - On: it stays at 8.333 ms through drops; damped and particle motion lags slightly on a drop instead of jumping ahead.
 - Keyframed animation and audio stay in sync with real time in both settings.
 
+## Step: Settings → Rendering
+
+**Action:**
+Open *Settings → Rendering* next to the Performance window and change *Frame Rate* and *Lock Animation Step* in one of them.
+
+**Expected:**
+- Both show the same values and follow each other's changes.
+- The category also lists *Max Fill Resolution*, *Suspend rendering when hidden*, the GPU memory settings and the shader options; *Settings → Interface* and *Settings → Projects* no longer do.
+- Below the frame-rate settings a hint suggests a fullscreen output against dropped frames.
+
 ## Step: Frame Rate needs VSync
 
 **Action:**

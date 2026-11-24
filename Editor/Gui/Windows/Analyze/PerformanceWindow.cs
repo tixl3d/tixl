@@ -74,6 +74,10 @@ internal sealed class PerformanceWindow : Window
                                           Smooth keeps one more frame in flight, like the Vulkan backend: one refresh more delay,
                                           but a late frame no longer costs a whole refresh.
                                           """);
+
+        FormInputs.AddVerticalSpace();
+        CustomComponents.HelpText("Frames dropping although the scene renders fast enough? In a window, the desktop compositor shares "
+                                  + "the GPU with TiXL and can miss refreshes with heavy scenes. A fullscreen output avoids this.");
         return changed;
     }
 

@@ -30,6 +30,7 @@ internal sealed partial class SettingsWindow : Window
         Interface,
         Theme,
         Projects,
+        Rendering,
         Audio,
         Midi,
         InputDevices,
@@ -285,18 +286,6 @@ internal sealed partial class SettingsWindow : Window
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Output");
-
-                    changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.MaxWindowFillResolution,
-                                                          "Max Fill Resolution",
-                                                          """
-                                                          Limits the render resolution of outputs that take their size from the window,
-                                                          like "Fill" in the Output Window and the background in focus mode.
-                                                          On high-resolution displays this keeps the frame rate reasonable;
-                                                          the image is upscaled to fill the window. Fixed resolutions like 4k are not affected.
-                                                          """,
-                                                          UserSettings.Defaults.MaxWindowFillResolution,
-                                                          GetWindowFillLimitLabel);
-
                     changed |= FormInputs.AddFloat("Sequential screenshots",
                                                    ref UserSettings.Config.ContinuousScreenshotDelay,
                                                    0.1f, 60f, 0.1f, true, true,
@@ -352,18 +341,6 @@ internal sealed partial class SettingsWindow : Window
                                                       "This warning pops up when you attempt to enter an Operator that ships with the application.\n" +
                                                       "If unsure, this is best left checked.",
                                                       UserSettings.Defaults.WarnBeforeLibEdit);
-
-                    changed |= FormInputs.AddCheckBox("Suspend rendering when hidden",
-                                                      ref UserSettings.Config.SuspendRenderingWhenHidden,
-                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.\n" +
-                                                      "Not applied during playback or while outputs are shown on other displays.",
-                                                      UserSettings.Defaults.SuspendRenderingWhenHidden);
-
-                    FormInputs.AddVerticalSpace();
-                    FormInputs.AddSectionSubHeader("Frame rate");
-                    FormInputs.SetIndentToParameters();
-                    changed |= Analyze.PerformanceWindow.DrawPresentationSettings();
-
                     break;
                 case Categories.Theme:
                     FormInputs.AddVerticalSpace();
@@ -466,22 +443,6 @@ internal sealed partial class SettingsWindow : Window
                                                      );
 
                     FormInputs.AddSectionSubHeader("Performance");
-                    FormInputs.SetIndentToLeft();
-
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
-                                                                     ref CoreSettings.Config.SkipOptimization,
-                                                                     "Makes working with shader graphs easier by skipping HLSL optimization.",
-                                                                     CoreSettings.Defaults.SkipOptimization);
-
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
-                                                                     ref CoreSettings.Config.EnableDirectXDebug,
-                                                                     """
-                                                                     Adds debug information to shaders and buffers for tools like RenderDoc.
-                                                                     Can impact rendering performance. Requires a restart.
-                                                                     Needs the Windows "Graphics Tools" optional feature; without it the debug layer is skipped.
-                                                                     """,
-                                                                     CoreSettings.Defaults.EnableDirectXDebug);
-                    FormInputs.SetIndentToParameters();
 
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddInt("Keep Projects Loaded",
@@ -493,6 +454,36 @@ internal sealed partial class SettingsWindow : Window
                                                  """,
                                                  UserSettings.Defaults.KeepLoadedProjectCount);
 
+
+                    break;
+                }
+                case Categories.Rendering:
+                {
+                    FormInputs.AddSectionSubHeader("Frame rate");
+                    FormInputs.SetIndentToParameters();
+                    changed |= Analyze.PerformanceWindow.DrawPresentationSettings();
+
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.AddSectionSubHeader("Output");
+                    changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.MaxWindowFillResolution,
+                                                          "Max Fill Resolution",
+                                                          """
+                                                          Limits the render resolution of outputs that take their size from the window,
+                                                          like "Fill" in the Output Window and the background in focus mode.
+                                                          On high-resolution displays this keeps the frame rate reasonable;
+                                                          the image is upscaled to fill the window. Fixed resolutions like 4k are not affected.
+                                                          """,
+                                                          UserSettings.Defaults.MaxWindowFillResolution,
+                                                          GetWindowFillLimitLabel);
+
+                    changed |= FormInputs.AddCheckBox("Suspend rendering when hidden",
+                                                      ref UserSettings.Config.SuspendRenderingWhenHidden,
+                                                      "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.\n" +
+                                                      "Not applied during playback or while outputs are shown on other displays.",
+                                                      UserSettings.Defaults.SuspendRenderingWhenHidden);
+
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.AddSectionSubHeader("GPU memory");
                     changed |= FormInputs.AddInt("GPU Memory Limit %",
                                                  ref UserSettings.Config.GpuMemoryLimitPercent,
                                                  10, 100, 0.2f,
@@ -511,6 +502,24 @@ internal sealed partial class SettingsWindow : Window
                                                  """,
                                                  UserSettings.Defaults.ReleaseUnusedRenderTargetsAfterSeconds);
 
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.AddSectionSubHeader("Shaders");
+                    FormInputs.SetIndentToLeft();
+
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
+                                                                     ref CoreSettings.Config.SkipOptimization,
+                                                                     "Makes working with shader graphs easier by skipping HLSL optimization.",
+                                                                     CoreSettings.Defaults.SkipOptimization);
+
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
+                                                                     ref CoreSettings.Config.EnableDirectXDebug,
+                                                                     """
+                                                                     Adds debug information to shaders and buffers for tools like RenderDoc.
+                                                                     Can impact rendering performance. Requires a restart.
+                                                                     Needs the Windows "Graphics Tools" optional feature; without it the debug layer is skipped.
+                                                                     """,
+                                                                     CoreSettings.Defaults.EnableDirectXDebug);
+                    FormInputs.SetIndentToParameters();
                     break;
                 }
                 case Categories.Audio:
@@ -899,6 +908,7 @@ internal sealed partial class SettingsWindow : Window
                                                                         Categories.Interface  => "User Interface",
                                                                         Categories.Theme      => "Color Theme",
                                                                         Categories.Projects   => "Project specific settings",
+                                                                        Categories.Rendering  => "Rendering and frame rate",
                                                                         Categories.Audio      => "Audio System",
                                                                         Categories.Midi       => "Midi & OSC",
                                                                         Categories.InputDevices => "Input Devices",
