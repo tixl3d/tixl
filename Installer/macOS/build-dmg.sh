@@ -155,6 +155,43 @@ if [[ "$("$payload/slang/bin/slangc" -v 2>&1)" != "$slang_version"* ]]; then
     exit 1
 fi
 
+# FFmpeg: the LGPL build of Native/FFmpeg/build-macos.sh, published once per FFmpeg version as the
+# deps-ffmpeg-<version> release (FFmpeg for macOS workflow, run by hand with "publish"). FfmpegLibrary loads the
+# libraries from the folder of VideoServices.dll, which is the Video package. TIXL_FFMPEG_ARCHIVE points at a
+# locally built archive instead.
+ffmpeg_version="$(sed -n 's/^version=//p' "$root/Native/FFmpeg/build-macos.sh")"
+ffmpeg_name="ffmpeg-$ffmpeg_version-lgpl-macos-arm64.tar.gz"
+ffmpeg_archive="${TIXL_FFMPEG_ARCHIVE:-$output/downloads/$ffmpeg_name}"
+if [[ ! -f "$ffmpeg_archive" ]]; then
+    echo "Downloading FFmpeg $ffmpeg_version..."
+    ffmpeg_url="https://github.com/tixl3d/tixl/releases/download/deps-ffmpeg-$ffmpeg_version/$ffmpeg_name"
+    mkdir -p "$(dirname "$ffmpeg_archive")"
+    if ! curl -fsSL -o "$ffmpeg_archive.part" "$ffmpeg_url" || ! curl -fsSL -o "$ffmpeg_archive.sha256" "$ffmpeg_url.sha256"; then
+        rm -f "$ffmpeg_archive.part" "$ffmpeg_archive.sha256"
+        echo "FFmpeg $ffmpeg_version is not published. Run the 'FFmpeg for macOS' workflow by hand with publish," >&2
+        echo "or build it with Native/FFmpeg/build-macos.sh and set TIXL_FFMPEG_ARCHIVE." >&2
+        exit 1
+    fi
+    mv "$ffmpeg_archive.part" "$ffmpeg_archive"
+    (cd "$(dirname "$ffmpeg_archive")" && shasum -a 256 -c "$(basename "$ffmpeg_archive").sha256")
+fi
+video_dir="$payload/Operators/Video"
+if [[ ! -f "$video_dir/VideoServices.dll" ]]; then
+    echo "The Video package is missing in $video_dir" >&2
+    exit 1
+fi
+ffmpeg_staging="$output/ffmpeg-staging"
+rm -rf "$ffmpeg_staging"
+mkdir -p "$ffmpeg_staging" "$video_dir/licenses/ffmpeg"
+tar -xzf "$ffmpeg_archive" -C "$ffmpeg_staging"
+cp "$ffmpeg_staging"/*.dylib "$video_dir/"
+cp "$ffmpeg_staging/COPYING.LGPLv2.1" "$ffmpeg_staging/LICENSE.md" "$ffmpeg_staging/SOURCE.txt" "$video_dir/licenses/ffmpeg/"
+rm -rf "$ffmpeg_staging"
+if [[ ! -f "$video_dir/libavcodec.61.dylib" ]]; then
+    echo "The FFmpeg archive did not contain libavcodec.61.dylib" >&2
+    exit 1
+fi
+
 # Icon: AppIcon.png is the logo on Apple's icon grid (a rounded square spanning 824 of 1024 px, with a shadow) -
 # a full-bleed square looks oversized next to every other app and covers its name in the app switcher.
 iconset="$output/TiXL.iconset"
@@ -189,6 +226,8 @@ cat > "$contents/Info.plist" <<PLIST
     <string>TiXL keeps your projects in your Documents folder.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>TiXL can react to sound from a microphone or line input.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>TiXL can use video from a camera, for example with the WebcamInput operator.</string>
 </dict>
 </plist>
 PLIST
