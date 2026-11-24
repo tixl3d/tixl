@@ -25,7 +25,7 @@ public sealed class SoftwareFrameConverter : IDisposable
 
     /// <summary>
     /// Converts <paramref name="source"/> into a reused packed-RGBA frame and returns it (valid until the
-    /// next call). Read pixels via <c>Data[0]</c>/<c>Linesize[0]</c> or <c>ToImageBuffer</c>.
+    /// next call). Read pixels via <see cref="CopyPixels"/>; Sdcb's <c>ToImageBuffer</c> fails outside Windows.
     /// </summary>
     public Frame Convert(Frame source)
     {

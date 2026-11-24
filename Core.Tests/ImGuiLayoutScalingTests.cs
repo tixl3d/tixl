@@ -31,8 +31,9 @@ public class ImGuiLayoutScalingTests
     public void DefaultLayout_AtSavedSize_KeepsWindowRects()
     {
         var (ini, titles) = LoadLayout("layout0.json");
+        var (pos, size) = ReadDockSpace(ini);
 
-        var result = ImGuiLayoutScaling.Rescale(ini, new Vector2(0, 26), new Vector2(2560, 1391), titles, MinPanelSize);
+        var result = ImGuiLayoutScaling.Rescale(ini, pos, size, titles, MinPanelSize);
 
         foreach (var title in titles)
         {
@@ -44,9 +45,10 @@ public class ImGuiLayoutScalingTests
     public void DefaultLayout_OnBiggerDisplay_ScalesAllPanels()
     {
         var (ini, titles) = LoadLayout("layout0.json");
+        var (pos, size) = ReadDockSpace(ini);
         const float factor = 1.5f;
 
-        var result = ImGuiLayoutScaling.Rescale(ini, new Vector2(0, 26), new Vector2(2560 * factor, 1391 * factor), titles, MinPanelSize);
+        var result = ImGuiLayoutScaling.Rescale(ini, pos, size * factor, titles, MinPanelSize);
 
         foreach (var title in titles)
         {
@@ -64,7 +66,7 @@ public class ImGuiLayoutScalingTests
 
         var result = ImGuiLayoutScaling.Rescale(ini, new Vector2(0, 20), new Vector2(800, 600), titles, MinPanelSize);
 
-        // The library column (199 of 2558) would be 62px wide; it takes the minimum from its larger sibling.
+        // Scaled down, the library column would be narrower than the minimum; it takes it from its larger sibling.
         var library = ReadWindowRect(result, "Symbol Library");
         Assert.Equal(MinPanelSize, library.Size.X);
         Assert.Equal(MinPanelSize + 2, ReadWindowRect(result, "Graph View##1").Pos.X);
@@ -193,6 +195,14 @@ public class ImGuiLayoutScalingTests
         }
 
         return (pos, size);
+    }
+
+    /** The dock space the layout was saved in, so the tests follow when the default layouts are saved again. */
+    private static (Vector2 Pos, Vector2 Size) ReadDockSpace(string ini)
+    {
+        var match = Regex.Match(ini, @"^DockSpace\s.*?\sPos=(-?\d+,-?\d+) Size=(\d+,\d+)", RegexOptions.Multiline);
+        Assert.True(match.Success, "No dock space in layout");
+        return (ParsePair(match.Groups[1].Value), ParsePair(match.Groups[2].Value));
     }
 
     private static Vector2 ParsePair(string text)
