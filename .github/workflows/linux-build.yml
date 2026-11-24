@@ -58,6 +58,14 @@ jobs:
       - name: Check Licences
         run: python3 Installer/check-licences.py
 
+      # The unit tests against this Release build. The Slang tests use the compiler the tarball bundles; tests
+      # that need a GPU skip themselves in the container.
+      - name: Run Tests
+        run: |
+          export TIXL_SLANGC="$PWD/Installer/Linux/Output/tixl-linux-x64/slang/bin/slangc"
+          dotnet test Core.Tests/Core.Tests.csproj -c Release --no-build
+          dotnet test VideoServices.Tests/VideoServices.Tests.csproj -c Release --no-build
+
       - name: Upload Tarball
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

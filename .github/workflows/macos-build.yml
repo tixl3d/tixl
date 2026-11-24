@@ -101,6 +101,16 @@ jobs:
       - name: Check Licences
         run: python3 Installer/check-licences.py
 
+      # The unit tests against this Release build, with the Slang compiler and FFmpeg libraries the app bundles
+      # (macOS has no FFmpeg NuGet package for the test project). Tests that need Vulkan skip themselves.
+      - name: Run Tests
+        run: |
+          app_dir="$PWD/Installer/macOS/Output/TiXL.app/Contents/Resources/TiXL"
+          export TIXL_SLANGC="$app_dir/slang/bin/slangc"
+          export TIXL_FFMPEG_DIR="$app_dir/Operators/Video"
+          dotnet test Core.Tests/Core.Tests.csproj -c Release --no-build
+          dotnet test VideoServices.Tests/VideoServices.Tests.csproj -c Release --no-build
+
       - name: Remove Signing Keychain
         if: always() && github.ref_type == 'tag'
         run: |
