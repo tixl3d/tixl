@@ -25,7 +25,10 @@ bool ParticleGridFind(in float3 position, out uint2 entry)
             i = cellEnd;
     }
     if(i >= cellEnd)
+    {
+        entry = 0;
         return false;
+    }
     entry.x = CellRangeIndices[i];
     entry.y = CellPointCounts[i] + entry.x;
     return true;
@@ -49,7 +52,11 @@ bool GridFind(in float3 position, out uint startIndex, out uint endIndex)
             i = cellEnd;
     }
     if(i >= cellEnd)
+    {
+        startIndex = 0;
+        endIndex = 0;
         return false;
+    }
 
     startIndex = CellRangeIndices[i];
     endIndex = CellPointCounts[i] + startIndex;

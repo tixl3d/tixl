@@ -236,6 +236,9 @@ public sealed class SlangShaderCompiler : ShaderCompiler
                 // A D3D9 keyword some 225 of TiXL's shaders still use, which FXC accepts and Slang does not.
                 "-D", "sampler=SamplerState",
 
+                // Implicit narrowing like float4 to float3 is idiomatic HLSL and all over TiXL's shaders and user code.
+                "-warnings-disable", "30081",
+
                 // Constant buffers keep D3D's packing, because the operators' C# structs are laid out for it.
                 "-fvk-use-dx-layout",
 

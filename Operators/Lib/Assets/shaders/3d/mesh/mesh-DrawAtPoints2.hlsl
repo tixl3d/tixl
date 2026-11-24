@@ -161,7 +161,7 @@ inline float GetUFromMode(float mode, int id, float f, float4 scatter, float w, 
     }
 }
 
-#define LimitScale(s)  ((s) > 1 ? s: 1/(2-(s)))
+#define LimitScale(s)  select((s) > 1, (s), 1/(2-(s)))
 
 
 psInput vsMain(uint id : SV_VertexID)

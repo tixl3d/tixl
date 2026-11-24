@@ -1,8 +1,8 @@
-float4x4 objectToWorldMatrix;
-float4x4 worldToCameraMatrix;
-float4x4 cameraToObjectMatrix; // modelview inverse
-float4x4 projMatrix;
-float4x4 textureMatrix;
+static float4x4 objectToWorldMatrix;
+static float4x4 worldToCameraMatrix;
+static float4x4 cameraToObjectMatrix; // modelview inverse
+static float4x4 projMatrix;
+static float4x4 textureMatrix;
 
 TextureCube CubeMap : register(t0);;
 //Texture2D txDiffuse;
@@ -10,9 +10,9 @@ TextureCube CubeMap : register(t0);;
 //Texture2D Image : register(t0);
 sampler texSampler : register(s0);
 
-float g_CubeSize = 256;
-float g_CubeLod = 0;
-float g_CubeLodCount = 1;
+static float g_CubeSize = 256;
+static float g_CubeLod = 0;
+static float g_CubeLodCount = 1;
 
 // float Roughness;
 // int BaseMip;

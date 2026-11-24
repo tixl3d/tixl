@@ -126,7 +126,7 @@ float3 voronoi( in float2 x, out float4 color )
 
 void mainImage( out float4 fragColor, in float2 fragCoord )
 {
-
+    fragColor = 0;
 }
 
 

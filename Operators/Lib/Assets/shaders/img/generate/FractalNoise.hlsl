@@ -56,7 +56,7 @@ float simplex_noise(float3 p)
 
     // thx nikita: https://www.shadertoy.com/view/XsX3zB
     float3 e = step(float3(0, 0, 0), d0 - d0.yzx);
-    float3 i1 = e * (1.0 - e.zxy, 1.0 - e.zxy, 1.0 - e.zxy);
+    float3 i1 = e * (1.0 - e.zxy);
     float3 i2 = 1.0 - e.zxy * (1.0 - e);
 
     float3 d1 = d0 - (i1 - 1.0 * K2);

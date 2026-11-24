@@ -140,7 +140,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     for(int stepIndex = 0; stepIndex< lineLength; stepIndex++ , pos += lineDirection )
     {
-        float hash = hash12((float2)(pos.x, pos.y));
+        float hash = hash12(float2(pos.x, pos.y));
 
         float2 uv = (pos + 0.1) / resolution;
             // ((float)stepIndex + 0.5) / (float)TargetWidth, 

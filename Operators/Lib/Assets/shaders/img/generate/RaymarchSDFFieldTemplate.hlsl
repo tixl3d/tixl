@@ -225,34 +225,4 @@ PSOutput psMain(vsOutput input)
     // result.depth = input.texCoord;
     result.depth = DepthFromWorldSpace2(depth, 0.01, 1000);
     return result;
-
-    //
-
-    col = lerp(col, Glow.rgb, float(steps) / float(MaxSteps) * Glow.a);
-
-    float f = clamp(log(length(p - input.worldTViewPos) / Fog), 0, 1);
-
-    // col = lerp(col, Background.rgb, f);
-
-    // a *= (1 - f * Background.a);
-
-    // if (a < 0.6)
-    // {
-    //     discard;
-    // }
-
-    result.color = float4(clamp(col, 0, 1000), saturate(a));
-    // result.color = float4(1, 1, 0, 1);
-    //   result.depth = totalD; // length(p);
-
-    // float depth = dot(eye - p, -input.viewDir);
-
-    // result.depth = input.texCoord;
-    // result.depth = DepthFromWorldSpace2(depth, 0.01, 1000);
-    // result.color = float4(depth.xxx, 1);
-    //  result.depth = DepthFromWorldSpace2(length(eye - p), 0.01, 1000);
-    return result;
-
-    // return float4(a.xxx, 1);
-    // return float4(col, a);
 }

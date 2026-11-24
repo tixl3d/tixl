@@ -463,6 +463,19 @@ PSOutput psMain(vsOutput input)
     float3 fieldPos = r.fieldPos;
     float3 absN = abs(normal);
 
+#ifndef MAPPING_GLOBAL_TRIPLANAR
+#define MAPPING_GLOBAL_TRIPLANAR 0
+#endif
+#ifndef MAPPING_LOCAL_TRIPLANAR
+#define MAPPING_LOCAL_TRIPLANAR 0
+#endif
+#ifndef MAPPING_XY
+#define MAPPING_XY 0
+#endif
+#ifndef MAPPING_XZ
+#define MAPPING_XZ 0
+#endif
+
 #if MAPPING_GLOBAL_TRIPLANAR
     float2 uv = (absN.x > absN.y && absN.x > absN.z) ? p.yz / TextureScale : (absN.y > absN.z) ? p.zx / TextureScale
                                                                                                : p.xy / TextureScale;

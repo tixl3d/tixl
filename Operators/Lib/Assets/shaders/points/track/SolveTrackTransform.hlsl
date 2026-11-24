@@ -370,7 +370,7 @@ void main(uint threadIndex : SV_GroupIndex)
     WindowWeights[threadIndex] = 0;
     WindowTransforms[threadIndex] = 0;
 
-    Similarity solved;
+    Similarity solved = (Similarity)0;
     bool isSolved = abs(offset) <= halfWindow && ChainToReference(slot, solved);
     if (isSolved)
     {

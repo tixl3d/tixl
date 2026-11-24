@@ -36,8 +36,7 @@ float4 GetBias(float4 x, float bias)
 
 float4 GetSchlickBias(float4 x, float gain)
 {
-    return x < 0.5 ? GetBias(x * 2.0, gain)/2.0
-                    : GetBias(x * 2.0 - 1.0,1.0 - gain)/2.0 + 0.5;
+    return select(x < 0.5, GetBias(x * 2.0, gain)/2.0, GetBias(x * 2.0 - 1.0,1.0 - gain)/2.0 + 0.5);
 }
 
 
