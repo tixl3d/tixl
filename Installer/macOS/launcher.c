@@ -81,11 +81,19 @@ int main(int argc, const char** argv)
         return 1;
     }
 
-    /* hostfxr lives in <dotnet root>/host/fxr/<version>/. */
+    /* A self-contained app carries hostfxr next to itself and is its own root; a global install keeps it in
+       <dotnet root>/host/fxr/<version>/. hostfxr looks for the runtime in this folder to tell the two apart. */
+    char app_dir[PATH_MAX];
+    snprintf(app_dir, sizeof(app_dir), "%s", app_path);
+    strip_last_component(app_dir);
     char dotnet_root[PATH_MAX];
     snprintf(dotnet_root, sizeof(dotnet_root), "%s", hostfxr_path);
-    for (int level = 0; level < 4; level++)
-        strip_last_component(dotnet_root);
+    strip_last_component(dotnet_root);
+    if (strcmp(dotnet_root, app_dir) != 0)
+    {
+        for (int level = 0; level < 3; level++)
+            strip_last_component(dotnet_root);
+    }
 
     /* The command line hostfxr expects: the app's path in place of the program name, then the app's arguments. */
     const char** arguments = calloc((size_t)argc + 1, sizeof(char*));
