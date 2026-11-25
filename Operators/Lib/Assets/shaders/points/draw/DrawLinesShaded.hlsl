@@ -36,6 +36,7 @@ cbuffer Params : register(b1)
     float Width;
     float CutOffTransparent;
     float FadeNearest;
+    float MaxSegmentLength;
 };
 
 cbuffer IntParams : register(b2)
@@ -180,31 +181,41 @@ struct LineEnd
     float LineCoord;
 };
 
+/** True if the points at i and i + 1 form a segment: both exist and neither is a separator. With a MaxSegmentLength,
+    longer jumps break the line the same way, for example where a trail wraps around. */
+bool IsSegment(int i, int pointCount)
+{
+    if (i < 0 || i + 1 >= pointCount)
+        return false;
+
+    Point from = Points[i];
+    Point to = Points[i + 1];
+    if (IsSeparator(from) || IsSeparator(to))
+        return false;
+
+    if (MaxSegmentLength <= 0)
+        return true;
+
+    float3 step = to.Position - from.Position;
+    return dot(step, step) <= MaxSegmentLength * MaxSegmentLength;
+}
+
 LineEnd GetLineEnd(int pointIndex, int pointCount, bool previousMatches)
 {
     int smoothing = clamp(Smoothing, 0, MaxSmoothing);
 
-    // Neighbours count only up to the next separator or buffer end, so lines never blend into each other.
-    // HLSL does not short-circuit '&&', so each index is range-checked before it is read.
+    // Neighbours count only up to the next break or buffer end, so lines never blend into each other.
     int pointsBefore = 0;
     for (; pointsBefore < smoothing; pointsBefore++)
     {
-        int neighbourIndex = pointIndex - pointsBefore - 1;
-        if (neighbourIndex < 0)
-            break;
-
-        if (IsSeparator(Points[neighbourIndex]))
+        if (!IsSegment(pointIndex - pointsBefore - 1, pointCount))
             break;
     }
 
     int pointsAfter = 0;
     for (; pointsAfter < smoothing; pointsAfter++)
     {
-        int neighbourIndex = pointIndex + pointsAfter + 1;
-        if (neighbourIndex >= pointCount)
-            break;
-
-        if (IsSeparator(Points[neighbourIndex]))
+        if (!IsSegment(pointIndex + pointsAfter, pointCount))
             break;
     }
 
@@ -329,10 +340,8 @@ psInput vsMain(uint id : SV_VertexID)
     int segmentIndex = id / 6;
     float2 corner = Corners[cornerIndex];
 
-    // The draw covers one quad per point, so the last one has no segment. Separators break the line.
-    bool hasSegment = segmentIndex + 1 < (int)pointCount;
-    if (hasSegment)
-        hasSegment = !IsSeparator(Points[segmentIndex]) && !IsSeparator(Points[segmentIndex + 1]);
+    // The draw covers one quad per point, so the last one has no segment. Separators and long jumps break the line.
+    bool hasSegment = IsSegment(segmentIndex, (int)pointCount);
 
     if (!hasSegment)
     {
@@ -351,13 +360,8 @@ psInput vsMain(uint id : SV_VertexID)
     float3 b = end.PositionInCamera;
 
     // At line ends the mirrored end point keeps the curve straight there, like the segment itself.
-    bool hasBefore = segmentIndex > 0;
-    if (hasBefore)
-        hasBefore = !IsSeparator(Points[segmentIndex - 1]);
-
-    bool hasAfter = segmentIndex + 2 < (int)pointCount;
-    if (hasAfter)
-        hasAfter = !IsSeparator(Points[segmentIndex + 2]);
+    bool hasBefore = IsSegment(segmentIndex - 1, (int)pointCount);
+    bool hasAfter = IsSegment(segmentIndex + 1, (int)pointCount);
 
     output.hasNeighbours = float2(hasBefore ? 1 : 0, hasAfter ? 1 : 0);
     output.beforeInCamera = hasBefore ? GetLineEnd(segmentIndex - 1, (int)pointCount, false).PositionInCamera : 2 * a - b;

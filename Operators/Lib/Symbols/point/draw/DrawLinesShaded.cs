@@ -26,6 +26,12 @@ internal sealed class DrawLinesShaded : Instance<DrawLinesShaded>
     [Input(Guid = "c000197c-192e-4073-a5aa-f2570933c4c8")]
     public readonly InputSlot<int> Smoothing = new();
 
+    [Input(Guid = "bd54e934-b714-4ae8-b423-06387e977a65")]
+    public readonly InputSlot<float> MaxSegmentLength = new();
+
+    [Input(Guid = "96e63ffb-bd62-4b24-8357-b27326f22898")]
+    public readonly InputSlot<bool> FlatCaps = new();
+
     [Input(Guid = "5a4e9d51-27c0-4c85-8cd9-37d7dbc27ce3")]
     public readonly InputSlot<bool> EnableZWrite = new();
 
