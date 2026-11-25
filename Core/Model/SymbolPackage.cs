@@ -243,25 +243,29 @@ public abstract partial class SymbolPackage : IResourcePackage
             }
         }
 
-        // gather slot changes
-        foreach (var symbol in updatedSymbols)
+        // Type updates rewrite the connections of parent symbols, which may belong to another package loading in parallel.
+        lock (_typeUpdateLock)
         {
-            symbol.UpdateInstanceType(true);
-        }
-
-        // update symbol instances 
-        foreach (var symbol in updatedSymbols)
-        {
-            UpdateSymbolInstances(symbol);
-            SymbolUpdated?.Invoke(symbol);
-        }
-
-        if (SymbolRemoved != null)
-        {
-            // remaining symbols have been removed from the assembly
-            foreach (var symbolId in removedSymbolIds)
+            // gather slot changes
+            foreach (var symbol in updatedSymbols)
             {
-                SymbolRemoved.Invoke(symbolId);
+                symbol.UpdateInstanceType(true);
+            }
+
+            // update symbol instances 
+            foreach (var symbol in updatedSymbols)
+            {
+                UpdateSymbolInstances(symbol);
+                SymbolUpdated?.Invoke(symbol);
+            }
+
+            if (SymbolRemoved != null)
+            {
+                // remaining symbols have been removed from the assembly
+                foreach (var symbolId in removedSymbolIds)
+                {
+                    SymbolRemoved.Invoke(symbolId);
+                }
             }
         }
 
@@ -439,6 +443,9 @@ public abstract partial class SymbolPackage : IResourcePackage
     public IReadOnlyDictionary<Guid, Symbol> Symbols => SymbolDict;
 
     private readonly ConcurrentBag<string> _corruptedSymbolFiles = new();
+
+    /** Serializes symbol type updates across all packages. */
+    private static readonly object _typeUpdateLock = new();
 
     /// <summary>
     /// Paths of .t3 files that were corrupt/unreadable during the last load and were skipped. When
