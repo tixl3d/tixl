@@ -97,7 +97,7 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
+      "Description": "Source IPv4 address. Auto (0.0.0.0) lets the OS choose. Unavailable addresses fall back to Auto; the saved value is unchanged.",
       "Usage": "CustomDropdown"
     }
   ],
