@@ -95,24 +95,28 @@ time *t* — no matter how the clip is stretched or slipped.
   color the fade had there after removal) — the original fade shape is *not* restored.
 - After the two undos: the original fade between bars 2 and 4 plays again.
 
-## Step: `Shift + C` inserts scalar step markers in local time
+## Step: `Shift + C` inserts step markers in local time
 
-> `Shift + C` only affects **scalar** parameters — vector parameters like Color are skipped, so
-> tapping step markers can't wreck a visible fade animation. Note the displayed *value* of Volume
-> never updates (nothing evaluates it yet — video audio is backlog); this step verifies the
+> `Shift + C` only affects parameters that have a **selected** keyframe, so tapping step markers
+> can't wreck other visible animations like the Color fade. The inserted keys become the new
+> selection, so repeated presses keep targeting the same parameters. Note the displayed *value* of
+> Volume never updates (nothing evaluates it yet — video audio is backlog); this step verifies the
 > keyframe **positions** in the dope sheet instead.
 
 **Action:**
 1. Keep the Color fade from the earlier steps visible in the dope sheet.
-2. `Alt + click` the **Volume** input in the Parameter Window to animate it.
+2. `Alt + click` the **Volume** input in the Parameter Window to animate it, then click its
+   keyframe in the dope sheet so it is the only selected keyframe.
 3. Move the playtime to bar `3` (clip still stretched to bars 0–8, source 0–4) and press
    `Shift + C` once. Move to bar `5`, press `Shift + C` again.
+4. Click empty dope-sheet space to clear the selection and press `Shift + C` once more.
 
 **Expected:**
 - The **Volume** row shows new keyframes drawn at bars **3** and **5** — exactly where you pressed
   `Shift + C`. (Internally they are stored at content bars 1.5 and 2.5; select one and check
   *Clip Times* if curious.)
-- The **Color** row gets **no** new keyframes — `Shift + C` skips vector parameters.
+- The **Color** row gets **no** new keyframes — none of its keyframes were selected.
+- With nothing selected (action 4), `Shift + C` inserts nothing.
 
 ## Step: Slipped clip
 
