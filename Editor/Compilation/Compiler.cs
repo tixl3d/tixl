@@ -307,7 +307,7 @@ internal static class Compiler
 
         if (!success)
         {
-            output = output == null ? logOutput : $"Restore output: ```\n{output}\n```\n Build output: \n```\n{output}\n```\n";
+            output = output == null ? logOutput : $"Restore output: ```\n{output}\n```\n Build output: \n```\n{logOutput}\n```\n";
         }
 
         return success;
