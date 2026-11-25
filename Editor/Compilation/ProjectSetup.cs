@@ -54,6 +54,7 @@ internal static partial class ProjectSetup
     }
     public static bool TryCreateProject(string nameSpace,
                                         bool shareResources,
+                                        string projectDirectory,
                                         [NotNullWhen(true)] out EditableSymbolProject? newProject,
                                         [NotNullWhen(false)] out string? failureLog)
     {
@@ -65,7 +66,7 @@ internal static partial class ProjectSetup
         CsProjectFile newCsProj;
         try
         {
-            newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectDirectories[0]);
+            newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, projectDirectory);
         }
         catch (Exception e)
         {

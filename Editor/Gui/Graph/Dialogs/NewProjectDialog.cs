@@ -20,18 +20,22 @@ internal sealed class NewProjectDialog : ModalDialog
         _newProjectName = "MyProject";
         _userName = UserSettings.Config.UserName;
         _newSubNamespace = "";
+
+        // Keep the folder picked last time while it is still configured.
+        var projectDirectories = UserSettings.Config.ProjectDirectories;
+        if (!projectDirectories.Contains(_projectDirectory))
+        {
+            _projectDirectory = projectDirectories.Count > 0
+                                    ? projectDirectories[0]
+                                    : FileLocations.DefaultProjectFolder;
+        }
     }
         
     public void Draw()
     {
-        DialogSize = new Vector2(550, 320);
-
-        // ProjectDirectories is normally populated at startup but can be empty
-        // on a corrupted user-settings file. Drawn every frame, so guard the indexer.
         var projectDirectories = UserSettings.Config.ProjectDirectories;
-        var primaryProjectDirectory = projectDirectories.Count > 0
-                                          ? projectDirectories[0]
-                                          : FileLocations.DefaultProjectFolder;
+        var hasMultipleProjectDirectories = projectDirectories.Count > 1;
+        DialogSize = new Vector2(550, hasMultipleProjectDirectories ? 350 : 320);
 
         if (BeginDialog("Create new project"))
         {
@@ -99,6 +103,12 @@ internal sealed class NewProjectDialog : ModalDialog
             ImGui.TextColored(allValid ? UiColors.TextMuted : UiColors.StatusError, fullName);
             
                 
+            if (hasMultipleProjectDirectories)
+            {
+                FormInputs.AddDropdown(ref _projectDirectory, projectDirectories, "Location",
+                                       "The project directory the new project is created in. Manage the list in Settings > Projects.");
+            }
+
             FormInputs.AddCheckBox("Share Resources", ref _shareResources, 
                                    """
                                    Enabling this allows anyone with this package to reference shaders, 
@@ -113,7 +123,7 @@ internal sealed class NewProjectDialog : ModalDialog
             }
                 
             FormInputs.SetIndentToLeft();
-            var projectFolder = System.IO.Path.Combine(primaryProjectDirectory, _newProjectName);
+            var projectFolder = System.IO.Path.Combine(_projectDirectory, _newProjectName);
             FormInputs.AddHint($"""
                                 Creates a new project. Projects are used to group operators and resources. 
                                 You can find your project in "{projectFolder}".
@@ -130,7 +140,7 @@ internal sealed class NewProjectDialog : ModalDialog
             ImGui.SameLine();
             if (CustomComponents.DrawCtaButton("Create", isEnabled: allValid))
             {
-                if (ProjectSetup.TryCreateProject(fullName, _shareResources, out var project, out var failureLog))
+                if (ProjectSetup.TryCreateProject(fullName, _shareResources, _projectDirectory, out var project, out var failureLog))
                 {
                     T3Ui.Save(false); // todo : this is probably not needed
                     ImGui.CloseCurrentPopup();
@@ -181,7 +191,7 @@ internal sealed class NewProjectDialog : ModalDialog
                         var hasResult = !string.IsNullOrWhiteSpace(result);
                         ReportError(report: hasResult,
                                     includeEnvVars: result == buttonWithEnvironmentVariables || !hasResult,
-                                    failureLog, fullName, primaryProjectDirectory);
+                                    failureLog, fullName, _projectDirectory);
                     }
                 }
             }
@@ -267,4 +277,5 @@ internal sealed class NewProjectDialog : ModalDialog
     private string _newSubNamespace = string.Empty;
     private string _userName = string.Empty;
     private bool _shareResources = true;
+    private string _projectDirectory = string.Empty;
 }

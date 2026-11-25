@@ -2344,7 +2344,7 @@ internal static class DebugServer
         }
 
         // Scaffolds files and compiles - blocks the frame loop for the duration.
-        if (!ProjectSetup.TryCreateProject(name, shareResources: true, out var newProject, out var failureLog))
+        if (!ProjectSetup.TryCreateProject(name, shareResources: true, UserSettings.Config.ProjectDirectories[0], out var newProject, out var failureLog))
         {
             context.SendError("CREATE_FAILED", failureLog ?? "unknown reason");
             return;
