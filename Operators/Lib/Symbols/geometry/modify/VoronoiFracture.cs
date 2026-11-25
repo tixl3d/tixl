@@ -132,8 +132,8 @@ internal sealed class VoronoiFracture : Instance<VoronoiFracture>, IProgressProv
                      () => new CellBuilder(),
                      (seedIndex, _, builder) =>
                      {
-                         cells[seedIndex] = builder.BuildCell(sourceIndex, insideTester, seeds, seedIndex, sourceHasNormals, fillInterior,
-                                                             sourceIsClosed);
+                         cells[seedIndex] = builder.BuildCell(sourceIndex, insideTester, seeds, seedIndex, sourceHasNormals,
+                                                             sourceIsClosed: sourceIsClosed, fillInterior: fillInterior);
                          var done = Interlocked.Increment(ref completed);
                          _asyncComputation.ReportProgress(done / (float)seeds.Length);
                          return builder;

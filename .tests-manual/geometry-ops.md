@@ -96,6 +96,23 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
   `FillInterior` reproduces the old dark gaps (expected for that setting, which
   exists for open or non-manifold meshes).
 
+## Step: Toggling interior cells and preserving openings
+
+**Action:**
+Use a closed cube extending from -1 to 1 on each axis with seven seed points: the center and one at each of ±0.5 on X, Y and Z.
+Feed it into [VoronoiFracture] with **Async** disabled, then toggle **FillInterior** and inspect the output parts.
+
+**Expected:**
+- With **FillInterior** enabled, seven fragments are present, including the center cell.
+- With **FillInterior** disabled, six fragments remain and the center cell is absent.
+
+**Action:**
+Remove the cube's top face and use two seed points at (-0.5, 0, 0) and (0.5, 0, 0).
+Toggle **FillInterior** again and inspect the pieces' open edges.
+
+**Expected:**
+- Both settings preserve the top openings; enabling **FillInterior** does not seal the input's missing face.
+
 ## Step: Fracturing a concave shape
 
 **Action:**
