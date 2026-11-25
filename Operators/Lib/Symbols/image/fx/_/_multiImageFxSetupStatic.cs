@@ -35,4 +35,7 @@ internal sealed class _multiImageFxSetupStatic : Instance<_multiImageFxSetupStat
 
         [Input(Guid = "9997e726-3951-4822-af7e-ffbf26164723")]
         public readonly InputSlot<T3.Graphics.Compat.Filter> TextureFilter = new InputSlot<T3.Graphics.Compat.Filter>();
+
+        [Input(Guid = "57987441-daea-4fac-8739-3b69c1ab659a")]
+        public readonly InputSlot<T3.Core.DataTypes.Texture2D> ImageMask = new InputSlot<T3.Core.DataTypes.Texture2D>();
 }
