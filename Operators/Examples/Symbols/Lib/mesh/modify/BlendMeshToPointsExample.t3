@@ -424,27 +424,27 @@
       "Outputs": []
     },
     {
-      "Id": "e1532723-895f-4cb4-8c2a-bafa3520f98a"/*FaceLandmarkDetection*/,
+      "Id": "e1532723-895f-4cb4-8c2a-bafa3520f98a",
       "SymbolId": "9b2c3d4e-5f6a-4798-89ab-cdef12345678",
       "SymbolName": "Lib.io.video.mediapipe.FaceLandmarkDetection",
       "InputValues": [
         {
-          "Id": "4567890a-bcde-f123-4567-890abcdef123"/*Debug*/,
+          "Id": "4567890a-bcde-f123-4567-890abcdef123",
           "Type": "System.Boolean",
           "Value": false
         },
         {
-          "Id": "890abcde-f123-4567-890a-bcdef1234567"/*UseCombinedAIOutput*/,
+          "Id": "890abcde-f123-4567-890a-bcdef1234567",
           "Type": "System.Boolean",
           "Value": false
         },
         {
-          "Id": "cdef0123-4567-890a-bcde-f01234567890"/*CorrectAspectRatio*/,
+          "Id": "cdef0123-4567-890a-bcde-f01234567890",
           "Type": "System.Boolean",
           "Value": true
         },
         {
-          "Id": "f1234567-890a-bcde-f123-4567890abcde"/*NormalizeLandmarks*/,
+          "Id": "f1234567-890a-bcde-f123-4567890abcde",
           "Type": "System.Boolean",
           "Value": false
         }

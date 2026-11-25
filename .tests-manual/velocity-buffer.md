@@ -90,8 +90,9 @@ Rotation), into a [RenderTarget] with `WithVelocityBuffer`. Look at `VelocityBuf
 
 **Action:**
 Animate points (e.g. a rotating [RadialPoints] or a particle simulation) and draw them with [DrawPoints],
-[DrawBillboards], [DrawMovingPoints], [DrawMeshAtPoints2] and [DrawMeshChunksAtPoints] in turn, rendered by
-[RenderScene] → [MotionBlur]. View the VelocityBuffer output as well.
+[DrawBillboards], [DrawMovingPoints], [DrawMeshAtPoints2], [DrawMeshChunksAtPoints] and [DrawPointSprites] (e.g. an
+[AnimatedText] with moving letters) in turn, rendered by [RenderScene] → [MotionBlur]. View the VelocityBuffer output
+as well.
 
 **Expected:**
 - Each draw blurs along its motion and shows motion in the velocity buffer; still points show none.

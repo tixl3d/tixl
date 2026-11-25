@@ -5,6 +5,14 @@
   "SymbolTags": "8",
   "InputUis": [
     {
+      "InputId": "00a16561-cfc6-4644-a62d-d6d6ad07be58"/*VerticalAlign*/,
+      "Position": {
+        "X": -322.64862,
+        "Y": -102.664734
+      },
+      "GroupTitle": "Align"
+    },
+    {
       "InputId": "031a5894-b13c-4cca-8c54-4722c3fd3274"/*Randomize*/,
       "Position": {
         "X": 160.0,
@@ -35,7 +43,7 @@
       "InputId": "35b2c723-c605-44e3-b9dd-4c853570241e"/*GroupSeparator*/,
       "Position": {
         "X": -322.64862,
-        "Y": -102.664734
+        "Y": -32.664734
       },
       "Description": "Splits the text into the groups that are animated together. Empty means a space. Line breaks always start a new group.",
       "Usage": "Default"
@@ -44,7 +52,7 @@
       "InputId": "385917c7-7925-4f4d-b085-28e8ef6e8323"/*LineHeight*/,
       "Position": {
         "X": -322.64862,
-        "Y": -207.66473
+        "Y": -172.66473
       },
       "Min": 0.5,
       "Max": 2.0
@@ -120,7 +128,7 @@
       "InputId": "86cf8af8-2a75-4aa5-84bc-8e99cc89fab1"/*HorizontalAlign*/,
       "Position": {
         "X": -322.64862,
-        "Y": -137.66473
+        "Y": -67.664734
       }
     },
     {
@@ -136,7 +144,7 @@
       "InputId": "9eef0588-949a-477d-ab40-6e93020c47be"/*Position*/,
       "Position": {
         "X": -322.64862,
-        "Y": -172.66473
+        "Y": -137.66473
       },
       "Min": -1.0,
       "Max": 1.0
@@ -173,6 +181,14 @@
       "Min": 0.0,
       "Max": 500.0,
       "ClampMin": true
+    },
+    {
+      "InputId": "dc260ea8-a2ad-4be9-9329-c7dcfa0ea373"/*Spacing*/,
+      "Position": {
+        "X": -322.64862,
+        "Y": -207.66473
+      },
+      "Description": "Additional spacing between characters in font pixel units."
     },
     {
       "InputId": "e8c60a31-8e55-4a47-bec1-c5998fe02a2a"/*GainAndBias*/,
@@ -257,15 +273,15 @@
       {
         "Id": "6fac5aa5-2e10-4a1f-ab6e-9a6a3707e246",
         "Position": {
-          "X": 49.441498,
-          "Y": -539.9121
+          "X": 62.003967,
+          "Y": -542.5
         }
       },
       {
         "Id": "f993711f-0349-48e9-9288-a737f2b3b192",
         "Position": {
-          "X": 108.406555,
-          "Y": -508.0312
+          "X": 77.966736,
+          "Y": -507.5
         }
       }
     ],

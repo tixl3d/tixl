@@ -8,16 +8,16 @@
       "InputId": "08c37dd9-155c-4fb4-a9d0-f29ddd7da9b0"/*Texture_*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -686.9146,
-        "Y": 96.05664
+        "X": 335.09845,
+        "Y": 252.51663
       },
       "Description": "MSDF texture, e.g. the font texture from [TextSprites]."
     },
     {
       "InputId": "12e1244c-efb7-4bfd-a13c-f94552f153ca"/*UsePointScale*/,
       "Position": {
-        "X": -674.21533,
-        "Y": 781.9566
+        "X": -130.60596,
+        "Y": 387.4281
       },
       "Description": "Multiplies the sprite size with the scale of each point.",
       "AddPadding": "True"
@@ -26,8 +26,8 @@
       "InputId": "32a76e06-db29-40e0-9a4e-29ad88c2f62b"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -690.1123,
-        "Y": -64.879105
+        "X": -369.70364,
+        "Y": 479.59442
       },
       "GroupTitle": "Points Input",
       "Description": "Points defining position, color and scale of each sprite."
@@ -35,8 +35,8 @@
     {
       "InputId": "926bdbc2-ee14-4125-8886-18f445766ef3"/*AlphaCutOff*/,
       "Position": {
-        "X": -680.84375,
-        "Y": 416.23785
+        "X": 9.393982,
+        "Y": 422.4281
       },
       "Description": "Pixels with a shape coverage below this threshold are discarded. Useful in combination with EnableDepthWrite.",
       "AddPadding": "True"
@@ -44,16 +44,16 @@
     {
       "InputId": "9df7e923-76d2-4e98-af72-3a73b47de960"/*EnableDepthWrite*/,
       "Position": {
-        "X": -674.21533,
-        "Y": 586.9566
+        "X": 235.55399,
+        "Y": 647.8463
       },
       "GroupTitle": "Additional Options"
     },
     {
       "InputId": "c0fdacd9-a887-488a-842d-46d015dae0bb"/*ScaleFactor*/,
       "Position": {
-        "X": -674.21533,
-        "Y": 706.9566
+        "X": -130.60596,
+        "Y": 352.4281
       },
       "Description": "Selects a point attribute (F1 or F2) that is multiplied with the sprite size.",
       "DisplayAs": "SegmentedSwitch"
@@ -61,16 +61,16 @@
     {
       "InputId": "c694946c-37b6-4792-8fc5-4204ede69f90"/*Color*/,
       "Position": {
-        "X": -680.84375,
-        "Y": 326.23785
+        "X": -130.60596,
+        "Y": 177.42822
       },
       "GroupTitle": "Appearance"
     },
     {
       "InputId": "cf7692c9-d6bd-4e93-b89c-14ab507b6da5"/*Size*/,
       "Position": {
-        "X": -680.84375,
-        "Y": 371.23785
+        "X": 9.393982,
+        "Y": 317.4281
       },
       "Description": "Scale factor for all sprites."
     },
@@ -78,8 +78,8 @@
       "InputId": "d815c639-d412-4266-81df-f5889a87b4f6"/*SpriteBuffer*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -690.1123,
-        "Y": -8.879105
+        "X": 335.09845,
+        "Y": 217.51663
       },
       "GroupTitle": "Sprites Input",
       "Description": "Sprite definitions, e.g. from [TextSprites]."
@@ -87,66 +87,66 @@
     {
       "InputId": "fecc8310-208e-45de-a43b-bf547663e743"/*BlendMode*/,
       "Position": {
-        "X": -674.21533,
-        "Y": 631.9566
+        "X": 235.55399,
+        "Y": 577.8463
       }
     }
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "12a09bcc-659d-48ae-b95d-b566c2d250ce",
+      "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
+      "Position": {
+        "X": 615.09845,
+        "Y": 42.516632
+      }
+    },
+    {
       "ChildId": "15573550-5cdc-4119-8a6b-06f624cbebd9",
       "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
       "Position": {
-        "X": -457.35638,
-        "Y": 840.79645
+        "X": 9.393982,
+        "Y": 387.4281
       }
     },
     {
       "ChildId": "1ad36aab-2d27-4cbe-8449-51a0cd143d6c",
       "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 69.83368,
-        "Y": 168.70113
+        "X": 475.09845,
+        "Y": 77.51663
       }
     },
     {
       "ChildId": "1e3c26d6-5361-499d-a70e-4522ae42bd85",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": -540.1123,
-        "Y": -8.879105
+        "X": 475.09845,
+        "Y": 217.51663
       }
     },
     {
       "ChildId": "26165f54-6f59-43af-9da1-4e28d4941158",
       "SymbolName": "Lib.render._dx11.api._TransformsCBuffer",
       "Position": {
-        "X": 69.162445,
-        "Y": 61.992615
-      }
-    },
-    {
-      "ChildId": "351febde-b267-4ef0-a45a-54a59e23501f",
-      "SymbolName": "Types.Gfx.VertexShaderStage",
-      "Position": {
-        "X": 320.53583,
-        "Y": -70.73839
+        "X": 475.09845,
+        "Y": 112.51663
       }
     },
     {
       "ChildId": "3b6af4a3-02a5-4c53-b495-81a432394cf6",
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
-        "X": 69.162445,
-        "Y": 18.992615
+        "X": 475.09845,
+        "Y": 42.516632
       }
     },
     {
       "ChildId": "4e57fefc-296d-412f-b50b-80e047939013",
       "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "Position": {
-        "X": 318.63165,
-        "Y": -128.77988
+        "X": 722.5475,
+        "Y": -62.827812
       }
     },
     {
@@ -158,16 +158,16 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": -389.75403,
-        "Y": 173.65451
+        "X": 9.393982,
+        "Y": 177.42822
       }
     },
     {
       "ChildId": "573cb58c-f5fe-4407-a275-68cd766d5364",
       "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "Position": {
-        "X": 182.90894,
-        "Y": 490.16724
+        "X": 375.554,
+        "Y": 577.8463
       }
     },
     {
@@ -179,48 +179,48 @@
         "Y": 678.3668
       },
       "Position": {
-        "X": 542.1859,
-        "Y": -85.99786
+        "X": 862.5475,
+        "Y": -62.827812
       }
     },
     {
       "ChildId": "714f9654-bb6a-4e71-ac11-7768378ec8f1",
       "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
-        "X": -142.85321,
-        "Y": 542.70605
+        "X": 55.483765,
+        "Y": 665.9966
       }
     },
     {
       "ChildId": "8474e781-a09a-4672-818f-33a817377116",
       "SymbolName": "Lib.numbers.int.basic.IntToFloat",
       "Position": {
-        "X": -441.20428,
-        "Y": 741.5763
+        "X": 9.393982,
+        "Y": 352.4281
       }
     },
     {
       "ChildId": "8a5575bd-a26b-46e6-b5be-c5e6dbcc8e78",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 69.83368,
-        "Y": 211.70111
+        "X": 475.09845,
+        "Y": 287.51663
       }
     },
     {
       "ChildId": "aaba3876-2637-4ad1-9684-5f012b4e922d",
       "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
-        "X": 312.90894,
-        "Y": 434.16724
+        "X": 515.554,
+        "Y": 577.8463
       }
     },
     {
       "ChildId": "b8261969-053f-4395-a68d-39b989814bce",
       "SymbolName": "Types.Gfx.DepthStencilState",
       "Position": {
-        "X": 182.90894,
-        "Y": 434.16724
+        "X": 375.554,
+        "Y": 612.8463
       }
     },
     {
@@ -232,72 +232,64 @@
         "Y": 178.47862
       },
       "Position": {
-        "X": -132.46957,
-        "Y": 157.22102
+        "X": 149.39401,
+        "Y": 142.42816
       }
     },
     {
       "ChildId": "d22e3e33-849e-4add-b703-99f664fd7ddf",
       "SymbolName": "Lib.numbers.int.basic.MultiplyInt",
       "Position": {
-        "X": 173.67908,
-        "Y": 678.8453
+        "X": 55.483765,
+        "Y": 735.9966
       }
     },
     {
       "ChildId": "d8e9db80-eea0-475f-82e4-9dd6221a735f",
       "SymbolName": "Lib.render._dx11.api.Draw",
       "Position": {
-        "X": 312.9089,
-        "Y": 546.16724
+        "X": 515.554,
+        "Y": 729.0812
       }
     },
     {
       "ChildId": "db07624d-df89-4d9d-a30b-a61490cb9377",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": -536.9146,
-        "Y": 96.05664
+        "X": 475.09845,
+        "Y": 252.51663
       }
     },
     {
       "ChildId": "e1d80b11-e69d-4007-9156-19c24630a323",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": -540.1123,
-        "Y": -64.879105
-      }
-    },
-    {
-      "ChildId": "e310d95f-1393-4d60-8f4a-210caf1c5138",
-      "SymbolName": "Types.Gfx.PixelShaderStage",
-      "Position": {
-        "X": 322.43994,
-        "Y": 148.61937
+        "X": -229.70364,
+        "Y": 479.59442
       }
     },
     {
       "ChildId": "e337ee6d-b0e6-4842-95d5-51a59077a87a",
       "SymbolName": "Lib.numbers.int.process.ClampInt",
       "Position": {
-        "X": 18.297302,
-        "Y": 697.3048
+        "X": 55.483765,
+        "Y": 700.9966
       }
     },
     {
       "ChildId": "ef592116-0cdd-458a-a4f6-8a2bc558c03e",
       "SymbolName": "Types.Gfx.RasterizerState",
       "Position": {
-        "X": 182.90894,
-        "Y": 378.16727
+        "X": 375.554,
+        "Y": 507.8463
       }
     },
     {
       "ChildId": "f8c49a19-2a4d-463c-b718-6d0a18dc80eb",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
-        "X": 312.90894,
-        "Y": 378.16727
+        "X": 515.554,
+        "Y": 507.8463
       }
     }
   ],
@@ -305,8 +297,8 @@
     {
       "OutputId": "d08f138b-e440-4b2a-a8f1-60dc412d872b"/*Output*/,
       "Position": {
-        "X": 1693.3767,
-        "Y": 109.5778
+        "X": 1002.5475,
+        "Y": -62.827812
       }
     }
   ]

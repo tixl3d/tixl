@@ -74,6 +74,12 @@ internal sealed class AnimatedText : Instance<AnimatedText>
     [Input(Guid = "1806bf13-4e8a-441b-b6c9-d57a063c6a76")]
     public readonly InputSlot<T3.Core.DataTypes.Gradient> Gradient = new();
 
+        [Input(Guid = "00a16561-cfc6-4644-a62d-d6d6ad07be58")]
+        public readonly InputSlot<int> VerticalAlign = new InputSlot<int>();
+
+        [Input(Guid = "dc260ea8-a2ad-4be9-9329-c7dcfa0ea373")]
+        public readonly InputSlot<float> Spacing = new InputSlot<float>();
+
     private enum Units
     {
         Characters,

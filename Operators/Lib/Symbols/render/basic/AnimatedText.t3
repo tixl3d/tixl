@@ -3,6 +3,10 @@
   "Id": "2e4ecee7-2975-46e1-8f98-900935559176"/*AnimatedText*/,
   "Inputs": [
     {
+      "Id": "00a16561-cfc6-4644-a62d-d6d6ad07be58"/*VerticalAlign*/,
+      "DefaultValue": 1
+    },
+    {
       "Id": "031a5894-b13c-4cca-8c54-4722c3fd3274"/*Randomize*/,
       "DefaultValue": 0.0
     },
@@ -131,6 +135,10 @@
       "DefaultValue": 150.0
     },
     {
+      "Id": "dc260ea8-a2ad-4be9-9329-c7dcfa0ea373"/*Spacing*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "e8c60a31-8e55-4a47-bec1-c5998fe02a2a"/*GainAndBias*/,
       "DefaultValue": {
         "X": 0.5,
@@ -194,6 +202,11 @@
           "Id": "12e1244c-efb7-4bfd-a13c-f94552f153ca"/*UsePointScale*/,
           "Type": "System.Boolean",
           "Value": true
+        },
+        {
+          "Id": "926bdbc2-ee14-4125-8886-18f445766ef3"/*AlphaCutOff*/,
+          "Type": "System.Single",
+          "Value": 0.14
         }
       ],
       "Outputs": []
@@ -205,6 +218,12 @@
       "SourceSlotId": "d08f138b-e440-4b2a-a8f1-60dc412d872b",
       "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "TargetSlotId": "ad9aa97f-0089-4fe5-9aa6-bca5e0dd4886"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "00a16561-cfc6-4644-a62d-d6d6ad07be58",
+      "TargetParentOrChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
+      "TargetSlotId": "14829eac-ba59-4d31-90dc-53c7fc56cc30"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
@@ -235,6 +254,12 @@
       "SourceSlotId": "35b2c723-c605-44e3-b9dd-4c853570241e",
       "TargetParentOrChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
       "TargetSlotId": "cf0701ff-b73e-4630-8a2f-380c7c2ec6af"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "dc260ea8-a2ad-4be9-9329-c7dcfa0ea373",
+      "TargetParentOrChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
+      "TargetSlotId": "e05e143e-8d4c-4de7-8c9c-7fa7755009d3"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

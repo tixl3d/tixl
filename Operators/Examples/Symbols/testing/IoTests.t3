@@ -244,7 +244,7 @@
       "Outputs": []
     },
     {
-      "Id": "ade7a971-38b6-4d7f-a220-a28f5a9968dd"/*NdiInput*/,
+      "Id": "ade7a971-38b6-4d7f-a220-a28f5a9968dd",
       "SymbolId": "7567c3b0-9d91-40d2-899d-3a95b481d023",
       "SymbolName": "Lib.io.video.NdiInput",
       "InputValues": [],
@@ -332,7 +332,7 @@
       "Outputs": []
     },
     {
-      "Id": "f0f7eceb-45bb-4eb7-b86f-7287dda04ed6"/*NdiOutput*/,
+      "Id": "f0f7eceb-45bb-4eb7-b86f-7287dda04ed6",
       "SymbolId": "9412d0f4-dab8-4145-9719-10395e154fa7",
       "SymbolName": "Lib.io.video.NdiOutput",
       "InputValues": [],

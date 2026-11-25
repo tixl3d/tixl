@@ -3532,7 +3532,7 @@
       "Outputs": []
     },
     {
-      "Id": "aff41acf-76a1-495b-8571-c69539e0ba7d"/*AbletonLinkSync*/,
+      "Id": "aff41acf-76a1-495b-8571-c69539e0ba7d",
       "SymbolId": "31ab98ec-5e79-4667-9a85-2fb168f41fa1",
       "SymbolName": "Lib.numbers.anim.time.AbletonLinkSync",
       "InputValues": [],
