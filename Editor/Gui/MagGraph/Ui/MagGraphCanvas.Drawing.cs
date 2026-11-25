@@ -164,6 +164,7 @@ internal sealed partial class MagGraphView
             // Draw connections
             _connectionRoutes = _context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
             _context.ConnectionRouting.PrepareFrame();
+            _context.ConnectionRouting.DrawSnapIndicator(_context);
             foreach (var connection in _context.Layout.MagConnections)
             {
                 DrawConnection(connection, drawList, _context);

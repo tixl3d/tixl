@@ -1,8 +1,10 @@
 #nullable enable
 using ImGuiNET;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -24,6 +26,25 @@ internal sealed class ConnectionRouting
     {
         Ignored,
         StartedDrag,
+    }
+
+    /** Heights a dragged route point snaps to, collected when the drag starts. */
+    private sealed class SnapHeights : IValueSnapAttractor
+    {
+        internal readonly List<float> Values = [];
+
+        void IValueSnapAttractor.CheckForSnap(ref SnapResult result)
+        {
+            foreach (var value in Values)
+            {
+                result.TryToImproveWithAnchorValue(value);
+            }
+        }
+    }
+
+    internal ConnectionRouting()
+    {
+        _snapAttractors = [_snapHeights];
     }
 
     internal static float GrabRadius => 7 * T3Ui.UiScaleFactor;
@@ -55,6 +76,7 @@ internal sealed class ConnectionRouting
         _hoveredPointId = Guid.Empty;
         _closestHandleDistance = float.MaxValue;
         _hoveredCable = null;
+        _hoveredCables.Clear();
         _visiblePointIds.Clear();
     }
 
@@ -72,9 +94,15 @@ internal sealed class ConnectionRouting
     /// <param name="insertIndex">Where a point added at <paramref name="positionOnScreen"/> belongs in the route.</param>
     internal void RegisterHoveredCable(MagGraphConnection connection, Vector2 positionOnScreen, int insertIndex)
     {
+        _hoveredCables.Add((connection, positionOnScreen, insertIndex));
+
+        var mousePosition = ImGui.GetMousePos();
+        if (_hoveredCable != null
+            && Vector2.Distance(positionOnScreen, mousePosition) >= Vector2.Distance(_hoveredCablePositionOnScreen, mousePosition))
+            return;
+
         _hoveredCable = connection;
         _hoveredCablePositionOnScreen = positionOnScreen;
-        _hoveredCableInsertIndex = insertIndex;
     }
 
     internal ClickResults HandleClick(GraphUiContext context)
@@ -111,7 +139,7 @@ internal sealed class ConnectionRouting
 
         var command = new ModifyConnectionRoutesCommand(symbolUi.Symbol.Id, routes, "Add route point");
         var positionOnCanvas = context.View.InverseTransformPositionFloat(_hoveredCablePositionOnScreen);
-        var pointId = routes.InsertPoint(_hoveredCable.RouteKey, _hoveredCableInsertIndex, positionOnCanvas);
+        var pointId = routes.InsertSharedPoint(CollectOverlappingCables(), positionOnCanvas);
         var newPoint = routes.Points[pointId];
         context.Selector.SetSelection(newPoint);
         StartDrag(command, context, routes, newPoint, positionOnCanvas - mouseOnCanvas);
@@ -154,6 +182,15 @@ internal sealed class ConnectionRouting
         var newPosition = _mergeTargetPointId != Guid.Empty
                               ? routes.Points[_mergeTargetPointId].PosOnCanvas
                               : context.View.InverseTransformPositionFloat(ImGui.GetMousePos()) + _grabOffset;
+
+        // Ctrl bypasses snapping.
+        if (_mergeTargetPointId == Guid.Empty
+            && !ImGui.GetIO().KeyCtrl
+            && _snapHeights.Values.Count > 0
+            && _snapHandlerY.TryCheckForSnapping(newPosition.Y, out var snappedY, context.View.Scale.Y, null, _snapAttractors))
+        {
+            newPosition.Y = (float)snappedY;
+        }
 
         var offset = newPosition - _draggedPointStartPosition;
         foreach (var (point, startPosition) in _pointsMovingWithDrag)
@@ -203,6 +240,11 @@ internal sealed class ConnectionRouting
         ResetDrag();
     }
 
+    internal void DrawSnapIndicator(GraphUiContext context)
+    {
+        _snapHandlerY.DrawSnapIndicator(context.View, UiColors.StatusActivated.Fade(0.3f));
+    }
+
     /// <summary>A selected point drags all selected points along; an unselected one moves alone.</summary>
     private void StartDrag(ModifyConnectionRoutesCommand command, GraphUiContext context, ConnectionRoutes routes,
                            ConnectionRoutes.RoutePoint point, Vector2 grabOffset)
@@ -218,18 +260,57 @@ internal sealed class ConnectionRouting
 
         _pointsMovingWithDrag.Clear();
         _pointsMovingWithDrag.Add((point, point.PosOnCanvas));
-        if (!context.Selector.IsNodeSelected(point))
-            return;
-
-        foreach (var selectable in context.Selector.Selection)
+        if (context.Selector.IsNodeSelected(point))
         {
-            if (selectable is ConnectionRoutes.RoutePoint selectedPoint
-                && selectedPoint != point
-                && routes.Points.ContainsKey(selectedPoint.Id))
+            foreach (var selectable in context.Selector.Selection)
             {
-                _pointsMovingWithDrag.Add((selectedPoint, selectedPoint.PosOnCanvas));
+                if (selectable is ConnectionRoutes.RoutePoint selectedPoint
+                    && selectedPoint != point
+                    && routes.Points.ContainsKey(selectedPoint.Id))
+                {
+                    _pointsMovingWithDrag.Add((selectedPoint, selectedPoint.PosOnCanvas));
+                }
             }
         }
+
+        CollectSnapHeights(context, routes, point.Id);
+    }
+
+    /// <summary>
+    /// The output and input of every line through the dragged point, and its other points that stay in place, so
+    /// straight horizontal runs are easy to make.
+    /// </summary>
+    private void CollectSnapHeights(GraphUiContext context, ConnectionRoutes routes, Guid draggedPointId)
+    {
+        _snapHeights.Values.Clear();
+        foreach (var connection in context.Layout.MagConnections)
+        {
+            if (connection.IsSnapped
+                || connection.IsTemporary
+                || !routes.TryGetRoute(connection.RouteKey, out var pointIds)
+                || !pointIds.Contains(draggedPointId))
+                continue;
+
+            _snapHeights.Values.Add(connection.SourcePos.Y);
+            _snapHeights.Values.Add(connection.TargetPos.Y);
+
+            foreach (var pointId in pointIds)
+            {
+                if (routes.Points.TryGetValue(pointId, out var otherPoint) && !IsMovingWithDrag(otherPoint))
+                    _snapHeights.Values.Add(otherPoint.PosOnCanvas.Y);
+            }
+        }
+    }
+
+    private bool IsMovingWithDrag(ConnectionRoutes.RoutePoint point)
+    {
+        foreach (var (movingPoint, _) in _pointsMovingWithDrag)
+        {
+            if (movingPoint == point)
+                return true;
+        }
+
+        return false;
     }
 
     private void CommitDrag()
@@ -254,6 +335,39 @@ internal sealed class ConnectionRouting
         _removeIfReleasedWithoutMoving = false;
         _pointsMovingWithDrag.Clear();
     }
+
+    /// <summary>
+    /// Lines from the same output that run on top of the clicked one at the click position. They all get the new
+    /// point, so clicking a trunk keeps it a trunk.
+    /// </summary>
+    private List<(ConnectionRoutes.Key Key, int Index)> CollectOverlappingCables()
+    {
+        var clickedKey = _hoveredCable!.RouteKey;
+        var maxDistance = OverlapDistance * T3Ui.UiScaleFactor;
+        var insertions = new List<(ConnectionRoutes.Key Key, int Index)>();
+        foreach (var (connection, positionOnScreen, insertIndex) in _hoveredCables)
+        {
+            var key = connection.RouteKey;
+            if (connection.IsSnapped
+                || !key.HasSameSource(clickedKey)
+                || Vector2.Distance(positionOnScreen, _hoveredCablePositionOnScreen) > maxDistance)
+                continue;
+
+            var isDuplicate = false;
+            foreach (var (existingKey, _) in insertions)
+            {
+                isDuplicate |= existingKey == key;
+            }
+
+            if (!isDuplicate)
+                insertions.Add((key, insertIndex));
+        }
+
+        return insertions;
+    }
+
+    /** How close the hover positions of two lines must be, in pixels, to count as overlapping. */
+    private const float OverlapDistance = 3;
 
     private Guid FindMergeTarget(GraphUiContext context, ConnectionRoutes routes)
     {
@@ -282,7 +396,7 @@ internal sealed class ConnectionRouting
     private float _closestHandleDistance;
     private MagGraphConnection? _hoveredCable;
     private Vector2 _hoveredCablePositionOnScreen;
-    private int _hoveredCableInsertIndex;
+    private readonly List<(MagGraphConnection Connection, Vector2 PositionOnScreen, int InsertIndex)> _hoveredCables = [];
 
     private ModifyConnectionRoutesCommand? _dragCommand;
     private Guid _draggedPointId;
@@ -293,4 +407,8 @@ internal sealed class ConnectionRouting
     private bool _removeIfReleasedWithoutMoving;
     private readonly List<(ConnectionRoutes.RoutePoint Point, Vector2 StartPosition)> _pointsMovingWithDrag = [];
     private readonly ShakeDetector _shakeDetector = new();
+
+    private readonly SnapHeights _snapHeights = new();
+    private readonly IValueSnapAttractor[] _snapAttractors;
+    private readonly ValueSnapHandler _snapHandlerY = new(SnapResult.Orientations.Vertical);
 }

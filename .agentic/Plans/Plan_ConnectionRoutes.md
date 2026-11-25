@@ -112,9 +112,9 @@ or out of collapsed sections ignore their route and draw as usual.
    points follow group drags, copy/paste/duplicate (routes copy when both ends are copied, with new point ids
    and the paste offset), help page, release note, manual test set.
 2. **Snapping and polish** (after user testing):
-   - **Vertical snapping** while dragging a point: snap its Y to the connection's own output and input anchor and
-     to the other points of the *same* connection, so straight horizontal runs are easy. Show the snap line like
-     the existing alignment snapping (`ValueSnapHandler`). A key to bypass snapping is still to be decided (e.g. `Ctrl`).
+   - ✅ **Vertical snapping** while dragging a point: its Y snaps to the output and input of every line through it
+     and to those lines' other points that stay in place (collected at drag start), shown with a
+     `ValueSnapHandler` snap line. `Ctrl` bypasses it; a merge target takes precedence.
    - **Horizontal snapping** (maybe): snap X to route points of other connections, to line up parallel cables.
    - Detach one cable from a shared point (modifier + drag), a junction marker where branches split.
    - Hover/insertion for the `BottomToLeft`/`RightToTop` Bézier styles (they have no hover test today).

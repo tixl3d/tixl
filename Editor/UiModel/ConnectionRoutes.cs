@@ -130,6 +130,27 @@ internal sealed class ConnectionRoutes
         return id;
     }
 
+    /// <summary>
+    /// Inserts one point into several routes at once, so lines that overlap there start sharing it as a trunk.
+    /// </summary>
+    internal Guid InsertSharedPoint(List<(Key Key, int Index)> insertions, Vector2 position)
+    {
+        var id = Guid.NewGuid();
+        Points[id] = new RoutePoint(id, position);
+        foreach (var (key, index) in insertions)
+        {
+            if (!Routes.TryGetValue(key, out var pointIds))
+            {
+                pointIds = [];
+                Routes[key] = pointIds;
+            }
+
+            pointIds.Insert(Math.Clamp(index, 0, pointIds.Count), id);
+        }
+
+        return id;
+    }
+
     /// <summary>Removes a point from every route that uses it, and routes left without points.</summary>
     internal void RemovePoint(Guid pointId)
     {

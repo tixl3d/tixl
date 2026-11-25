@@ -42,6 +42,16 @@ lines must not share routes.)
 **Expected:** The first drag moves the point. The cancelled drag puts it back where it was. Holding `Alt` during a
 drag doesn't pan the graph.
 
+## Step: Vertical snapping
+
+1. Drag a route point slowly up and down past the height of its line's output, its input and another point of the
+   same line.
+2. Repeat with `Ctrl` held.
+3. Drag it past the height of a point on a line from a different operator.
+
+**Expected:** The point catches at each of those heights and a horizontal snap line flashes. With `Ctrl` it moves
+freely. Points of other lines don't attract it.
+
 ## Step: Sharing a trunk
 
 1. Alt+Click the line into the second [Add] to add a point.
@@ -49,6 +59,13 @@ drag doesn't pan the graph.
 
 **Expected:** A large ring appears around the first point while hovering it. After release both lines run through one
 point and overlap from the output up to it. Dragging the shared point moves both lines.
+
+## Step: Adding a point where lines overlap
+
+1. Make sure the two lines from [Time] run on top of each other for a stretch (e.g. right after the output).
+2. **Alt+Click** on that stretch.
+
+**Expected:** One point is added that both lines share; dragging it moves both. One undo removes it from both.
 
 ## Step: Lines from different outputs don't merge
 

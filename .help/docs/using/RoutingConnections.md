@@ -31,12 +31,19 @@ A selected route point shows a white ring. Drag a route point to move it; no mod
 all selected route points move with it. Press `Esc` while dragging to cancel. The graph doesn't pan while you drag a
 route point, even with `Alt` held.
 
+While you drag a route point, it snaps vertically to the output and input of its line and to the line's other
+route points, so straight horizontal runs are easy to make. A horizontal line shows where it snapped. Hold `Ctrl` to
+drag without snapping.
+
 When you drag selected operators, the selected route points move along. Route points that aren't selected stay where
 they are, and the lines stretch to them. Dragging a section moves the route points inside it.
 
 ## Sharing a trunk
 
-Lines coming from the same output can share route points:
+Lines coming from the same output can share route points. Where such lines run on top of each other, for example
+right after the output, **Alt+Click** adds one point that all of them share.
+
+To join lines that don't overlap yet:
 
 1. Add a route point to the first line.
 2. Add a route point to the second line and drag it onto the first point.
