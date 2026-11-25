@@ -133,7 +133,7 @@ internal sealed class BenchmarkWindow : Window
         if (_historyRows.Count < 2)
             return;
 
-        if (!ImGui.CollapsingHeader($"History ({_historyRows.Count} runs of {primary.Label} on this GPU)###benchmarkHistory",
+        if (!ImGui.CollapsingHeader($"History ({_historyRows.Count} runs of {primary.Label} on this GPU, power: {primary.System.PowerSource})###benchmarkHistory",
                                     ImGuiTreeNodeFlags.DefaultOpen))
             return;
 
@@ -322,6 +322,7 @@ internal sealed class BenchmarkWindow : Window
         }
 
         UpdateHeaders(primary);
+        var wrapHeaders = DoesAnyHeaderOverflow(width - 2 * MathF.Round(PanelPadding * scale));
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(spacing, spacing));
         for (var index = 0; index < BenchmarkSuite.Tests.Length; index++)
@@ -329,13 +330,37 @@ internal sealed class BenchmarkWindow : Window
             if (index % columns != 0)
                 ImGui.SameLine();
 
-            DrawTestGraph(index, primary, new Vector2(width, MathF.Round(GraphHeight * scale)));
+            DrawTestGraph(index, primary, new Vector2(width, MathF.Round(GraphHeight * scale)), wrapHeaders);
         }
 
         ImGui.PopStyleVar();
     }
 
-    private void DrawTestGraph(int testIndex, BenchmarkRun primary, Vector2 size)
+    /// <summary>
+    /// True when a title, grade and duration don't fit on one line in some panel. All panels then move the duration
+    /// to a second line, so their plots stay aligned.
+    /// </summary>
+    private static bool DoesAnyHeaderOverflow(float innerWidth)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        ImGui.PushFont(Fonts.FontLarge);
+        var overflows = false;
+        for (var index = 0; index < BenchmarkSuite.Tests.Length && !overflows; index++)
+        {
+            var header = _headers[index];
+            var width = ImGui.CalcTextSize(BenchmarkSuite.Tests[index].Category).X + HeaderGap * scale
+                        + ImGui.CalcTextSize(header.Detail).X;
+            if (header.Grade.Length > 0)
+                width += ImGui.CalcTextSize(header.Grade).X + GradeGap * scale;
+
+            overflows = width > innerWidth;
+        }
+
+        ImGui.PopFont();
+        return overflows;
+    }
+
+    private void DrawTestGraph(int testIndex, BenchmarkRun primary, Vector2 size, bool wrapHeader)
     {
         var test = BenchmarkSuite.Tests[testIndex];
         var header = _headers[testIndex];
@@ -353,24 +378,42 @@ internal sealed class BenchmarkWindow : Window
         // Header: category, grade and the duration at the Reference
         var headerPos = min + new Vector2(padding, padding * 0.7f);
         ImGui.PushFont(Fonts.FontLarge);
+        drawList.PushClipRect(min, max, true);
         var categorySize = ImGui.CalcTextSize(test.Category);
         drawList.AddText(headerPos, UiColors.ForegroundFull, test.Category);
-        var x = headerPos.X + categorySize.X + 8 * scale;
+        var x = headerPos.X + categorySize.X + HeaderGap * scale;
         if (header.Grade.Length > 0)
         {
             drawList.AddText(new Vector2(x, headerPos.Y), header.GradeColor, header.Grade);
-            x += ImGui.CalcTextSize(header.Grade).X + 6 * scale;
+            x += ImGui.CalcTextSize(header.Grade).X + GradeGap * scale;
         }
 
-        if (x + ImGui.CalcTextSize(header.Detail).X <= max.X - padding)
+        if (!wrapHeader)
+        {
             drawList.AddText(new Vector2(x, headerPos.Y), UiColors.TextMuted, header.Detail);
+        }
+        else
+        {
+            // On its own line the duration still has to be readable in narrow panels.
+            var detailInLargeFontFits = ImGui.CalcTextSize(header.Detail).X <= size.X - 2 * padding;
+            if (!detailInLargeFontFits)
+                ImGui.PushFont(Fonts.FontNormal);
 
+            var detailY = headerPos.Y + categorySize.Y + (detailInLargeFontFits ? 0 : (categorySize.Y - ImGui.GetTextLineHeight()) / 2);
+            drawList.AddText(new Vector2(headerPos.X, detailY), UiColors.TextMuted, header.Detail);
+            if (!detailInLargeFontFits)
+                ImGui.PopFont();
+        }
+
+        drawList.PopClipRect();
         ImGui.PopFont();
 
         ImGui.PushFont(Fonts.FontSmall);
         var smallLineHeight = ImGui.GetTextLineHeight();
-        var subtitleY = headerPos.Y + categorySize.Y;
+        var subtitleY = headerPos.Y + categorySize.Y * (wrapHeader ? 2 : 1);
+        drawList.PushClipRect(min, new Vector2(max.X - padding, max.Y), true);
         drawList.AddText(new Vector2(headerPos.X, subtitleY), UiColors.TextMuted, test.Description);
+        drawList.PopClipRect();
 
         var plotMin = new Vector2(min.X + padding + 36 * scale, subtitleY + smallLineHeight + 14 * scale);
         var plotMax = max - new Vector2(padding, padding + smallLineHeight);
@@ -482,19 +525,20 @@ internal sealed class BenchmarkWindow : Window
         var test = BenchmarkSuite.Tests[_tooltipTestIndex];
         ImGui.PushTextWrapPos(TooltipWrapWidth * T3Ui.UiScaleFactor);
         CustomComponents.StylizedText(test.Category, Fonts.FontLarge, UiColors.ForegroundFull);
-        TextWrappedUnformatted($"Reference: {test.ReferenceDescription}");
+        ImGui.TextUnformatted($"Reference: {test.ReferenceDescription}");
         var isDebugBuild = _headersRun?.System.IsDebugBuild == true;
         var gradeScale = test.GetGradeScale(isDebugBuild);
-        TextWrappedUnformatted($"Grades go from A+ (up to {FormatMs(test.GradeBestMs * gradeScale)}) to F (from {FormatMs(test.GradeWorstMs * gradeScale)}).");
+        ImGui.TextUnformatted($"Grades go from A+ (up to {FormatMs(test.GradeBestMs * gradeScale)}) to F (from {FormatMs(test.GradeWorstMs * gradeScale)}); "
+                               + $"each step from A to D- is {(test.GradeStepFactor - 1) * 100:0} % slower than the one before.");
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        TextWrappedUnformatted(test.PlotsCpuTime
+        ImGui.TextUnformatted(test.PlotsCpuTime
                                    ? "Plotted: main-thread time of the evaluation."
                                    : "Plotted: time until the GPU has finished the work.");
         if (gradeScale > 1)
-            TextWrappedUnformatted($"Debug builds evaluate about {gradeScale:0.#}× slower, so the grade range is stretched by that factor.");
+            ImGui.TextUnformatted($"Debug builds evaluate about {gradeScale:0.#}× slower, so the grade range is stretched by that factor.");
 
         if (_tooltipResult != null && !string.IsNullOrEmpty(_tooltipResult.StopReason))
-            TextWrappedUnformatted($"Stopped: {_tooltipResult.StopReason}");
+            ImGui.TextUnformatted($"Stopped: {_tooltipResult.StopReason}");
 
         ImGui.PopStyleColor();
         ImGui.PopTextWrapPos();
@@ -593,9 +637,9 @@ internal sealed class BenchmarkWindow : Window
     {
         return grade switch
                    {
-                       BenchmarkGrade.APlus or BenchmarkGrade.A => UiColors.StatusOkay,
-                       BenchmarkGrade.B or BenchmarkGrade.C     => UiColors.StatusActivated,
-                       _                                        => UiColors.StatusWarning,
+                       <= BenchmarkGrade.AMinus => UiColors.StatusOkay,
+                       <= BenchmarkGrade.CMinus => UiColors.StatusActivated,
+                       _                        => UiColors.StatusWarning,
                    };
     }
 
@@ -744,11 +788,13 @@ internal sealed class BenchmarkWindow : Window
     private const float MinGraphWidth = 320;
     private const float GraphHeight = 250;
     private const float GraphSpacing = 12;
+    private const float HeaderGap = 8;
+    private const float GradeGap = 6;
     private const float PanelPadding = 14;
     private const float TooltipWrapWidth = 320;
     private const double MinPlottedMs = 0.1;
 
-    private static readonly string[] _gradeLabels = ["A+", "A", "B", "C", "D", "F"];
+    private static readonly string[] _gradeLabels = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"];
 
     private static readonly (double Ms, string Label)[] _durationLines =
         [(0.1, "0.1ms"), (1, "1ms"), (8, "8ms"), (16, "16ms"), (50, "50ms")];

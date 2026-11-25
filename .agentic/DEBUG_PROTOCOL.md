@@ -115,7 +115,7 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 - `runBenchmark` (optional `note`, stored with the result: say what is uncommitted on top of the build's commit)
   starts the Benchmark window's suite and returns at once; the run advances one measured frame per editor frame
   (30–40 s). Poll `getBenchmarkStatus` (`isRunning`, `progress`, `resultPath`) until `isRunning` is false. The
-  finished status adds `comparison`: the previous run of the same label (OS, backend, configuration) and GPU, and
+  finished status adds `comparison`: the previous run of the same label (OS, backend, configuration), GPU and power source, and
   per test `previousMs`, `currentMs` (duration at the test's Reference), `changePercent`, `verdict`
   (`Unchanged`, `Improved`, `Regressed`, `NotComparable`; changes count above 10 % and 0.05 ms) and `testChanged`.
   `getBenchmarkHistory` (optional `label`, e.g. `linux-vulkan-debug`) lists saved runs newest first with `commit`,

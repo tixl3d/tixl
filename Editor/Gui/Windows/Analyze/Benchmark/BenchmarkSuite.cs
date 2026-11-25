@@ -28,7 +28,7 @@ internal sealed record BenchmarkTest(
 {
     /// <summary>
     /// Rates the duration at the Reference for people who don't want to read milliseconds: A+ at or below
-    /// <see cref="GradeBestMs"/>, F at or above <see cref="GradeWorstMs"/>, and A to D in equal factors between.
+    /// <see cref="GradeBestMs"/>, F at or above <see cref="GradeWorstMs"/>, and A to D- in equal factors between.
     /// The range is stretched by <see cref="GetGradeScale"/>, so a Debug build grades the machine, not the build.
     /// </summary>
     public BenchmarkGrade GetGrade(double referenceMs, bool isDebugBuild)
@@ -41,23 +41,36 @@ internal sealed record BenchmarkTest(
             return BenchmarkGrade.F;
 
         var t = Math.Log(referenceMs / (GradeBestMs * scale)) / Math.Log(GradeWorstMs / GradeBestMs);
-        return (BenchmarkGrade)(1 + Math.Min((int)(t * 4), 3));
+        return (BenchmarkGrade)(1 + Math.Min((int)(t * GradedStepCount), GradedStepCount - 1));
     }
+
+    /** How much slower each step from A to D- is than the one before, e.g. 1.36 for 36 %. */
+    public double GradeStepFactor => Math.Pow(GradeWorstMs / GradeBestMs, 1.0 / GradedStepCount);
+
+    /** The grades between A+ and F: A, A-, B+, B, B-, C+, C, C-, D+, D, D-. */
+    private const int GradedStepCount = 11;
 
     /** The factor applied to the grade range: Debug builds only slow down the CPU test. */
     public double GetGradeScale(bool isDebugBuild) => PlotsCpuTime && isDebugBuild ? DebugCpuSlowdown : 1;
 
-    /** Debug builds evaluate operators about this much slower than Release builds (measured 0.30 vs. 0.12 ms at the CPU Reference). */
-    private const double DebugCpuSlowdown = 2.5;
+    /** Debug builds evaluate and draw about this much slower than Release builds (measured 4.1 vs. 1.9 ms at the CPU Reference). */
+    private const double DebugCpuSlowdown = 2.2;
 }
 
 internal enum BenchmarkGrade
 {
     APlus,
     A,
+    AMinus,
+    BPlus,
     B,
+    BMinus,
+    CPlus,
     C,
+    CMinus,
+    DPlus,
     D,
+    DMinus,
     F,
 }
 
@@ -67,21 +80,21 @@ internal enum BenchmarkGrade
 /// </summary>
 internal static class BenchmarkSuite
 {
-    public const int Version = 1;
+    public const int Version = 2;
 
     public static readonly BenchmarkTest[] Tests =
         [
             new("GraphEvaluation", "CPU", new Guid("a4055ada-4668-5205-b5e1-e45b032e754d"),
-                "loop iterations", "Updating N loop iterations of 6 operators each", 1, 100_000, 500,
-                "500 iterations: about 3,000 operator updates, a large composition", PlotsCpuTime: true,
-                GradeBestMs: 0.1, GradeWorstMs: 3),
+                "layers", "Updating and drawing N [Layer2d] layers", 1, 100_000, 500,
+                "500 layers: 500 draw calls and the operators that set them up, a busy composition", PlotsCpuTime: true,
+                GradeBestMs: 1.2, GradeWorstMs: 30),
             new("PointProcessing", "Compute", new Guid("22a202a0-7fde-5c9d-a6fb-813d8264c82a"),
-                "points", "Processing N points with two compute operators", 10, 10_000_000, 500_000,
-                "500K points through two compute operators, a dense particle or point scene", PlotsCpuTime: false,
-                GradeBestMs: 0.15, GradeWorstMs: 8),
+                "points", "Processing N points with three compute operators", 10, 10_000_000, 1_000_000,
+                "1M points through noise, attribute mapping and a transform, a dense particle or point scene", PlotsCpuTime: false,
+                GradeBestMs: 0.5, GradeWorstMs: 25),
             new("Fillrate", "Draw", new Guid("061cffbf-ba0e-515e-8342-0f940cde0c53"),
-                "layers", "Drawing N blended full-screen layers at 1920×1080", 1, 2_000, 20,
-                "20 blended full-screen layers, a layered image effect stack", PlotsCpuTime: false,
+                "layers", "Drawing N textured layers at 1920×1080", 1, 2_000, 20,
+                "20 textured, blended layers, a layered image effect stack", PlotsCpuTime: false,
                 GradeBestMs: 0.5, GradeWorstMs: 25),
         ];
 

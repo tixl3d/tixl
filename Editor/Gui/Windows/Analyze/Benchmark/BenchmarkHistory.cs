@@ -4,7 +4,8 @@ namespace T3.Editor.Gui.Windows.Analyze.Benchmark;
 
 /// <summary>
 /// Compares runs of one machine and build configuration over time, so a change can be checked for improvements and
-/// regressions. Runs are matched by label (OS, backend, configuration) and GPU.
+/// regressions. Runs are matched by label (OS, backend, configuration), GPU and power source: a laptop on battery
+/// measured about 3× slower on every test.
 /// </summary>
 internal static class BenchmarkHistory
 {
@@ -103,7 +104,10 @@ internal static class BenchmarkHistory
 
     private static bool IsSameSetup(BenchmarkRun a, BenchmarkRun b)
     {
-        return a.Label == b.Label && a.System.Adapter == b.System.Adapter && a.SuiteVersion == b.SuiteVersion;
+        return a.Label == b.Label
+               && a.System.Adapter == b.System.Adapter
+               && a.System.PowerSource == b.System.PowerSource
+               && a.SuiteVersion == b.SuiteVersion;
     }
 
     private static readonly List<CurvePoint> _curveScratch = [];

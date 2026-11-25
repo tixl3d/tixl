@@ -46,7 +46,7 @@ shaders and operators that most scenes use, run the benchmark suite over the deb
 The finished status compares the run with the previous one of the same machine and build configuration. Report
 every test marked `Regressed` or `Improved` with its change, and say when `testChanged` is set: then the test's
 operators changed and the numbers aren't comparable. Without an earlier run, run the suite on the unchanged build
-first. Compare Debug with Debug: CPU times differ by about 2.5× between configurations.
+first. Compare Debug with Debug: CPU times differ by about 2.2× between configurations.
 
 ## State and Resource Handling
 - Avoid storing long-lived direct references to instances/resources.

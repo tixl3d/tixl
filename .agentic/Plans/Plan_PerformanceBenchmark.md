@@ -197,6 +197,27 @@ First results (Radeon 8060S, Linux, Vulkan), duration at the Reference:
 | Buffers & Compute, 500K points | 0.77 ms | 0.77 ms | 10M points: 12.5 ms |
 | Draw & Fillrate, 20 layers | 3.0 ms | 3.0 ms | 500 layers: 71 ms |
 
+## Suite v2 (2026-11-25)
+
+The v1 CPU test (six float operators per [Loop] iteration) cost ~0.04 µs per operator update; real scenes pay ~5 µs
+(ProceduralMaterial: 818 updates, 4–5 ms), because their CPU time goes into issuing draws and dispatches. v2:
+
+- **CPU:** a [Layer2d] per iteration (scale 0: draw calls without pixels). Reference 500 layers.
+- **Compute:** [MapPointAttributes] added between noise and transform. Reference raised to 1M points.
+- **Draw:** textured [Layer2d] layers from a [LoadImage] instead of untextured quads. Reference 20 layers.
+- **History** compares only runs with the same power source: a battery run measured ~3× slower on every test.
+
+Grade ranges, set so a high-end desktop (GPU 3–5× faster, CPU ~1.5× faster than the Radeon 8060S / Ryzen AI Max
+notebook) lands at A to A+, and the notebook at A- (CPU) and B (GPU):
+
+| Test | Release (8060S) | Debug | A+ up to | F from |
+|---|---|---|---|---|
+| CPU, 500 layers | 1.87 ms (A-) | 4.09 ms (A-, Debug range ×2.2) | 1.2 ms | 30 ms |
+| Compute, 1M points | 2.09 ms (B-) | 2.14 ms | 0.5 ms | 25 ms |
+| Draw, 20 layers | 2.0 ms (B) | 2.2 ms | 0.5 ms | 25 ms |
+
+The desktop anchors are estimates; check them with a run on a high-end desktop.
+
 ## Decided (2026-11-24)
 
 - The marker is called **Reference**: an authored, fixed amount per test, shown with this machine's duration.

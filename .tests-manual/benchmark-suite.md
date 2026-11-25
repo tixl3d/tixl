@@ -31,7 +31,7 @@ Open the Performance window (click the frame graph in the app bar) and click **B
 Note whether VSync is on in the Performance window. Click **Run benchmark** and don't touch the editor.
 
 **Expected:**
-- A **Cancel** button and a progress line ("CPU: 500 loop iterations …, pass 1 of 3") replace the toolbar.
+- A **Cancel** button and a progress line ("CPU: 500 layers …, pass 1 of 3") replace the toolbar.
 - The graphs fill in step by step while the run goes on.
 - After about a minute and a half the toolbar returns and shows "Saved <date>-<os>-<backend>.json".
 - VSync is back to the state it had before the run.
@@ -43,7 +43,8 @@ Look at the three graphs and hover one of them.
 
 **Expected:**
 - Each graph has a large title (CPU, Compute, Draw) with a grade and the duration at the Reference, e.g. "B (3.1ms for 20)", a line saying what the test does, duration lines at 0.1, 1, 8, 16 and 50 ms, and amount labels (1, 10, 100, 1K …).
-- The grade is green for A+ and A, blue for B and C, red for D and F. In a Debug build the CPU grade is about the same as in Release, and hovering the CPU title shows its stretched range.
+- The grade has plus and minus steps (A+, A, A-, B+ … D-, F) and is green for A+ to A-, blue for B+ to C-, red for D+ to F.
+- In a window too narrow for title, grade and duration on one line, every panel moves the duration to a second line; it stays readable and the plots stay aligned. In a Debug build the CPU grade is about the same as in Release, and hovering the CPU title shows its stretched range.
 - The curves rise with the amount, inside a blue band showing the spread of the three passes. CPU and Draw stop after the first step above 50 ms; Compute may reach 10M.
 - Hovering the title explains the Reference and the grade range. Hovering the plot shows the nearest amount with the fastest and slowest pass (Min and Max) and their CPU and GPU times.
 - The small print below the graphs names the GPU, driver, OS, TiXL version and power source.
