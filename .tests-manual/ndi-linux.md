@@ -51,6 +51,19 @@ On `[NdiInput]`, open the *SourceName* dropdown and pick that source.
 - After selecting it, the operator's output texture shows the stream and updates continuously.
 - The operator's status is empty (success); no "skipping frame" message stays on permanently at 30 fps or more.
 
+## Step: Streaming with alpha
+
+**Action:**
+In the output setup, select the NDI stream and switch **Alpha** on. Send content that covers only part of a
+transparent canvas, e.g. a `[RenderTarget]` with a clear color whose alpha is 0, and receive the stream on the
+second endpoint (in OBS, the NDI source may need **Normal** latency; its low-latency modes drop alpha).
+
+**Expected:**
+- The uncovered area of the received stream is transparent; the content keeps its shape and edges.
+- [NdiOutput] with *EnableAlpha* on behaves the same way.
+- The stream's card on the Board shows the same transparency, and the content keeps animating without selecting the output.
+- Displays and outputs without alpha still show the output over opaque black.
+
 ## Step: Receiving for a while
 
 **Action:**

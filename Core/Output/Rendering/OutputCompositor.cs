@@ -80,32 +80,43 @@ public static class OutputCompositor
     /// Renders the output's composite, or null if nothing is bound to it. Rendered at most once per frame:
     /// presentation, the Board card and an open output view all ask for the same pixels, so later calls in
     /// the frame get the target rendered by the first.
+    /// <para><paramref name="transparentBackground"/> composites over transparent black instead of opaque black,
+    /// so the alpha channel describes what the output actually covers. It uses its own target and memo entry:
+    /// previews and displays keep the opaque composite, and an alpha-streaming sender can read the other one in
+    /// the same frame without either changing what the other sees.</para>
     /// </summary>
     /// <summary>
     /// An output's composite for a preview (a Board card, the output view): re-composited when the preview
     /// budget allows, otherwise the last composite. See <see cref="OutputPreviewRefresh"/>.
+    /// <para>Pass <paramref name="transparentBackground"/> for the variant a stream with alpha sends; because the
+    /// streamer composites it every frame, the preview then shows those live frames for free.</para>
     /// </summary>
-    public static Texture2D? RenderPreview(Guid outputId)
+    public static Texture2D? RenderPreview(Guid outputId, bool transparentBackground = false)
     {
         if (OutputPreviewRefresh.ShouldRefresh(outputId))
-            return RenderOutput(outputId);
+            return RenderOutput(outputId, transparentBackground);
 
-        return _compositeFrames.TryGetValue(outputId, out var rendered) && rendered.HasContent
-               && _targets.TryGetValue(outputId, out var target)
+        var frames = transparentBackground ? _transparentCompositeFrames : _compositeFrames;
+        var targets = transparentBackground ? _transparentTargets : _targets;
+        return frames.TryGetValue(outputId, out var rendered) && rendered.HasContent
+               && targets.TryGetValue(outputId, out var target)
                    ? target.Texture
                    : null;
     }
 
-    public static Texture2D? RenderOutput(Guid outputId)
+    public static Texture2D? RenderOutput(Guid outputId, bool transparentBackground = false)
     {
         var setup = ActiveSetup.Current;
         var output = ActiveSetup.FindOutput(outputId);
         if (setup == null || output == null)
             return null;
 
+        var targets = transparentBackground ? _transparentTargets : _targets;
+        var compositeFrames = transparentBackground ? _transparentCompositeFrames : _compositeFrames;
+
         var frame = OutputFrame.Index;
-        if (_compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
-            return rendered.HasContent && _targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
+        if (compositeFrames.TryGetValue(outputId, out var rendered) && rendered.Frame == frame)
+            return rendered.HasContent && targets.TryGetValue(outputId, out var renderedTarget) ? renderedTarget.Texture : null;
 
         var pullStart = Stopwatch.GetTimestamp();
         var context = OutputContentResolver.PrepareContext(output.ResolvedResolution);
@@ -150,14 +161,14 @@ public static class OutputCompositor
 
         if (_drawItems.Count == 0)
         {
-            _compositeFrames[outputId] = (frame, false);
+            compositeFrames[outputId] = (frame, false);
             return null;
         }
 
         // 8-bit is what every consumer ends at: a stream sender reads the composite back as 8-bit pixels (NDI
         // accepts nothing else) and a display's swap chain is 8-bit too. A float target would only double the
         // bandwidth of the largest texture in the pipeline — a venue canvas runs to tens of megapixels.
-        var target = GetOrCreateTarget(outputId, output.ResolvedResolution, Format.B8G8R8A8_UNorm);
+        var target = GetOrCreateTarget(outputId, output.ResolvedResolution, Format.B8G8R8A8_UNorm, targets);
         if (target == null)
             return null;
 
@@ -174,9 +185,10 @@ public static class OutputCompositor
         var deviceContext = ResourceManager.Device.ImmediateContext;
         deviceContext.OutputMerger.SetTargets(target.Rtv);
         deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, target.Size.Width, target.Size.Height, 0f, 1f));
-        // Opaque black: uncovered output area is "no projection", and the editor preview shouldn't show the
-        // panel gray through a transparent composite.
-        deviceContext.ClearRenderTargetView(target.Rtv, new Vector4(0, 0, 0, 1));
+        // Opaque black for previews and displays: uncovered output area is "no projection", and the editor
+        // preview shouldn't show the panel gray through a transparent composite. An alpha stream needs the
+        // coverage instead, so its composite clears transparent and lets the layer alpha accumulate.
+        deviceContext.ClearRenderTargetView(target.Rtv, transparentBackground ? Vector4.Zero : new Vector4(0, 0, 0, 1));
 
         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         deviceContext.InputAssembler.InputLayout = null;
@@ -215,7 +227,7 @@ public static class OutputCompositor
 
         Overlay?.Draw(deviceContext, output.ResolvedResolution);
         _statsCompositeUs += Microseconds(compositeStart);
-        _compositeFrames[outputId] = (frame, true);
+        compositeFrames[outputId] = (frame, true);
         return target.Texture;
     }
 
@@ -329,7 +341,7 @@ public static class OutputCompositor
         if (!TryComputeNdcHomographyFromPixels(destQuad, targetSize, out var homography))
             return null;
 
-        var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize, Format.R16G16B16A16_Float);
+        var target = GetOrCreateTarget(targetKey == Guid.Empty ? _scratchTargetId : targetKey, targetSize, Format.R16G16B16A16_Float, _targets);
         if (target == null || !EnsureShaders())
             return null;
 
@@ -367,9 +379,13 @@ public static class OutputCompositor
     {
         foreach (var target in _targets.Values)
             target.Dispose();
+        foreach (var target in _transparentTargets.Values)
+            target.Dispose();
 
         _targets.Clear();
         _compositeFrames.Clear();
+        _transparentTargets.Clear();
+        _transparentCompositeFrames.Clear();
         OutputPreviewRefresh.InvalidateAll();
     }
 
@@ -385,8 +401,11 @@ public static class OutputCompositor
     {
         if (_targets.Remove(outputId, out var target))
             target.Dispose();
+        if (_transparentTargets.Remove(outputId, out var transparent))
+            transparent.Dispose();
 
         _compositeFrames.Remove(outputId);
+        _transparentCompositeFrames.Remove(outputId);
         OutputPreviewRefresh.Invalidate(outputId);
     }
 
@@ -442,11 +461,11 @@ public static class OutputCompositor
         return TryComputeNdcHomography(_ndcScratch, out matrix);
     }
 
-    private static Target? GetOrCreateTarget(Guid outputId, Int2 resolution, Format format)
+    private static Target? GetOrCreateTarget(Guid outputId, Int2 resolution, Format format, Dictionary<Guid, Target> targets)
     {
         var width = Math.Max(1, resolution.Width);
         var height = Math.Max(1, resolution.Height);
-        if (_targets.TryGetValue(outputId, out var existing)
+        if (targets.TryGetValue(outputId, out var existing)
             && existing.Size.Width == width && existing.Size.Height == height && existing.Format == format)
             return existing;
 
@@ -474,7 +493,7 @@ public static class OutputCompositor
                              Size = new Int2(width, height),
                              Format = format,
                          };
-        _targets[outputId] = target;
+        targets[outputId] = target;
         return target;
     }
 
@@ -620,6 +639,10 @@ public static class OutputCompositor
     private static readonly Dictionary<Guid, Target> _targets = new();
     /** Which outputs were composited this frame, and whether anything was drawn. */
     private static readonly Dictionary<Guid, (int Frame, bool HasContent)> _compositeFrames = new();
+
+    /** The same per-frame memo for composites over transparent black, which alpha-carrying streams read. */
+    private static readonly Dictionary<Guid, Target> _transparentTargets = new();
+    private static readonly Dictionary<Guid, (int Frame, bool HasContent)> _transparentCompositeFrames = new();
     private static readonly List<DrawItem> _drawItems = [];
     private static readonly List<OutputLayers.Layer> _layers = [];
     private static Resource<VertexShader>? _vertexShaderResource;

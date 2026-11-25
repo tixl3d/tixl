@@ -185,7 +185,7 @@ internal sealed partial class SetupOutputView
             if (_spaceKind == SetupEntityKinds.ReferenceImage)
                 DrawReferenceSpaceForShown(setup, selection, straighten: tracedImage != null);
             else if (output != null)
-                DrawOutputCanvas(setup, output, outputId, selection); // Original / Straight, morphed by _viewMorph
+                DrawOutputCanvas(setup, machineConfig, output, outputId, selection); // Original / Straight, morphed by _viewMorph
         }
 
         ResolvePicking(setup, selection);
@@ -336,7 +336,8 @@ internal sealed partial class SetupOutputView
     // 0 (Original), and by 1 (Straight) it maps the focused surface's quad onto its own axis-aligned bounding
     // box, carrying the whole composite and every surface with it. Blending R and the framing is what makes
     // the views morph.
-    private void DrawOutputCanvas(Setup setup, OutputDefinition output, Guid outputId, SetupEntitySelection? selection)
+    private void DrawOutputCanvas(Setup setup, MachineConfig machineConfig, OutputDefinition output, Guid outputId,
+                                  SetupEntitySelection? selection)
     {
         // This canvas works in the output's pixels — framing, grids, snap thresholds and handles are all tuned
         // to that. Mappings and patches are *stored* as ratios of the canvas, so they are scaled into these
@@ -346,7 +347,7 @@ internal sealed partial class SetupOutputView
         var straighten = _viewMorph.Value;
 
         // Pulled before the transform so the content aspect below reads a live evaluation context.
-        var composite = OutputCompositor.RenderPreview(outputId);
+        var composite = OutputCompositor.RenderPreview(outputId, Plugs.StreamsAlpha(machineConfig, outputId));
 
         // Rectify basis = the focused surface. Freeze it while it is the one being dragged, so the transform
         // doesn't chase its own edit; otherwise the live quad keeps R settled and current.
