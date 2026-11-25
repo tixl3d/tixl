@@ -429,7 +429,7 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                 CurveInputEditing.MoveDirection = Math.Abs(mouseDragDelta.X) >= Math.Abs(mouseDragDelta.Y)
                                                       ? CurveInputEditing.MoveDirections.Horizontal
                                                       : CurveInputEditing.MoveDirections.Vertical;
-                TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
+                TimeLineCanvas.Current.StartKeyframeDragCommand(compositionSymbolId);
             }
         }
 

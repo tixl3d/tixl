@@ -18,7 +18,8 @@ using T3.Editor.Gui.Interaction.Timing;
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// The timeline's transport row: playback controls, audio mute, keyframe pinning and the record toggle.
+/// The timeline's transport row: playback controls, audio mute, keyframe pinning, the record toggle and
+/// the <see cref="SelectedKeyframesBar"/>.
 /// Shown as a strip along the bottom of the graph window while the timeline is attached, or as the
 /// top row of the <see cref="TimelineWindow"/> while it is detached. Both use the same layout.
 /// </summary>
@@ -123,6 +124,8 @@ internal static class TimelineToolbar
             var centerGroupEnd = ImGui.GetItemRectMax().X;
 
             var rightX = MathF.Max(max.X - _lastRightGroupWidths[layoutIndex], centerGroupEnd + groupGap);
+            SelectedKeyframesBar.Draw(projectView.TimeLineCanvas, composition, centerGroupEnd + groupGap, rightX - groupGap, min.Y);
+
             ImGui.SetCursorScreenPos(new Vector2(rightX, min.Y));
             ImGui.BeginGroup();
             if (!settings.Playback.UsesBeatTapping)
