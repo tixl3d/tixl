@@ -20,6 +20,7 @@ namespace Lib.io.dmx
         private readonly ConnectionSettings _connectionSettings = new();
         private readonly object _dataLock = new();
         private readonly object _connectionLock = new();
+        private readonly object _senderLock = new();
         private readonly ConcurrentDictionary<string, string> _discoveredNodes = new();
         private readonly ConcurrentDictionary<int, IPEndPoint> _universeRoutingTable = new();
         private readonly byte[] _packetBuffer = new byte[18 + 512];
@@ -122,7 +123,7 @@ namespace Lib.io.dmx
             else if (!discoverNodes && _isPolling) StopArtPolling();
 
             var enableSending = SendTrigger.GetValue(context);
-            if (enableSending != _wasSendingLastFrame)
+            if (enableSending != _wasSendingLastFrame || (enableSending && _senderThread is { IsAlive: false }))
             {
                 if (enableSending) StartSenderThread();
                 else StopSenderThread();
@@ -208,19 +209,29 @@ namespace Lib.io.dmx
         #region Sender Thread
         private void StartSenderThread()
         {
-            if (_senderThread != null) return;
-            _senderCts = new CancellationTokenSource();
-            _senderThread = new Thread(() => SenderLoop(_senderCts.Token)) { IsBackground = true, Name = "ArtNetSender", Priority = ThreadPriority.AboveNormal };
-            _senderThread.Start();
+            lock (_senderLock)
+            {
+                if (_senderThread is { IsAlive: true }) return;
+                _senderCts?.Dispose();
+                _senderCts = new CancellationTokenSource();
+                var token = _senderCts.Token;
+                _senderThread = new Thread(() => SenderLoop(token)) { IsBackground = true, Name = "ArtNetSender", Priority = ThreadPriority.AboveNormal };
+                _senderThread.Start();
+            }
         }
 
         private void StopSenderThread()
         {
-            if (_senderThread == null) return;
-            _senderCts?.Cancel();
-            if (_senderThread.Join(500)) _senderCts?.Dispose();
-            _senderCts = null;
-            _senderThread = null;
+            lock (_senderLock)
+            {
+                if (_senderThread == null) return;
+                _senderCts?.Cancel();
+                // Retain ownership after a timeout so a replacement cannot share the packet buffer.
+                if (!_senderThread.Join(500)) return;
+                _senderCts?.Dispose();
+                _senderCts = null;
+                _senderThread = null;
+            }
         }
 
         private void SenderLoop(CancellationToken token)
@@ -251,7 +262,7 @@ namespace Lib.io.dmx
                     if (maxFpsCopy > 0)
                     {
                         if (!stopwatch.IsRunning) stopwatch.Start();
-                        while (true)
+                        while (!token.IsCancellationRequested)
                         {
                             long now = stopwatch.ElapsedTicks;
                             if (now >= nextFrameTimeTicks)
@@ -263,6 +274,12 @@ namespace Lib.io.dmx
                             if (nextFrameTimeTicks - now > Stopwatch.Frequency / 1000) Thread.Sleep(1);
                             else Thread.SpinWait(10);
                         }
+                    }
+
+                    if (token.IsCancellationRequested)
+                    {
+                        _frameDataPool.Add(frameData);
+                        break;
                     }
 
                     Socket? currentSocket;
@@ -512,7 +529,7 @@ namespace Lib.io.dmx
                         _lastErrorMessage = null;
                         return _connected = true;
                     }
-                    catch (Exception e) { _lastErrorMessage = $"Failed to bind socket: {e.Message}"; CloseSocket(); return false; }
+                    catch (Exception e) { CloseSocket(); _lastErrorMessage = $"Failed to bind socket: {e.Message}"; return false; }
                 }
             }
         }
