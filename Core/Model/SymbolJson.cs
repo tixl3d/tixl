@@ -270,6 +270,17 @@ public static class SymbolJson
     }
 
     #region reading
+    private static bool AreAllExpectedMissing(Symbol symbol)
+    {
+        foreach (var child in symbol.UnresolvedChildren)
+        {
+            if (!SymbolPackage.ExpectedMissingSymbolIds.Contains(child.SymbolId))
+                return false;
+        }
+
+        return true;
+    }
+
     public static bool TryReadAndApplySymbolChildren(SymbolReadResult symbolReadResult)
     {
         var childrenJson = symbolReadResult.ChildrenJsonArray;
@@ -296,7 +307,7 @@ public static class SymbolJson
                           + "They are skipped but kept in the file.";
 
             // Shipped packages may use operators of optional packages that aren't installed; nothing to fix there
-            if (parent.SymbolPackage is { IsReadOnly: true })
+            if (parent.SymbolPackage is { IsReadOnly: true } || AreAllExpectedMissing(parent))
                 Log.Debug(message);
             else
                 Log.Warning(message);

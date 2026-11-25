@@ -4,6 +4,7 @@ using System.Text;
 using ImGuiNET;
 using T3.Core.Model;
 using T3.Core.SystemUi;
+using T3.Editor.Compilation;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -35,7 +36,7 @@ internal sealed class MissingOperatorsDialog : ModalDialog
 
             foreach (var symbol in editorPackage.Symbols.Values)
             {
-                if (!symbol.HasUnresolvedChildren)
+                if (!symbol.HasUnresolvedChildren || ProjectSetup.AreAllExpectedMissing(symbol))
                     continue;
 
                 _missingOperatorCount += symbol.UnresolvedChildren.Count;

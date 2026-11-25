@@ -269,3 +269,20 @@ Progress 2026-11-23 (uncommitted):
 7. **MS-PL is allowed** for bundled packages (Svg, Svg.Custom in Lib; licence text already shipped).
 8. **SixLabors.Fonts** (Six Labors Split License) counts as Apache-2.0: TiXL is open source and users get it
    transitively.
+
+## Extensions in source builds and for contributors (2026-11-25)
+
+- Source (Debug) builds skip `Optional` packages unless `TIXL_DEBUG_EXTENSIONS` names them (`;`-list or `all`);
+  their operator ids become `SymbolPackage.ExpectedMissingSymbolIds`, so graphs using them log only at debug level
+  and the missing-operators dialog ignores them (`Editor/Compilation/OptionalPackagesInSourceBuilds.cs`).
+- Contributor guide `.help/docs/contributing/WritingExtensions.md`, agent procedure `.agentic/EXTENSIONS.md`
+  (written for splitting large stacked contributions such as PRs #1246–#1257 into enabling PRs and one PR per
+  extension).
+- Decided: official extensions live in the main repo; separate repositories wait for a `TiXL.Sdk` package (Phase 4).
+
+Follow-ups:
+- Bundled examples that use extension operators (`HowToIO`, `IoTests`, `SetVJVariables`, `VJDeadlineAnimals`,
+  `BlendMeshToPointsExample`) should move into the extensions they demonstrate, as the guide now asks.
+- Extensions still compile in a full `t3.sln` build. If that becomes slow with large extensions, a solution filter
+  (`t3.Core.slnf`) without them keeps everyday builds fast; release builds keep using `t3.sln`.
+

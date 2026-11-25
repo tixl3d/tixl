@@ -64,6 +64,7 @@ internal static partial class ProjectSetup
 
         // Find project files
         var csProjFiles = FindCsProjFiles(isDebugBuild);
+        OptionalPackagesInSourceBuilds.PublishSkipped();
 
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
@@ -171,7 +172,7 @@ internal static partial class ProjectSetup
                 // Shipped packages such as Examples may use operators of optional packages; that is expected
                 // and can't be fixed by the user, so it only goes to the debug log.
                 var target = details;
-                if (package.IsReadOnly)
+                if (package.IsReadOnly || AreAllExpectedMissing(symbol))
                 {
                     target = readOnlyDetails;
                 }
@@ -202,6 +203,18 @@ internal static partial class ProjectSetup
         Log.Warning($"{totalChildren} operator(s) in {affectedSymbols} symbol(s) are not available — most likely "
                     + "a missing package or a deleted operator. They are hidden but stay in the files when saving, "
                     + "and return once the package is installed:" + details);
+    }
+
+    /** True when the symbol only misses operators of packages deliberately not loaded (an optional package skipped in a source build). */
+    internal static bool AreAllExpectedMissing(T3.Core.Operator.Symbol symbol)
+    {
+        foreach (var child in symbol.UnresolvedChildren)
+        {
+            if (!SymbolPackage.ExpectedMissingSymbolIds.Contains(child.SymbolId))
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -391,7 +404,8 @@ internal static partial class ProjectSetup
                                                                                                var subDir = Path.GetFileName(path);
                                                                                                return
                                                                                                    !subDir
-                                                                                                      .StartsWith('.'); // ignore things like .git and file sync folders 
+                                                                                                      .StartsWith('.') // ignore things like .git and file sync folders
+                                                                                                   && OptionalPackagesInSourceBuilds.ShouldLoad(path);
                                                                                            }));
             }
             return projectSearchDirectories;

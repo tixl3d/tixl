@@ -123,6 +123,14 @@ placement is a packaging convention:
   other file and need no registration.
 - A helper used by exactly one operator stays a nested private class of that operator.
 
+### Extensions (optional operator packages)
+
+Operators with a licence that isn't MIT-compatible, large libraries or models, one-platform or special-hardware
+needs, or a niche domain belong in an **extension**: a package under `Operators/<Name>/` with
+`<TixlDistribution>Optional</TixlDistribution>`, which users install from Settings → Extensions and source builds
+skip unless `TIXL_DEBUG_EXTENSIONS` names it. Creating one, and splitting a large contribution into reviewable pull
+requests, follows [`EXTENSIONS.md`](EXTENSIONS.md). An extension never changes code outside its own folder.
+
 ### Operator descriptions
 
 An operator's Description lives in its `.t3ui` and is the source for both the editor's help panel and the
