@@ -103,7 +103,7 @@ folders above until you delete them yourself.
 ## What doesn't work on macOS yet
 
 - **H.264 and hardware-accelerated video export.** H.264 exports fall back to MPEG-4.
-- **NDI, webcams and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
+- **NDI and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
 - **Geometry shaders.** Apple's graphics chips don't have them. TiXL's own operators don't need them, but a
   custom shader with a geometry stage won't render.
 - **Recording what other programs play** (loopback). A virtual audio device like BlackHole can route system
