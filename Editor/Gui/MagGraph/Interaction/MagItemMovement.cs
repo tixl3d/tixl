@@ -66,7 +66,6 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
-            context.ConnectionRouting.CompleteNodeDrag();
             TrySpliceIntoWire(context);
             CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
@@ -293,9 +292,26 @@ internal sealed partial class MagItemMovement
     /// <summary>
     /// Reset to avoid accidental dragging of previous elements 
     /// </summary>
+    /// <summary>
+    /// Moves selected route points by the offset the dragged operators actually moved, snapping included.
+    /// Called after <see cref="UpdateDragging"/>.
+    /// </summary>
+    internal void UpdateRoutePointsFollowingDrag()
+    {
+        if (_referenceItemForRoutePoints == null || _routePointsFollowingDrag.Count == 0)
+            return;
+
+        var offset = _referenceItemForRoutePoints.PosOnCanvas - _referenceItemStartPosition;
+        foreach (var (routePoint, startPosition) in _routePointsFollowingDrag)
+        {
+            routePoint.PosOnCanvas = startPosition + offset;
+        }
+    }
+
     internal void StopDragOperation()
     {
-        _context.ConnectionRouting.ResetNodeDrag();
+        _routePointsFollowingDrag.Clear();
+        _referenceItemForRoutePoints = null;
         _lastAppliedOffset = Vector2.Zero;
         SpliceSets.Clear();
         DraggedItems.Clear();
@@ -719,12 +735,33 @@ internal sealed partial class MagItemMovement
         _draggedSelectables = DraggedItems.Select(i => i as ISelectableCanvasObject).ToList();
         if (_draggedSelectables.Count == 0)
             return;
+
+        // Selected route points follow the drag and need their positions in the same undo step.
+        _routePointsFollowingDrag.Clear();
+        _referenceItemForRoutePoints = null;
+        if (_draggedItemsFromSelection)
+        {
+            foreach (var selectable in _context.Selector.Selection)
+            {
+                if (selectable is not ConnectionRoutes.RoutePoint routePoint)
+                    continue;
+
+                _draggedSelectables.Add(routePoint);
+                _routePointsFollowingDrag.Add((routePoint, routePoint.PosOnCanvas));
+            }
+
+            foreach (var item in DraggedItems)
+            {
+                _referenceItemForRoutePoints = item;
+                _referenceItemStartPosition = item.PosOnCanvas;
+                break;
+            }
+        }
         
         var macroCommand = context.StartMacroCommand("Move nodes");
 
         context.MoveElementsCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, _draggedSelectables, _nodeSelection);
         macroCommand.AddExecutedCommandForUndo(context.MoveElementsCommand);
-        context.ConnectionRouting.StartNodeDrag(context, DraggedItems, macroCommand);
 
         _lastAppliedOffset = Vector2.Zero;
         _hasDragged = false;
@@ -2041,6 +2078,9 @@ internal sealed partial class MagItemMovement
 
     internal readonly HashSet<MagGraphItem> DraggedItems = [];
     private bool _draggedItemsFromSelection;
+    private readonly List<(ConnectionRoutes.RoutePoint Point, Vector2 StartPosition)> _routePointsFollowingDrag = [];
+    private MagGraphItem? _referenceItemForRoutePoints;
+    private Vector2 _referenceItemStartPosition;
     private List<ISelectableCanvasObject> _draggedSelectables = [];
 
     /// <summary>

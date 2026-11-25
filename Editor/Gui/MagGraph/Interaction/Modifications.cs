@@ -188,6 +188,20 @@ internal static class Modifications
             if (childUi != null)
                 context.Selector.AddSelection(childUi, instance);
         }
+
+        // Route points of lines within the selected tree, so moving the tree keeps its routes.
+        var routes = context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
+        foreach (var (key, pointIds) in routes.Routes)
+        {
+            if (!connectedIds.Contains(key.SourceItemId) || !connectedIds.Contains(key.TargetItemId))
+                continue;
+
+            foreach (var pointId in pointIds)
+            {
+                if (routes.Points.TryGetValue(pointId, out var routePoint) && !context.Selector.IsNodeSelected(routePoint))
+                    context.Selector.AddSelection(routePoint);
+            }
+        }
     }
 
     internal static ChangeSymbol.SymbolModificationResults AlignSelectionToLeft(GraphUiContext context)
@@ -248,6 +262,7 @@ internal static class Modifications
         var deletedInputUis = new List<IInputUi>();
         var deletedOutputUis = new List<IOutputUi>();
         var deletedSections = new List<MagGraphSection>();
+        var deletedRoutePointIds = new List<Guid>();
         
         foreach (var s in context.Selector.Selection)
         {
@@ -291,6 +306,10 @@ internal static class Modifications
                 }
 
                 deletedSections.Add(mga);
+            }
+            else if (s is ConnectionRoutes.RoutePoint routePoint)
+            {
+                deletedRoutePointIds.Add(routePoint.Id);
             }
             else
             {
@@ -357,13 +376,25 @@ internal static class Modifications
         }
         
         if (deletedChildUis.Count == 0 && deletedInputUis.Count == 0 && deletedOutputUis.Count == 0
-            && deletedSections.Count==0)
+            && deletedSections.Count==0 && deletedRoutePointIds.Count == 0)
             return results;
 
         var deletedItemSet = new HashSet<MagGraphItem>(deletedItems);
         var itemToSelect = FindSnappedUpstreamSurvivor(deletedItems, deletedItemSet);
 
         var macroCommand = new MacroCommand("Delete items");
+        if (deletedRoutePointIds.Count > 0)
+        {
+            var routesCommand = new ModifyConnectionRoutesCommand(compositionUi.Symbol.Id, compositionUi.ConnectionRoutes, "Remove route points");
+            foreach (var pointId in deletedRoutePointIds)
+            {
+                compositionUi.ConnectionRoutes.RemovePoint(pointId);
+            }
+
+            routesCommand.StoreCurrentValues();
+            macroCommand.AddExecutedCommandForUndo(routesCommand);
+        }
+
         if (deletedChildUis.Count > 0)
         {
             var symbol = context.CompositionInstance.Symbol;

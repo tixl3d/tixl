@@ -71,8 +71,8 @@ internal sealed partial class MagGraphView
         {
             foreach (var pointId in routePointIds)
             {
-                if (_connectionRoutes.Points.TryGetValue(pointId, out var pointOnCanvas))
-                    boundsOnCanvas.Add(pointOnCanvas);
+                if (_connectionRoutes.Points.TryGetValue(pointId, out var routePoint))
+                    boundsOnCanvas.Add(routePoint.PosOnCanvas);
             }
         }
         if (connection.Style is MagGraphConnection.ConnectionStyles.BottomToLeft or MagGraphConnection.ConnectionStyles.RightToTop)

@@ -82,6 +82,9 @@ public sealed partial class SymbolUi : ISelectionContainer
 
         foreach (var section in Sections)
             yield return section.Value;
+
+        foreach (var routePoint in ConnectionRoutes.GetLivePoints(Symbol))
+            yield return routePoint;
     }
 
     /// <summary>

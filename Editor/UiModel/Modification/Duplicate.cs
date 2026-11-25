@@ -200,8 +200,9 @@ internal static class Duplicate
         UndoRedoStack.AddAndExecute(addCommand);
 
         // Update the positions
-        var sourceSelectables = sourceSymbolUi.GetSelectables().ToArray();
-        var newSelectables = newSymbolUi.GetSelectables().ToArray();
+        // Route points get new ids and positions when their connections are copied; they can't be matched by order.
+        var sourceSelectables = sourceSymbolUi.GetSelectables().Where(s => s is not ConnectionRoutes.RoutePoint).ToArray();
+        var newSelectables = newSymbolUi.GetSelectables().Where(s => s is not ConnectionRoutes.RoutePoint).ToArray();
         Debug.Assert(sourceSelectables.Length == newSelectables.Length);
         for (int i = 0; i < sourceSelectables.Length && i < newSelectables.Length; i++)
         {

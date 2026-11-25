@@ -345,7 +345,7 @@ internal static class SymbolUiJson
             writer.WriteStartObject();
             writer.WriteObject(JsonKeys.Id, pointId);
             writer.WritePropertyName(JsonKeys.Position);
-            _vector2ToJson(writer, connectionRoutes.Points[pointId]);
+            _vector2ToJson(writer, connectionRoutes.Points[pointId].PosOnCanvas);
             writer.WriteEndObject();
         }
 
@@ -394,7 +394,7 @@ internal static class SymbolUiJson
                     continue;
                 }
 
-                connectionRoutes.Points[pointId] = GetVec2OrDefault(pointEntry[JsonKeys.Position]);
+                connectionRoutes.Points[pointId] = new ConnectionRoutes.RoutePoint(pointId, GetVec2OrDefault(pointEntry[JsonKeys.Position]));
             }
         }
 

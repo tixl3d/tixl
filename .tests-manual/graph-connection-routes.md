@@ -20,7 +20,8 @@ copying, saving and undo.
 1. Hold `Alt` and hover the line into the first [Add].
 2. **Alt+Click** the line and drag before releasing.
 
-**Expected:** While hovering with `Alt` held, the hover circle on the line is 1.5× larger than without it. After the
+**Expected:** While hovering with `Alt` held, the filled hover dot on the line is 1.5× larger than without it; the
+rings at the line's ends keep their size. After the
 click a filled point follows the mouse and the line bends through it. No selection fence appears and the selection
 doesn't change.
 
@@ -56,13 +57,38 @@ point and overlap from the output up to it. Dragging the shared point moves both
 
 **Expected:** No large ring appears and the points don't merge.
 
+## Step: Selecting route points
+
+1. Click a route point, then **Shift+Click** another one.
+2. Draw a selection fence around [Time], both [Add] operators and their route points.
+3. Select the first [Add] and press **Shift+G**.
+
+**Expected:** Selected route points show a white ring. The fence selects operators and route points together.
+**Shift+G** selects the upstream operators and the route points of the lines between them.
+
 ## Step: Moving operators
 
-1. Drag only the first [Add].
-2. Select [Time] and both [Add] operators and drag them together.
+1. Drag only the first [Add] (nothing else selected).
+2. Fence-select [Time], both [Add] operators and their route points, and drag the group. Try it near other operators
+   so it snaps.
+3. Undo.
 
-**Expected:** Dragging one operator stretches its line to the route points, which stay in place. Dragging the whole
-group moves the route points along with it.
+**Expected:** Dragging one operator stretches its line to the route points, which stay in place. Dragging the group
+moves the selected route points exactly with the operators, also when the group snaps. One undo puts operators and
+route points back.
+
+## Step: Dragging a section
+
+1. Put the operators and their route points into a section and drag the section by its header.
+
+**Expected:** The route points inside the section move with it.
+
+## Step: Shaking off and deleting
+
+1. Drag a route point and shake the mouse quickly.
+2. Select another route point and press `Delete`.
+
+**Expected:** The shaken point is removed and the drag ends. `Delete` removes the selected point. Both can be undone.
 
 ## Step: Undo and redo
 

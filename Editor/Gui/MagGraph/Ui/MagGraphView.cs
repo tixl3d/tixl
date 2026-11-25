@@ -553,6 +553,23 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                 _context.Selector.AddSelection(magSection.Section);
             }
         }
+
+        // Only drawn points: routes of deleted connections are kept for undo but stay invisible.
+        foreach (var pointId in _context.ConnectionRouting.VisiblePointIds)
+        {
+            if (!_connectionRoutes.Points.TryGetValue(pointId, out var routePoint)
+                || !boundsInCanvas.Contains(routePoint.PosOnCanvas))
+                continue;
+
+            if (selectMode == SelectionFence.SelectModes.Remove)
+            {
+                _context.Selector.DeselectNode(routePoint);
+            }
+            else
+            {
+                _context.Selector.AddSelection(routePoint);
+            }
+        }
     }    
     
     

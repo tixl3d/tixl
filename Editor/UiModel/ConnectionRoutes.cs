@@ -1,5 +1,6 @@
 #nullable enable
 using T3.Core.Operator;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.UiModel;
 
@@ -38,7 +39,23 @@ internal sealed class ConnectionRoutes
         internal Guid TargetItemId => TargetParentOrChildId == Guid.Empty ? TargetSlotId : TargetParentOrChildId;
     }
 
-    internal Dictionary<Guid, Vector2> Points { get; } = new();
+    /// <summary>A bend in one or more connection lines. Selectable and movable like the operators.</summary>
+    internal sealed class RoutePoint : ISelectableCanvasObject
+    {
+        internal RoutePoint(Guid id, Vector2 posOnCanvas)
+        {
+            Id = id;
+            PosOnCanvas = posOnCanvas;
+        }
+
+        public Guid Id { get; }
+        public Vector2 PosOnCanvas { get; set; }
+
+        /** Hit-tested by a radius on screen, so it covers no area on the canvas. */
+        public Vector2 Size { get => Vector2.Zero; set { } }
+    }
+
+    internal Dictionary<Guid, RoutePoint> Points { get; } = new();
     internal Dictionary<Key, List<Guid>> Routes { get; } = new();
 
     internal bool IsEmpty => Routes.Count == 0;
@@ -61,12 +78,34 @@ internal sealed class ConnectionRoutes
         return clone;
     }
 
+    /// <summary>
+    /// Updates existing points in place rather than replacing them, so a selection holding them stays valid
+    /// across undo and redo.
+    /// </summary>
     internal void CopyFrom(ConnectionRoutes other)
     {
-        Points.Clear();
-        foreach (var (id, position) in other.Points)
+        _pointsToRemove.Clear();
+        foreach (var id in Points.Keys)
         {
-            Points[id] = position;
+            if (!other.Points.ContainsKey(id))
+                _pointsToRemove.Add(id);
+        }
+
+        foreach (var id in _pointsToRemove)
+        {
+            Points.Remove(id);
+        }
+
+        foreach (var (id, otherPoint) in other.Points)
+        {
+            if (Points.TryGetValue(id, out var point))
+            {
+                point.PosOnCanvas = otherPoint.PosOnCanvas;
+            }
+            else
+            {
+                Points[id] = new RoutePoint(id, otherPoint.PosOnCanvas);
+            }
         }
 
         Routes.Clear();
@@ -86,7 +125,7 @@ internal sealed class ConnectionRoutes
         }
 
         var id = Guid.NewGuid();
-        Points[id] = position;
+        Points[id] = new RoutePoint(id, position);
         pointIds.Insert(Math.Clamp(index, 0, pointIds.Count), id);
         return id;
     }
@@ -175,14 +214,14 @@ internal sealed class ConnectionRoutes
             var newRoute = new List<Guid>(pointIds.Count);
             foreach (var pointId in pointIds)
             {
-                if (!source.Points.TryGetValue(pointId, out var position))
+                if (!source.Points.TryGetValue(pointId, out var sourcePoint))
                     continue;
 
                 if (!newPointIds.TryGetValue(pointId, out var newId))
                 {
                     newId = Guid.NewGuid();
                     newPointIds[pointId] = newId;
-                    Points[newId] = position + offset;
+                    Points[newId] = new RoutePoint(newId, sourcePoint.PosOnCanvas + offset);
                 }
 
                 newRoute.Add(newId);
@@ -201,6 +240,26 @@ internal sealed class ConnectionRoutes
         }
 
         RemoveUnusedPoints();
+    }
+
+    /// <summary>Points used by routes of connections that still exist; the others are kept only for undo.</summary>
+    internal IEnumerable<RoutePoint> GetLivePoints(Symbol symbol)
+    {
+        if (IsEmpty)
+            yield break;
+
+        var livePointIds = new HashSet<Guid>();
+        foreach (var connection in symbol.Connections)
+        {
+            if (Routes.TryGetValue(Key.From(connection), out var pointIds))
+                livePointIds.UnionWith(pointIds);
+        }
+
+        foreach (var id in livePointIds)
+        {
+            if (Points.TryGetValue(id, out var point))
+                yield return point;
+        }
     }
 
     internal void RemoveUnusedPoints()

@@ -463,14 +463,14 @@ namespace T3.Editor.Gui.MagGraph.States
 
                               EdgeScrolling.Update(context.View);
                               context.ItemMovement.UpdateDragging(context);
-                              context.ConnectionRouting.UpdateNodeDrag(context);
+                              context.ItemMovement.UpdateRoutePointsFollowingDrag();
                           },
                   Exit: context => { context.ItemMovement.StopDragOperation(); }
                  );
 
         /// <summary>
         /// Dragging a route point of a connection line. Dropping it on a point of another cable from the same output
-        /// merges the two.
+        /// merges the two; shaking it removes it.
         /// </summary>
         internal static State<GraphUiContext> DragRoutePoint
             = new(
@@ -493,6 +493,10 @@ namespace T3.Editor.Gui.MagGraph.States
 
                               EdgeScrolling.Update(context.View);
                               context.ConnectionRouting.UpdateDrag(context);
+
+                              // Shaking a point off removes it and ends the drag.
+                              if (!context.ConnectionRouting.IsDraggingPoint)
+                                  context.StateMachine.SetState(Default, context);
                           },
                   Exit: context => { context.ConnectionRouting.CancelDrag(context); }
                  );

@@ -1,6 +1,6 @@
 # Connection Routes
 
-**Status (2026-11-25):** phase 1 built (uncommitted, on `main`), not yet tested in the editor. Modifier is `Alt`
+**Status (2026-11-25):** phase 1 built and first user test done; route points made selectable afterwards (uncommitted, on `main`). Modifier is `Alt`
 (briefly `Shift`; kept `Alt` since most users pan with MMB/RMB/trackpad).
 Manual test set: [`graph-connection-routes`](../../.tests-manual/graph-connection-routes.md).
 
@@ -43,8 +43,14 @@ Rules:
 - **Lifetime:** a point exists while at least one route references it. Routes of connections that no longer
   exist stay in memory during the session, so undoing a deletion brings the route back. They are invisible
   (drawing only looks up live connections) and are dropped on save.
-- **Positions** are absolute canvas positions. A point moves with a node drag only if the nodes at both ends of
-  *every* route using it are dragged together; moving a single node stretches its cable to the fixed points.
+- **Positions** are absolute canvas positions.
+- **Selectable:** each point is a `ConnectionRoutes.RoutePoint : ISelectableCanvasObject`, returned by
+  `SymbolUi.GetSelectables()` (live routes only). So the user decides what moves: fence and Shift+G select points
+  with the operators, selected points follow node drags (in the drag's undo step, offset taken from a dragged
+  operator so snapping is included), section drags take the points inside the section, and `Delete` removes them.
+  Unselected points stay put and their cables stretch. (Phase 1 first moved a point only when both ends of every
+  route using it were dragged; that broke as soon as other moves were involved.) Snapshot undo updates
+  `RoutePoint` objects in place so a selection holding them stays valid.
 
 ### File format
 
@@ -75,6 +81,10 @@ a node drag (added to the drag's macro command).
 | Drag a route point | Moves it (all cables sharing it follow) |
 | Drop a point on a point of another cable from the same output | Merges them into one shared point (trunk) |
 | `Alt` + click on a route point (no movement) | Removes it from every cable that uses it; moving before release drags it instead |
+| Click / Shift+click a route point | Selects it / adds it to the selection |
+| Drag a selected point | Moves all selected points |
+| Shake a dragged point | Removes it |
+| `Delete` with points selected | Removes them |
 | `Esc` while dragging | Cancels |
 
 `Alt` also pans the canvas on left-drag. A click on a cable or route point starts the route drag in the same frame,
@@ -90,9 +100,9 @@ A click on a route point is claimed before `ConnectionHovering` can turn it into
 
 ## Drawing
 
-A routed cable is a chain of cubic Béziers built in the draw list's path (no managed allocation): from the source
-anchor through each point to the target input. Tangents are horizontal at the points; at the ends they follow
-the connection style (right/bottom out, left/top in). Hover testing walks the path segments (the generic helper
+A routed cable is built in the draw list's path (no managed allocation) from the source anchor through each point
+to the target input. Between horizontal ends each segment uses `GraphConnectionDrawer.AppendArcPath`, the same
+horizontal-runs-and-arcs shape as unrouted lines; segments that leave or enter vertically fall back to a Bézier. Hover testing walks the path segments (the generic helper
 assumes the cable stays between its endpoints, which a detour doesn't). Snapped connections and connections into
 or out of collapsed sections ignore their route and draw as usual.
 

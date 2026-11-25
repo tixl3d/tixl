@@ -33,6 +33,36 @@ internal static class GraphConnectionDrawer
 
         var drawList = ImGui.GetWindowDrawList();
         drawList.PathClear();
+        if (!AppendArcPath(drawList, canvasScale, Sn, Sp, Tn, Tp))
+        {
+            drawList.PathStroke(color, ImDrawFlags.None, thickness);
+            return false;
+        }
+
+        var isHovering = LegacyConnectionDrawer.TestHoverDrawListPath(ref drawList, out hoverPosition, out  normalizedHoverPos);
+
+        // Optionally draw an outline
+        if (currentCanvasScale > 0.5f)
+        {
+            drawList.AddPolyline(ref drawList._Path[0], drawList._Path.Size, 
+                                 UiColors.WindowBackground.Fade(0.6f * color.A), 
+                                 ImDrawFlags.None, 
+                                 thickness + 5f);
+        }
+
+        drawList.PathStroke(color, ImDrawFlags.None, thickness);
+
+        return isHovering;
+    }
+
+    /// <summary>
+    /// Appends a connection line from <paramref name="Sp"/> to <paramref name="Tp"/> to the draw list's path:
+    /// horizontal runs joined by arcs whose radii follow the source and target node rects. Returns false if the
+    /// arcs would overlap and a straight line was appended instead.
+    /// </summary>
+    internal static bool AppendArcPath(ImDrawListPtr drawList, float canvasScale, ImRect Sn, Vector2 Sp, ImRect Tn, Vector2 Tp)
+    {
+        var currentCanvasScale = canvasScale.Clamp(0.2f, 2f);
 
         var dx = Tp.X - Sp.X;
         var dy = Tp.Y - Sp.Y;
@@ -164,7 +194,6 @@ internal static class GraphConnectionDrawer
                 {
                     // Circles are overlapping; draw a straight line for simplicity
                     drawList.PathLineTo(Tp);
-                    drawList.PathStroke(color, ImDrawFlags.None, thickness);
                     return false;
                 }
 
@@ -237,20 +266,7 @@ internal static class GraphConnectionDrawer
             drawList.PathArcTo(Tc, Tc_r, startAngle_Tc, endAngle_Tc, segmentsT);
         }
 
-        var isHovering = LegacyConnectionDrawer.TestHoverDrawListPath(ref drawList, out hoverPosition, out  normalizedHoverPos);
-
-        // Optionally draw an outline
-        if (currentCanvasScale > 0.5f)
-        {
-            drawList.AddPolyline(ref drawList._Path[0], drawList._Path.Size, 
-                                 UiColors.WindowBackground.Fade(0.6f * color.A), 
-                                 ImDrawFlags.None, 
-                                 thickness + 5f);
-        }
-
-        drawList.PathStroke(color, ImDrawFlags.None, thickness);
-
-        return isHovering;
+        return true;
     }
 
     private static int ComputerSegmentCount(float arcLengthRad, float canvasScale)

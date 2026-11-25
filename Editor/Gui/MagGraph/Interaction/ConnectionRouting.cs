@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
@@ -10,9 +11,13 @@ using T3.Editor.UiModel.Commands.Graph;
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
 /// <summary>
-/// Adds, drags, merges and removes the route points of connection lines, and moves points along with dragged
-/// operators. Hovering is collected while the connections are drawn and evaluated after drawing.
+/// Adds, selects, drags, merges and removes the route points of connection lines. Hovering is collected while
+/// the connections are drawn and evaluated after drawing.
 /// </summary>
+/// <remarks>
+/// Route points are selectables of the composition, so fence selection, node drags, section drags and delete
+/// handle them like operators. This class only covers the gestures that start on a point or a line.
+/// </remarks>
 internal sealed class ConnectionRouting
 {
     internal enum ClickResults
@@ -40,6 +45,9 @@ internal sealed class ConnectionRouting
     internal bool IsPointHighlighted(Guid pointId) => pointId == _hoveredPointId || pointId == _draggedPointId;
 
     internal Guid MergeTargetPointId => _mergeTargetPointId;
+
+    /** Points drawn in the last frame. Routes of deleted connections are kept for undo but never drawn. */
+    internal HashSet<Guid> VisiblePointIds => _visiblePointIds;
 
     /** Called before the connections are drawn, which register what is hovered. */
     internal void PrepareFrame()
@@ -76,9 +84,22 @@ internal sealed class ConnectionRouting
         var isModifierDown = IsRoutingModifierDown;
         var mouseOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
 
-        if (_hoveredPointId != Guid.Empty && routes.Points.TryGetValue(_hoveredPointId, out var pointPosition))
+        if (_hoveredPointId != Guid.Empty && routes.Points.TryGetValue(_hoveredPointId, out var point))
         {
-            StartDrag(symbolUi, _hoveredPointId, pointPosition - mouseOnCanvas, "Move route point");
+            if (!isModifierDown && !context.Selector.IsNodeSelected(point))
+            {
+                if (ImGui.GetIO().KeyShift)
+                {
+                    context.Selector.AddSelection(point);
+                }
+                else
+                {
+                    context.Selector.SetSelection(point);
+                }
+            }
+
+            StartDrag(new ModifyConnectionRoutesCommand(symbolUi.Symbol.Id, routes, "Move route point"),
+                      context, routes, point, point.PosOnCanvas - mouseOnCanvas);
 
             // Decided on release, so an Alt+drag that happens to start on a point moves it instead of deleting it.
             _removeIfReleasedWithoutMoving = isModifierDown;
@@ -91,7 +112,9 @@ internal sealed class ConnectionRouting
         var command = new ModifyConnectionRoutesCommand(symbolUi.Symbol.Id, routes, "Add route point");
         var positionOnCanvas = context.View.InverseTransformPositionFloat(_hoveredCablePositionOnScreen);
         var pointId = routes.InsertPoint(_hoveredCable.RouteKey, _hoveredCableInsertIndex, positionOnCanvas);
-        StartDrag(command, pointId, positionOnCanvas - mouseOnCanvas);
+        var newPoint = routes.Points[pointId];
+        context.Selector.SetSelection(newPoint);
+        StartDrag(command, context, routes, newPoint, positionOnCanvas - mouseOnCanvas);
         _hasChanged = true;
         return ClickResults.StartedDrag;
     }
@@ -102,7 +125,7 @@ internal sealed class ConnectionRouting
             return;
 
         var routes = context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
-        if (!routes.Points.ContainsKey(_draggedPointId))
+        if (!routes.Points.TryGetValue(_draggedPointId, out var draggedPoint))
         {
             CancelDrag(context);
             return;
@@ -116,16 +139,29 @@ internal sealed class ConnectionRouting
             _removeIfReleasedWithoutMoving = false;
         }
 
-        _mergeTargetPointId = FindMergeTarget(context, routes);
+        if (_shakeDetector.TestDragForShake(ImGui.GetMousePos()))
+        {
+            routes.RemovePoint(_draggedPointId);
+            context.Selector.DeselectNode(draggedPoint);
+            _dragCommand.Name = "Remove route point";
+            _hasChanged = true;
+            CommitDrag();
+            return;
+        }
+
+        // Merging only makes sense for a single point: a group keeps its shape.
+        _mergeTargetPointId = _pointsMovingWithDrag.Count == 1 ? FindMergeTarget(context, routes) : Guid.Empty;
         var newPosition = _mergeTargetPointId != Guid.Empty
-                              ? routes.Points[_mergeTargetPointId]
+                              ? routes.Points[_mergeTargetPointId].PosOnCanvas
                               : context.View.InverseTransformPositionFloat(ImGui.GetMousePos()) + _grabOffset;
 
-        if (routes.Points[_draggedPointId] == newPosition)
-            return;
+        var offset = newPosition - _draggedPointStartPosition;
+        foreach (var (point, startPosition) in _pointsMovingWithDrag)
+        {
+            point.PosOnCanvas = startPosition + offset;
+        }
 
-        routes.Points[_draggedPointId] = newPosition;
-        _hasChanged = true;
+        _hasChanged |= offset != Vector2.Zero;
     }
 
     internal void CompleteDrag(GraphUiContext context)
@@ -136,23 +172,24 @@ internal sealed class ConnectionRouting
         var routes = context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
         if (_removeIfReleasedWithoutMoving && !HasMovedSincePress)
         {
+            if (routes.Points.TryGetValue(_draggedPointId, out var point))
+                context.Selector.DeselectNode(point);
+
             routes.RemovePoint(_draggedPointId);
             _dragCommand.Name = "Remove route point";
             _hasChanged = true;
         }
         else if (_mergeTargetPointId != Guid.Empty && routes.CanMerge(_draggedPointId, _mergeTargetPointId))
         {
+            if (routes.Points.TryGetValue(_draggedPointId, out var point))
+                context.Selector.DeselectNode(point);
+
             routes.MergePoint(_draggedPointId, _mergeTargetPointId);
+            _dragCommand.Name = "Merge route points";
             _hasChanged = true;
         }
 
-        if (_hasChanged)
-        {
-            _dragCommand.StoreCurrentValues();
-            UndoRedoStack.Add(_dragCommand);
-        }
-
-        ResetDrag();
+        CommitDrag();
     }
 
     internal void CancelDrag(GraphUiContext context)
@@ -166,101 +203,44 @@ internal sealed class ConnectionRouting
         ResetDrag();
     }
 
-    /// <summary>
-    /// Points move with a node drag only if every route using them has both ends among the dragged items.
-    /// Otherwise the cable of a single moved node stretches to its fixed points.
-    /// </summary>
-    internal void StartNodeDrag(GraphUiContext context, HashSet<MagGraphItem> draggedItems, MacroCommand macroCommand)
-    {
-        ResetNodeDrag();
-
-        var symbolUi = context.CompositionInstance.Symbol.GetSymbolUi();
-        var routes = symbolUi.ConnectionRoutes;
-        if (routes.IsEmpty || draggedItems.Count == 0)
-            return;
-
-        foreach (var item in draggedItems)
-        {
-            _referenceItem ??= item;
-            _draggedItemIds.Add(item.Id);
-        }
-
-        foreach (var (key, pointIds) in routes.Routes)
-        {
-            var bothEndsDragged = _draggedItemIds.Contains(key.SourceItemId) && _draggedItemIds.Contains(key.TargetItemId);
-            foreach (var pointId in pointIds)
-            {
-                if (bothEndsDragged)
-                {
-                    _pointIdsMovingWithNodes.Add(pointId);
-                }
-                else
-                {
-                    _pointIdsStayingInPlace.Add(pointId);
-                }
-            }
-        }
-
-        foreach (var pointId in _pointIdsMovingWithNodes)
-        {
-            if (!_pointIdsStayingInPlace.Contains(pointId) && routes.Points.TryGetValue(pointId, out var position))
-                _pointsFollowingNodes.Add((pointId, position));
-        }
-
-        if (_pointsFollowingNodes.Count == 0 || _referenceItem == null)
-        {
-            ResetNodeDrag();
-            return;
-        }
-
-        _referenceItemStartPosition = _referenceItem.PosOnCanvas;
-        _nodeDragCommand = new ModifyConnectionRoutesCommand(symbolUi.Symbol.Id, routes, "Move route points");
-        macroCommand.AddExecutedCommandForUndo(_nodeDragCommand);
-    }
-
-    internal void UpdateNodeDrag(GraphUiContext context)
-    {
-        if (_nodeDragCommand == null || _referenceItem == null)
-            return;
-
-        var routes = context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
-        var offset = _referenceItem.PosOnCanvas - _referenceItemStartPosition;
-        foreach (var (pointId, startPosition) in _pointsFollowingNodes)
-        {
-            if (routes.Points.ContainsKey(pointId))
-                routes.Points[pointId] = startPosition + offset;
-        }
-    }
-
-    internal void CompleteNodeDrag()
-    {
-        _nodeDragCommand?.StoreCurrentValues();
-        ResetNodeDrag();
-    }
-
-    internal void ResetNodeDrag()
-    {
-        _nodeDragCommand = null;
-        _referenceItem = null;
-        _draggedItemIds.Clear();
-        _pointIdsMovingWithNodes.Clear();
-        _pointIdsStayingInPlace.Clear();
-        _pointsFollowingNodes.Clear();
-    }
-
-    private void StartDrag(SymbolUi symbolUi, Guid pointId, Vector2 grabOffset, string commandName)
-    {
-        StartDrag(new ModifyConnectionRoutesCommand(symbolUi.Symbol.Id, symbolUi.ConnectionRoutes, commandName), pointId, grabOffset);
-    }
-
-    private void StartDrag(ModifyConnectionRoutesCommand command, Guid pointId, Vector2 grabOffset)
+    /// <summary>A selected point drags all selected points along; an unselected one moves alone.</summary>
+    private void StartDrag(ModifyConnectionRoutesCommand command, GraphUiContext context, ConnectionRoutes routes,
+                           ConnectionRoutes.RoutePoint point, Vector2 grabOffset)
     {
         _dragCommand = command;
-        _draggedPointId = pointId;
+        _draggedPointId = point.Id;
+        _draggedPointStartPosition = point.PosOnCanvas;
         _grabOffset = grabOffset;
         _mergeTargetPointId = Guid.Empty;
         _hasChanged = false;
         _removeIfReleasedWithoutMoving = false;
+        _shakeDetector.ResetShaking();
+
+        _pointsMovingWithDrag.Clear();
+        _pointsMovingWithDrag.Add((point, point.PosOnCanvas));
+        if (!context.Selector.IsNodeSelected(point))
+            return;
+
+        foreach (var selectable in context.Selector.Selection)
+        {
+            if (selectable is ConnectionRoutes.RoutePoint selectedPoint
+                && selectedPoint != point
+                && routes.Points.ContainsKey(selectedPoint.Id))
+            {
+                _pointsMovingWithDrag.Add((selectedPoint, selectedPoint.PosOnCanvas));
+            }
+        }
+    }
+
+    private void CommitDrag()
+    {
+        if (_hasChanged && _dragCommand != null)
+        {
+            _dragCommand.StoreCurrentValues();
+            UndoRedoStack.Add(_dragCommand);
+        }
+
+        ResetDrag();
     }
 
     private static bool HasMovedSincePress => ImGui.GetIO().MouseDragMaxDistanceAbs[0].Length() >= UserSettings.Config.ClickThreshold;
@@ -271,9 +251,10 @@ internal sealed class ConnectionRouting
         _draggedPointId = Guid.Empty;
         _mergeTargetPointId = Guid.Empty;
         _hasChanged = false;
+        _removeIfReleasedWithoutMoving = false;
+        _pointsMovingWithDrag.Clear();
     }
 
-    /** Only drawn points qualify: routes of deleted connections are kept for undo but stay invisible. */
     private Guid FindMergeTarget(GraphUiContext context, ConnectionRoutes routes)
     {
         var mousePosition = ImGui.GetMousePos();
@@ -282,10 +263,10 @@ internal sealed class ConnectionRouting
 
         foreach (var pointId in _visiblePointIds)
         {
-            if (pointId == _draggedPointId || !routes.Points.TryGetValue(pointId, out var position))
+            if (pointId == _draggedPointId || !routes.Points.TryGetValue(pointId, out var point))
                 continue;
 
-            var distance = Vector2.Distance(context.View.TransformPosition(position), mousePosition);
+            var distance = Vector2.Distance(context.View.TransformPosition(point.PosOnCanvas), mousePosition);
             if (distance >= closestDistance || !routes.CanMerge(_draggedPointId, pointId))
                 continue;
 
@@ -305,16 +286,11 @@ internal sealed class ConnectionRouting
 
     private ModifyConnectionRoutesCommand? _dragCommand;
     private Guid _draggedPointId;
+    private Vector2 _draggedPointStartPosition;
     private Guid _mergeTargetPointId;
     private Vector2 _grabOffset;
     private bool _hasChanged;
     private bool _removeIfReleasedWithoutMoving;
-
-    private ModifyConnectionRoutesCommand? _nodeDragCommand;
-    private MagGraphItem? _referenceItem;
-    private Vector2 _referenceItemStartPosition;
-    private readonly HashSet<Guid> _draggedItemIds = [];
-    private readonly HashSet<Guid> _pointIdsMovingWithNodes = [];
-    private readonly HashSet<Guid> _pointIdsStayingInPlace = [];
-    private readonly List<(Guid PointId, Vector2 StartPosition)> _pointsFollowingNodes = [];
+    private readonly List<(ConnectionRoutes.RoutePoint Point, Vector2 StartPosition)> _pointsMovingWithDrag = [];
+    private readonly ShakeDetector _shakeDetector = new();
 }

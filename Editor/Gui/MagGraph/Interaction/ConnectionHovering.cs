@@ -56,11 +56,12 @@ internal sealed class ConnectionHovering
 
         var hoverDuration = time - _hoverStartTime;
         var hoverIndicatorRadius = EaseFunctions.EaseOutElastic((float)hoverDuration) * 9;
-        if (context.ConnectionRouting.WouldAddPoint)
-            hoverIndicatorRadius *= 1.5f;
+
+        // Grows while Alt+click would add a route point. Only the dot on the line, not the end markers.
+        var hoverDotRadius = context.ConnectionRouting.WouldAddPoint ? hoverIndicatorRadius * 1.5f : hoverIndicatorRadius;
         var drawList = ImGui.GetWindowDrawList();
 
-        drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverIndicatorRadius, firstHover.Color, 30);
+        drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverDotRadius, firstHover.Color, 30);
 
         // For merged lines with matching types and line regions, we can offer multi drag...
         var bounds = ImRect.RectWithSize(firstHover.PositionOnScreen, Vector2.Zero);
@@ -93,7 +94,7 @@ internal sealed class ConnectionHovering
         if (isConsistentTypeAndOutput)
         {
             // We only draw first indicator, because hover points fall together closely...
-            drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverIndicatorRadius, firstHover.Color, 12);
+            drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverDotRadius, firstHover.Color, 12);
 
             // Prepare disconnecting from input slot...
             if (region == LineRegions.End)

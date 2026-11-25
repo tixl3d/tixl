@@ -213,6 +213,15 @@ internal static class SectionDragging
     {
         var matches = new List<ISelectableCanvasObject>();
         SectionTree.CollectSectionContents(parentUi, section, matches);
+
+        // Route points have no section membership; the ones lying inside the section move with it.
+        var area = new ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
+        foreach (var routePoint in parentUi.ConnectionRoutes.GetLivePoints(parentUi.Symbol))
+        {
+            if (area.Contains(routePoint.PosOnCanvas))
+                matches.Add(routePoint);
+        }
+
         return matches;
     }
 

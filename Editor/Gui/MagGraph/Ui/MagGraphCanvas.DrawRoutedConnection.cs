@@ -3,6 +3,7 @@ using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
@@ -12,8 +13,8 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView
 {
     /// <summary>
-    /// Draws a connection through its route points as a chain of curves that pass the points horizontally
-    /// (vertically for vertical connections), so cables sharing a point merge smoothly into one trunk.
+    /// Draws a connection through its route points in the style of unrouted lines: horizontal runs joined by arcs.
+    /// Lines pass every point horizontally, so cables sharing a point merge smoothly into one trunk.
     /// </summary>
     private void DrawRoutedConnection(MagGraphConnection connection, List<Guid> pointIds, ImDrawListPtr drawList, GraphUiContext context,
                                       Vector2 sourceOnScreen, Vector2 targetOnScreen, Color color, float thickness)
@@ -33,19 +34,24 @@ internal sealed partial class MagGraphView
 
         var previous = sourceOnScreen;
         var previousDirection = sourceDirection;
+        var previousArea = TransformRect(connection.SourceItem.Area);
         for (var index = 0; index < pointIds.Count; index++)
         {
-            if (!_connectionRoutes.Points.TryGetValue(pointIds[index], out var pointOnCanvas))
+            if (!_connectionRoutes.Points.TryGetValue(pointIds[index], out var routePoint))
                 continue;
 
-            var pointOnScreen = TransformPosition(pointOnCanvas);
-            AddRouteCurve(drawList, previous, previousDirection, pointOnScreen, pointDirection);
+            var pointOnScreen = TransformPosition(routePoint.PosOnCanvas);
+            AddRouteSegment(drawList, previous, previousDirection, previousArea, pointOnScreen, pointDirection, default);
             _routeSegments.Add((drawList._Path.Size, index));
             previous = pointOnScreen;
             previousDirection = pointDirection;
+
+            // An empty area makes the arc drawer assume a node-sized box around the point.
+            previousArea = default;
         }
 
-        AddRouteCurve(drawList, previous, previousDirection, targetOnScreen, targetDirection);
+        AddRouteSegment(drawList, previous, previousDirection, previousArea,
+                        targetOnScreen, targetDirection, TransformRect(connection.TargetItem.VerticalStackArea));
         _routeSegments.Add((drawList._Path.Size, pointIds.Count));
 
         if (TryFindHoverOnPath(drawList, out var hoverPosition, out var normalizedHoverPos, out var insertIndex))
@@ -75,8 +81,16 @@ internal sealed partial class MagGraphView
         DrawRoutePointHandles(pointIds, drawList, context, color);
     }
 
-    private static void AddRouteCurve(ImDrawListPtr drawList, Vector2 from, Vector2 fromDirection, Vector2 to, Vector2 toDirection)
+    /** Arcs like unrouted lines between horizontal ends; a curve where an end leaves or enters vertically. */
+    private void AddRouteSegment(ImDrawListPtr drawList, Vector2 from, Vector2 fromDirection, ImRect fromArea,
+                                 Vector2 to, Vector2 toDirection, ImRect toArea)
     {
+        if (fromDirection == Vector2.UnitX && toDirection == Vector2.UnitX)
+        {
+            GraphConnectionDrawer.AppendArcPath(drawList, CanvasScale, fromArea, from, toArea, to);
+            return;
+        }
+
         var tangentLength = Vector2.Distance(from, to) * 0.4f;
         drawList.PathBezierCubicCurveTo(from + fromDirection * tangentLength,
                                         to - toDirection * tangentLength,
@@ -106,10 +120,10 @@ internal sealed partial class MagGraphView
 
         foreach (var pointId in pointIds)
         {
-            if (!_connectionRoutes.Points.TryGetValue(pointId, out var pointOnCanvas))
+            if (!_connectionRoutes.Points.TryGetValue(pointId, out var routePoint))
                 continue;
 
-            var pointOnScreen = TransformPosition(pointOnCanvas);
+            var pointOnScreen = TransformPosition(routePoint.PosOnCanvas);
             routing.RegisterHandle(pointId, pointOnScreen);
 
             if (routing.IsPointHighlighted(pointId))
@@ -121,6 +135,9 @@ internal sealed partial class MagGraphView
                 drawList.AddCircleFilled(pointOnScreen, radius, UiColors.WindowBackground, 16);
                 drawList.AddCircle(pointOnScreen, radius, color, 16, lineWidth);
             }
+
+            if (context.Selector.IsSelected(routePoint))
+                drawList.AddCircle(pointOnScreen, radius * 1.9f, UiColors.ForegroundFull.Fade(_context.GraphOpacity), 16, lineWidth);
 
             if (pointId == routing.MergeTargetPointId)
                 drawList.AddCircle(pointOnScreen, radius * 2.5f, color, 24, lineWidth);
