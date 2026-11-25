@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "daab8738-babd-4036-8581-22e3dc55e4ba"/*FillCurves*/,
+  "Inputs": [
+    {
+      "Id": "02b5e3a3-064e-4e1b-85b9-1d3ca685958d"/*EvenOdd*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2b970621-dc0a-41d8-9220-3dd19a707af1"/*Curves*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a2bca4ff-9cd9-4f97-9fbf-a0ee9351b86e"/*KeepCurves*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "ac6b705b-b962-4f92-8e4a-451d787f57bb"/*Weight*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "9e4961ef-ebd1-43d9-b505-bd591101551c"/*Inset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d1deb9b8-6ffd-476b-b9b4-fbd32845b0f0"/*Tolerance*/,
+      "DefaultValue": 0.002
+    },
+    {
+      "Id": "eff0d217-6548-4871-aa00-31c85029e69c"/*Lattice*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c78b348e-1e02-492e-be16-b70c5994f88d"/*ConstrainedDelaunay*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

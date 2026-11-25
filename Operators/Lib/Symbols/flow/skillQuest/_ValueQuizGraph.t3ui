@@ -9,7 +9,8 @@
       "Position": {
         "X": 224.42734,
         "Y": 258.16098
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "afcdab0a-b859-4137-82de-3fc20f306d57"/*Value*/,

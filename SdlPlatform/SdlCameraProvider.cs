@@ -86,6 +86,20 @@ public sealed unsafe class SdlCameraProvider : ICameraProvider
             return null;
         }
 
+        if (OperatingSystem.IsMacOS())
+        {
+            switch (MacCameraPermission.Check())
+            {
+                case MacCameraPermission.State.Pending:
+                    error = "Waiting for camera permission. Allow TiXL in the system dialog.";
+                    return null;
+
+                case MacCameraPermission.State.Denied:
+                    error = "Camera access is denied. Allow TiXL in System Settings > Privacy & Security > Camera, then restart TiXL.";
+                    return null;
+            }
+        }
+
         var cameraId = cameras[cameraIndex].Id;
         var mode = CompleteMode(requestedMode, ReadModes(cameraId));
         var spec = new SDL_CameraSpec

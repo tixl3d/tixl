@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -16,16 +18,17 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
                        InputDefinition = InputDefinition,
                        Parent = Parent,
                        PosOnCanvas = PosOnCanvas,
-                       Relevancy = Relevancy
+                       Relevancy = Relevancy,
+                       _displayMode = _displayMode,
                    };
     }
 
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref T value, bool readOnly)
     {
-        return DrawEnumInputEdit(ref value);
+        return DrawEnumInputEdit(ref value, _displayMode);
     }
 
-    public static InputEditStateFlags DrawEnumInputEdit(ref T value)
+    public static InputEditStateFlags DrawEnumInputEdit(ref T value, EnumDisplayMode displayMode = EnumDisplayMode.Dropdown)
     {
         var enumInfo = EnumCache.Instance.GetTypedEnumEntry<T>();
 
@@ -76,6 +79,14 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
         else
         {
             var index = Array.IndexOf(enumInfo.Values, value);
+            if (EnumDisplayModeUi.TryDrawSegmented(displayMode, enumInfo, ref index, out var segmentedFlags))
+            {
+                if (segmentedFlags != InputEditStateFlags.Nothing)
+                    value = enumInfo[index];
+
+                return segmentedFlags;
+            }
+
             var editStateFlags = InputEditStateFlags.Nothing;
             var modified = false;
 
@@ -202,8 +213,32 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
         ImGui.TextUnformatted(index >= 0 && !enumInfo.IsFlagEnum ? enumInfo.DisplayNames[index] : value.ToString());
     }
 
+    public override bool DrawSettings()
+    {
+        var modified = base.DrawSettings();
+        if (EnumCache.Instance.GetTypedEnumEntry<T>().IsFlagEnum)
+            return modified;
+
+        modified |= EnumDisplayModeUi.DrawSettings(ref _displayMode);
+        return modified;
+    }
+
+    public override void Write(JsonTextWriter writer)
+    {
+        base.Write(writer);
+        EnumDisplayModeUi.Write(writer, _displayMode);
+    }
+
+    public override void Read(JToken? inputToken)
+    {
+        base.Read(inputToken);
+        _displayMode = EnumDisplayModeUi.Read(inputToken);
+    }
+
     /** Long lists like texture formats would otherwise run off the screen. */
     private const float MaxPopupHeightRelativeToViewport = 0.5f;
+
+    private EnumDisplayMode _displayMode;
 
     private static int _lastHoveredComboItem = -1;
     private static T _originalValue;

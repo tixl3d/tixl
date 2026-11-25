@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "98d9ae64-3784-4141-a509-489ae5775bd6"/*SubdivideGeometry*/,
+  "Inputs": [
+    {
+      "Id": "070c122c-2fea-425d-bf5c-62910f393676"/*Smoothness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "07a29562-d391-47cc-a344-fc447dbcd4da"/*Normals*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "09b5442d-9eff-43e1-b6e8-79eaed455b74"/*SmoothAngle*/,
+      "DefaultValue": 60.0
+    },
+    {
+      "Id": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "6ff3ad95-376e-4de3-ba02-875a3f620bee"/*MaxEdgeLength*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "951c95ee-c446-41be-ba9e-7211dc78ff2b"/*SmoothnessAttribute*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "bef4d855-bedd-45ea-9d28-0f45b9fc3b7a"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f361912f-b190-4e4f-a192-ef77e8ce5eac"/*Iterations*/,
+      "DefaultValue": 1
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -8,9 +9,10 @@ namespace T3.Core.Resource.ShaderCompiling;
 /// <summary>
 /// Turns slangc's multi-line diagnostics into the short message shown for a failed shader: where the first
 /// error is, what it says, and how to fix it if the cause is a known difference from earlier TiXL versions.
+/// <see cref="Parse"/> keeps all of them for the code editor's problem list.
 /// </summary>
 /// <remarks>
-/// Only the first error is reported, because the following ones are often consequences of it.
+/// The message names only the first error, because the following ones are often consequences of it.
 /// </remarks>
 internal static partial class SlangDiagnostics
 {
@@ -19,30 +21,52 @@ internal static partial class SlangDiagnostics
     /// <param name="shaderName">What to call that file in the message instead.</param>
     public static string DescribeFirstError(string diagnostics, string compiledSourcePath, string shaderName)
     {
+        var parsed = new List<ShaderCompileFailures.Diagnostic>();
+        Parse(diagnostics, compiledSourcePath, parsed);
+        foreach (var diagnostic in parsed)
+        {
+            if (!diagnostic.IsError)
+                continue;
+
+            var location = diagnostic.File.Length == 0 ? shaderName : diagnostic.File;
+            var message = diagnostic.Line > 0 ? $"Line {diagnostic.Line}: {diagnostic.Text}\n\n{location}" : diagnostic.Text;
+            var hint = FindHint(diagnostic.Text);
+            return hint == null ? message : $"{message}\n\n{hint}";
+        }
+
+        return diagnostics;
+    }
+
+    /// <summary>Adds every error and warning in slangc's output, in the order reported.</summary>
+    public static void Parse(string diagnostics, string compiledSourcePath, List<ShaderCompileFailures.Diagnostic> result)
+    {
         var lines = diagnostics.Split('\n');
 
         for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
         {
-            var header = ErrorHeaderRegex().Match(lines[lineIndex].TrimEnd());
+            var header = HeaderRegex().Match(lines[lineIndex].TrimEnd());
             if (!header.Success)
                 continue;
 
+            var isError = header.Groups["severity"].Value == "error";
             var text = header.Groups["text"].Value;
-            var location = string.Empty;
-            var lineNumber = string.Empty;
+            var file = string.Empty;
+            var lineNumber = 0;
+            var column = 0;
 
             for (var detailIndex = lineIndex + 1; detailIndex < lines.Length; detailIndex++)
             {
                 var detailLine = lines[detailIndex].TrimEnd();
-                if (detailLine.Length == 0 || ErrorHeaderRegex().IsMatch(detailLine))
+                if (detailLine.Length == 0 || HeaderRegex().IsMatch(detailLine))
                     break;
 
                 var locationMatch = LocationRegex().Match(detailLine);
-                if (locationMatch.Success && lineNumber.Length == 0)
+                if (locationMatch.Success && lineNumber == 0)
                 {
                     var path = locationMatch.Groups["path"].Value;
-                    location = SamePath(path, compiledSourcePath) ? shaderName : Path.GetFileName(path);
-                    lineNumber = locationMatch.Groups["line"].Value;
+                    file = SamePath(path, compiledSourcePath) ? string.Empty : Path.GetFileName(path);
+                    lineNumber = int.Parse(locationMatch.Groups["line"].Value);
+                    column = int.Parse(locationMatch.Groups["column"].Value);
                     continue;
                 }
 
@@ -55,12 +79,8 @@ internal static partial class SlangDiagnostics
                 }
             }
 
-            var message = lineNumber.Length > 0 ? $"Line {lineNumber}: {text}\n\n{location}" : text;
-            var hint = FindHint(text);
-            return hint == null ? message : $"{message}\n\n{hint}";
+            result.Add(new ShaderCompileFailures.Diagnostic(isError, file, lineNumber, column, text));
         }
-
-        return diagnostics;
     }
 
     /** Null when the error says nothing specific to moving a shader from an earlier TiXL version. */
@@ -93,11 +113,11 @@ internal static partial class SlangDiagnostics
         return string.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase);
     }
 
-    [GeneratedRegex(@"^error(\[\w+\])?:\s*(?<text>.*)$")]
-    private static partial Regex ErrorHeaderRegex();
+    [GeneratedRegex(@"^(?<severity>error|warning)(\[\w+\])?:\s*(?<text>.*)$")]
+    private static partial Regex HeaderRegex();
 
     /** Greedy path, because a Windows path contains a colon itself. */
-    [GeneratedRegex(@"^\s*-+>\s*(?<path>.+):(?<line>\d+):\d+$")]
+    [GeneratedRegex(@"^\s*-+>\s*(?<path>.+):(?<line>\d+):(?<column>\d+)$")]
     private static partial Regex LocationRegex();
 
     [GeneratedRegex(@"^\s*\|\s*\^+\s+(?<text>.+)$")]

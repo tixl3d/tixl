@@ -18,7 +18,8 @@
         "X": 51.512096,
         "Y": 46.995968
       },
-      "Usage": "FilePath"
+      "Usage": "FilePath",
+      "FileFilter": "glb, gltf"
     }
   ],
   "SymbolChildUis": [],

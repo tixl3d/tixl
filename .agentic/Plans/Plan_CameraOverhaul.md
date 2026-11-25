@@ -133,6 +133,13 @@ is height).
   that.
 - The Player has no camera interaction and only evaluates operator matrices, so the risk is low.
 
+## Edit mode by default
+
+Decided 2026-11-20 for shape editing (`Plan_ShapeEditing.md`): the left mouse button in the Output window belongs to
+editing, not to orbiting. Holding the right button flies (as above); Alt+left orbits, middle drag pans, Alt+right and
+the wheel dolly. A View/Edit toggle in the Output window toolbar keeps a navigation mode where left drag orbits as
+today. The long-term default is Edit.
+
 ## Open questions
 
 1. 4.4 or 4.5 for Phase 1? It is self-contained, but changes mouse habits (right drag).

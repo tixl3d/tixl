@@ -6,7 +6,7 @@
       "Id": "804aba22-3b3d-4121-b754-82c3ed2d4566"/*DifferenceRange*/,
       "DefaultValue": {
         "X": 0.0,
-        "Y": 0.1
+        "Y": 0.03
       }
     },
     {

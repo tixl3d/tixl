@@ -423,7 +423,7 @@ Items under "Needs attention" were NOT fixed, mostly because a fix would change 
 ### mesh_particle
 
 - particle/force/SnapToAnglesForce: `AngleCount` is the angle step in degrees (default 45), not a count. Misleading name.
-- mesh/generate/ExtrudeCurves: `UseExtend` actually toggles scaling by point Scale (shader UseStretch); `UseWAsWidth` is obsolete and unused but still visible; output slot is named `Output2`.
+- mesh/generate/ExtrudePointCurves (formerly ExtrudeCurves): `UseExtend` actually toggles scaling by point Scale (shader UseStretch); `UseWAsWidth` is obsolete and unused but still visible; output slot is named `Output2`.
 - mesh/draw/DrawMeshCelShading: `EdgeThresold` typo; Shading is a Gradient while other draw ops use Shading as a Default/Flat enum.
 - mesh/modify/TransformMeshUVs: `Uniformscale` casing; TransformMesh uses `UniformScale`. MeshProjectUV/TransformMeshUVs use Translate/Rotate; TransformMesh uses Translation/Rotation.
 - mesh/draw: Culling vs CullMode naming differs between DrawMesh/DrawMeshAtPoints/DrawMeshChunksAtPoints. DrawMeshChunksAtPoints uses UseF1ForSize/UseStretch while DrawMeshAtPoints uses ScaleFactor/UsePointScale.

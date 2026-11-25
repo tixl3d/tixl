@@ -12,6 +12,12 @@ namespace T3.Editor.Skills.Ui;
 
 internal sealed class SkillMapCanvas : HexCanvas
 {
+    /** When off, topics whose levels are all still planned or draft are faded out. */
+    public bool ShowPlannedTopics = true;
+
+    /** When on, topics without never-played levels are faded so the ones with new levels stand out. */
+    public bool HighlightNewTopics;
+
     public bool DrawContent(HandleTopicInteraction? topicAction, out HexCanvas.Cell mouseCell, HashSet<QuestTopic> selection)
     {
         if (!ImGui.IsWindowAppearing())
@@ -83,9 +89,10 @@ internal sealed class SkillMapCanvas : HexCanvas
         var radius = HexRadiusOnScreen;
 
         GetTopicColorAndStateFade(topic, out var typeColor, out var unlockProgressFade);
+        var topicFade = GetFilterFade(topic);
         var isHoveredFade = isHovered ? 1f : 0.9f;
         var isUndefinedFade = string.IsNullOrEmpty(topic.Namespace) ? 0.4f : 1;
-        dl.AddNgonRotated(posOnScreen, radius * 0.95f, typeColor.Fade(isHoveredFade * unlockProgressFade * isUndefinedFade));
+        dl.AddNgonRotated(posOnScreen, radius * 0.95f, typeColor.Fade(isHoveredFade * unlockProgressFade * isUndefinedFade * topicFade));
 
         var isSelected = selection.Contains(topic);
         if (isSelected)
@@ -106,7 +113,8 @@ internal sealed class SkillMapCanvas : HexCanvas
             var delta = posOnScreen - targetPos;
             var direction = Vector2.Normalize(delta);
             var angle = -MathF.Atan2(delta.X, delta.Y) - MathF.PI / 2;
-            var fadeLine = (delta.Length() / Scale.X).RemapAndClamp(0f, 2000f, 1, 0.06f) * lockedFade;
+            var fadeLine = (delta.Length() / Scale.X).RemapAndClamp(0f, 2000f, 1, 0.06f) * lockedFade
+                           * MathF.Min(topicFade, GetFilterFade(targetTopic));
 
             dl.AddLine(posOnScreen - direction * radius * 0.83f,
                        targetPos + direction * radius * 0.83f,
@@ -123,7 +131,7 @@ internal sealed class SkillMapCanvas : HexCanvas
 
         if (!string.IsNullOrEmpty(topic.Title))
         {
-            var labelAlpha = Scale.X.RemapAndClamp(0.25f, 0.6f, 0, 1);
+            var labelAlpha = Scale.X.RemapAndClamp(0.25f, 0.6f, 0, 1) * topicFade;
             if (labelAlpha > 0.01f)
             {
                 ImGui.PushFont(Scale.X < 0.55f ? Fonts.FontSmall : Fonts.FontNormal);
@@ -193,6 +201,18 @@ internal sealed class SkillMapCanvas : HexCanvas
         return isHovered;
     }
 
+    private float GetFilterFade(QuestTopic topic)
+    {
+        var fade = 1f;
+        if (!ShowPlannedTopics && topic.ProgressionState == QuestTopic.ProgressStates.Upcoming)
+            fade = PlannedTopicFade;
+
+        if (HighlightNewTopics && topic.NeverPlayedLevelCount == 0)
+            fade = MathF.Min(fade, NotNewTopicFade);
+
+        return fade;
+    }
+
     internal static void GetTopicColorAndStateFade(QuestTopic topic, out Color typeColor, out float unlockProgressFade)
     {
         var type = topic.TopicType switch
@@ -218,4 +238,7 @@ internal sealed class SkillMapCanvas : HexCanvas
     }
 
     internal delegate void HandleTopicInteraction(QuestTopic topic, bool isSelected);
+
+    private const float PlannedTopicFade = 0.2f;
+    private const float NotNewTopicFade = 0.3f;
 }

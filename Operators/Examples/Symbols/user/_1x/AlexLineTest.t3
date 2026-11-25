@@ -278,7 +278,7 @@
       "Outputs": []
     },
     {
-      "Id": "1941a013-fc01-4bd6-a794-f55ac8e9368b"/*ExtrudeCurves*/,
+      "Id": "1941a013-fc01-4bd6-a794-f55ac8e9368b"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
       "InputValues": [],
       "Outputs": []
@@ -1405,7 +1405,7 @@
       "Outputs": []
     },
     {
-      "Id": "92068204-e0e1-4f69-8c64-a5cf18c7d380"/*ExtrudeCurves*/,
+      "Id": "92068204-e0e1-4f69-8c64-a5cf18c7d380"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
       "InputValues": [],
       "Outputs": []

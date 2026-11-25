@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.numbers.vec2;
 
@@ -15,12 +15,8 @@ internal sealed class PickVector2 : Instance<PickVector2>
 
     private void Update(EvaluationContext context)
     {
-        var connections = Input.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
-            return;
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
+        if (PickedInput.TryGetValue(Input, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
 
     [Input(Guid = "f210558a-4f9e-4e94-bbd4-ef73da498614")]

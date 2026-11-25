@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "2e4ecee7-2975-46e1-8f98-900935559176"/*AnimatedText*/,
-  "Description": "Draws text whose characters or words build in and out one after another.\n\nCombines [TextSprites], [TextBuildup] and [DrawPointSprites] with the most useful parameters. Each unit moves from a hidden state (offset, rotation, scale and the edges of the gradient) to its resting place when RangeEnd passes its index, and leaves again when RangeStart passes it.\n\nAKA: text animation, typewriter, reveal, kinetic typography, build in\n\nTips:\n- Animate RangeEnd from 0 to the number of words with linear keyframes.\n- Separate phrases with a GroupSeparator like \",\" to animate them as a whole.\n- For full control, combine [TextSprites], [TextBuildup] and [DrawPointSprites] directly.\n\nSee also: [Text], [TextSprites], [TextBuildup]",
+  "Description": "Draws text whose characters or words build in and out one after another.\n\nCombines [TextSprites], [TextBuildup] and [DrawPointSprites] with the most useful parameters. Each unit moves from a hidden state (offset, rotation, scale and the edges of the gradient) to its resting place when RangeEnd passes its index, and leaves again when RangeStart passes it.\n\nAKA: text animation, typewriter, reveal, kinetic typography, build in\n\nTips:\n- Animate RangeEnd from 0 to the number of words with linear keyframes, or set RangeMode to Normalized and animate it from 0 to 1.\n- Separate phrases with a GroupSeparator like \",\" to animate them as a whole.\n- For full control, combine [TextSprites], [TextBuildup] and [DrawPointSprites] directly.\n\nSee also: [Text], [TextSprites], [TextBuildup]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -50,6 +50,14 @@
       "Max": 2.0
     },
     {
+      "InputId": "3aa4b67f-a502-42e0-bf30-dbd4acba6f21"/*RangeMode*/,
+      "Position": {
+        "X": 160.0,
+        "Y": -437.5
+      },
+      "Description": "Index measures RangeStart and RangeEnd in units. Normalized maps 0 to before the first unit and 1 to the last unit fully built, independent of the text length."
+    },
+    {
       "InputId": "4b6b2893-f913-453b-89aa-7152358c55a0"/*Pivot*/,
       "Position": {
         "X": 160.0,
@@ -65,7 +73,7 @@
         "X": 160.0,
         "Y": -420.0
       },
-      "Description": "Units with an index below this value are built in. Animate it from 0 to the unit count to reveal the text.",
+      "Description": "Units with an index below this value are built in. Animate it from 0 to the unit count to reveal the text, or from 0 to 1 with RangeMode Normalized.",
       "Min": 0.0,
       "Max": 20.0
     },

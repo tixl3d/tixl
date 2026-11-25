@@ -28,10 +28,13 @@ public enum VideoPlaybackOptimization
 /// The latest frame and status for one video stream, returned by
 /// <see cref="IVideoPlaybackEngine.RequestFrame"/>. <see cref="Produced"/> is true when this call uploaded a
 /// new frame; <see cref="IsReady"/> drives the export-gated <c>Playback.OpNotReady</c>.
+/// <see cref="FrameIndex"/> is the source frame number of <see cref="Texture"/> (counted from the stream start at
+/// the stream's frame rate), or -1 before the first frame.
 /// </summary>
 public readonly record struct VideoFrameResult(
     bool Produced,
     Texture2D? Texture,
+    long FrameIndex,
     float Duration,
     bool HasCompleted,
     bool IsReady,

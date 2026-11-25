@@ -15,6 +15,12 @@ namespace Lib.mesh.generate{
         [Input(Guid = "b9ee9f01-0c73-45c7-a72d-5ce28cb56e3c")]
         public readonly InputSlot<int> ClipIndex = new InputSlot<int>();
 
+        [Input(Guid = "443aae80-dff3-49bf-bfa9-82f33ccaaa2d")]
+        public readonly InputSlot<string> Path = new InputSlot<string>();
+
+        [Input(Guid = "342ae171-066e-47c7-871c-9b26e5ed3360")]
+        public readonly InputSlot<float> OverrideTime = new InputSlot<float>();
+
 
     }
 }

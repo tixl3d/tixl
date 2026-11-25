@@ -19,9 +19,11 @@ public sealed class DepthStencilState : Instance<DepthStencilState>
 
         try
         {
+            var enabled = EnableZTest.GetValue(context) || EnableZWrite.GetValue(context);
+
             var depthStencilStateDescription = new DepthStencilStateDescription()
                                                    {
-                                                       IsDepthEnabled = EnableZTest.GetValue(context),
+                                                       IsDepthEnabled = enabled,
                                                        DepthWriteMask = EnableZWrite.GetValue(context) ?  DepthWriteMask.All : DepthWriteMask.Zero,
                                                        DepthComparison = Comparison.GetValue(context),
                                                    };

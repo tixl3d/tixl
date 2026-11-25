@@ -1,0 +1,62 @@
+{
+  "Id": "1e3ff394-1d2d-4318-b50f-2147e001f26c",
+  "Variations": [
+    {
+      "Id": "92faeb5b-91cf-49e9-8e84-5932a4932a10",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "fdd6e2f5-7e4d-4d75-aa44-71a5996936c7": {
+          "b4a8c16d-5a0f-4867-ae03-92a675abe709": {
+            "X": 0.0,
+            "Y": -0.48,
+            "Z": 0.0
+          }
+        },
+        "59791860-c456-46e1-ae8f-89e8705bf853": {
+          "2693cb7d-33b3-4a0c-929f-e6911d2d4a0c": 2,
+          "c427d83b-1046-4b8d-b44a-e616a64a702a": {
+            "X": 5.2,
+            "Y": 130.0,
+            "Z": 2.5
+          }
+        },
+        "501fe428-a089-4930-8706-02514d072616": {
+          "61eb78f5-d36e-479e-938f-a4fa4b31a1b6": 5.0,
+          "d84bd197-8788-4787-9883-c43bc0e285e7": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "5a987e4a-9529-4b53-ad67-377071a7e37b",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1E-06,
+                    "G": 9.9999E-07,
+                    "B": 1E-06,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "7a09416c-d5a2-44ac-a643-1ae1c7fb76d4",
+                  "NormalizedPosition": 0.43281144,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

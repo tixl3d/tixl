@@ -6,7 +6,7 @@ namespace Lib.numbers.floats.process;
 public sealed class RemapFloatList : Instance<RemapFloatList>
 {
     [Input(Guid = "80eed18c-5453-4088-9e96-e5d42f9776c3")]
-    public readonly InputSlot<Vector2> BiasAndGain = new();
+    public readonly InputSlot<Vector2> GainAndBias = new();
 
     [Input(Guid = "fdc8c3ea-30cb-4f31-9469-435a87b34028")]
     public readonly InputSlot<List<float>> FloatList = new();
@@ -47,7 +47,7 @@ public sealed class RemapFloatList : Instance<RemapFloatList>
         var inMax = RangeInMax.GetValue(context);
         var outMin = RangeOutMin.GetValue(context);
         var outMax = RangeOutMax.GetValue(context);
-        var biasAndGain = BiasAndGain.GetValue(context);
+        var gainAndBias = GainAndBias.GetValue(context);
         var mode = (Modes)Mode.GetValue(context);
 
         var resultList = new List<float>(inputList.Count);
@@ -71,7 +71,7 @@ public sealed class RemapFloatList : Instance<RemapFloatList>
             var normalized = (value - inMin) / inRange;
             if (normalized > 0 && normalized < 1)
             {
-                normalized = normalized.ApplyGainAndBias(biasAndGain.X, biasAndGain.Y);
+                normalized = normalized.ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
             }
 
             var v = normalized * (outMax - outMin) + outMin;

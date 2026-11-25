@@ -29,7 +29,34 @@ internal sealed class NodeSelection : ISelection
     }
 
     //public readonly HashSet<Guid> HoveredIds = [];
-    public readonly HashSet<Guid> PinnedIds = [];
+
+    /// <summary>
+    /// Called by every output window pinned to an operator in this view, each frame. The set is rebuilt on the
+    /// first call of a frame, so several output windows can pin different operators.
+    /// </summary>
+    public void MarkPinned(Guid symbolChildId)
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame != _pinnedIdsFrame)
+        {
+            _pinnedIdsFrame = frame;
+            _pinnedIds.Clear();
+        }
+
+        _pinnedIds.Add(symbolChildId);
+    }
+
+    /// <summary>
+    /// Accepts last frame's set because the graph may draw before the output windows. Older sets are stale
+    /// (all pins released or windows closed).
+    /// </summary>
+    public bool IsPinned(Guid symbolChildId)
+    {
+        return _pinnedIdsFrame >= ImGui.GetFrameCount() - 1 && _pinnedIds.Contains(symbolChildId);
+    }
+
+    private readonly HashSet<Guid> _pinnedIds = [];
+    private int _pinnedIdsFrame = -1;
 
     public void Clear()
     {

@@ -119,7 +119,7 @@
       "Description": "Offsets the gradient inward / outward"
     },
     {
-      "InputId": "df44d68a-1631-4f05-a616-242fab419e57"/*BiasAndGain*/,
+      "InputId": "df44d68a-1631-4f05-a616-242fab419e57"/*GainAndBias*/,
       "Position": {
         "X": -229.21353,
         "Y": 493.88443

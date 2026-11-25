@@ -30,7 +30,7 @@
     },
     {
       "Id": "603078ef-e7bc-4ba8-87b2-81574a04cfb6"/*OffsetDirection*/,
-      "DefaultValue": 100.0
+      "DefaultValue": 140.0
     },
     {
       "Id": "61eb78f5-d36e-479e-938f-a4fa4b31a1b6"/*LineWidth*/,

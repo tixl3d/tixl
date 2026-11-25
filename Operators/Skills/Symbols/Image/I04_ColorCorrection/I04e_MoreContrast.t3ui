@@ -5,28 +5,53 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0e361c90-3076-49f5-8e64-9efd713126d0",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "5616f61d-5be1-42ea-a9a0-905267b60979",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "3ca69801-5395-403e-92df-7fa7c12d33e6",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "8a8c7bcf-dc11-4e56-beee-a807ee9ed585",
+      "SymbolName": "Lib.image.analyze.WaveForm",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1553.2708,
+        "Y": 1821.6185
       }
     },
     {
-      "ChildId": "8c2c212c-7f51-4cef-b67b-77af55a69e3c",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "93aab270-ef99-456a-a4f6-8088f6c11826",
+      "SymbolName": "Lib.image.color.RemapColor",
+      "Position": {
+        "X": 1341.057,
+        "Y": 1792.0546
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ab80202a-3616-4455-8001-9a5cead6d395",
+      "SymbolName": "Lib.image.color.RemapColor",
       "SectionId": "f3a7070a-5700-49f3-91d4-5ff437e759a8",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1357.3864,
+        "Y": 2105.145
+      }
+    },
+    {
+      "ChildId": "cd7172c4-d67e-4a7a-a9e8-73de7eac0563",
+      "SymbolName": "Skills._._ExampleImageContent",
+      "Position": {
+        "X": 841.88245,
+        "Y": 1903.7231
+      }
+    },
+    {
+      "ChildId": "ffee9b53-55f3-4854-9ebc-cfea87cd2b38",
+      "SymbolName": "Lib.image.analyze.WaveForm",
+      "Position": {
+        "X": 1553.2708,
+        "Y": 1786.6185
       }
     }
   ],
@@ -51,19 +76,19 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
+        "X": 1278.1979,
         "Y": 2052.5103
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 331.80212,
+        "Y": 152.48975
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "96300c46-c750-4b4d-a07f-e84117c99ccf",
-      "Description": "In this final example we use [RemapColors] again.\nIt can also adjust brightness and contrast without editing the gradient itself.\nThe idea is to bias the color before it is sampled from the gradient."
+      "Description": "In this final example we use [RemapColor] again.\nIt can also adjust brightness and contrast without editing the gradient itself.\nThe idea is to bias the color before it is sampled from the gradient."
     },
     {
       "Id": "c359e400-53b1-4dac-ab13-e36bee2e228b",

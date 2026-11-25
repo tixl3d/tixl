@@ -33,6 +33,7 @@ StructuredBuffer<PbrVertex> SourceVertices : register(t1);
 RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 static float3 variationOffset;
 static float4x4 transform;
+static float3x3 faceRotation;
 static float OffsetDirection = 0.5;
 
 const static float DirectionSurface = 0.5;
@@ -62,7 +63,10 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     pos.xyz += normalizedDirection * influence * pushStrength;
 
     ResultVertices[vertexIndex].Position = pos;
-    ResultVertices[vertexIndex].Normal = normalize(mul(float4(ResultVertices[vertexIndex].Normal.xyz, 0), transform)).xyz;
+    // Only the face rotation turns the tangent frame; the slight tilt from Distort is ignored to keep smooth normals.
+    ResultVertices[vertexIndex].Normal = normalize(mul(faceRotation, ResultVertices[vertexIndex].Normal));
+    ResultVertices[vertexIndex].Tangent = normalize(mul(faceRotation, ResultVertices[vertexIndex].Tangent));
+    ResultVertices[vertexIndex].Bitangent = normalize(mul(faceRotation, ResultVertices[vertexIndex].Bitangent));
 }
 
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
@@ -166,6 +170,7 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
                                 0, 0, 0, 1};
 
     float4x4 rotation = mul(rotx, roty);
+    faceRotation = (float3x3)rotation;
 
     transform = translateToOrigin;
     transform = mul(rotation, transform);
@@ -175,15 +180,4 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     tranformVertex(faceVertices.x, influence, pCenter, direction);
     tranformVertex(faceVertices.y, influence, pCenter, direction);
     tranformVertex(faceVertices.z, influence, pCenter, direction);
-
-    pos0 = ResultVertices[faceVertices.x].Position;
-    pos1 = ResultVertices[faceVertices.y].Position;
-    pos2 = ResultVertices[faceVertices.z].Position;
-
-    float3 n = cross(pos1 - pos0, pos2 - pos0);
-
-    float i2 = saturate(influence * 10);
-    ResultVertices[faceVertices.x].Normal = lerp(ResultVertices[faceVertices.x].Normal, n, i2);
-    ResultVertices[faceVertices.y].Normal = lerp(ResultVertices[faceVertices.y].Normal, n, i2);
-    ResultVertices[faceVertices.z].Normal = lerp(ResultVertices[faceVertices.z].Normal, n, i2);
 }

@@ -17,6 +17,15 @@ internal sealed class MagGraphConnection
     public ISlot SourceOutput;
     public ISlot TargetInput => TargetItem.InputLines[InputLineIndex].Input;
 
+    /// <summary>
+    /// A saved connection whose output type doesn't match the input, e.g. after an operator changed a slot's type.
+    /// The evaluation rejects it, so it carries no data and is drawn as needing attention.
+    /// </summary>
+    public bool IsTypeMismatch => SourceOutput != null
+                                  && TargetItem != null
+                                  && InputLineIndex < TargetItem.InputLines.Length
+                                  && SourceOutput.ValueType != TargetInput.ValueType;
+
     public Type Type
     {
         get

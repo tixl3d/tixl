@@ -9,7 +9,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Set replaces the entry, Add adds Value to it, Multiply multiplies it by Value."
+      "Description": "Set replaces the entry, Add adds Value to it, Multiply multiplies it by Value.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "0f18e03d-c395-4a68-a139-e1e5aa9d54ff"/*IntList*/,

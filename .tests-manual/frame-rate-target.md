@@ -21,8 +21,8 @@ and that the measured refresh rate is the real one.
 Open the Performance window (click the frame graph in the app bar) with *Frame Rate* set to *Match Display*.
 
 **Expected:**
-- The *Display* line shows the display's real refresh rate, e.g. `119.9 Hz measured`, within a few seconds.
-- On a 48 Hz panel it reads about 48 Hz, not 60.
+- The *Display* line shows the display's refresh rate as the system reports it, e.g. `120.00 Hz display`.
+- On a 48 Hz panel it reads 48 Hz, not 60.
 - Frame time is about one refresh period (8.3 ms at 120 Hz).
 
 ## Step: Lower frame rates
@@ -36,6 +36,30 @@ Set *Frame Rate* to *60 fps*, then *30 fps*, then *50 fps*, while playback runs.
 - 50 fps on a 120 Hz display gives a 60 fps target, since only whole refreshes are possible.
 - The animation keeps the same speed in every setting; only its smoothness changes.
 - Interaction (dragging a slider, panning the graph) has no noticeable lag beyond the lower rate.
+
+## Step: Lock Animation Step
+
+**Action:**
+Add a [LastFrameDuration] op and show its value (e.g. with [FloatToString] and a text layer), and a [Damp] or particle
+setup that moves continuously. Check that *Lock Animation Step* is on by default. With *Frame Rate* at
+*Match Display*, toggle it, then cause a few dropped frames (e.g. drag a heavy parameter, or briefly resize a window).
+
+**Expected:**
+- Without drops [LastFrameDuration] shows exactly one refresh period (8.333 ms at 120 Hz) on every frame in both
+  settings, with no fluctuation in the last digits.
+- Off: on a dropped frame it shows whole refreshes more (16.667, 25.0 ms) and damped motion keeps its speed.
+- On: it stays at 8.333 ms through drops; damped and particle motion lags slightly on a drop instead of jumping ahead.
+- Keyframed animation and audio stay in sync with real time in both settings.
+
+## Step: Settings → Rendering
+
+**Action:**
+Open *Settings → Rendering* next to the Performance window and change *Frame Rate* and *Lock Animation Step* in one of them.
+
+**Expected:**
+- Both show the same values and follow each other's changes.
+- The category also lists *Max Fill Resolution*, *Suspend rendering when hidden*, the GPU memory settings and the shader options; *Settings → Interface* and *Settings → Projects* no longer do.
+- Below the frame-rate settings a hint suggests a fullscreen output against dropped frames.
 
 ## Step: Frame Rate needs VSync
 

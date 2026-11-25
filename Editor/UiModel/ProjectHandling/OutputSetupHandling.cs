@@ -45,6 +45,8 @@ internal static class OutputSetupHandling
         SetupRelations.SyncPinsToLinkedPatches(entry.Setup);
         if (switched)
             ActiveSetup.NotifyChanged();
+
+        ProjectorCalibration.SyncCameras(entry.Setup);
     }
 
     /// <summary>

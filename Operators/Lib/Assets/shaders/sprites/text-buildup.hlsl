@@ -41,6 +41,7 @@ cbuffer IntParams : register(b1)
 {
     int Unit;
     int Seed;
+    int RangeMode;
 }
 
 StructuredBuffer<Point> SourcePoints : register(t0);
@@ -60,6 +61,8 @@ float4 SampleGradient(float position)
 
 static const int UnitCharacters = 0;
 static const int UnitGroups = 1;
+
+static const int RangeModeNormalized = 1;
 
 float UnitHash(uint unitIndex)
 {
@@ -113,9 +116,15 @@ void main(uint3 i : SV_DispatchThreadID)
 
     float2 gainAndBias = float2(Gain, Bias);
     float spread = max(Spread, 0.0001);
-    float builtIn = ApplyGainAndBias(saturate((RangeEnd - order) / spread), gainAndBias);
+
+    // Normalized 1 is where the last unit has finished its transition.
+    float rangeScale = RangeMode == RangeModeNormalized ? unitCount - 1 + spread : 1;
+    float rangeStart = RangeStart * rangeScale;
+    float rangeEnd = RangeEnd * rangeScale;
+
+    float builtIn = ApplyGainAndBias(saturate((rangeEnd - order) / spread), gainAndBias);
     // Mirrored so the build-out is the time-reverse of the build-in.
-    float builtOut = 1 - ApplyGainAndBias(1 - saturate((RangeStart - order) / spread), gainAndBias);
+    float builtOut = 1 - ApplyGainAndBias(1 - saturate((rangeStart - order) / spread), gainAndBias);
     float inAmount = 1 - builtIn;
     float amount = saturate(inAmount + builtOut);
 

@@ -2,31 +2,123 @@
   "FormatVersion": 3,
   "Id": "f8935a0d-bd26-448b-84a3-d0347e47ac1d"/*R04c_ZBuffer*/,
   "Description": "Z-Buffer",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "59657416-a074-4f34-b691-37df2798faf8",
-      "SymbolName": "Lib.render.basic.Text",
-      "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
-    },
-    {
-      "ChildId": "717c4d62-416c-4eb9-9d8c-87f103de9d22",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "16ceb130-9720-4267-944b-c2cd04cfefdf",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec2",
       "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1150.9666,
+        "Y": 1976.1138
       }
     },
     {
-      "ChildId": "e25023e4-aef0-490b-98f5-6d4e49fa8bc1",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "5a7bd603-6d74-48f1-936e-e3d24f1774b8",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1150.9666,
+        "Y": 2081.1138
+      }
+    },
+    {
+      "ChildId": "5e67de6a-514b-43d9-b451-ff4113dc8a0c",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Position": {
+        "X": 1205.4241,
+        "Y": 1576.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7834797f-ebab-4ecd-99e1-74415b028683",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1345.4241,
+        "Y": 1611.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7d7f6be5-2e8d-4147-9e09-d3ee5409cb10",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1290.9666,
+        "Y": 2116.1138
+      }
+    },
+    {
+      "ChildId": "80db276a-e08f-4131-b531-5050e60753ac",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "826f7fbb-3253-4773-ba2e-8613658fe4a6",
+      "SymbolName": "Lib.render.transform.RepeatTransform",
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1290.9666,
+        "Y": 2046.1138
+      }
+    },
+    {
+      "ChildId": "964134c3-ed44-44b5-8412-444a21d55a3b",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec2",
+      "Position": {
+        "X": 1205.4241,
+        "Y": 1471.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "974c6b85-c1ba-474a-b9a0-798a263b5dab",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1290.9666,
+        "Y": 1941.1138
+      }
+    },
+    {
+      "ChildId": "99b77219-2eef-43b8-a149-432078b9f3f9",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1345.4241,
+        "Y": 1506.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b61021ff-7e7a-48ea-bcd2-980869ff7287",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1345.4241,
+        "Y": 1436.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "de2574d8-3a89-402f-8eca-a803c359dcec",
+      "SymbolName": "Lib.render.transform.RepeatTransform",
+      "Position": {
+        "X": 1345.4241,
+        "Y": 1541.9536
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f3108f75-d959-4643-bfdd-dd329446b64e",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "8e4ecddb-8e90-437f-a44c-2db26aead2b3",
+      "Position": {
+        "X": 1290.9666,
+        "Y": 2011.1138
       }
     }
   ],
@@ -52,18 +144,18 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1855.0
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 385.0
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "8f8f8bf6-42d2-495f-8adc-030abff879aa",
-      "Description": "In computer graphics, an algorithm called the Z-buffer is used to ensure that distant objects are not drawn in front of objects that are closer to the camera.\nThe [RenderTarget] operator automatically provides a depth buffer for this purpose.\nEach draw operator has parameters that control how it interacts with depth."
+      "Description": "In computer graphics, an algorithm called the Z-buffer is used to ensure that distant objects are not drawn in front of objects that are closer to the camera.\n\nThe [RenderTarget] operator automatically provides a depth buffer for this purpose.\n\nEach draw operator has parameters that control how it interacts with depth."
     },
     {
       "Id": "829fdcc3-df02-45da-8c48-b850d88b5a41",

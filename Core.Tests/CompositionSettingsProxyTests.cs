@@ -31,16 +31,14 @@ public class CompositionSettingsProxyTests
     }
 
     [Fact]
-    public void NonDefaultProxy_PersistsEvenWhenNotEnabled()
+    public void DisabledSettings_AreDropped_EvenWithNonDefaultProxy()
     {
-        // The Proxy section must round-trip on its own merit, not only when Enabled / audio clips force a write.
+        // Disabled settings are not saved, so cleaned-up ops don't keep a stale block. Proxy preferences alone
+        // don't keep them either.
         var original = new CompositionSettings { Enabled = false };
         original.Proxy.Format = VideoExportCodec.HapQ;
 
-        var restored = WriteThenRead(original);
-
-        Assert.NotNull(restored);
-        Assert.Equal(VideoExportCodec.HapQ, restored!.Proxy.Format);
+        Assert.Null(WriteThenRead(original));
     }
 
     [Fact]

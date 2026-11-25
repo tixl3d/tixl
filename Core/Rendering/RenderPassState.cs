@@ -51,6 +51,13 @@ public struct RenderPassState
     public Vector2 JitterOffset;
 
     /// <summary>
+    /// The jitter the current camera added to <see cref="T3.Core.Operator.EvaluationContext.CameraToClipSpace"/>, as a
+    /// clip-space offset per unit of depth. Cameras that apply <see cref="JitterOffset"/> set it for their subtree; zero
+    /// for cameras that don't (e.g. the editor's view camera).
+    /// </summary>
+    public Vector2 ProjectionJitter;
+
+    /// <summary>
     /// The camera whose view the current render op's draws use: the innermost camera, since an inner camera overrides
     /// the matrices of an outer one. Render ops clear it before their subtree and read it after.
     /// </summary>
@@ -100,4 +107,10 @@ public struct RenderPassState
     /// (e.g. last frame's points), which they can skip otherwise.
     /// </summary>
     public bool VelocityRequested;
+
+    /// <summary>
+    /// The render target being drawn has base color and material buffers (SV_Target3 and SV_Target4), so PBR draws
+    /// should write their material.
+    /// </summary>
+    public bool MaterialRequested;
 }

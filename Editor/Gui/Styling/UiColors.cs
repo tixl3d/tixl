@@ -132,6 +132,16 @@ public static class UiColors
     [T3Style.Hint(Description = "Related to time — animation, keyframes, playback (orange).")]
     public static Color StatusAnimated = new(1f, 0.46f, 0f, 1f);
 
+    // -- Vector components ----------------------------------------------------------------------------
+    [T3Style.Hint(GroupTitle = "Vector components", Description = "X component of vector values — animation curves and value plots (red).")]
+    public static Color AxisColorX = new(1f, 0.2f, 0.2f, 1f);
+
+    [T3Style.Hint(Description = "Y component of vector values (green).")]
+    public static Color AxisColorY = new(0.1f, 1f, 0.2f, 1f);
+
+    [T3Style.Hint(Description = "Z component of vector values (blue). Also marks inline code in tour texts.")]
+    public static Color AxisColorZ = new(0.1f, 0.4f, 1f, 1f);
+
     // -- Output setup ---------------------------------------------------------------------------------
     [T3Style.Hint(GroupTitle = "Output setup", Description = "Surfaces and their regions — the physical things in a projection setup (green).")]
     public static Color SetupSurface = new(0.468f, 0.586f, 0.320f, 1.000f);
@@ -191,7 +201,7 @@ public static class UiColors
     [T3Style.Hint(Description = "Base color for GPU buffer data.")]
     public static Color ColorForGpuData = new(0.72f, 0.2f, 0.18f, 1.000f);
 
-    [T3Style.Hint(Description = "Base color for CPU-side procedural geometry (MeshGeometry, curves).")]
+    [T3Style.Hint(Description = "Base color for CPU-side procedural geometry (Geometry: polygons and curves).")]
     public static Color ColorForCpuGeometry = new(0.3f, 0.68f, 0.5f, 1.000f);
 
     [T3Style.Hint(Description = "Base color for CPU field delegates (ScalarField, VectorField, RemapCurve).")]

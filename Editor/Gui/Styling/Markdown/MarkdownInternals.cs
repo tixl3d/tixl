@@ -20,7 +20,8 @@ internal enum RunStyle : byte
     Bold = 1 << 0,
     Code = 1 << 1,
     Link = 1 << 2,
-    OpRef = 1 << 3
+    OpRef = 1 << 3,
+    Italic = 1 << 4
 }
 
 internal readonly struct Slice

@@ -1,3 +1,4 @@
+#include "shared/velocity-functions.hlsl"
 
 static const float3 Quad[] =
     {
@@ -28,6 +29,24 @@ cbuffer Params : register(b1)
     float4 Color;
     float Width;
     float Height;
+
+    /** 1 with depth writing: only then do the normal (and velocity) belong to this pixel's depth. Unset reads 0. */
+    float WritesDepth;
+};
+
+/** Last frame's transforms of this draw, for the velocity target. Unbound (e.g. [DrawQuad]) the motion counts as unknown. */
+cbuffer PreviousTransforms : register(b2)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
 };
 
 Texture2D<float4> InputTexture : register(t0);
@@ -37,6 +56,22 @@ struct vsOutput
 {
     float4 position : SV_POSITION;
     float2 texCoord : TEXCOORD;
+    float4 clipPosition : CLIP_POSITION;
+    float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
+    float3 normalInWorld : NORMAL;
+    float3 positionInWorld : POSITION;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+
+    // Without depth writing the layer leaves the normal behind it: AO and reflections would otherwise shade the
+    // background with the layer's direction. With it, the image's alpha blends between the two.
+    float4 Normal : SV_Target1;
+
+    // Consumers only trust velocity that matches the depth buffer, so it takes effect with depth writing enabled.
+    float4 Velocity : SV_Target2;
 };
 
 // struct vsOutputOnlyColor
@@ -51,6 +86,12 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
     float2 quadVertex = Quad[vertexId].xy;
     float2 quadVertexInObject = quadVertex * float2(Width, Height);
     output.position = mul(float4(quadVertexInObject, 0, 1), ObjectToClipSpace);
+    output.clipPosition = output.position;
+    output.previousClipPosition = mul(float4(quadVertexInObject, 0, 1), PrevObjectToClipSpace);
+
+    // The quad lies in the object's xy plane; the inverse transpose keeps the normal right under non-uniform scale.
+    output.normalInWorld = normalize(mul(WorldToObject, float4(0, 0, 1, 0)).xyz);
+    output.positionInWorld = mul(float4(quadVertexInObject, 0, 1), ObjectToWorld).xyz;
     output.texCoord = quadVertex * float2(0.5, -0.5) + 0.5;
 
     return output;
@@ -67,10 +108,20 @@ vsOutput vsMain(uint vertexId : SV_VertexID)
 //     return output;
 // }
 
-float4 psMain(vsOutput input) : SV_TARGET
+psOutput psMain(vsOutput input)
 {
+    psOutput output;
     float4 c = InputTexture.Sample(texSampler, input.texCoord);
-    return clamp(float4(1, 1, 1, 1) * Color * c, 0, float4(1000, 1000, 1000, 1));
+    output.Color = clamp(float4(1, 1, 1, 1) * Color * c, 0, float4(1000, 1000, 1000, 1));
+    // Both sides of the layer are visible; the normal faces the camera.
+    float3 normal = normalize(input.normalInWorld);
+    float3 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld).xyz;
+    if (dot(normal, eyePosition - input.positionInWorld) < 0)
+        normal = -normal;
+
+    output.Normal = WritesDepth > 0.5 ? float4(normal, output.Color.a) : 0;
+    output.Velocity = EncodeVelocity(input.clipPosition, input.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    return output;
 }
 
 float4 psMainOnlyColor(vsOutput input) : SV_TARGET

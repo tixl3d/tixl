@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "8c671ee1-c4da-4209-a00d-4c79b9f1888b"/*M05c_MaximumRandomwithReset*/,
   "Description": "Maximum Random with Reset",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

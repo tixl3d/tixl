@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "ca23d69c-9dbf-421a-9c75-205c3eab3101",
+  "Description": "Internal helper. Renders mesh buffers in the output window like [VisualizeMesh], with the overlays the output window asks for through [GetPreviewState] (wireframe, indices, the hovered vertex).\n\nIts only input is connected by the editor while it renders.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "f13f5753-d17d-4234-a605-a99fab1a57b5",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Relevancy": "Required"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "471924c9-8440-4645-b999-e693ce187aa8",
+      "SymbolName": "Lib.flow.context.GetPreviewState",
+      "Position": {
+        "X": -150.0,
+        "Y": 80.0
+      }
+    },
+    {
+      "ChildId": "08046c10-dcf4-404c-af5b-5dfca2a62bec",
+      "SymbolName": "Lib.mesh._.VisualizeMesh",
+      "Position": {
+        "X": 150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7eb47d38-bc73-4fba-9ab8-5cb9296502a3",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 450.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "f5c3a3b4-3819-4940-926a-6bd848b0fb37",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 300.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "ChildId": "da25cf6c-9bd3-4b28-b6b8-b906440cf15e",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 150.0,
+        "Y": 120.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "06c27969-043e-4d77-90b8-0ae69962c640",
+      "Position": {
+        "X": 900.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

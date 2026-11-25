@@ -11,7 +11,8 @@
         "Y": 75.0
       },
       "GroupTitle": "Shader Variation",
-      "Description": "Axis around which the field is bent."
+      "Description": "Axis around which the field is bent.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "adaf8efd-47b3-4d4b-9102-d8a3c6a7e34a"/*InputField*/,

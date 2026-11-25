@@ -22,7 +22,8 @@
         "Y": 4314.8438
       },
       "GroupTitle": "Draw Style",
-      "Description": "Solid or wireframe rendering."
+      "Description": "Solid or wireframe rendering.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "329d8248-5f9f-4ad3-9b97-0f142e91ba05"/*Mesh*/,
@@ -47,7 +48,8 @@
         "X": 1916.3214,
         "Y": 3405.53
       },
-      "Description": "Default: uses the mesh normals.\nFlat: computes facet normals per pixel, giving a faceted look."
+      "Description": "Default: uses the mesh normals.\nFlat: computes facet normals per pixel, giving a faceted look.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "69e1f021-4db2-43a1-a4e6-837024350dc1"/*UsePointScale*/,
@@ -79,7 +81,8 @@
         "X": 2056.321,
         "Y": 3639.9988
       },
-      "Description": "How the atlas cell of each instance is selected.\n\nBufferOrder: by the index of the point.\nF1: by the point's F1 attribute.\nF2: by the point's F2 attribute."
+      "Description": "How the atlas cell of each instance is selected.\n\nBufferOrder: by the index of the point.\nF1: by the point's F1 attribute.\nF2: by the point's F2 attribute.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "998e0e5b-fccf-430c-b799-aacc8b0cbb28"/*ScaleFactor*/,
@@ -87,7 +90,8 @@
         "X": 2056.3213,
         "Y": 3534.9988
       },
-      "Description": "Additionally scales each instance by a point attribute.\n\nNone: no extra scaling.\nF1: scales by the point's F1.\nF2: scales by the point's F2."
+      "Description": "Additionally scales each instance by a point attribute.\n\nNone: no extra scaling.\nF1: scales by the point's F1.\nF2: scales by the point's F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "9ec6c311-22de-411b-9821-0d458f33df7a"/*SpecularAA*/,
@@ -133,7 +137,8 @@
         "X": 2072.6316,
         "Y": 4279.8438
       },
-      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default)."
+      "Description": "Which faces are hidden.\n\nNone: both sides are drawn.\nFront: front faces are hidden, only back faces are visible.\nBack: back faces are hidden (default).",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "c4adbb96-8838-4c7f-be20-bb464f0eea4c"/*AtlasSize*/,

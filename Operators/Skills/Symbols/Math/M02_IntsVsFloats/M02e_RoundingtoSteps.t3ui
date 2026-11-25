@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "988a3a00-0ad6-467c-99a7-cf82a4e7cdf6"/*M02e_RoundingtoSteps*/,
   "Description": "Rounding to Steps",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

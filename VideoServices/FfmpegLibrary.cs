@@ -152,8 +152,8 @@ public static class FfmpegLibrary
     }
 
     /// <summary>
-    /// macOS has no LGPL FFmpeg package to ship yet, so a development machine uses an installed one: the folder
-    /// in TIXL_FFMPEG_DIR, or Homebrew's ffmpeg@7 (FFmpeg 7.x = avcodec-61, which these bindings need; plain
+    /// The macOS app bundles an LGPL build next to this assembly (Installer/macOS/build-dmg.sh); a build from source
+    /// has none, so a development machine uses an installed one: the folder in TIXL_FFMPEG_DIR, or Homebrew's ffmpeg@7 (FFmpeg 7.x = avcodec-61, which these bindings need; plain
     /// "ffmpeg" is already 8.x). Sdcb.FFmpeg asks for "libavutil.59.dylib" by name and finds nothing outside
     /// the standard paths, so the request falls through to this handler.
     /// </summary>

@@ -15,7 +15,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "fba596d6-bb06-43ad-921e-ea55da365fc2"/*Interpolation*/,

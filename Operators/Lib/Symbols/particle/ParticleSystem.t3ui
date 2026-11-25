@@ -65,7 +65,8 @@
         "X": 226.2659,
         "Y": 197.61816
       },
-      "Description": "Scales EmitVelocity by an attribute of the emit point.\n\nNone: no scaling.\nF1 / F2: scales by the F1 or F2 attribute."
+      "Description": "Scales EmitVelocity by an attribute of the emit point.\n\nNone: no scaling.\nF1 / F2: scales by the F1 or F2 attribute.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "5a61994e-42c7-47e7-b0a5-5beb48f4a34b"/*Drag*/,

@@ -10,7 +10,8 @@
         "X": 976.5911,
         "Y": 1673.2859
       },
-      "Description": "Allows to store the distance to the SDF in one of the FX attributes. This might be useful in combinations with [RepeatAtPoints]."
+      "Description": "Allows to store the distance to the SDF in one of the FX attributes. This might be useful in combinations with [RepeatAtPoints].",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "03bdab33-35a1-410b-b032-61efa1dffb9c"/*SetOrientation*/,
@@ -34,7 +35,8 @@
       "Position": {
         "X": 976.591,
         "Y": 1778.2859
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "42e46e25-0d3b-40cb-a32c-fb9af373220d"/*NormalSamplingDistance*/,

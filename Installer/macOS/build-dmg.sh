@@ -42,7 +42,7 @@ contents="$app/Contents"
 
 # The Editor lives in Resources/TiXL, not in MacOS: signing seals Contents/MacOS as code and takes every folder
 # with a dot in its name for a nested bundle - NuGet's runtimes/*/lib/net10.0 folders are full of them. In
-# Resources the same files are sealed as data. MacOS holds only a launcher that starts the real executable.
+# Resources the same files are sealed as data. MacOS holds only the launcher, which runs the Editor's TiXL.dll.
 payload="$contents/Resources/TiXL"
 
 # The Vulkan loader and MoltenVK ship inside the bundle; a development machine has them from Homebrew or the
@@ -148,10 +148,49 @@ for library in "libslang-compiler.0.$slang_version.dylib" "libslang-glslang-$sla
                "libslang-glsl-module-$slang_version.dylib"; do
     cp "$slang_staging/lib/$library" "$payload/slang/lib/"
 done
+# SlangLibrary loads the unversioned name to compile in-process instead of starting slangc for every shader.
+ln -s "libslang-compiler.0.$slang_version.dylib" "$payload/slang/lib/libslang-compiler.dylib"
 cp "$slang_staging/LICENSE" "$payload/slang/"
 rm -rf "$slang_staging"
 if [[ "$("$payload/slang/bin/slangc" -v 2>&1)" != "$slang_version"* ]]; then
     echo "Bundled slangc does not report version $slang_version" >&2
+    exit 1
+fi
+
+# FFmpeg: the LGPL build of Native/FFmpeg/build-macos.sh, published once per FFmpeg version as the
+# deps-ffmpeg-<version> release (FFmpeg for macOS workflow, run by hand with "publish"). FfmpegLibrary loads the
+# libraries from the folder of VideoServices.dll, which is the Video package. TIXL_FFMPEG_ARCHIVE points at a
+# locally built archive instead.
+ffmpeg_version="$(sed -n 's/^version=//p' "$root/Native/FFmpeg/build-macos.sh")"
+ffmpeg_name="ffmpeg-$ffmpeg_version-lgpl-macos-arm64.tar.gz"
+ffmpeg_archive="${TIXL_FFMPEG_ARCHIVE:-$output/downloads/$ffmpeg_name}"
+if [[ ! -f "$ffmpeg_archive" ]]; then
+    echo "Downloading FFmpeg $ffmpeg_version..."
+    ffmpeg_url="https://github.com/tixl3d/tixl/releases/download/deps-ffmpeg-$ffmpeg_version/$ffmpeg_name"
+    mkdir -p "$(dirname "$ffmpeg_archive")"
+    if ! curl -fsSL -o "$ffmpeg_archive.part" "$ffmpeg_url" || ! curl -fsSL -o "$ffmpeg_archive.sha256" "$ffmpeg_url.sha256"; then
+        rm -f "$ffmpeg_archive.part" "$ffmpeg_archive.sha256"
+        echo "FFmpeg $ffmpeg_version is not published. Run the 'FFmpeg for macOS' workflow by hand with publish," >&2
+        echo "or build it with Native/FFmpeg/build-macos.sh and set TIXL_FFMPEG_ARCHIVE." >&2
+        exit 1
+    fi
+    mv "$ffmpeg_archive.part" "$ffmpeg_archive"
+    (cd "$(dirname "$ffmpeg_archive")" && shasum -a 256 -c "$(basename "$ffmpeg_archive").sha256")
+fi
+video_dir="$payload/Operators/Video"
+if [[ ! -f "$video_dir/VideoServices.dll" ]]; then
+    echo "The Video package is missing in $video_dir" >&2
+    exit 1
+fi
+ffmpeg_staging="$output/ffmpeg-staging"
+rm -rf "$ffmpeg_staging"
+mkdir -p "$ffmpeg_staging" "$video_dir/licenses/ffmpeg"
+tar -xzf "$ffmpeg_archive" -C "$ffmpeg_staging"
+cp "$ffmpeg_staging"/*.dylib "$video_dir/"
+cp "$ffmpeg_staging/COPYING.LGPLv2.1" "$ffmpeg_staging/LICENSE.md" "$ffmpeg_staging/SOURCE.txt" "$video_dir/licenses/ffmpeg/"
+rm -rf "$ffmpeg_staging"
+if [[ ! -f "$video_dir/libavcodec.61.dylib" ]]; then
+    echo "The FFmpeg archive did not contain libavcodec.61.dylib" >&2
     exit 1
 fi
 
@@ -189,21 +228,27 @@ cat > "$contents/Info.plist" <<PLIST
     <string>TiXL keeps your projects in your Documents folder.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>TiXL can react to sound from a microphone or line input.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>TiXL can use video from a camera, for example with the WebcamInput operator.</string>
 </dict>
 </plist>
 PLIST
 
 cp "$root/LICENSE.txt" "$contents/Resources/LICENSE.txt"
+# Next to the Editor, where Help > Third-Party Licenses looks for it.
+python3 "$root/Installer/check-licences.py" --notices "$payload/THIRD-PARTY-NOTICES.txt" --platform "$rid"
 
-# The launcher: the app's executable as far as macOS is concerned. It hands over to the Editor with exec, so the
-# Editor keeps the launcher's process and with it the app's identity in the Dock.
-cat > "$contents/MacOS/TiXL" <<'LAUNCHER'
-#!/bin/sh
-resources="$(cd "$(dirname "$0")/../Resources" && pwd)"
-export VK_DRIVER_FILES="${VK_DRIVER_FILES:-$resources/vulkan/icd.d/MoltenVK_icd.json}"
-exec "$resources/TiXL/TiXL" "$@"
-LAUNCHER
-chmod +x "$contents/MacOS/TiXL"
+# The launcher (launcher.c) is the app's executable and runs the Editor's TiXL.dll on .NET in its own process.
+# Exec'ing the Editor's apphost instead makes macOS refuse microphone and camera access without asking. It links
+# nethost from the SDK's apphost pack, which finds .NET the same way the apphost does.
+dotnet_root="$(dirname "$(realpath "$(command -v dotnet)")")"
+nethost_dir="$(ls -d "$dotnet_root"/packs/Microsoft.NETCore.App.Host.$rid/*/runtimes/$rid/native 2>/dev/null | sort -V | tail -n 1)"
+if [[ ! -f "$nethost_dir/libnethost.a" ]]; then
+    echo "No libnethost.a for $rid in $dotnet_root/packs" >&2
+    exit 1
+fi
+clang -O2 -Wall -Wextra -arch arm64 -mmacosx-version-min=14.0 -I"$nethost_dir" \
+    -o "$contents/MacOS/TiXL" "$script_dir/launcher.c" "$nethost_dir/libnethost.a" -lc++
 
 # Apple Silicon refuses unsigned native code; an ad-hoc signature satisfies that without an identity. Every
 # Mach-O file gets its own, then the app seals the rest as resources. A Developer ID signature for notarization

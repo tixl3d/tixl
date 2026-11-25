@@ -31,7 +31,8 @@
         "X": 0.0,
         "Y": 180.0
       },
-      "Description": "X: input value that maps to OutputRange.X. Y: input value that maps to OutputRange.Y."
+      "Description": "X: input value that maps to OutputRange.X. Y: input value that maps to OutputRange.Y.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "a9b1edde-ad70-4c65-8ed6-473577fe59a7"/*OutputRange*/,
@@ -39,7 +40,8 @@
         "X": 0.0,
         "Y": 225.0
       },
-      "Description": "Target range for the remapped values."
+      "Description": "Target range for the remapped values.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "b529d322-b7a4-4711-8391-e71f196b90b5"/*SpringDamping*/,

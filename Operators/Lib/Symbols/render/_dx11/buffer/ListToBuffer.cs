@@ -41,8 +41,10 @@ internal sealed class ListToBuffer : Instance<ListToBuffer>
 
         if (totalSizeInBytes == 0)
         {
-            _buffer = null;
+            // Empty lists give no buffer, like missing ones; a wrapper without a buffer is invalid downstream
+            OutBuffer.Value = null;
             Length.Value = 0;
+            return;
         }
         else
         {

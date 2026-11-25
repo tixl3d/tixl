@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "c3e7a1d4-5b82-4f06-9a3e-1d6c8b2f7e40"/*ScreenSpaceReflections*/,
-  "Description": "Adds reflections of what is visible on screen to surfaces, using the depth and normal buffers of the rendered scene.\n\nRays are traced through the depth buffer from each pixel. Hits are accumulated over frames with the camera motion, following the reflected image rather than the surface so that mirror reflections stay stable while the camera moves. As with [TXAA], moving objects are only handled by the color clamp.\n\nRequirements:\n\nRender the scene with [RenderScene] and connect only Image: depth, normals, velocity and the camera come with it, and the result passes them on to the next effect. Connected inputs override them.\n\nWith a plain [RenderTarget], enable WithNormalBuffer and connect its buffers and the scene camera to the matching inputs. Only shaders that output normals reflect, such as [DrawMesh] and [DrawPointsShaded].\n\nOnly content visible on screen can be reflected. Where a ray finds nothing, the original image remains, including any reflections from [SetEnvironment].\n\nThe whole scene is treated as one material. To limit reflections to certain surfaces, combine the Reflections output with the image through a mask.\n\nAKA: SSR, screen space reflections, realtime reflections\n\nTips:\n\n- Place [TXAA] after this operator to clean up the remaining edges.\n- Keep MaxSteps low and raise it only when reflections break apart.",
+  "Description": "Adds reflections of what is visible on screen to surfaces, using the depth and normal buffers of the rendered scene.\n\nRays are traced through the depth buffer from each pixel. Hits are accumulated over frames with the camera motion, following the reflected image rather than the surface so that mirror reflections stay stable while the camera moves. As with [TXAA], moving objects are only handled by the color clamp.\n\nRequirements:\n\nRender the scene with [RenderScene] and connect only Image: depth, normals, velocity and the camera come with it, and the result passes them on to the next effect. Connected inputs override them.\n\nWith a plain [RenderTarget], enable WithNormalBuffer and connect its buffers and the scene camera to the matching inputs. Only shaders that output normals reflect, such as [DrawMesh] and [DrawPointsShaded].\n\nOnly content visible on screen can be reflected. Where a ray finds nothing, the original image remains, including any reflections from [SetEnvironment].\n\nWith WithMaterialBuffer on in [RenderScene] (or a material buffer connected), surfaces drawn with PBR shading use their own material from [SetMaterial]: rough surfaces get blurred reflections and fade out when very rough, metals reflect in their base color, and Specular scales the reflection. Without it, the whole scene is treated as one material; to limit reflections to certain surfaces, combine the Reflections output with the image through a mask.\n\nAKA: SSR, screen space reflections, realtime reflections\n\nTips:\n\n- Place [TXAA] after this operator to clean up the remaining edges.\n- Keep MaxSteps low and raise it only when reflections break apart.",
   "SymbolTags": "1216",
   "InputUis": [
     {
@@ -62,7 +62,7 @@
         "X": -600.0,
         "Y": 200.0
       },
-      "Description": "Reflection strength when looking straight at a surface. It rises toward 1 at grazing angles. Dielectrics are near 0.04, polished metals near 1.",
+      "Description": "Reflection strength when looking straight at a surface. It rises toward 1 at grazing angles. Dielectrics are near 0.04, polished metals near 1. With a material buffer, metallic surfaces reflect with their base color instead.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -74,7 +74,7 @@
         "X": -600.0,
         "Y": 240.0
       },
-      "Description": "Scatters the rays. Accumulation averages the noise into blurred reflections, so higher values take longer to settle.",
+      "Description": "Scatters the rays. Accumulation averages the noise into blurred reflections, so higher values take longer to settle. Surfaces with a material buffer use their own roughness instead.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -91,6 +91,14 @@
       "Min": 0.0,
       "Max": 50.0,
       "ClampMin": true
+    },
+    {
+      "InputId": "857a89d7-7166-4a60-a5da-b580bcd9dfce"/*BaseColorMap*/,
+      "Position": {
+        "X": -900.0,
+        "Y": 400.0
+      },
+      "Description": "Overrides the base color buffer of the image's render bundle. Metallic surfaces tint their reflection with it."
     },
     {
       "InputId": "9104b2e8-f5ac-4619-8d3b-e285a6b4c79f"/*Thickness*/,
@@ -149,6 +157,14 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true
+    },
+    {
+      "InputId": "c9292236-b386-4ae9-9d5f-b6cfe0a43f76"/*MaterialMap*/,
+      "Position": {
+        "X": -900.0,
+        "Y": 400.0
+      },
+      "Description": "Overrides the material buffer of the image's render bundle. With it, roughness, metalness and specular come from the surfaces instead of the parameters."
     },
     {
       "InputId": "d548f62c-39e0-4a5d-917f-26c9eaf80bd3"/*NeighborhoodClamp*/,
@@ -223,6 +239,14 @@
       "Position": {
         "X": 2100.0,
         "Y": 200.0
+      }
+    },
+    {
+      "ChildId": "0beae876-5c9a-4664-9294-c737dc3dcdd1",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": -450.0,
+        "Y": 620.0
       }
     },
     {
@@ -506,6 +530,14 @@
       }
     },
     {
+      "ChildId": "7a6ea92f-72b6-44c6-a28b-641fe22fa805",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": -450.0,
+        "Y": 560.0
+      }
+    },
+    {
       "ChildId": "7a829321-480b-5fa9-a5d0-4a03a0ab2ca5",
       "SymbolName": "Types.Gfx.RenderTargetBlendDescription",
       "Position": {
@@ -702,6 +734,14 @@
       "SymbolName": "Lib.numbers.int.basic.AddInt",
       "Position": {
         "X": 800.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "ChildId": "e09e163e-00de-4c0f-a453-28f79a5256f6",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "Position": {
+        "X": -450.0,
         "Y": 500.0
       }
     },

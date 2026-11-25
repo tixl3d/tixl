@@ -20,7 +20,7 @@
     {
       "Id": "7bc277be-8e5f-4dfb-b81a-718d31d66e00"/*GeometryToMesh*/,
       "SymbolId": "4fea8c0e-cb7f-41fe-a410-df1d3886bf98",
-      "SymbolName": "Lib.geometry.GeometryToMesh",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
       "InputValues": [],
       "Outputs": []
     },

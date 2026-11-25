@@ -27,6 +27,10 @@
       "DefaultValue": 1
     },
     {
+      "Id": "bcb6064d-e137-4cd7-b743-cc84058a0d23"/*WithMaterialBuffer*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "e67e7052-1f2f-4ad0-909f-f97190128c34"/*Environment*/,
       "DefaultValue": 0
     }
@@ -187,6 +191,12 @@
       "SourceSlotId": "3db94583-6694-47e5-b775-23eb351e9f11",
       "TargetParentOrChildId": "8429ba3d-fd88-4253-9f0a-ac12e44876f9",
       "TargetSlotId": "8bb4a4e5-0c88-4d99-a5b2-2c9e22bd301f"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "bcb6064d-e137-4cd7-b743-cc84058a0d23",
+      "TargetParentOrChildId": "8429ba3d-fd88-4253-9f0a-ac12e44876f9",
+      "TargetSlotId": "e63bb9fb-208b-49d4-8500-aed1f6a74e18"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

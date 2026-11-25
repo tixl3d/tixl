@@ -25,7 +25,8 @@
       "Position": {
         "X": -102.96118,
         "Y": 2093.433
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "6d16847c-a560-4835-b120-3fb8c278530a"/*WriteTo*/,
@@ -51,7 +52,8 @@
         "Y": 2058.4329
       },
       "GroupTitle": "Write Colors",
-      "Description": "Defines how the gradient colors are applied."
+      "Description": "Defines how the gradient colors are applied.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "7c944690-d5b2-4894-a178-97593ecd797a"/*Gradient*/,
@@ -76,7 +78,8 @@
         "Y": 1953.4331
       },
       "GroupTitle": "Mapping Range",
-      "Description": "Allows the initial input value to be remapped. \nCombining this with Range and Phase can be powerful to build transitions for animated effects."
+      "Description": "Allows the initial input value to be remapped. \nCombining this with Range and Phase can be powerful to build transitions for animated effects.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "ba00fa7a-fcda-48da-a4c7-f2fe97997e50"/*WriteMode*/,

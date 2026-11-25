@@ -201,7 +201,7 @@ classes: SetupOutputView, SetupEntities, OutputPresentation, CalibrationOverlay
 ## Geometry operators
 id: GeometryOps
 synonyms: geometry nodes, geometry node system, mesh geometry ops, procedural geometry, scalar field
-classes: MeshGeometry, GeometryToMesh
+classes: Geometry, GeometryToMesh
 
 ## IO view
 id: IoView

@@ -1,0 +1,223 @@
+# Plan: Light Types and Material Buffer (deferred ingredients, forward shading)
+
+Status: **M1 and M2 implemented 2026-11-22, untested by a human** (test set `.tests-manual/light-types-and-blending.md`).
+Written 2026-11-20 on `main` (32bcb8124). **M3 implemented 2026-11-22**, probed on Vulkan (test set
+`.tests-manual/material-buffer.md`). **M5 implemented 2026-11-22**, probed on Vulkan. **M4 implemented 2026-11-22**, probed on Vulkan.
+M6, M7 not started.
+
+**M4 as built:** two extra field evaluations at the hit point instead of the planned one with a sentinel, because the
+~30 generator lines write `f.xyz = p.w < 0.5 ? p.xyz : 1` and a sentinel can't blend. Pass `p.w = 2` holds roughness,
+metal, specular; pass `p.w = 3` holds per channel how much is *not* set (generators default to 1, [SetSDFMaterial]
+writes 0). [CombineSDF] / [BlendSDFWithSDF] blend both passes with the same factor, so the template recovers the set
+values exactly: `set = (value - notSet) / (1 - notSet)`, `material = lerp(set, parameters, notSet)`. No generator
+changed. [SetSDFMaterial] has OverrideMaterial (code switch via FlagCodeChanged, off by default so existing projects
+keep the [RaymarchField] settings) plus Roughness / Metal / Specular graph params. Specular reaches ComputePbr()
+through a `PBR_SPECULAR` macro (default: the cbuffer `Specular`). [RepeatFieldAtPoints] now tints only passes below
+1.5 with point colors. Probe (two spheres, smooth union K 0.5, material buffer): left (26, 0, 255) = 0.1 / 0 / 1,
+right (229, 255, 128) = 0.9 / 1 / 0.5, seam (129, 129, 190); override off is byte-identical to no [SetSDFMaterial].
+
+**M5 as built:** [ScreenSpaceReflections] binds the material buffer at t6 and base color at t7 in all three passes
+(trace and composite get an empty `UnusedSlot` SRV as filler, because registers follow the multi-input order). Per
+pixel roughness = lerp(Roughness parameter, material roughness, coverage) in trace and temporal; composite uses
+F0 = lerp(Reflectivity, baseColor, metalness), scales by Specular and fades roughness 0.6-0.95, all weighted by
+coverage, so without a material buffer the output is unchanged. New MaterialMap / BaseColorMap override inputs.
+Probe (floor under a sphere, mean SSR change on the floor, 0-255): roughness 0.02 off/on 4.97 / 5.00, roughness 0.8
+off/on 5.37 / 2.69. The Vulkan debug callback now drops `Undefined-Value-ShaderOutputNotConsumed-DynamicRendering`
+(draws writing optional targets a render target lacks); validation otherwise silent.
+
+**M3 as built:** `[RenderTarget]` `WithMaterialBuffer` (off by default) adds RGBA8 `BaseColorBuffer` (albedo x material
+color x field tint, a = occlusion) and `MaterialBuffer` (roughness, metalness, specular, a = **relight coverage**: 1 PBR,
+0 nothing relightable). Coverage replaces the planned shading-model id because it survives the averaging MSAA resolve,
+so no custom resolve pass was needed; more shading models would need another encoding. With material on, normal and
+velocity are bound (Vulkan packs targets) but velocity history is not requested. `RenderPassState.MaterialRequested`
+and [GetRenderPassState] `MaterialRequested = 5` exist; shaders don't read it yet (writes to unbound targets are
+dropped). `RenderBundle.BaseColor/Material` (label `+M`), [HandleTextureBundle] outputs + override inputs,
+[RenderScene] `WithMaterialBuffer` input. Helper `GetMaterialTargets(tint, coverage, ...)` in `pbr-render.hlsl`, called
+by the 6 PBR shaders. Slang numbers fragment outputs by declaration order, not by the SV_Target index, so
+`mesh-CustomDraw-template` gained a velocity output (written 0) to keep slots 3/4 aligned. Probe (256x256, sphere,
+Roughness 0.3 / Metal 0.6 / Specular 0.5 / BaseColor (1, 0.5, 0.25)): material (76, 153, 128, 255), base color
+(255, 128, 64, 255), background 0, identical with 4x MSAA, Vulkan validation silent. D3D11 not run.
+
+**What shipped:** `[PickBlendMode]` is a C# op with nine cached states (same color blends as the old graph, targets
+1-7 written unblended for Normal/None and masked for all other modes). Core `PointLight`/`PointLightStack`/
+`context.PointLights` became `Light`/`LightStack`/`context.Lights` (96-byte layout, first five fields at their old
+offsets, `LightType` Point/Spot/Directional). HLSL keeps the name `PointLight` in `shared/point-light.hlsl`, which
+now has `EvaluateLight()`; `ComputePbr()` uses it. New C# ops `[SetSpotLight]` (Position, Target, ConeAngle full
+degrees, Softness) and `[SetDirectionalLight]`. Directional lights reach point-only shaders as a distant point light
+with decay 0. All 22 light shaders compile with slangc and the cbuffer reflection matches the C# layout (stride 96,
+count at 768). Not yet run in the editor; FXC (D3D11) not compiled.
+Gizmo hook (2026-11-22): `ITransformable.AimTargetInput` (default null). When set, the rotate gizmo swings that point
+around `TranslationInput` (fixed axes, screen ring around the view ray, Ctrl snaps 15 degrees) and Move leaves it
+fixed. `[SetSpotLight]` and `[SetDirectionalLight]` (now Position + Target instead of Direction) implement it.
+Open-question answers taken (proposals): 1 write, 2 separate ops, 3 keep 8, 5 later. Still to do for M2: gizmo
+wrappers `[SpotLight]` / `[DirectionalLight]` like `[PointLight]`, `.help/` pages.
+
+## Why
+
+Users ask for "deferred rendering". What they actually want is **better lighting and material control**: more light
+types than point lights, and post effects that know the surface material. A full switch to deferred would break what
+TiXL relies on — custom pixel shaders (`[CustomDrawMesh]`, raymarch templates, field code applied after lighting in
+`mesh-Draw.hlsl`), non-PBR looks (unlit, cel, hatched), additive/premultiplied blending and MSAA.
+
+So: keep forward shading as the default, add the missing light types, and write a **material buffer** next to the
+existing depth / normal / velocity targets. Together with those, the material buffer holds everything a deferred
+lighting pass needs, so deferred becomes an *optional additive op* later instead of a pipeline rewrite.
+
+Non-goals: replacing forward shading, clustered/tiled light culling (only worth it at hundreds of lights; revisit if
+point-buffer lights are added), shadow receiving in more draw ops.
+
+## Current State (2026-11-20)
+
+- **Lights**: point lights only. `Core/Rendering/PointLightStack.cs` (`PointLight` struct, 48 bytes, `MaxPointLights =
+  8`), HLSL mirror `Operators/Lib/Assets/shaders/shared/point-light.hlsl`, bound as `cbuffer PointLights : register(b3)`.
+  Pushed/popped by `[PointLight]` / `[SetPointLight]` (`render/shading/`) on `context.PointLights`, so light sets are
+  scoped per subtree.
+- **PBR**: `shared/pbr-render.hlsl` `ComputePbr()` loops `ActiveLightCount`, falloff
+  `intensity / (pow(dist / range, decay) + 1)`, GGX + Schlick, IBL, emissive, fog. Material inputs live in the static
+  `FragmentMaterial frag` (`shared/pbr.hlsl:74`: Roughness, Metalness, Occlusion, albedo, N, …). Included by 6 draw
+  shaders (mesh-Draw, mesh-CustomDraw-template, mesh-DrawAtPoints, DrawPointsShaded, DrawLinesShaded,
+  RaymarchSDFFieldWithMatTemplate). 8 further draw shaders read the light cbuffer with their own lighting (hatched,
+  cel, tubes, ribbons, chunks, point sprites, DrawWithShadows, DrawAtPoints2).
+- **Materials**: `[SetMaterial]` → `Core/Rendering/Material/PbrMaterial.cs` (BaseColor, Emissive, Roughness, Specular,
+  Metal + maps), pushed on `context.PbrMaterial`.
+- **Shadows**: `[SetShadow]` renders one depth map from LightPosition toward LightTarget (`RenderPass.IsShadowPass`);
+  only `[DrawMeshWithShadow]` receives it.
+- **Render targets**: `[RenderTarget]` (`image/generate/basic/RenderTarget.cs`) has color, depth (R32), normal
+  (SV_Target1, world normal) and velocity (SV_Target2, RGBA16F) with `WithNormalBuffer` / `WithVelocityBuffer`;
+  velocity sets `RenderPass.VelocityRequested`. Vulkan packs bound targets, so velocity forces a normal target in slot 1
+  (see `Plan_ImplicitRenderDefaults.md`). `[RenderScene]` passes depth/normal/velocity/camera as a render bundle.
+- **Blending**: draw ops get their blend state from `[PickBlendMode]` (`render/_dx11/fxsetup/PickBlendMode.t3`), a
+  graph of 10 `[BlendState]` type ops with one `[RenderTargetBlendDescription]` each and `IndependentBlendEnable` off.
+  51 symbols use it. With the flag off, target 0's blend applies to every target: additive draws add into normal and
+  velocity today. Both backends already honour per-target state (`Graphics.Compat/Resources.cs:605`,
+  `Graphics.D3D11/Convert.cs:83`, `Graphics.Vulkan/VulkanPipelineFactory.cs:160`).
+- **SDF materials**: the raymarch template calls `GetField(float4(p, 0))` for distance and `GetField(float4(p, 1))` for
+  color (`RaymarchSDFFieldWithMatTemplate.hlsl:477`). `[SetSDFMaterial]` branches on `p.w` in (0.5, 1.5) and sets
+  albedo only. Roughness / Specular / Metal are global template parameters plus an RSMO map (lines 62–64, 480–494).
+  Other ops reading `p.w`: `ExecuteHeightmapSdf`, `ExecuteImage2dSdf`, `ExecuteRepeatFieldAtPoints`.
+- No shader writes SV_Target3 or higher.
+
+## Design
+
+### 1. Per-target blending (prerequisite)
+
+Replace the `[PickBlendMode]` graph with a C# op that returns cached `BlendState`s (one per mode, created once, no
+per-frame allocation), keeping the symbol id and the `BlendMode` input so the 51 users don't change.
+`IndependentBlendEnable = true`, and per mode:
+
+| Blend mode | Target 0 (color) | Targets 1–4 (normal, velocity, base color, material) |
+|---|---|---|
+| None / opaque | as today | write, no blend |
+| Normal (alpha) | as today | write, no blend (alpha cut-off decides coverage; see open question 1) |
+| Additive, Multiply, Invert, BlendOnWhite | as today | write mask 0 |
+| PreMultiplied | as today | write mask 0 |
+
+This alone fixes additive particles corrupting normal and velocity (which `Plan_ImplicitRenderDefaults.md` works around
+with `a = 1`). Custom `[BlendState]` graphs stay untouched.
+
+### 2. Light types
+
+Generalize `PointLight` into `Light` (C# in `Core/Rendering/`, HLSL in a new `shared/lights.hlsl`;
+`point-light.hlsl` keeps a compatible include). Keep the first fields (position, intensity, color, range, decay) at
+their current offsets so the 8 non-PBR shaders keep compiling and treat every light as a point light until ported.
+Append:
+
+- `uint Type` (0 point, 1 spot, 2 directional, 3 sphere area, 4 rect area)
+- `float3 Direction`, `float SpotCosInner`, `float SpotCosOuter`
+- `float2 Size` (area extent), `float3 Right` (rect orientation), padding to 16 bytes
+
+Keep the cbuffer at b3 and the stack semantics; raise the cap only if the cbuffer stays under 64 KB (structured buffer
+is a later step, together with point-buffer lights).
+
+Shader side: one function `EvaluateLight(Light l, float3 worldPos, out float3 L, out float3 radiance)` used by
+`ComputePbr()`. Spot = point × smoothstep cone; directional = constant L, no falloff; sphere/tube area = representative
+point (Karis 2013) with roughness widening; rect area = LTC (two 64×64 lookup textures, bound like `BRDFLookup`).
+
+Ops: `[SpotLight]` / `[DirectionalLight]` / `[AreaLight]` (and `Set…` variants if the point-light pairs are kept as
+the pattern), all pushing on the same stack. Gizmos in the 3D view for direction and cone.
+
+Shadows: `[SetShadow]` already renders a perspective map from position toward target, i.e. a spot camera. Give it an
+optional light reference (store the light op's `Guid`, not the value) so cone and shadow stay matched; directional
+needs an orthographic projection. More receivers / multiple shadow maps are out of scope.
+
+### 3. Material buffer
+
+`[RenderTarget]` gets `WithMaterialBuffer` (opt-in, like velocity) and two outputs:
+
+- **SV_Target3 BaseColor**: RGBA8, rgb = unlit albedo × material color, a = occlusion.
+- **SV_Target4 Material**: RGBA8, r = roughness, g = metalness, b = specular, a = shading model id / 255
+  (0 = not written — cleared value, 1 = PBR, 2 = unlit / custom, skip relight).
+
+Emissive is not stored: deferred lighting adds to the forward color, which already contains emissive.
+
+Rules, following the velocity precedent:
+- With material on, normal and velocity slots are always bound (Vulkan packs targets; a gap would shift slots).
+- `RenderPassState.MaterialRequested` lets draws skip the work when no target listens.
+- MSAA: resolve like normal (taking sample 0 for the id, not an average — averaged ids are meaningless).
+- The render bundle gets `BaseColor` and `Material` textures; `[HandleTextureBundle]` passes them through.
+
+Writers: a helper in `pbr-render.hlsl`, e.g. `WriteMaterialTargets(out float4 baseColor, out float4 material)`
+reading `frag`, called by the 6 PBR shaders. Non-PBR draw shaders write id 2 (or nothing → 0, also skipped).
+
+### 4. SDF material pass (`p.w = 2`)
+
+Third field evaluation at the hit point only (not per step), so the cost is one extra `GetField` per pixel.
+- `[SetSDFMaterial]` gets Roughness / Metal / Specular inputs; for `p.w` in (1.5, 2.5) it writes them to `f.rgb`.
+- The template calls `GetField(float4(p, 2))`, and where no material was set (sentinel, e.g. `f.a < 0`) falls back
+  to its global parameters + RSMO map. With `[SetSDFMaterial]` present, its values replace them.
+- SDF blending ops must mix `f` for `w = 2` exactly as for `w = 1`; check the combine ops and the three ops listed in
+  Current State that branch on `p.w`.
+- Works in forward immediately (per-object materials in raymarching); also feeds the material buffer.
+
+### 5. Consumers
+
+1. `[ScreenSpaceReflections]` reads roughness (blur/cone width, fade) and metalness (tint by base color) when the
+   bundle has a material texture; unchanged without it.
+2. Optional `[DeferredLights]` post op on the render bundle: evaluates its own light subtree from depth + normal +
+   base color + material and **adds** the result to the color target. Lighting is linear, so forward lights and
+   deferred lights sum. Skips id 0 and 2. Transparent surfaces stay forward-lit only. This is where many / expensive
+   lights (rect area) get cheap.
+3. Later, same inputs: decals, screen-space GI.
+
+## Milestones
+
+| | Scope | Verify |
+|---|---|---|
+| M1 | Per-target blending in `[PickBlendMode]` | Additive sprites over a mesh no longer change normal / velocity buffers (bridge readback); TXAA with velocity unchanged on opaque scenes; both backends, Vulkan validation clean |
+| M2 | `Light` struct + spot and directional in `ComputePbr()`, new ops | Existing point-light projects render identically (screenshot diff); spot cone and directional match expectations; non-PBR shaders still compile |
+| M3 | Material targets in `[RenderTarget]` / bundle, written by the 6 PBR shaders | Buffers show expected values for a known material; MSAA on/off; slots correct on Vulkan with only some targets enabled |
+| M4 | SDF `p.w = 2` pass + `[SetSDFMaterial]` inputs | Two blended SDFs with different roughness transition smoothly; projects without `[SetSDFMaterial]` unchanged |
+| M5 | SSR uses roughness / metal | Rough vs. polished surfaces show blurred vs. sharp reflections |
+| M6 | Area lights (sphere/tube, then rect LTC) | Compare against a reference (e.g. Blender Eevee) for one setup |
+| M7 | `[DeferredLights]` op | Same light forward vs. deferred on an opaque scene matches within tolerance |
+
+Each milestone gets a `.tests-manual/` set and `.help/` updates for the new ops.
+
+## Open Questions
+
+1. Alpha-blended (Normal mode) draws: write normal/material (top surface wins, matches today's normal behaviour) or
+   mask them out (SSR/relight sees the surface behind)? Proposal: write, since alpha cut-off is the common use.
+2. Light ops: one `[Light]` op with a type enum, or separate ops per type? Separate ops give cleaner parameter sets.
+3. Light count: keep 8 in M2, or move to a structured buffer right away?
+4. Base color for vertex-color / point-color driven draws: store the multiplied color (proposal) or the material only?
+5. Should `[DrawMeshCelShading]` / hatched get spot and directional in M2 or later?
+
+## Deferred Performance Ideas
+
+- **Velocity work in point draws when nobody asks for it.** `[DrawPoints]` (and the other draws gated by
+  `[GetRenderPassState]`) already skip the previous-buffer copy without `VelocityRequested`, but the vertex shader still
+  reads the previous point and does two extra matrix multiplies, and the pixel shader encodes velocity into an unbound
+  target. Estimated a few percent of vertex cost on large point counts, not measured. Cheapest fix: pass
+  `VelocityRequested` as a cbuffer flag and branch around the previous-position block. A define-based variant would also
+  free the interpolator, but needs per-define-set shader caching. Measure 1-5M points with velocity on/off first.
+- **Feature variants for lighting.** Keep uniform branches for point/spot/directional (and sphere/tube). Expensive
+  features (rect LTC, shadow sampling) raise register pressure for every PBR draw; either keep them deferred-only (M7)
+  or select a variant automatically from the light stack, never from a user-set project flag.
+
+## Risks
+
+- Five targets at 4K with MSAA: memory and bandwidth; opt-in keeps the default cost at zero.
+- Light struct layout change touches C# and every shader reading lights; keep offsets of existing fields stable.
+- Shaders writing SV_Target3/4 while those targets are unbound: fine on D3D11; check Vulkan validation (precedent:
+  draws already write SV_Target1/2 without bound targets).
+- Changing `[PickBlendMode]` affects 51 symbols; M1 must compare before/after across the example projects.

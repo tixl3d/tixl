@@ -7,15 +7,15 @@
     {
       "InputId": "163db356-b44a-490c-a9ee-21b18a6e02ed"/*ShowWireframe*/,
       "Position": {
-        "X": -150.0,
-        "Y": 45.0
+        "X": 348.5813,
+        "Y": 201.27681
       }
     },
     {
       "InputId": "23a23cd6-95c5-4f0e-bb30-d14d6e4bf146"/*TBNAxisSize*/,
       "Position": {
-        "X": -164.67151,
-        "Y": 369.03265
+        "X": 138.5813,
+        "Y": 446.2768
       },
       "Description": "Length of the drawn tangent space axes.",
       "Min": 0.0,
@@ -24,8 +24,8 @@
     {
       "InputId": "5db2dd45-3581-4f92-80f3-b52681c94be5"/*MeshColor*/,
       "Position": {
-        "X": -164.67151,
-        "Y": 324.03265
+        "X": 138.5813,
+        "Y": 621.2768
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -35,30 +35,30 @@
     {
       "InputId": "76147372-f850-4aa3-ad3a-af4c374e1f2a"/*ShowVerticeSelection*/,
       "Position": {
-        "X": -164.67151,
-        "Y": 279.03265
+        "X": 138.5813,
+        "Y": 306.2768
       }
     },
     {
       "InputId": "abab5c80-fa17-4d1c-aa28-3829be755d99"/*ShowTBNSpace*/,
       "Position": {
-        "X": -150.0,
-        "Y": 135.0
+        "X": 278.5813,
+        "Y": 516.2768
       },
       "Description": "Draws the tangent, bitangent and normal axes of each vertex as short lines."
     },
     {
       "InputId": "ae443ba9-13b9-4692-97c4-a22d7acafcd4"/*Mesh*/,
       "Position": {
-        "X": -150.0,
-        "Y": 0.0
+        "X": -74.34878,
+        "Y": 128.34674
       }
     },
     {
       "InputId": "c7887b49-a16e-4bf1-ada2-19b250972fb5"/*ShowIndices*/,
       "Position": {
-        "X": -150.0,
-        "Y": 180.0
+        "X": 138.5813,
+        "Y": 341.2768
       }
     }
   ],
@@ -67,72 +67,72 @@
       "ChildId": "0f4c21b3-34f8-4820-b43b-f103eaa32fdf",
       "SymbolName": "Lib.render.gizmo._._VisualizeTBN",
       "Position": {
-        "X": 309.08142,
-        "Y": 332.6593
+        "X": 278.5813,
+        "Y": 411.2768
       }
     },
     {
       "ChildId": "13711154-4738-4bd1-8663-fea51263cea9",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 468.73804,
-        "Y": 174.52612
+        "X": 488.5813,
+        "Y": 271.2768
       }
     },
     {
       "ChildId": "3a12a5ef-30d8-4705-8a00-000210ccc1a1",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 459.08142,
-        "Y": 332.6593
+        "X": 488.5813,
+        "Y": 341.2768
       }
     },
     {
       "ChildId": "58fc8769-054c-4cde-a35e-d89a617f4b9d",
       "SymbolName": "Lib.point.generate.MeshVerticesToPoints",
       "Position": {
-        "X": 120.0096,
-        "Y": 98.549255
+        "X": 138.5813,
+        "Y": 271.2768
       }
     },
     {
       "ChildId": "60c1aa65-3472-4f03-b685-e3482092313c",
       "SymbolName": "Lib.point.draw.VisualizePoints",
       "Position": {
-        "X": 303.4552,
-        "Y": 172.08087
+        "X": 278.5813,
+        "Y": 271.2768
       }
     },
     {
       "ChildId": "723fa282-bc09-4f1b-820a-6e42236a19fe",
       "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
-        "X": 305.5337,
-        "Y": 6.774414
+        "X": 278.5813,
+        "Y": 586.2768
       }
     },
     {
-      "ChildId": "7a1b0543-a70c-4a9f-84f8-119020c58e45",
-      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "ChildId": "a34e7722-5546-41fd-a7b5-33e3aa52f8fd",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "Position": {
-        "X": 305.5337,
-        "Y": 75.774414
+        "X": 337.49704,
+        "Y": 67.09627
       }
     },
     {
       "ChildId": "c66a5704-5d38-4975-9fa4-92652261f93c",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 455.5337,
-        "Y": 86.774414
+        "X": 488.5813,
+        "Y": 166.27681
       }
     },
     {
       "ChildId": "f307f212-7953-4b88-976b-36a34c84d419",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 455.5337,
-        "Y": 6.774414
+        "X": 488.5813,
+        "Y": 446.2768
       }
     },
     {

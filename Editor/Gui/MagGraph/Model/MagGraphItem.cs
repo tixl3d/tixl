@@ -146,9 +146,43 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
                 _baseFontSize = font.FontSize;
                 _spacesAdded = spacesAdded;
                 _text = text;
+                _fittedForWidthAtBaseSize = 0;
             }
 
             return _widthAtBaseSize * fontSize / _baseFontSize;
+        }
+
+        /// <summary>
+        /// The number of leading characters of <paramref name="displayedText"/> that fit <paramref name="maxWidth"/>
+        /// when followed by <paramref name="suffix"/>, and their drawn width. Call after <see cref="GetWidth"/> with
+        /// the same text; the cut is cached until the text or the available width changes.
+        /// </summary>
+        public float GetFittingLength(ImFontPtr font, float fontSize, float maxWidth, ReadOnlySpan<char> displayedText,
+                                      string suffix, out int length)
+        {
+            var maxWidthAtBaseSize = maxWidth * _baseFontSize / fontSize;
+            if (_fittedForWidthAtBaseSize <= 0 || MathF.Abs(maxWidthAtBaseSize - _fittedForWidthAtBaseSize) > 0.5f)
+            {
+                var availableWidth = maxWidthAtBaseSize - font.CalcTextSizeA(_baseFontSize, float.MaxValue, 0, suffix).X;
+                var fittedLength = displayedText.Length;
+                var fittedWidth = 0f;
+                for (; fittedLength > 0; fittedLength--)
+                {
+                    if (displayedText[fittedLength - 1] == ' ')
+                        continue;
+
+                    fittedWidth = font.CalcTextSizeA(_baseFontSize, float.MaxValue, 0, displayedText[..fittedLength]).X;
+                    if (fittedWidth <= availableWidth)
+                        break;
+                }
+
+                _fittedLength = fittedLength;
+                _fittedWidthAtBaseSize = fittedLength > 0 ? fittedWidth : 0;
+                _fittedForWidthAtBaseSize = maxWidthAtBaseSize;
+            }
+
+            length = Math.Min(_fittedLength, displayedText.Length);
+            return _fittedWidthAtBaseSize * fontSize / _baseFontSize;
         }
 
         private string? _text;
@@ -156,6 +190,9 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
         private float _baseFontSize;
         private bool _spacesAdded;
         private float _widthAtBaseSize;
+        private float _fittedForWidthAtBaseSize;
+        private int _fittedLength;
+        private float _fittedWidthAtBaseSize;
     }
 
     public struct InputLine

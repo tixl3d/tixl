@@ -9,8 +9,7 @@ TiXL can build and modify meshes on the CPU before turning them into GPU buffers
 
 Most mesh operators in TiXL work on **MeshBuffers** — packed GPU vertex and index buffers that are fast to draw but hard to restructure. The geometry operators work on CPU-side data instead:
 
-- **Geometry** (`MeshGeometry`) — faces with any number of corners, shared points and flexible attributes. Quads stay quads, which is what makes modeling operations like beveling possible. Geometry can be split into **parts** (one per glyph, fracture chunk or copy), each with its own pivot.
-- **Curves** — closed or open cubic-bezier outlines, for example the glyphs of a text.
+- **Geometry** — points, and **primitives** that connect them through **vertices**: polygons with any number of corners, and cubic-bezier curves, open or closed (for example the glyphs of a text). Both kinds flow through the same connection, so selections and transforms work on either, and [ExtrudeCurves] can keep its source outline next to the solid. Quads stay quads, which is what makes modeling operations like beveling possible. Geometry can be split into **parts** (one per glyph, fracture chunk or copy), each with its own pivot. Attributes live on points, vertices, primitives, edges or parts, the terms Houdini uses.
 - **Fields** — functions that return a value for any position in space, such as noise or the distance to a set of points. They don't hold data; operators like [DisplaceGeometry] sample them where they need them.
 
 You can tell them apart by wire color: geometry and curves are teal-green, fields are a lighter yellow-green, and GPU mesh buffers stay red.
@@ -46,7 +45,7 @@ Animating **Width** is cheap on simple shapes — the geometry rebuilds in real 
 - [TransformGeometry] scales, rotates and translates geometry while it is still in CPU form. Use it before a bevel: beveling happens after the transform and adapts to stretched shapes.
 - [CenterGeometry] moves geometry so a pivot inside its bounding box lands on the origin. Pivot `(0,-0.5,0)` puts the bottom on the ground plane — useful for imported files that aren't centered.
 - [TriangulateGeometry] converts all faces into triangles. Rendering does this automatically, so you only need it when a later operation expects triangles.
-- [GetGeometryStats] reports counts, bounds, volume and whether the shape is watertight. The output window also shows these stats when you view a geometry output directly.
+- [GetGeometryStats] reports counts, bounds, volume and whether the shape is watertight. The output window renders geometry and curve outputs directly, and its **Stats** view shows these numbers.
 
 ## Importing geometry
 
@@ -76,11 +75,11 @@ Fields describe a value that varies through space. Build one, optionally reshape
 The curve operators turn fonts into 3D text:
 
 ```
-[TextToCurves] -> [CurvesToGeometry] -> [GeometryToMesh] -> [DrawMesh]
+[StringToCurves] -> [ExtrudeCurves] -> [GeometryToMesh] -> [DrawMesh]
 ```
 
-- [TextToCurves] lays out text with a TrueType or OpenType font and outputs each glyph as a curve part. Variable fonts respond to **Weight** and one additional axis. **LetterSpacing** adds tracking relative to the size, and **Position** (with a move gizmo) places the text block.
-- [CurvesToGeometry] fills the outlines. With **Depth** above 0 it extrudes them into solid letters; **Bevel** and **BevelSegments** round or chamfer the edges. Keep the bevel below half the thinnest stroke, otherwise the surface folds over itself.
+- [StringToCurves] lays out text with a TrueType or OpenType font and outputs each glyph as a curve part. Variable fonts respond to **Weight** and one additional axis. **LetterSpacing** adds tracking relative to the size, and **Position** (with a move gizmo) places the text block.
+- [ExtrudeCurves] fills the outlines. With **Depth** above 0 it extrudes them into solid letters; **Bevel** and **BevelSegments** round or chamfer the edges. Keep the bevel below half the thinnest stroke, otherwise the surface folds over itself.
 - [SubdivideCurves] splits long segments into shorter ones without changing the shape — useful before deforming outlines.
 - [OffsetCurves] grows or shrinks outlines by a distance. Sharp corners stay closed with a miter, round or bevel join, and holes shrink while outlines grow.
 - [CurvesToPoints] flattens curves into a point list for [DrawLines] and the other point operators. Each point's Z axis faces away from the filled area, so oriented sprites, ribbons and instances follow the outline.
@@ -99,6 +98,9 @@ Many operators produce geometry with several parts: one per glyph, OBJ group or 
 - [ExplodeGeometry] moves parts away from the center (**Distance**) and shrinks them (**Shrink**).
 - [FilterGeoPartsByIndex] and [FilterGeoPartsInBox] keep only some parts — the quickest way to inspect a single chunk.
 - [ColorFacesFromAttribute] picks a color per part or per face from a color list.
+
+Disable **FillInterior** on [VoronoiFracture] to omit cells lying entirely inside a solid.
+Open input surfaces keep their original openings with either setting.
 
 To animate parts on the GPU instead of rebuilding geometry every frame, compile them with [GeometryToMeshChunks]. It outputs one mesh with a chunk per part plus a point per pivot; move those points with any point operator and draw the result with [DrawMeshChunksAtPoints].
 

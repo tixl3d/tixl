@@ -43,7 +43,8 @@
         "X": 164.88193,
         "Y": 1800.6741
       },
-      "Description": "Raymarch: outputs only the start point and the hit points. KeepSteps: outputs every raymarching step."
+      "Description": "Raymarch: outputs only the start point and the hit points. KeepSteps: outputs every raymarching step.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "81855333-ab3a-4543-b68c-0eb2f62427b0"/*StepDistanceFactor*/,
@@ -95,7 +96,8 @@
         "X": 976.59106,
         "Y": 1743.2859
       },
-      "Description": "Writes the travelled distance into F1 or F2."
+      "Description": "Writes the travelled distance into F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

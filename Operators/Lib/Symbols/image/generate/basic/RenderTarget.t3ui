@@ -87,6 +87,14 @@
       }
     },
     {
+      "InputId": "e63bb9fb-208b-49d4-8500-aed1f6a74e18"/*WithMaterialBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Adds a base color and a material buffer (8 bit each) for post effects that reflect or relight the scene, written by PBR draws. Also enables the normal and velocity buffers."
+    },
+    {
       "InputId": "e882e0f0-03f9-46e6-ac7a-709e6fa66613"/*Multisampling*/,
       "Position": {
         "X": -100.96112,
@@ -139,6 +147,20 @@
       "Position": {
         "X": 29.03888,
         "Y": 152.75378
+      }
+    },
+    {
+      "OutputId": "6df4a69f-917a-4fcb-9fea-d40226b05192"/*BaseColorBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "e26a28c5-61bd-46d4-9b1b-41bdef8a6435"/*MaterialBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
       }
     }
   ]

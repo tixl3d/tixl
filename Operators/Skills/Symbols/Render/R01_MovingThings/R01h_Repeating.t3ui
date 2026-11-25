@@ -5,11 +5,21 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "4fe259d8-6184-451e-9915-0384680b6971",
+      "ChildId": "2a59ff9f-ef30-4961-a6fb-91efb60669d9",
       "SymbolName": "Lib.render.basic.Text",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1402.2217,
+        "Y": 1683.7262
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "698d469d-668a-4eb4-93cc-69cca13097f9",
+      "SymbolName": "Lib.render.basic.Text",
+      "SectionId": "caada1fa-b1b2-4901-ad43-a6027552e246",
+      "Position": {
+        "X": 1160.8724,
+        "Y": 1971.9971
       }
     },
     {
@@ -21,12 +31,39 @@
       }
     },
     {
-      "ChildId": "9b4dde76-ede4-45d1-869f-462d719bb43e",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "be29cab6-96e8-4c78-8c00-0eb2f71a07b9",
+      "SymbolName": "Lib.numbers.anim.time.Time",
       "SectionId": "caada1fa-b1b2-4901-ad43-a6027552e246",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1160.8726,
+        "Y": 2061.2654
+      }
+    },
+    {
+      "ChildId": "d22370c3-26d2-44ed-9759-d82f43ad853f",
+      "SymbolName": "Lib.render.transform.RepeatTransform",
+      "Position": {
+        "X": 1402.2217,
+        "Y": 1789.226
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ebdbd8e8-d2e5-4bd9-9e09-434418be64e5",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 1227.6273,
+        "Y": 1788.8395
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f7ac556d-7e20-4f8a-9c23-f416e3e1fd8e",
+      "SymbolName": "Lib.render.transform.RepeatTransform",
+      "SectionId": "caada1fa-b1b2-4901-ad43-a6027552e246",
+      "Position": {
+        "X": 1393.3003,
+        "Y": 1999.0653
       }
     }
   ],
@@ -51,8 +88,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1111.0526,
+        "Y": 1931.4453
       },
       "Size": {
         "X": 525.0,

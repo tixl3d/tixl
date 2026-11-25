@@ -61,19 +61,23 @@ internal static class SingleValueEdit
 
     private static int _editInteractionCounter = 0;
 
-    private static InputEditStateFlags Draw(ref double value,
-                                            Vector2 size,
-                                            double min = double.NegativeInfinity,
-                                            double max = double.PositiveInfinity,
-                                            bool clampMin = false, 
-                                            bool clampMax= false,
-                                            float scale = 1,
-                                            string format = "{0:0.000}",
-                                            bool useIntegers = false,
-                                            double defaultValue = default,
-                                            float horizontalAlign = 0)
+    /// <param name="formatLabel">Optional label for the idle and dragged button, for values a format string can't
+    /// express (e.g. timecodes). Typed input still shows and parses the plain number using <paramref name="format"/>.</param>
+    internal static InputEditStateFlags Draw(ref double value,
+                                             Vector2 size,
+                                             double min = double.NegativeInfinity,
+                                             double max = double.PositiveInfinity,
+                                             bool clampMin = false, 
+                                             bool clampMax= false,
+                                             float scale = 1,
+                                             string format = "{0:0.000}",
+                                             bool useIntegers = false,
+                                             double defaultValue = default,
+                                             float horizontalAlign = 0,
+                                             Func<double, string> formatLabel = null)
     {
         _numberFormat = format;
+        _formatLabel = formatLabel;
         _currentTabIndex++;
         var componentId = ImGui.GetID("valueEdit");
 
@@ -389,6 +393,9 @@ internal static class SingleValueEdit
 
     private static string FormatValueForButton(ref double value, bool hideSuffix = false)
     {
+        if (!hideSuffix && _formatLabel != null)
+            return _formatLabel(value);
+
         // Don't use rounding for integers
         if (_numberFormat == "{0:0}")
             return "" + (int)value;
@@ -506,6 +513,7 @@ internal static class SingleValueEdit
     private static InputStates _state = InputStates.Inactive;
 
     private static string _numberFormat = "{0:0.000}";
+    private static Func<double, string> _formatLabel;
     private static double _timeOpened;
     private const double DefaultValue = 0.0;
 

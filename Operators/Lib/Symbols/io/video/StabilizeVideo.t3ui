@@ -1,0 +1,466 @@
+{
+  "FormatVersion": 3,
+  "Id": "07837c27-0ab3-496b-92aa-05e0836106c4"/*StabilizeVideo*/,
+  "Description": "An experimental setup that uses [MarkerTracking] to stabilize videos.",
+  "SymbolTags": "192",
+  "InputUis": [
+    {
+      "InputId": "095a7e31-b427-41b8-805d-e4c54e73d0b6"/*Color*/,
+      "Position": {
+        "X": 594.7644,
+        "Y": 1717.2582
+      },
+      "Description": "Selects a color which will be multiplied with the incoming image.",
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "1a03ffa2-053c-4c81-b9ac-ae3b65189c3f"/*ShowGrid*/,
+      "Position": {
+        "X": 961.1237,
+        "Y": 1852.3525
+      }
+    },
+    {
+      "InputId": "23cc6760-c664-4c0c-8789-7d6067f50267"/*AllowRotation*/,
+      "Position": {
+        "X": 1177.6818,
+        "Y": 402.4404
+      },
+      "Description": "Solve rotation. Turn off to solve only translation and scale."
+    },
+    {
+      "InputId": "36617d0a-4a51-469c-b4a7-3170db49b9b9"/*FocusPoint*/,
+      "Position": {
+        "X": -143.90366,
+        "Y": 833.973
+      },
+      "GroupTitle": "Weighting",
+      "Description": "Video-space point where the transform should fit best.",
+      "Min": -2.0,
+      "Max": 2.0,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "439ae155-4072-490f-be80-b850f654193f"/*TrackingMask*/,
+      "Position": {
+        "X": -733.6293,
+        "Y": 565.3573
+      },
+      "Description": "Texture input for any 2D op.\ne.g. [RenderTarget], [LoadImage] etc."
+    },
+    {
+      "InputId": "4beaba83-65e7-47ab-b56e-7390956e66da"/*AllowScale*/,
+      "Position": {
+        "X": 1177.6818,
+        "Y": 437.4404
+      },
+      "Description": "Solve uniform scale. Turn off for footage without zoom or forward motion."
+    },
+    {
+      "InputId": "67896b9c-a1a4-4fa8-9246-fa1451024c59"/*PoolSize*/,
+      "Position": {
+        "X": -143.90366,
+        "Y": 465.28943
+      },
+      "Description": "Number of markers kept alive in Automatic mode.",
+      "Min": 4,
+      "Max": 64,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "6cb36113-9240-402a-bd1d-9901c53e77a5"/*FocusRadius*/,
+      "Position": {
+        "X": -143.90366,
+        "Y": 760.0049
+      },
+      "Description": "Falloff of the focus weighting in video space. 0 weights all markers equally.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "876699f4-b588-4d3a-9c4e-6f08664f98f6"/*Reset*/,
+      "Position": {
+        "X": 165.99557,
+        "Y": 494.44196
+      },
+      "GroupTitle": "Control",
+      "Description": "Clears the track. It starts again when the video reaches SeedFrame."
+    },
+    {
+      "InputId": "9a51b4c2-5437-4294-9549-21e33949fdb7"/*Path*/,
+      "Position": {
+        "X": -609.64545,
+        "Y": 186.49393
+      },
+      "Usage": "FilePath",
+      "FileFilter": "mp4, mov, webm"
+    },
+    {
+      "InputId": "ee9afc76-b55f-4bb2-9538-e459f6dde06d"/*Visibility*/,
+      "Position": {
+        "X": 1186.5485,
+        "Y": 1663.5531
+      },
+      "Description": "Off = Never executed\nOn = Always executed\nIfSelected = Executed while this operator or one of its parent operators is selected\nInherit = Follows the gizmo toggle of the output window"
+    },
+    {
+      "InputId": "f2d20773-e607-4b99-b250-6c1f3a5b2463"/*ReferenceFrame*/,
+      "Position": {
+        "X": -143.90366,
+        "Y": 143.34631
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02736009-733e-45b4-be31-eee6fdbfb4f9",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": -236.63644,
+        "Y": 515.6308
+      }
+    },
+    {
+      "ChildId": "06ffdc33-f9f5-44fe-94df-a259f8f608d9",
+      "SymbolName": "Lib.numbers.int.basic.IntToFloat",
+      "Position": {
+        "X": 847.12915,
+        "Y": 1662.565
+      }
+    },
+    {
+      "ChildId": "0e4f50d0-9bd2-4ff8-82c9-64610df2b2b5",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1113.0948
+      }
+    },
+    {
+      "ChildId": "11a0f06c-1f65-44dd-be24-448e762b9e1d",
+      "SymbolName": "Types.Values.Vector2",
+      "Position": {
+        "X": 1037.6818,
+        "Y": 612.44037
+      }
+    },
+    {
+      "ChildId": "157f72ee-a229-4cda-8835-30a73b21483d",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": -96.636444,
+        "Y": 515.6308
+      }
+    },
+    {
+      "ChildId": "1853ccbb-5425-4a7b-9a2a-ba691457d502",
+      "SymbolName": "Lib.image.use.FirstValidTexture",
+      "Position": {
+        "X": -593.6293,
+        "Y": 565.3573
+      }
+    },
+    {
+      "ChildId": "28d4b12d-04e2-4b66-ba82-43043970c7df",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1367.9238
+      }
+    },
+    {
+      "ChildId": "2d6c54e1-260b-4c7d-a9d8-6c7c86475a1e",
+      "SymbolName": "Lib.image.fx.blur.Sharpen",
+      "Position": {
+        "X": -211.90134,
+        "Y": 359.45673
+      }
+    },
+    {
+      "ChildId": "2e5a51a0-ab66-40f6-b88e-675d5dd873e3",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 847.12915,
+        "Y": 1402.9238
+      }
+    },
+    {
+      "ChildId": "30730ff9-ec8b-4423-91d3-088701d53700",
+      "SymbolName": "Lib.point.track.SolveTrackTransform",
+      "Position": {
+        "X": 1317.6818,
+        "Y": 227.4404
+      }
+    },
+    {
+      "ChildId": "3244a526-9971-4841-809d-3d17865cbc73",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
+      "Position": {
+        "X": 897.68176,
+        "Y": 542.4404
+      }
+    },
+    {
+      "ChildId": "325b6278-6ce1-47d3-a380-938cb80c782f",
+      "SymbolName": "Lib.render.gizmo.DrawLineGrid",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1784.8293
+      }
+    },
+    {
+      "ChildId": "36f63ce5-1a0c-4dd3-a6be-41ced5de5120",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1532.6265
+      }
+    },
+    {
+      "ChildId": "46a969ce-7343-4135-96a9-4c87f43c6bd8",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1180.4283
+      }
+    },
+    {
+      "ChildId": "46d9ea61-9331-43b9-9af5-820efbc4b112",
+      "SymbolName": "Lib.numbers.int.basic.SubInts",
+      "Position": {
+        "X": 92.69066,
+        "Y": 17.801086
+      }
+    },
+    {
+      "ChildId": "4f16f6dc-1234-47a1-9744-eddd2ef3ec6e",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1127.1292,
+        "Y": 1784.8293
+      }
+    },
+    {
+      "ChildId": "4f1e1512-b7b4-46f6-b616-606f573e5d73",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
+      "Position": {
+        "X": 1317.6818,
+        "Y": 542.4404
+      }
+    },
+    {
+      "ChildId": "5d7ad742-f7b0-4114-9b17-28a37acc15c8",
+      "SymbolName": "Lib.point.modify.SetPointAttributes",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1437.9238
+      }
+    },
+    {
+      "ChildId": "70c1c2b1-1b99-4daf-be93-a95fb81a5747",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1697.5647
+      }
+    },
+    {
+      "ChildId": "73a00375-453f-439a-85ab-7c7434eb4d50",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1317.6818,
+        "Y": 612.44037
+      }
+    },
+    {
+      "ChildId": "749b9150-db89-4e85-9d51-2b81092c3380",
+      "SymbolName": "Lib.render._dx11.api.GetTextureSize",
+      "Position": {
+        "X": -312.3187,
+        "Y": 79.92525
+      }
+    },
+    {
+      "ChildId": "76d5ea3f-d48f-41c9-b4b7-a76b1147d71f",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1250.4277
+      }
+    },
+    {
+      "ChildId": "78e0ee0f-9389-4d50-a12a-44f5e446e9e6",
+      "SymbolName": "Lib.numbers.vec2.Vec2ToVec3",
+      "Position": {
+        "X": -143.90366,
+        "Y": 868.9728
+      }
+    },
+    {
+      "ChildId": "7db6e669-2df8-486c-a0c5-f685d7e6dc08",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": -733.6293,
+        "Y": 600.3573
+      }
+    },
+    {
+      "ChildId": "8fa1ca94-fc49-4787-b590-f8aa70950ce6",
+      "SymbolName": "Lib.mesh.generate.QuadMesh",
+      "Position": {
+        "X": 1177.6818,
+        "Y": 577.44037
+      }
+    },
+    {
+      "ChildId": "90578c27-28f9-406e-92a7-30592d49bfdd",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": -376.63644,
+        "Y": 550.6308
+      }
+    },
+    {
+      "ChildId": "95cc38bd-c7c3-4094-96eb-bfefc0fea3c9",
+      "SymbolName": "Lib.image.fx.stylize.DetectEdges",
+      "Position": {
+        "X": 987.1291,
+        "Y": 1001.8665
+      }
+    },
+    {
+      "ChildId": "a1710664-877b-480d-bc0a-8d43abe73783",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
+      "Position": {
+        "X": 1326.5485,
+        "Y": 1628.5531
+      }
+    },
+    {
+      "ChildId": "a26575e6-b183-4def-bf51-b369d416c896",
+      "SymbolName": "Lib.image.generate.basic.LinearGradient",
+      "Position": {
+        "X": -183.75244,
+        "Y": 226.93903
+      }
+    },
+    {
+      "ChildId": "a2c3b1ac-883c-45bb-bcde-28ad3496a83d",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1472.9238
+      }
+    },
+    {
+      "ChildId": "a34eaef2-0cc8-4d69-a9e2-a04ebca05882",
+      "SymbolName": "Lib.string.convert.IntToString",
+      "Position": {
+        "X": 847.12915,
+        "Y": 1532.6265
+      }
+    },
+    {
+      "ChildId": "a5bdf534-10a9-4922-93be-d4c4cbbd4de8",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1592.565
+      }
+    },
+    {
+      "ChildId": "a9a5a252-d97c-4ab3-a7cc-64a5aa37291e",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1326.5485,
+        "Y": 1383.5531
+      }
+    },
+    {
+      "ChildId": "bb7a3111-af95-4e6c-b22b-f567e9aea37f",
+      "SymbolName": "Lib.point.modify.CustomPointShader",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1627.5647
+      }
+    },
+    {
+      "ChildId": "beb85642-2a0d-4111-928d-535e391dc169",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1523.1525,
+        "Y": 534.8105
+      }
+    },
+    {
+      "ChildId": "cbfa5071-6dea-4cef-8839-530c70eecc2e",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": -376.63644,
+        "Y": 515.6308
+      }
+    },
+    {
+      "ChildId": "cef994e6-bdd2-44fb-8a1b-4d4050c9a47f",
+      "SymbolName": "Lib.point.modify.SetPointAttributes",
+      "Position": {
+        "X": 847.12915,
+        "Y": 1113.0948
+      }
+    },
+    {
+      "ChildId": "cf7e6c5a-35fd-4f69-b27d-1229cfe14762",
+      "SymbolName": "Lib.point.track.TrackMarkers",
+      "Position": {
+        "X": 305.99557,
+        "Y": 319.44196
+      }
+    },
+    {
+      "ChildId": "dfb25e40-05f8-48bc-b872-fdffa5f9cafc",
+      "SymbolName": "Lib.io.video.PlayVideo",
+      "Position": {
+        "X": -609.64545,
+        "Y": 221.49393
+      }
+    },
+    {
+      "ChildId": "e13fea53-5804-4571-b86c-b478112c3d91",
+      "SymbolName": "Lib.numbers.int2.process.Int2Components",
+      "Position": {
+        "X": 897.68176,
+        "Y": 577.44037
+      }
+    },
+    {
+      "ChildId": "ecb59c67-db26-4b48-8472-096972e7c2eb",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1215.4277
+      }
+    },
+    {
+      "ChildId": "ecf2bdb5-805d-40df-9cf2-52986523e8e6",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": 987.12915,
+        "Y": 1036.8666
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2722fdfd-d710-4b8e-86fd-87997d4513cb"/*Output*/,
+      "Position": {
+        "X": 1708.5852,
+        "Y": 379.15936
+      }
+    }
+  ]
+}

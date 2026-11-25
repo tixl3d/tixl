@@ -5,11 +5,30 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "14ca0c55-c0eb-426a-aeba-c66608a13798",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "20e35458-5ba5-49a0-90f1-070c8f0d943d",
+      "SymbolName": "Lib.point.draw.DrawPoints",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1450.0072,
+        "Y": 1413.7429
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3d8ecca2-cd94-4377-b06f-76f0b3e3fcbc",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1449.6398,
+        "Y": 1939.0475
+      }
+    },
+    {
+      "ChildId": "4190ef8f-f182-4e8e-aa6b-4a1870fffa25",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1062.2128,
+        "Y": 2072.2805
       }
     },
     {
@@ -21,12 +40,102 @@
       }
     },
     {
-      "ChildId": "b435dc83-4b55-4dd1-8efc-97716c49ec1f",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "5362d71d-771c-4043-9bd1-7c53354bae82",
+      "SymbolName": "Lib.render.transform.Transform",
       "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1449.6398,
+        "Y": 2114.048
+      }
+    },
+    {
+      "ChildId": "5fef5003-5493-4e2b-a1e4-ebbdbd109ab5",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1449.6398,
+        "Y": 1974.0475
+      }
+    },
+    {
+      "ChildId": "76256d05-c22f-4a33-bcae-7c2647f3834c",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1062.5802,
+        "Y": 1466.5399
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "83889cd6-9b5c-492c-be70-5da1aeb74ce7",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 1450.0072,
+        "Y": 1343.7429
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "af718673-af57-4615-bdd8-edce8dca5cbf",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1309.6398,
+        "Y": 2009.0475
+      }
+    },
+    {
+      "ChildId": "b60ba848-0a71-475c-b062-29cfff0d7e19",
+      "SymbolName": "Lib.point.modify.MapPointAttributes",
+      "Position": {
+        "X": 1450.0072,
+        "Y": 1378.7429
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c0b1398e-5e6c-4e1f-a342-66aeb3fc970c",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1450.0072,
+        "Y": 1448.7429
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c0bb808e-e8d0-4a20-bacd-10e4813b29f7",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Position": {
+        "X": 1062.5802,
+        "Y": 1531.4797
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c64f9d79-9a15-4e1e-9877-8cd50c95b60c",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 1062.5802,
+        "Y": 1399.8284
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e783d224-384f-49c9-816f-5031c3dd1ced",
+      "SymbolName": "Lib.point.draw.DrawPoints",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1449.6398,
+        "Y": 2044.0475
+      }
+    },
+    {
+      "ChildId": "fb476733-7712-440d-8622-38be9a0c0b2c",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "8b53edb4-f169-4f85-b309-0837dd4e115f",
+      "Position": {
+        "X": 1309.6398,
+        "Y": 2149.048
       }
     }
   ],
@@ -51,12 +160,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
-        "Y": 2052.5103
+        "X": 1050.0128,
+        "Y": 1822.1919
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 575.1201,
+        "Y": 456.78674
       }
     }
   ],

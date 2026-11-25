@@ -23,15 +23,6 @@
       }
     },
     {
-      "ChildId": "66a246fe-4b7e-406a-b1af-b636ba6aeb84",
-      "SymbolName": "Lib.image.generate.load.LoadImage",
-      "Position": {
-        "X": 1050.1765,
-        "Y": 1866.1946
-      },
-      "SnapshotGroupIndex": "1"
-    },
-    {
       "ChildId": "7237be3a-2622-408b-b430-349dc960c8aa",
       "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
@@ -45,14 +36,6 @@
       "Position": {
         "X": 1553.2708,
         "Y": 1786.6185
-      }
-    },
-    {
-      "ChildId": "8aa32bd9-e8b9-45c2-b8de-e3615fb15eac",
-      "SymbolName": "Lib.image.color.AdjustColors",
-      "Position": {
-        "X": 1050.1765,
-        "Y": 1901.1946
       },
       "SnapshotGroupIndex": "1"
     },
@@ -62,6 +45,15 @@
       "Position": {
         "X": 1553.2708,
         "Y": 1821.6185
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f9a9e497-d8cc-4d4a-a5cd-2a946c6a574b",
+      "SymbolName": "Skills._._ExampleImageContent",
+      "Position": {
+        "X": 1043.3145,
+        "Y": 1815.9015
       }
     }
   ],
@@ -99,17 +91,20 @@
     {
       "Id": "6dc5c7eb-c146-48c7-ae90-4665e09538a5",
       "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
-      "Description": "[ColorGrade] is a powerful operator for adjusting colors.\nIts parameters are closely related to tools used in professional color grading software."
+      "Description": "[ColorGrade] is a powerful operator for adjusting colors.\nIts parameters are closely related to tools used in professional color grading software.",
+      "Style": "InfoFor"
     },
     {
       "Id": "1097e447-0fd7-42d3-8127-f56e4d94047f",
       "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
-      "Description": "The core parameters are Gain, Gamma, and Lift.\nThe reference gradient goes from pure black to pure white."
+      "Description": "The core parameters are Gain, Gamma, and Lift.\nThe reference gradient goes from pure black to pure white.",
+      "Style": "InfoFor"
     },
     {
       "Id": "0155668b-b742-4da5-ba61-fbe0032592bc",
       "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
-      "Description": "If Gain, Gamma, and Lift are pure gray, they are neutral and have no effect.\nYou can click parameter names to reset them to their defaults."
+      "Description": "If Gain, Gamma, and Lift are pure gray, they are neutral and have no effect.\nYou can click parameter names to reset them to their defaults.",
+      "Style": "CallToAction"
     },
     {
       "Id": "6d5d1ffe-39ea-472b-b799-41552d451397",
@@ -130,8 +125,17 @@
     },
     {
       "Id": "c7a2a8bc-29a4-4ced-aa14-3cbaa2d29b68",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
+      "InputId": "be4dc864-a5f9-4356-91f9-58de8056a3a8",
       "Description": "Dragging the color thumbnail with the left mouse button adjusts the alpha channel.\nThis scales the strength of the effect.",
-      "Style": "Tip"
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "b8f99dbc-3f06-4716-a22d-7af3bb8f79cd",
+      "ChildId": "4d64ebb0-82ec-4745-bbcc-34ceaa342e83",
+      "InputId": "4dc44a7b-fe7c-4807-aaaa-53fb553de017",
+      "Description": "Tip: Click on the parameter name to reset to neutral.",
+      "Style": "InfoFor"
     },
     {
       "Id": "932062d4-9ce0-4a2e-a72e-b91475cd1249",

@@ -1,5 +1,9 @@
 # Plan: CPU Procedural Geometry (Curves, Meshes, Parts, Chunks)
 
+> **2026-11-20:** `MeshGeometry` and `CurveGeometry` are being unified into one `Geometry` type with points, vertices
+> and primitives (polygons, curves), using Houdini's terms. See `Plan_UnifiedGeometry.md`; it supersedes the data-type
+> and domain decisions here. Ops, fields, parts, chunks and fracture below remain the reference.
+
 Status (2026-10-31): **core shipped in v4.3** (data types, 28 ops in `Operators/Lib/Symbols/geometry/`), on both branches.
 Left: missing ops from Phases 2-5 (`SelectGeometry`, `CombineGeometry`, `SetGeometryAttribute`, curve ops), fracture
 defects, static `_lengthList`, font licence, docs, demo graph. Phases 6-7+ not started. Progress notes saying "uncommitted" are out of date.
@@ -25,7 +29,9 @@ existing codebase. This plan records the TiXL-adapted conclusions, not the raw d
 
 Following `Plan_GltfAnimation.md`'s "no new connection types" approach:
 
-- **Slots / spaces / per-part instancing = `Point[]`** (`StructuredList<Point>`).
+- **Superseded 2026-11-20, see [Geometry points are primary](#geometry-points-are-primary-cpoints-are-the-gpu-bridge):
+  placements are geometry points, not `Point[]`.** Original decision, kept for context:
+  **Slots / spaces / per-part instancing = `Point[]`** (`StructuredList<Point>`).
   Position/Orientation/Scale carry the placement (for spaces, Scale = box extents);
   `F1`/`F2` carry stable id/seed for deterministic randomness. No `Slot`, `SlotSet`,
   or `SpaceSet` types. Every existing point op (scatter, grid, noise, repeat) becomes
@@ -79,6 +85,41 @@ they are the last-mile interchange with the existing GPU point ecosystem, the wa
 - Spaces/slots keep only id/seed in `F1`/`F2` (all that split/repeat/random need —
   and what keeps existing point ops usable on spaces). Richer per-space data joins
   back via a source-point-index part attribute stamped by `PlaceGeometryAtPoints`.
+
+### Geometry points are primary, CPoints are the GPU bridge
+
+> **Reframed 2026-11-20** in `Plan_UnifiedGeometry.md`, "Points: two worlds and a bridge": geometry points are
+> the Point domain of any `Geometry`, not a type of their own, and use the `Point` field names as attribute names.
+
+Decided by the maintainer 2026-11-20. CPU point lists (`StructuredList<Point>`, "CPoints") were an early step; today
+about 90% of point work starts on the GPU. Inside geometry graphs, CPoints feel foreign: their fixed fields can't
+carry named attributes, and every geometry op that takes them needs its own conversion.
+
+- **Points on the CPU are geometry points:** the Point domain of a `MeshGeometry` without faces, with attributes. A
+  marker list from JSON is points with `Lat`, `Long` and `Name` attributes.
+- **The `StructuredList<Point>` type stays** as the readback bridge from the GPU, for ops that need positions on the
+  CPU: locators, light and camera positions, skinning (`[ReadPointsFromGpu]`, `[PointToMatrix]`, `[CPointToCamera]`,
+  `[PoseFromPoints]`, `[SkeletonFromPoints]`, `[ConeGizmo]`, `_GetSceneDefinitionPoints`).
+- **The CPoint generators are retired** (`[RadialCPoints]`, `[LineCPoints]`, `[RepeatAtCPoints]`,
+  `[TransformCPoints]`, `[TransformCPoint]`, `[CommonPointSets]`, `[SampleSplinePoint]`, `[LoadObjAsPoints]`, ...)
+  and replaced by geometry ops. Many point sets are a curve's samples: a circle of points is `CircleCurves ->
+  ResampleCurves`, so fewer new generators are needed than it seems. `[LoadSvg]` gives way to `SvgToCurves`.
+- **Geometry ops take and emit geometry points**, never CPoints: `ScatterPointsInVolume` (output),
+  `PlaceGeometryAtPoints`, `VoronoiFracture` (seeds), `DistanceToPointsField`, `CustomScalarField` (inputs).
+- **Placement attributes** on the Point domain, as named constants in `GeometryAttributeNames`: `Orientation` (vec4
+  quaternion), `Scale` (vec3), `Color` (vec4), `Id` and `Seed` (int). Spaces (Phase 6) are points with `Scale` as the
+  box extents.
+- **Upload is one explicit op**, `GeometryToPointBuffer`: points straight into a GPU point buffer, with the attribute
+  mapping (`Color`, `F1`, `F2`) as parameters, without a `StructuredList` in between. `PointsToGeometry` goes the other
+  way, turning a read-back list into points with its fields as attributes.
+- **String attributes** are needed for names (`GeometryAttribute<T>` is `unmanaged` only). Add a string attribute
+  that is never packed for the GPU, sharing the `StringColumn` planned in `Plan_StructuredData.md`.
+- **Migration** goes through `Plan_OperatorVersioning.md`: changing an input from `StructuredList` to `MeshGeometry`
+  breaks connections, so the affected ops get new versions that supersede the old ones, and the CPoint generators are
+  tagged obsolete once their replacements exist.
+
+Open: names for geometry point generators (the GPU ops own `RadialPoints`, `GridPoints`, ...); whether curve ops
+accept geometry points directly or go through a `CurvesToGeometryPoints` op that keeps the anchor attributes.
 
 Two contracts every op must honor:
 

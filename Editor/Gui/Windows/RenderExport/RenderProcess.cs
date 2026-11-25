@@ -152,6 +152,7 @@ internal static class RenderProcess
         if (!RenderPaths.ValidateOrCreateTargetFolder(targetFilePath))
             return false;
 
+        RenderTiming.ApplyTimeRange(settings);
         TryGetRenderResolution(settings, out var requestedResolution);
 
         var newSession = new ExportSession
@@ -296,6 +297,8 @@ internal static class RenderProcess
     /// </summary>
     public static void Update()
     {
+        SelectLoopRangeWhenTimelineLoopTurnsOn();
+
         if (OutputWindow.TryGetPrimaryOutputWindow(out OutputWindow))
         {
             MainOutputTexture = OutputWindow.GetCurrentTexture();
@@ -535,6 +538,22 @@ internal static class RenderProcess
         return audioFrame;
     }
 
+    /** Runs every frame, not only while the render window is open, so the toolbar and shortcut also pick up the loop. */
+    private static void SelectLoopRangeWhenTimelineLoopTurnsOn()
+    {
+        var isLoopUsable = RenderTiming.IsTimelineLoopUsable();
+        var turnedOn = isLoopUsable && !_wasTimelineLoopUsable;
+        _wasTimelineLoopUsable = isLoopUsable;
+        if (!turnedOn || IsExporting)
+            return;
+
+        var settings = RenderSettings.Current;
+        if (ReferenceEquals(settings, RenderSettings.Defaults) || settings.TimeRange == RenderSettings.TimeRanges.Continuous)
+            return;
+
+        settings.TimeRange = RenderSettings.TimeRanges.Loop;
+    }
+
     private static void HandleRenderShortCuts()
     {
         if (MainOutputTexture == null)
@@ -762,6 +781,7 @@ internal static class RenderProcess
     }
 
     private static ExportSession? _activeExportSession;
+    private static bool _wasTimelineLoopUsable;
 
     // The output texture needs one frame to settle on each new playback time, so the first rendered frame is a
     // warmup that isn't written. The frame-count math accounts for it.

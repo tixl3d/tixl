@@ -1,0 +1,189 @@
+{
+  "FormatVersion": 3,
+  "Id": "39658ad0-96cf-49c3-9b38-b8c1c32f2a6b"/*TrackMarkers*/,
+  "Description": "Tracks hand-placed image features through a video and records one point per marker and frame.\n\nPlace SeedPoints on distinctive spots (knots, holes, corners) of the image on SeedFrame. Positions are in video space: centered, y up, y from -1 to 1 over the image height and x from -aspect to aspect. A [Layer2d] with Scale Mode FitHeight and Scale 1 shows the video in that same space. Connect FrameIndex from [PlayVideo]. Tracking starts once the video reaches SeedFrame and then follows each feature from frame to frame with pyramidal Lucas-Kanade on a small patch around it.\n\nTrackBuffer holds MarkerCount points per frame for FrameCount frames, one frame after another. It doubles as a cache: frames that were tracked already are read back when scrubbing, and scrubbing backward tracks backward. In each point F1 is the confidence (the correlation with the patch from SeedFrame) and F2 the marker index. A marker whose confidence drops below MinConfidence is lost and written as a separator. Points holds the current frame.\n\nSeedQuality rates each seed in F1 and colors it from red to green. Low values mark flat areas and straight edges, which can only be followed across the edge but not along it. Seeds whose patch leaves the image are invalid.\n\nA marker is also lost when tracking it back to the previous frame misses its start by more than MaxRoundTripError. Lost points keep their last searched position and confidence for diagnosis.\n\nMoving a seed re-seeds only that marker the next time the video is on SeedFrame. Changing PatchSize, FirstFrame, FrameCount, SeedFrame or the number of seeds restarts the track.\n\nWith SeedMode Automatic, no seeds are needed: markers start on detected corners spread over the image on SeedFrame, and every marker that gets lost or leaves the image is replaced by a new one on the next newly tracked frame. Each marker has a unique id in F2, so a reused slot never joins two markers. SeedQuality is not written in this mode.\n\nAKA: motion tracking, match move, feature tracking, KLT\n\nTips:\n- Prefer corners and spots over edges, and check SeedQuality before tracking.\n- Keep seeds away from the image border and from objects moving in front of the background.\n- To check the result, draw Points with [DrawPoints] in the same transform as the video layer.\n\nSee also: [SampleTrack], [PlayVideo]",
+  "InputUis": [
+    {
+      "InputId": "0b2c74e1-aa56-454e-95a0-6ac3eeea7e14"/*IsEnabled*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 1000.0
+      },
+      "Description": "Pauses tracking and keeps the recorded track."
+    },
+    {
+      "InputId": "2f715dd9-5cdb-41f4-81ce-f9b53de2639f"/*Reset*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 900.0
+      },
+      "GroupTitle": "Control",
+      "Description": "Clears the track. It starts again when the video reaches SeedFrame."
+    },
+    {
+      "InputId": "47a01aa0-2b05-4c08-9683-8ffe1b6b3127"/*SearchRadius*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 700.0
+      },
+      "Description": "How far in pixels a feature may move between two frames. Larger values search more pyramid levels.",
+      "Min": 4.0,
+      "Max": 200.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "48bd87e4-8e48-4971-a0f5-78f59fe98254"/*FirstFrame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 400.0
+      },
+      "Description": "First frame of the tracked range.",
+      "Min": 0,
+      "Max": 1000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "4e34e1a4-90dd-4581-8964-dc1c70627a64"/*FrameCount*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 500.0
+      },
+      "Description": "Number of frames in TrackBuffer. Frames outside the range are not tracked.",
+      "Min": 1,
+      "Max": 10000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "6e618b85-7ffc-4d83-9410-5ebd4b01f0f2"/*PatchSize*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 600.0
+      },
+      "GroupTitle": "Tracking",
+      "Description": "Side length in pixels of the patch followed around each marker, rounded to an odd number. Larger patches are more stable, smaller ones follow fine detail.",
+      "Min": 7,
+      "Max": 31,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "6ed43e2d-e061-4e6b-aafd-090e800f49ee"/*SeedFrame*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 300.0
+      },
+      "GroupTitle": "Range",
+      "Description": "The frame on which SeedPoints were placed. Tracking starts there.",
+      "Min": 0,
+      "Max": 1000,
+      "ClampMin": true
+    },
+    {
+      "InputId": "7638ba90-9f7b-414e-bc69-33d9b22e1658"/*FrameIndex*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 100.0
+      },
+      "Description": "Source frame number of Image, e.g. the FrameIndex output of [PlayVideo]. Tracking advances only when it changes."
+    },
+    {
+      "InputId": "91f1ac00-8f97-458e-9e18-affd80d201c7"/*PoolSize*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 870.0
+      },
+      "Description": "Number of markers kept alive in Automatic mode.",
+      "Min": 4,
+      "Max": 128,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a563515e-aee8-4f4b-b564-70d31da045b3"/*MaxRoundTripError*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 850.0
+      },
+      "Description": "How far in pixels tracking a marker back to the previous frame may miss its start before it counts as lost. Catches markers that get covered or slip along repeated texture. 0 turns the check off.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b888df98-6cf6-4152-a8bc-9f12c43d5c9c"/*MinConfidence*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 800.0
+      },
+      "Description": "Correlation with the seed patch below which a marker counts as lost.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "ba9ff29c-5a39-44cb-9948-43c72c45b753"/*SeedMode*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 860.0
+      },
+      "GroupTitle": "Seeding",
+      "Description": "Manual tracks the markers in SeedPoints. Automatic starts markers on detected corners and replaces every marker that gets lost or leaves the image, for footage where the view keeps changing."
+    },
+    {
+      "InputId": "d2a48b9a-5f1f-47ef-b979-e86570fedfc7"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      },
+      "Description": "The video frame to track in, e.g. from [PlayVideo]."
+    },
+    {
+      "InputId": "e619480e-b793-4dee-9168-cc4cb8cb6621"/*SeedPoints*/,
+      "Position": {
+        "X": -300.0,
+        "Y": 200.0
+      },
+      "Description": "One point per marker at its position on SeedFrame, in video space."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8562f734-17e1-400a-99a4-7a474bb98758"/*Points*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "15feac5c-dcfc-4d29-85ef-31d2017658e7"/*TrackBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "e98c4ce0-c6df-42b4-9009-431710e3e1aa"/*SeedQuality*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "2f2231d1-12c3-4a07-84d6-ad205f897087"/*MarkerCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "9916fcc6-4ab9-4e75-b1b9-d2702c1b8d71"/*TrackedFrameCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

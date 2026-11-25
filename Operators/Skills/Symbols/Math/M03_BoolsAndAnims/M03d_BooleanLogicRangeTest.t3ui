@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "72376119-cd3b-4a90-ae4c-377aa8383367"/*M03d_BooleanLogicRangeTest*/,
   "Description": "Boolean Logic: Range Test",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -186,7 +186,7 @@ internal static partial class Program
                 AudioEngine.UseSoundtrackClip(handle, playback.TimeInSecs);
             }
 
-            AudioEngine.CompleteFrame(playback, Playback.LastFrameDuration);
+            AudioEngine.CompleteFrame(playback, Playback.LastPlaybackStepSec);
 
             DirtyFlag.IncrementGlobalTicks();
             DirtyFlag.GlobalInvalidationTick++;

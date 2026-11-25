@@ -87,7 +87,8 @@
       "Position": {
         "X": -145.2865,
         "Y": 2057.3096
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "9b4cc2f7-97f0-4b70-9773-d33ab4b893d1"/*OffsetMode*/,

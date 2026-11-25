@@ -27,7 +27,6 @@ cbuffer IntParams : register(b1)
     int TargetHeight;
 };
 
-#define mod(x, y) ((x) - (y) * floor((x) / (y)))
 
 sampler texSampler : register(s0);
 Texture2D<float4> InputTexture : register(t0);

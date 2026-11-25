@@ -126,10 +126,9 @@ internal sealed class SoundtrackClipStream
 
         var clip = ResourceHandle.Clip;
 
-        // Graph hand-off: while the clip's AudioReference is wired into a bus, the graph owns its routing and
-        // level. Checking the real route every frame instead of a one-shot transition avoids racing the bus,
-        // whose release can run later in the same frame.
-        if (!clip.IsRoutedToGraph && !_engine.GetRouteTarget(_source).IsValid)
+        // Graph hand-off: while a bus or an editor preview plays the clip, the graph owns its routing and level.
+        // Once none does, reclaim it even from a still-valid target: a stopped preview leaves it in its paused bus.
+        if (!clip.IsRoutedToGraph && _engine.GetRouteTarget(_source) != AudioMixerManager.SoundtrackBus)
             _engine.Route(_source, AudioMixerManager.SoundtrackBus);
 
         // Elapsed seconds since the clip's TimeRange.Start on the timeline.

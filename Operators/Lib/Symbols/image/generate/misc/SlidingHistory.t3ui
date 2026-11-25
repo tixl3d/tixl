@@ -52,7 +52,8 @@
         "Y": 1024.1395
       },
       "Description": "Direction in which the history moves.",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

@@ -1,4 +1,5 @@
 #nullable enable
+using System.IO;
 using System.Threading.Tasks;
 using ImGuiNET;
 using T3.Core.Compilation;
@@ -433,6 +434,11 @@ internal static class AppMenuBar
             if (ProjectView.Focused?.GraphView is MagGraphView { Context: not null } magGraphView)
                 GraphEditMenu.Draw(magGraphView.Context);
 
+            // The clip area only reflects the focused composition while the timeline is drawn.
+            var isTimelineVisible = UserSettings.Config.ShowTimeline || WindowManager.TimelineWindow.IsDetached;
+            if (isTimelineVisible && ProjectView.Focused is { CompositionInstance: { } composition } focusedView)
+                focusedView.TimeLineCanvas.ClipArea.OpClips.DrawEditMenuItems(composition);
+
             ImGui.EndMenu();
         }
 
@@ -559,6 +565,7 @@ internal static class AppMenuBar
 
             CustomComponents.SeparatorLine();
 
+            DrawThirdPartyLicensesItem();
             _licenseLink.DrawMenuItem();
 
             if (MenuItem("About TiXL"))
@@ -635,12 +642,30 @@ internal static class AppMenuBar
 
             WindowManager.UtilitiesWindow.DrawMenuItemToggle();
             WindowManager.GuidedFeatureTestsWindow.DrawMenuItemToggle();
+            WindowManager.BenchmarkWindow.DrawMenuItemToggle();
 
             ImGui.EndMenu();
         }
     }
 
     private static ProjectView? _projectViewToClose;
+
+    /// <summary>
+    /// Opens the notices file the release scripts write next to the editor. Development builds have none and
+    /// get the list the notices are made from instead.
+    /// </summary>
+    private static void DrawThirdPartyLicensesItem()
+    {
+        if (MenuItem("Third-Party Licenses"))
+        {
+            var noticesPath = Path.Combine(AppContext.BaseDirectory, "THIRD-PARTY-NOTICES.txt");
+            CoreUi.Instance.OpenWithDefaultApplication(File.Exists(noticesPath) ? noticesPath : ThirdPartyListUrl);
+        }
+
+        CustomComponents.TooltipForLastItem("Licenses of the components TiXL includes");
+    }
+
+    private const string ThirdPartyListUrl = "https://github.com/tixl3d/tixl/blob/HEAD/Dependencies/third-party.json";
 
     private sealed class HelpLink(string title, string url, string toolTip = "")
     {

@@ -1,8 +1,11 @@
 #nullable enable
 
+using ImGuiNET;
 using T3.Core.Stats;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 
 namespace T3.Editor.Gui.Windows.Analyze;
 
@@ -24,6 +27,11 @@ internal sealed class PerformanceWindow : Window
     {
         DrawPresentationSettings();
         T3Metrics.DrawDetailedView();
+
+        if (ImGui.Button("Benchmark..."))
+            WindowManager.ToggleInstanceVisibility<Benchmark.BenchmarkWindow>();
+
+        CustomComponents.TooltipForLastItem("Measure how this machine handles CPU, compute and fill-rate load.");
     }
 
     /// <summary>The vsync and frame-rate settings, shared with the settings window.</summary>
@@ -44,6 +52,17 @@ internal sealed class PerformanceWindow : Window
                                           Rates the display can't divide into round to the nearest one it can.
                                           Needs vsync; the pacing display is the first bound output, otherwise the editor window.
                                           """);
+        changed |= FormInputs.AddCheckBox("Lock Animation Step",
+                                          ref UserSettings.Config.UseLockedFrameDuration,
+                                          """
+                                          Damping, springs and simulations advance by the locked frame duration (one refresh, or
+                                          one frame of the Frame Rate setting) even when a frame was dropped. Particle paths stay
+                                          even, and a dropped frame makes them lag for that frame instead of catching up.
+                                          Off, they advance by the time each frame really stayed on screen, which keeps their
+                                          speed through drops but makes them jump after one. Playback time and audio always
+                                          keep real time. On by default.
+                                          """,
+                                          UserSettings.Defaults.UseLockedFrameDuration);
         changed |= FormInputs.AddDropdown(ref UserSettings.Config.FrameLatency,
                                           FrameLatencies,
                                           "Frame Latency",
@@ -55,6 +74,10 @@ internal sealed class PerformanceWindow : Window
                                           Smooth keeps one more frame in flight, like the Vulkan backend: one refresh more delay,
                                           but a late frame no longer costs a whole refresh.
                                           """);
+
+        FormInputs.AddVerticalSpace();
+        CustomComponents.HelpText("Frames dropping although the scene renders fast enough? In a window, the desktop compositor shares "
+                                  + "the GPU with TiXL and can miss refreshes with heavy scenes. A fullscreen output avoids this.");
         return changed;
     }
 

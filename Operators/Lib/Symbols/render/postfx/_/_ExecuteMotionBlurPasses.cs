@@ -1,8 +1,6 @@
 #nullable enable
 using System.Numerics;
-using T3.Core.Animation;
 using T3.Core.Rendering;
-using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Graphics.Compat;
 
@@ -63,7 +61,7 @@ internal sealed class _ExecuteMotionBlurPasses : Instance<_ExecuteMotionBlurPass
                 return;
             }
 
-            _params.ShutterScale = GetShutterScale(shutter);
+            _params.ShutterScale = shutter;
             _params.MaxBlur = maxBlur;
             _params.SampleCount = sampleCount;
             _params.TileSize = tileSize;
@@ -108,21 +106,6 @@ internal sealed class _ExecuteMotionBlurPasses : Instance<_ExecuteMotionBlurPass
             Log.Warning("Motion blur failed: " + e.Message, this);
             Output.Value = image;
         }
-    }
-
-    /// <summary>
-    /// Velocity is the displacement since the previous frame, so it grows and shrinks with each frame's duration.
-    /// Dividing by the duration the animation actually advanced gives the speed, which times the shutter time
-    /// gives a blur that keeps its length while frame times vary.
-    /// </summary>
-    private static float GetShutterScale(float shutter)
-    {
-        var frameDuration = Playback.LastFrameDuration;
-        var framePeriod = Playback.FixedFrameDurationSec ?? FrameTiming.FramePeriodSec;
-        if (frameDuration < 1e-5 || framePeriod < 1e-5)
-            return shutter;
-
-        return (float)(shutter * framePeriod / frameDuration);
     }
 
     private static void RunPass(DeviceContext deviceContext, Target target, PixelShader pixelShader,

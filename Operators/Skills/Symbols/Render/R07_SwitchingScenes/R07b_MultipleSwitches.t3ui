@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "2d7079c8-9811-4336-8dc8-840a35d37e09"/*R07b_MultipleSwitches*/,
   "Description": "Multiple Switches",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

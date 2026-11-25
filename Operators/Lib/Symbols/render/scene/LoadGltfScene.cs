@@ -5,7 +5,7 @@ using SharpGLTF.Schema2;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Scene = SharpGLTF.Schema2.Scene;
 
 namespace Lib.render.scene;
@@ -34,11 +34,12 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
     public LoadGltfScene()
     {
-        _resource = new Resource<SceneSetup>(Path, OnFileChanged);
+        _resource = new Resource<SceneSetup>(Path, OnFileChanged, allowDisposal: false);
         _resource.AddDependentSlots(ResultSetup, Mesh, Material, SkinWeights, SkeletonPoints);
 
         ResultSetup.UpdateAction += Update;
         Mesh.UpdateAction += Update;
+        Material.UpdateAction += Update;
         SkinWeights.UpdateAction += Update;
         SkeletonPoints.UpdateAction += Update;
     }
@@ -48,17 +49,12 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                [NotNullWhen(true)]out SceneSetup? newValue, 
                                [NotNullWhen(false)]out string? failureReason)
     {
-        LoadFile(file.AbsolutePath, 0, true);
-        // if (BmFontDescription.TryInitializeFromFile(file.AbsolutePath, out newValue))
-        // {
+        // The resource only tracks the file. Loading happens in Update, so a reload applies the
+        // current mesh child selection and material offsets.
+        _fileChanged = true;
         failureReason = null;
         newValue = ResultSetup.Value!;
-        //     return true;
-        // }
         return true;
-            
-        // failureReason = "Failed to load font from file";
-        // return false;
     }
     
     private void Update(EvaluationContext context)
@@ -79,10 +75,15 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             Setup.SetTypedInputValue(sceneSetup);
         }
 
-        var filePath = Path.GetValue(context);
+        // Must run before anything reads Path, or the resource misses the address change and watches the wrong file
+        _resource.GetValue(context);
+        var filePath = Path.Value;
 
         _updateTriggered = TriggerUpdate.GetValue(context);
         _updateTriggered |= MathUtils.WasChanged(CombineBuffer.GetValue(context), ref _combineBuffer);
+        _updateTriggered |= MathUtils.WasChanged(meshChildIndex < 0, ref _combineChildMeshes);
+        _updateTriggered |= _fileChanged;
+        _fileChanged = false;
         
         TriggerUpdate.SetTypedInputValue(false);
         
@@ -93,6 +94,10 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         // }
 
         LoadFile(filePath, meshChildIndex, materialNeedsUpdate);
+
+        if (_combineBuffer && _fileHasSkins)
+            _lastErrorMessage = "Combine Buffer doesn't support skinned meshes, so skeletons and animations are skipped. "
+                                + "Turn it off and use MeshChildIndex -1 to merge the children instead.";
     }
 
     private void LoadFile(string? filePath, int meshChildIndex, bool materialNeedsUpdate)
@@ -109,7 +114,15 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             ResultSetup.Value = newSetup!;
         }
 
-        if (ResultSetup?.Value?.Dispatches != null && ResultSetup.Value.Dispatches.Count > 0)
+        if (meshChildIndex < 0 && _combinedMesh != null)
+        {
+            Mesh.Value = _combinedMesh;
+            Material.Value = _combinedMaterial!;
+            SkinWeights.Value = _combinedSkinWeights!;
+            var combinedSkeletonIndex = Math.Max(_combinedSkeletonIndex, 0);
+            SkeletonPoints.Value = (combinedSkeletonIndex < _skeletonPointBuffers.Count ? _skeletonPointBuffers[combinedSkeletonIndex] : null)!;
+        }
+        else if (ResultSetup?.Value?.Dispatches != null && ResultSetup.Value.Dispatches.Count > 0)
         {
             var dispatchCount = ResultSetup.Value.Dispatches.Count;
             var index = meshChildIndex.Mod(dispatchCount);
@@ -123,16 +136,21 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             SkeletonPoints.Value = (skeletonIndex < _skeletonPointBuffers.Count ? _skeletonPointBuffers[skeletonIndex] : null)!;
         }
 
-        if (materialNeedsUpdate && ResultSetup?.Value?.Dispatches != null && ResultSetup.Value.Dispatches.Count > 0)
+        if (materialNeedsUpdate)
         {
-            foreach (var dispatch in ResultSetup.Value.Dispatches)
+            // Materials are shared between dispatches, so update each one once. The authored factor is preserved in
+            // SceneMaterial so that this path and the create path produce the same parameter values.
+            foreach (var sceneMaterial in _sceneMaterialsByName.Values)
             {
-                if (dispatch.Material == null)
+                var pbrMaterial = sceneMaterial.PbrMaterial;
+                if (pbrMaterial == null)
                     continue;
 
-                dispatch.Material.Parameters.Roughness = _offsetRoughness;
-                dispatch.Material.Parameters.Metal = _offsetMetallic;
-                dispatch.Material.UpdateParameterBuffer();
+                sceneMaterial.PbrParameters.Roughness = sceneMaterial.AuthoredRoughnessOffset + _offsetRoughness;
+                sceneMaterial.PbrParameters.Metal = sceneMaterial.AuthoredMetalOffset + _offsetMetallic;
+
+                pbrMaterial.Parameters = sceneMaterial.PbrParameters;
+                pbrMaterial.UpdateParameterBuffer();
             }
         }
     }
@@ -157,6 +175,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         }
 
         _skeletonPointBuffers.Clear();
+        DisposeCombinedMesh();
 
         Log.Debug("Destroying LoadGltfScene");
     }
@@ -181,6 +200,8 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         _skinWeightsForPrimitives.Clear();
         _skeletonIndicesForSkins.Clear();
         _jointIndicesForNodes.Clear();
+        _primitiveUsages.Clear();
+        DisposeCombinedMesh();
 
         foreach (var pointBuffer in _skeletonPointBuffers)
         {
@@ -207,6 +228,11 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             sceneSetup.RootNodes.Add(rootNode);
             sceneSetup.GenerateSceneDrawDispatches();
             ExtractAnimationClips(model, sceneSetup);
+
+            if (_combineChildMeshes && !_combineBuffer)
+                BuildCombinedMesh();
+
+            _fileHasSkins = model.LogicalSkins.Count > 0;
         }
         catch (Exception e)
         {
@@ -526,6 +552,8 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                     Log.Debug($" mesh:{child.Name} {child.Mesh?.Name}  {meshIndex}");
                     
                     var materialDef = GetOrCreateMaterialDefinition(meshPrimitive.Material);
+                    _primitiveUsages.Add(new PrimitiveUsage(meshPrimitive, child.WorldMatrix, materialDef,
+                                                            skinWeights != null ? skeletonIndex : -1));
 
                     //Log.Debug("Material: " + materialDef);
 
@@ -681,18 +709,26 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         occlusionTexture?.Dispose();
         occlusionSrv?.Dispose();
 
+        // The shader adds these parameters on top of the roughness/metallic texture channels (see mesh-Draw.hlsl).
+        // glTF stores the roughness/metallic factors as multipliers, so remap them into that additive space and keep
+        // the authored part around so that OffsetRoughness/OffsetMetallic can be applied on top without discarding it.
+        var authoredRoughnessOffset = roughness - 1f; // glTF standard uses roughness factor?!
+        var authoredMetalOffset = metallic - 1f;      // glTF standard uses metallic factor?!
+
         var newMaterialDef = new SceneSetup.SceneMaterial
                                  {
                                      Name = name,
                                      // ColorTexture = baseColorTexture,
                                      // NormalTexture = normalTexture,
+                                     AuthoredRoughnessOffset = authoredRoughnessOffset,
+                                     AuthoredMetalOffset = authoredMetalOffset,
                                      PbrParameters = new PbrMaterial.PbrParameters
                                                          {
                                                              BaseColor = baseColor,
                                                              EmissiveColor = emissiveColor,
-                                                             Roughness = roughness - 1 + _offsetRoughness, // glTF standard uses roughness factor?!
+                                                             Roughness = authoredRoughnessOffset + _offsetRoughness,
                                                              Specular = 1,
-                                                             Metal = metallic -1 + _offsetMetallic, // glTF standard uses metallic factor?!
+                                                             Metal = authoredMetalOffset + _offsetMetallic,
                                                          }
                                  };
 
@@ -716,22 +752,26 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     /// <summary>
     /// Setup shaders and textures required for combining roughness, metallic and occlusion textures.
     /// </summary>
-    private static void PrepareCombineShaderResources(Instance instance, bool forceUpdate = false)
+    private static void PrepareCombineShaderResources(bool forceUpdate = false)
     {
-        if (_combineChannelsComputeShaderResource == null)
+        // This resource is shared by all instances, so it must not be owned by one of them: an owned resource is
+        // disposed with its owner (closing a project, recompiling a symbol), which would leave this static field
+        // pointing at a dead resource and make every subsequent model load fail with "Cannot access a disposed object".
+        if (_combineChannelsComputeShaderResource is not { IsDisposed: false })
         {
             const string sourcePath = "Lib:shaders/cs/CombineGltfChannels-cs.hlsl";
             const string entryPoint = "main";
 
-            _combineChannelsComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, instance, () => entryPoint, OnShaderChanged);
+            _combineChannelsComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, null, () => entryPoint, OnShaderChanged);
 
             OnShaderChanged(_combineChannelsComputeShaderResource.Value);
+            return;
         }
         
-        if (!forceUpdate && _combineChannelsComputeShaderResource?.Value != null)
+        if (!forceUpdate && _combineChannelsComputeShaderResource.Value != null)
             return;
         
-        OnShaderChanged(_combineChannelsComputeShaderResource!.Value);
+        OnShaderChanged(_combineChannelsComputeShaderResource.Value);
         return;
 
         static void OnShaderChanged(ComputeShader? e)
@@ -777,7 +817,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             return;
         }
 
-        PrepareCombineShaderResources(this, _updateTriggered);
+        PrepareCombineShaderResources(_updateTriggered);
 
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
@@ -804,15 +844,18 @@ public class LoadGltfScene : Instance<LoadGltfScene>
 
         // TODO: create and test merge compute shader
 
+        // Set Shader
+        var combineShader = _combineChannelsComputeShaderResource?.Value;
+        if (combineShader == null)
+        {
+            Log.Warning($"Failed to combine roughness/metallic/occlusion textures in {nameof(LoadGltfScene)}", this);
+            resultSrv = PbrMaterial.DefaultRoughnessMetallicOcclusionSrv;
+            return;
+        }
+
         // Keep previous setup
         deviceContext.PushState(StateGroups.ComputeShader);
-
-        // Set Shader
-        if (_combineChannelsComputeShaderResource != null)
-        {
-            var convertShader = _combineChannelsComputeShaderResource.Value;
-            csStage.Set(convertShader);
-        }
+        csStage.Set(combineShader);
 
         var srvs = new[] { metallicRoughnessSrv, occlusionSrv };
         csStage.SetShaderResources(0, srvs);
@@ -1320,6 +1363,25 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     private static bool TryCreateSkinWeightsBuffer(MeshPrimitive meshPrimitive, [NotNullWhen(true)] out BufferWithViews? weightsBuffer, out string message)
     {
         weightsBuffer = null;
+        if (!TryReadSkinWeights(meshPrimitive, out var weightData, out message))
+            return false;
+
+        weightsBuffer = CreateSkinWeightsBuffer(weightData);
+        return true;
+    }
+
+    private static BufferWithViews CreateSkinWeightsBuffer(SkinWeightDef[] weightData)
+    {
+        var weightsBuffer = new BufferWithViews();
+        ResourceManager.SetupStructuredBuffer(weightData, SkinWeightDef.Stride * weightData.Length, SkinWeightDef.Stride, ref weightsBuffer.Buffer);
+        ResourceManager.CreateStructuredBufferSrv(weightsBuffer.Buffer, ref weightsBuffer.Srv);
+        ResourceManager.CreateStructuredBufferUav(weightsBuffer.Buffer, UnorderedAccessViewBufferFlags.None, ref weightsBuffer.Uav);
+        return weightsBuffer;
+    }
+
+    private static bool TryReadSkinWeights(MeshPrimitive meshPrimitive, out SkinWeightDef[] weightData, out string message)
+    {
+        weightData = [];
 
         var vertexAccessors = meshPrimitive.VertexAccessors;
         if (!vertexAccessors.TryGetValue("JOINTS_0", out var jointsAccessor)
@@ -1340,7 +1402,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                 return false;
             }
 
-            var weightData = new SkinWeightDef[count];
+            weightData = new SkinWeightDef[count];
             for (var vertexIndex = 0; vertexIndex < count; vertexIndex++)
             {
                 var jointIndices = joints[vertexIndex];
@@ -1362,11 +1424,6 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                               };
             }
 
-            weightsBuffer = new BufferWithViews();
-            ResourceManager.SetupStructuredBuffer(weightData, SkinWeightDef.Stride * count, SkinWeightDef.Stride, ref weightsBuffer.Buffer);
-            ResourceManager.CreateStructuredBufferSrv(weightsBuffer.Buffer, ref weightsBuffer.Srv);
-            ResourceManager.CreateStructuredBufferUav(weightsBuffer.Buffer, UnorderedAccessViewBufferFlags.None, ref weightsBuffer.Uav);
-
             message = string.Empty;
             return true;
         }
@@ -1376,6 +1433,139 @@ public class LoadGltfScene : Instance<LoadGltfScene>
             return false;
         }
     }
+    #endregion
+
+
+    #region combined child meshes
+    /// <summary>
+    /// Merges all mesh primitives into one mesh for MeshChildIndex -1. glTF splits a mesh into one primitive per
+    /// material, so a single character is often several children. If the scene is skinned, only the primitives bound
+    /// to the first skeleton are merged; they stay in bind-pose space as the glTF spec requires. Unskinned scenes get
+    /// their node transforms baked in. The first primitive's material is used for the whole mesh.
+    /// </summary>
+    private void BuildCombinedMesh()
+    {
+        var skeletonIndex = -1;
+        foreach (var usage in _primitiveUsages)
+        {
+            if (usage.SkeletonIndex < 0)
+                continue;
+
+            skeletonIndex = usage.SkeletonIndex;
+            break;
+        }
+
+        var vertices = new List<PbrVertex>();
+        var faces = new List<Int3>();
+        var weights = skeletonIndex >= 0 ? new List<SkinWeightDef>() : null;
+        SceneSetup.SceneMaterial? material = null;
+        var skippedCount = 0;
+
+        foreach (var usage in _primitiveUsages)
+        {
+            if (usage.SkeletonIndex != skeletonIndex)
+            {
+                skippedCount++;
+                continue;
+            }
+
+            if (!GetMeshDataFromPrimitive(usage.Primitive, out var primitiveVertices, out var primitiveFaces, out var message))
+            {
+                Log.Warning($"Skipping primitive in combined mesh: {message}", this);
+                continue;
+            }
+
+            SkinWeightDef[] primitiveWeights = [];
+            if (weights != null && !TryReadSkinWeights(usage.Primitive, out primitiveWeights, out message))
+            {
+                Log.Warning($"Skipping primitive in combined mesh: {message}", this);
+                continue;
+            }
+
+            var vertexOffset = vertices.Count;
+
+            if (weights == null && !usage.WorldMatrix.IsIdentity)
+            {
+                var normalMatrix = Matrix4x4.Invert(usage.WorldMatrix, out var inverse)
+                                       ? Matrix4x4.Transpose(inverse)
+                                       : usage.WorldMatrix;
+                for (var index = 0; index < primitiveVertices.Length; index++)
+                {
+                    ref var v = ref primitiveVertices[index];
+                    v.Position = Vector3.Transform(v.Position, usage.WorldMatrix);
+                    v.Normal = Vector3.Normalize(Vector3.TransformNormal(v.Normal, normalMatrix));
+                    v.Tangent = Vector3.Normalize(Vector3.TransformNormal(v.Tangent, usage.WorldMatrix));
+                    v.Bitangent = Vector3.Normalize(Vector3.TransformNormal(v.Bitangent, usage.WorldMatrix));
+                }
+            }
+
+            vertices.AddRange(primitiveVertices);
+            foreach (var face in primitiveFaces)
+            {
+                faces.Add(new Int3(face.X + vertexOffset, face.Y + vertexOffset, face.Z + vertexOffset));
+            }
+
+            if (weights != null)
+            {
+                // Weights are indexed by vertex id, so pad if a primitive has fewer weights than vertices
+                for (var index = 0; index < primitiveVertices.Length; index++)
+                {
+                    weights.Add(index < primitiveWeights.Length
+                                    ? primitiveWeights[index]
+                                    : new SkinWeightDef { Weights = new Vector4(1, 0, 0, 0) });
+                }
+            }
+
+            material ??= usage.Material;
+        }
+
+        if (skippedCount > 0)
+            Log.Warning($"Combined mesh skips {skippedCount} primitive(s) not bound to skeleton {skeletonIndex}", this);
+
+        if (vertices.Count == 0 || faces.Count == 0)
+            return;
+
+        var meshBuffers = new MeshBuffers();
+        var faceArray = faces.ToArray();
+        var vertexArray = vertices.ToArray();
+        const int faceStride = 3 * 4;
+        ResourceManager.SetupStructuredBuffer(faceArray, faceStride * faceArray.Length, faceStride, ref meshBuffers.IndicesBuffer.Buffer);
+        ResourceManager.CreateStructuredBufferSrv(meshBuffers.IndicesBuffer.Buffer, ref meshBuffers.IndicesBuffer.Srv);
+        ResourceManager.CreateStructuredBufferUav(meshBuffers.IndicesBuffer.Buffer, UnorderedAccessViewBufferFlags.None,
+                                                  ref meshBuffers.IndicesBuffer.Uav);
+
+        ResourceManager.SetupStructuredBuffer(vertexArray, PbrVertex.Stride * vertexArray.Length, PbrVertex.Stride,
+                                              ref meshBuffers.VertexBuffer.Buffer);
+        ResourceManager.CreateStructuredBufferSrv(meshBuffers.VertexBuffer.Buffer, ref meshBuffers.VertexBuffer.Srv);
+        ResourceManager.CreateStructuredBufferUav(meshBuffers.VertexBuffer.Buffer, UnorderedAccessViewBufferFlags.None,
+                                                  ref meshBuffers.VertexBuffer.Uav);
+
+        _combinedMesh = meshBuffers;
+        _combinedMaterial = material?.PbrMaterial;
+        _combinedSkinWeights = weights != null ? CreateSkinWeightsBuffer(weights.ToArray()) : null;
+        _combinedSkeletonIndex = skeletonIndex;
+    }
+
+    private void DisposeCombinedMesh()
+    {
+        _combinedMesh?.Dispose();
+        _combinedSkinWeights?.Dispose();
+        _combinedMesh = null;
+        _combinedSkinWeights = null;
+        _combinedMaterial = null;
+        _combinedSkeletonIndex = -1;
+    }
+
+    private readonly record struct PrimitiveUsage(MeshPrimitive Primitive, Matrix4x4 WorldMatrix, SceneSetup.SceneMaterial? Material, int SkeletonIndex);
+
+    private readonly List<PrimitiveUsage> _primitiveUsages = new();
+    private MeshBuffers? _combinedMesh;
+    private BufferWithViews? _combinedSkinWeights;
+    private PbrMaterial? _combinedMaterial;
+    private int _combinedSkeletonIndex = -1;
+    private bool _combineChildMeshes;
+    private bool _fileChanged;
+    private bool _fileHasSkins;
     #endregion
 
     private readonly Dictionary<string, SceneSetup.SceneMaterial> _sceneMaterialsByName = new();

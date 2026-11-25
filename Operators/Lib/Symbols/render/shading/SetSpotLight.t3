@@ -1,0 +1,57 @@
+{
+  "FormatVersion": 3,
+  "Id": "0c17e5f9-266a-480f-a48b-9bf2f69eb383"/*SetSpotLight*/,
+  "Inputs": [
+    {
+      "Id": "1d5ad697-5590-4d06-a1e9-caa3356b641d"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "24eb2ff1-8a20-4178-ac1a-b43ad6001347"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "482d4b4e-403f-4f7d-beb1-36165acb620b"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 3.0,
+        "Z": 3.0
+      }
+    },
+    {
+      "Id": "84cb4172-56c2-4b91-86b0-951b3656be2a"/*Softness*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "91e532b4-3507-449c-a61f-01826b064611"/*Decay*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "a71b26df-b98a-42d5-bdf9-de1fba8798d2"/*Range*/,
+      "DefaultValue": 10.0
+    },
+    {
+      "Id": "aff99952-a008-45c9-9705-f5106b702313"/*Target*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "cf141c64-fd2f-405e-bee1-38d294999dc2"/*ConeAngle*/,
+      "DefaultValue": 45.0
+    },
+    {
+      "Id": "f4d0b3b9-359e-426c-b91a-28e6965f49f6"/*Intensity*/,
+      "DefaultValue": 10.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

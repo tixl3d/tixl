@@ -37,7 +37,7 @@ internal static class RemapUi
         internal readonly InputSlot<float> RangeOutMax = null!;
 
         [BindInput("23548048-E373-4FD6-9C83-1CF7398F952D")]
-        internal readonly InputSlot<Vector2> BiasAndGain = null!;
+        internal readonly InputSlot<Vector2> GainAndBias = null!;
 
         [BindOutput("de6e6f65-cb51-49f1-bb90-34ed1ec963c1")]
         internal readonly Slot<float> Result = null!;
@@ -103,14 +103,14 @@ internal static class RemapUi
 
             if (ImGui.IsItemActivated())
             {
-                _biasAndGainStart = data.BiasAndGain.TypedInputValue.Value;
+                _gainAndBiasStart = data.GainAndBias.TypedInputValue.Value;
             }
 
             if (dragDelta.Length() > 0.001)
             {
-                data.BiasAndGain.SetTypedInputValue(
-                                                    new Vector2((_biasAndGainStart.X + dragDelta.X / 400f).Clamp(0.001f, 0.99f),
-                                                                (_biasAndGainStart.Y - dragDelta.Y / 400f).Clamp(0.001f, 0.99f)));
+                data.GainAndBias.SetTypedInputValue(
+                                                    new Vector2((_gainAndBiasStart.X + dragDelta.X / 400f).Clamp(0.001f, 0.99f),
+                                                                (_gainAndBiasStart.Y - dragDelta.Y / 400f).Clamp(0.001f, 0.99f)));
             }
         }
 
@@ -118,7 +118,7 @@ internal static class RemapUi
         {
             const int steps = 35;
             var points = new Vector2[steps];
-            var biasAndGain = data.BiasAndGain.GetCurrentValue();
+            var gainAndBias = data.GainAndBias.GetCurrentValue();
             var p = new Vector2(MathUtils.Lerp(biasGraphRect.Min.X, biasGraphRect.Max.X, inFragment),
                                 MathUtils.Lerp(biasGraphRect.Max.Y, biasGraphRect.Min.Y, outFragment));
             drawList.AddCircleFilled(p,
@@ -129,7 +129,7 @@ internal static class RemapUi
             for (var i = 0; i < steps; i++)
             {
                 var t = (float)i / (steps - 1);
-                var f = t.ApplyGainAndBias(biasAndGain.X, biasAndGain.Y);
+                var f = t.ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
                 var x = MathUtils.Lerp(biasGraphRect.Min.X, biasGraphRect.Max.X, f);
                 var y = MathUtils.Lerp(biasGraphRect.Max.Y, biasGraphRect.Min.Y, f);
                 drawList.AddLine(new Vector2(biasGraphRect.Min.X, y), new
@@ -180,5 +180,5 @@ internal static class RemapUi
                | (isActive ? OpUi.CustomUiResult.IsActive : OpUi.CustomUiResult.None);
     }
 
-    private static Vector2 _biasAndGainStart = Vector2.One;
+    private static Vector2 _gainAndBiasStart = Vector2.One;
 }

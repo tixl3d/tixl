@@ -17,7 +17,7 @@ This can be useful to debug compute shader effects that rely on a spatial grid.
 | **GridStretch** (Vector3) | — |
 | **Offset** (Vector3) | — |
 | **Scatter** (Single) | — |
-| **BiasAndGain** (Vector2) | — |
+| **GainAndBias** (Vector2) | — |
 | **UseWAsWeight** (Boolean) | This is parameter has been deprecated and is only here for reference. |
 | **UseSelection** (Boolean) | This is parameter has been deprecated and is only here for reference. |
 

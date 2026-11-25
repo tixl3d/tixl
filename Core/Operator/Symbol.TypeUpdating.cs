@@ -51,20 +51,22 @@ public sealed partial class Symbol
             foreach (var info in inputs)
             {
                 var id = info.Attribute.Id;
+                var valueType = info.GenericArguments[0];
                 var alreadyExistingInput = removedInputDefinitions.FirstOrDefault(i => i.Id == id);
                 if (alreadyExistingInput != null)
+                    removedInputDefinitions.Remove(alreadyExistingInput);
+
+                // An input whose value type changed under the same id gets a fresh definition, so symbol children
+                // recreate their input values; its connections stay and are type-checked when instances connect.
+                if (alreadyExistingInput != null && alreadyExistingInput.DefaultValue.ValueType == valueType)
                 {
                     alreadyExistingInput.Name = info.Name;
                     alreadyExistingInput.IsMultiInput = info.IsMultiInput;
                     InputDefinitions.Add(alreadyExistingInput);
-                    removedInputDefinitions.Remove(alreadyExistingInput);
                 }
                 else
                 {
-                    var isMultiInput = info.IsMultiInput;
-                    var valueType = info.GenericArguments[0];
-                    
-                    if(TryCreateInputDefinition(id, info.Name, isMultiInput, valueType, InstanceType, out var inputDef))
+                    if(TryCreateInputDefinition(id, info.Name, info.IsMultiInput, valueType, InstanceType, out var inputDef))
                         InputDefinitions.Add(inputDef);
                 }
             }
@@ -80,9 +82,11 @@ public sealed partial class Symbol
                 if (alreadyExistingOutput != null)
                     removedOutputDefinitions.Remove(alreadyExistingOutput);
 
-                // A slot that changed kind under the same id (e.g. Slot -> TimeClipSlot) gets a fresh definition
-                // so symbol children recreate their output data; its connections stay.
-                if (alreadyExistingOutput != null && alreadyExistingOutput.OutputDataType == info.OutputDataType)
+                // A slot that changed kind (e.g. Slot -> TimeClipSlot) or value type under the same id gets a fresh
+                // definition so symbol children recreate their output data; its connections stay.
+                if (alreadyExistingOutput != null
+                    && alreadyExistingOutput.OutputDataType == info.OutputDataType
+                    && alreadyExistingOutput.ValueType == info.GenericArguments[0])
                 {
                     alreadyExistingOutput.Name = info.Name; // pick up renames in place, like inputs above
                     OutputDefinitions.Add(alreadyExistingOutput);

@@ -20,7 +20,8 @@
         "Y": 216.51556
       },
       "GroupTitle": "Advanced",
-      "Description": "Near and far clip planes of the shadow map camera."
+      "Description": "Near and far clip planes of the shadow map camera.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "6196074f-4770-4e81-812a-012fcaab207b"/*LightPosition*/,

@@ -51,6 +51,18 @@ On `[NdiInput]`, open the *SourceName* dropdown and pick that source.
 - After selecting it, the operator's output texture shows the stream and updates continuously.
 - The operator's status is empty (success); no "skipping frame" message stays on permanently at 30 fps or more.
 
+## Step: Receiving for a while
+
+**Action:**
+Keep `[NdiInput]` connected to a moving stream for a few minutes and watch the editor's memory usage in
+the task manager (or `top`). Then select the placeholder to disconnect, and reconnect to the same source
+a few times.
+
+**Expected:**
+- Memory usage stays flat while receiving; it does not grow by hundreds of megabytes per minute.
+- Disconnecting releases the memory the stream used.
+- Reconnecting repeatedly does not make memory climb; the stream shows again after each reconnect.
+
 ## Step: Changing the source resolution
 
 **Action:**

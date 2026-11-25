@@ -77,7 +77,7 @@ internal static partial class Program
         }
 
         // Update
-        AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration);
+        AudioEngine.CompleteFrame(_playback, Playback.LastPlaybackStepSec);
 
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.GlobalInvalidationTick++;

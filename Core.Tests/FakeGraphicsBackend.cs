@@ -82,6 +82,10 @@ internal sealed class FakeGraphicsBackend : IGraphicsBackend
 
     public void EndFrame(ICommandList commands) => FramesEnded++;
 
+    public void WaitForGpu()
+    {
+    }
+
     public MappedMemory MapForRead(GpuResource resource, int subresource) => default;
     public void Unmap(GpuResource resource, int subresource) { }
 

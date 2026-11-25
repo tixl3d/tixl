@@ -11,7 +11,8 @@
         "Y": 75.0
       },
       "GroupTitle": "Shader Variation",
-      "Description": "Axis around which the field is twisted."
+      "Description": "Axis around which the field is twisted.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "4935f569-8d23-495d-bb87-9a39e5b3981e"/*Amount*/,

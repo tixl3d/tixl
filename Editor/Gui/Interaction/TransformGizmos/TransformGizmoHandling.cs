@@ -4,9 +4,10 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
@@ -14,12 +15,12 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using Color = T3.Core.DataTypes.Vector.Color;
-using GraphicsMath = T3.Core.Utils.Geometry.GraphicsMath;
+using GraphicsMath = T3.Core.Utils.Math3d.GraphicsMath;
 using Plane = System.Numerics.Plane;
 using Quaternion = System.Numerics.Quaternion;
 using Vector2 = System.Numerics.Vector2;
 using Vector4 = System.Numerics.Vector4;
-using Ray = T3.Core.Utils.Geometry.Ray;
+using Ray = T3.Core.Utils.Math3d.Ray;
 
 // ReSharper disable RedundantNameQualifier
 
@@ -142,7 +143,8 @@ internal static class TransformGizmoHandling
         }
 
         _objectToWorld = context.ObjectToWorld;
-        _objectToClipSpace = context.ObjectToWorld * context.WorldToCamera * context.CameraToClipSpace;
+        // TXAA jitters the projection each frame, but the gizmo is drawn over the resolved, unjittered image.
+        _objectToClipSpace = context.ObjectToWorld * context.WorldToCamera * CameraJitter.GetUnjitteredCameraToClipSpace(context);
 
         PrepareCalculations(context);
 
@@ -175,7 +177,7 @@ internal static class TransformGizmoHandling
                 break;
 
             case TransformGizmoModes.Rotate:
-                if (_transformable.RotationInput != null)
+                if (_transformable.RotationInput != null || _transformable.AimTargetInput != null)
                 {
                     HandleRotationGizmos(context);
                 }
@@ -714,6 +716,16 @@ internal static class TransformGizmoHandling
     #region rotate ----------------------------------------------------------
     private static bool HandleRotationGizmos(EvaluationContext context)
     {
+        if (_transformable?.AimTargetInput != null)
+        {
+            // The aim point is rotated around fixed axes, so there is no gimbal to follow.
+            var isHoveringAim = HandleRotationOnAxis(context, Vector3.UnitY, Color.Green, GizmoParts.RotationYAxis);
+            isHoveringAim |= HandleRotationOnAxis(context, Vector3.UnitX, Color.Red, GizmoParts.RotationXAxis);
+            isHoveringAim |= HandleRotationOnAxis(context, Vector3.UnitZ, Color.Blue, GizmoParts.RotationZAxis);
+            isHoveringAim |= HandleScreenRotation();
+            return isHoveringAim;
+        }
+
         if (_transformable?.RotationInput == null)
             return false;
 
@@ -929,17 +941,18 @@ internal static class TransformGizmoHandling
         Debug.Assert(_transformable != null);
 
         _draggedGizmoPart = mode;
+        var rotatedInput = GetRotatedInput(_transformable);
         _inputCommandInFlight = new ChangeInputValueCommand(
                                                                _instance.Parent.Symbol,
                                                                _instance.SymbolChildId,
-                                                               _transformable.RotationInput.Input,
-                                                               _transformable.RotationInput.Input.Value,
+                                                               rotatedInput.Input,
+                                                               rotatedInput.Input.Value,
                                                                _instance);
 
         _draggedTransformable = _transformable;
         _dragInteractionWindowId = ImGui.GetID("");
         _initialOrigin = _localToObject.Translation;
-        _initialRotation = TryGetVectorFromInput(_transformable.RotationInput);
+        _initialRotation = TryGetVectorFromInput(rotatedInput);
         _initialMousePos = _mousePosInScreen;
         _draggedRotationAxis = axis;
 
@@ -982,6 +995,15 @@ internal static class TransformGizmoHandling
         Vector3 newRotation = _initialRotation;
 
         var snap = ImGui.GetIO().KeyCtrl;
+
+        if (_transformable.AimTargetInput != null)
+        {
+            if (snap)
+                angleDeg = MathF.Round(angleDeg / 15) * 15;
+
+            SetRotatedAimTarget(axis, angleDeg);
+            return;
+        }
 
         switch (_draggedGizmoPart)
         {
@@ -1040,12 +1062,37 @@ internal static class TransformGizmoHandling
         float det = initialDir.X * currentDir.Y - initialDir.Y * currentDir.X;
         float angleDelta = MathF.Atan2(det, dot) * (180f / MathF.PI);
 
+        if (_transformable.AimTargetInput != null)
+        {
+            // Screen-space angles grow clockwise, as does a rotation around an axis pointing away from the viewer.
+            var viewAxis = Vector3.Normalize(GetPickRayInObject(_originInScreen).Direction);
+            SetRotatedAimTarget(viewAxis, angleDelta);
+            return;
+        }
+
         // Apply to all axes equally for screen rotation, or choose one axis
         Vector3 newRotation = _initialRotation;
         newRotation.Z += angleDelta; // Apply to Z-axis for screen rotation
 
         TrySetVector3ToInput(_transformable.RotationInput, newRotation);
         _inputCommandInFlight.AssignNewValue(_transformable.RotationInput.Input.Value);
+    }
+
+    /** The aim target replaces the rotation when an operator has one. */
+    private static IInputSlot GetRotatedInput(ITransformable transformable)
+    {
+        return transformable.AimTargetInput ?? transformable.RotationInput;
+    }
+
+    /** Swings the aim target captured at drag start around the operator's position. */
+    private static void SetRotatedAimTarget(Vector3 axis, float angleDeg)
+    {
+        Debug.Assert(_transformable != null);
+        Debug.Assert(_inputCommandInFlight != null);
+        var rotation = Quaternion.CreateFromAxisAngle(axis, angleDeg * MathF.PI / 180f);
+        var newTarget = _initialOrigin + Vector3.Transform(_initialRotation - _initialOrigin, rotation);
+        TrySetVector3ToInput(_transformable.AimTargetInput, newTarget);
+        _inputCommandInFlight.AssignNewValue(_transformable.AimTargetInput.Input.Value);
     }
 
     private static void CompleteRotationDragging()

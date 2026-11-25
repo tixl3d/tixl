@@ -31,7 +31,8 @@
       "Position": {
         "X": -874.9017,
         "Y": 1821.696
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "36e2d2a8-4910-4c83-b9ff-ced8df59c7f1"/*VolumeSize*/,
@@ -108,7 +109,8 @@
       "Position": {
         "X": -42.238647,
         "Y": 1724.012
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a867c29a-3cca-49c0-92ae-a7d094b5213b"/*Dither*/,

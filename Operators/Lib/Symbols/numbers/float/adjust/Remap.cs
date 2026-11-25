@@ -20,14 +20,14 @@ public sealed class Remap : Instance<Remap>
         var inMax = RangeInMax.GetValue(context);
         var outMin = RangeOutMin.GetValue(context);
         var outMax = RangeOutMax.GetValue(context);
-        var biasAndGain = BiasAndGain.GetValue(context);
+        var gainAndBias = GainAndBias.GetValue(context);
 
             
             
         var normalized = (value - inMin) / (inMax - inMin);
         if (normalized > 0 && normalized < 1)
         {
-            normalized = normalized.ApplyGainAndBias(biasAndGain.X, biasAndGain.Y);
+            normalized = normalized.ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
         }
             
         var v = normalized * (outMax - outMin) + outMin;
@@ -78,7 +78,7 @@ public sealed class Remap : Instance<Remap>
     public readonly InputSlot<float> RangeOutMax = new();
 
     [Input(Guid = "23548048-E373-4FD6-9C83-1CF7398F952D")]
-    public readonly InputSlot<Vector2> BiasAndGain = new();
+    public readonly InputSlot<Vector2> GainAndBias = new();
 
     [Input(Guid = "406F6476-EB25-4493-AAEA-3899E84DE50F", MappedType = typeof(Modes))]
     public readonly InputSlot<int> Mode = new();        

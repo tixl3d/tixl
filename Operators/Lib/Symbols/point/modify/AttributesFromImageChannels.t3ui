@@ -181,7 +181,8 @@
         "X": -516.5826,
         "Y": 1882.8372
       },
-      "Description": "Optionally scales the strength per point with its F1 or F2 attribute."
+      "Description": "Optionally scales the strength per point with its F1 or F2 attribute.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "e864651e-06df-427d-978e-5adaa5366d0c"/*RotationSpace*/,

@@ -50,7 +50,8 @@
         "X": 197.0,
         "Y": 493.0
       },
-      "Description": "Limits the accumulated value to X (min) and Y (max). 0, 0 means unlimited."
+      "Description": "Limits the accumulated value to X (min) and Y (max). 0, 0 means unlimited.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "9f1d76d2-c3dd-4035-a37c-300eb011331b"/*ResetTrigger*/,

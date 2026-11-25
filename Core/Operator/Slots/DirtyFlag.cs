@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 using System.Collections.Generic;
 
@@ -10,6 +11,8 @@ namespace T3.Core.Operator.Slots;
 /// ValueVersion tracks the version of the currently cached value. A slot is considered "dirty" whenever SourceVersion > ValueVersion,
 /// triggering an update that recalculates the logic and synchronizes the two counters. This mechanism allows the engine to skip redundant
 /// calculations by ensuring that work is only performed when a dependency has actually incremented its version.
+/// Versions are unique across all slots, because a connected slot adopts its source's version: after rewiring to another
+/// source, a per-slot counter could hand it the very version it had already cached and the new value would be skipped.
 /// </summary>
 public sealed class DirtyFlag
 {
@@ -33,7 +36,7 @@ public sealed class DirtyFlag
             return SourceVersion;
         
         InvalidationTick = GlobalInvalidationTick;
-        SourceVersion++;
+        SourceVersion = NextVersion();
 
         return SourceVersion;
     }
@@ -41,7 +44,7 @@ public sealed class DirtyFlag
     public void ForceInvalidate()
     {
         InvalidationTick = GlobalInvalidationTick;
-        SourceVersion++;
+        SourceVersion = NextVersion();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,7 +67,7 @@ public sealed class DirtyFlag
     }
 
     public int ValueVersion;
-    public int SourceVersion = 1; // initially dirty
+    public int SourceVersion = NextVersion(); // initially dirty
 
     // editor-specific value
     public int FramesSinceLastUpdate => (_globalTickCount - 1 - _lastUpdateTick) / GlobalTickDiffPerFrame;
@@ -116,4 +119,10 @@ public sealed class DirtyFlag
     private const int GlobalTickDiffPerFrame = 100; // each frame differs with 100 ticks to last one
     private static int _globalTickCount;
     private int _lastUpdateTick;
+
+    /** Wraps around after 2^32 invalidations; versions are only compared for equality, so that stays harmless. */
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int NextVersion() => Interlocked.Increment(ref _lastIssuedVersion);
+
+    private static int _lastIssuedVersion;
 }

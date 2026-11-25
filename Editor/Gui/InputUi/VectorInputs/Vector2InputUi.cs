@@ -52,9 +52,10 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
                                         : (UiColors.BackgroundButton.Fade(ImGui.IsItemHovered() ? 1 : 0.5f));
             drawList.AddRectFilled(min, max, backgroundColor);
             var normalizedVec = ((float2Value - new Vector2(Min)) / (Max - Min) - new Vector2(0.5f)) * new Vector2(controlRatio,1) + new Vector2(0.5f);
-            var color = input == null ? UiColors.StatusAutomated
+            var valueColor = input == null ? UiColors.StatusAutomated
                         : input.IsDefault ? UiColors.TextMuted
                         : UiColors.ForegroundFull;
+            var color = valueColor;
 
             var exceedsDragCanvas = normalizedVec.X < 0 || normalizedVec.X > 1 || normalizedVec.Y < 0 || normalizedVec.Y > 1;
             if (exceedsDragCanvas)
@@ -107,6 +108,13 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
                     
                 drawList.AddPolyline(ref points[0], steps, UiColors.TextMuted, ImDrawFlags.None, 1);
             }
+            else if (UseVec2Control == Vec2Controls.Range)
+            {
+                var defaultRange = input?.DefaultValue is InputValue<Vector2> typedDefault
+                                       ? typedDefault.Value
+                                       : float2Value;
+                DrawRangeComparison(drawList, min, max, defaultRange, float2Value, valueColor);
+            }
 
             if (ImGui.IsItemActivated())
             {
@@ -141,7 +149,7 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
                 else
                 {
                     var zoom = MathF.Pow(4,-dy);
-                    var center = (_valueInDragStart.X + _valueInDragStart.Y) / 2 + dx*zoom * 0.1f;
+                    var center = (_valueInDragStart.X + _valueInDragStart.Y) / 2 + dx*zoom * 0.4f;
                     var width =   (_valueInDragStart.Y - _valueInDragStart.X) * zoom;
                     
                     FloatComponents[0] = center - width/2;
@@ -172,6 +180,74 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
         float2Value = new Vector2(FloatComponents[0], FloatComponents[1]);
 
         return inputEditState;
+    }
+
+    /// <summary>
+    /// Draws the default range as a faded line on top and the current range below it. The default stays centered,
+    /// and the horizontal scale fits both, so an offset or zoomed range reads as a shifted or stretched lower line.
+    /// </summary>
+    private static void DrawRangeComparison(ImDrawListPtr drawList, Vector2 min, Vector2 max, Vector2 defaultRange, Vector2 range, Color rangeColor)
+    {
+        var defaultCenter = (defaultRange.X + defaultRange.Y) / 2;
+        var defaultHalfExtent = MathF.Abs(defaultRange.X - defaultCenter);
+        var rangeHalfExtent = MathF.Max(MathF.Abs(range.X - defaultCenter), MathF.Abs(range.Y - defaultCenter));
+
+        var width = max.X - min.X;
+        var height = max.Y - min.Y;
+        var centerX = (min.X + max.X) / 2;
+
+        // The scale follows the default and only shrinks once the current range would leave its wider margin.
+        const float minExtent = 0.000001f;
+        var pixelsPerUnit = defaultHalfExtent > minExtent
+                                ? width * (0.5f - DefaultRangePadding) / defaultHalfExtent
+                                : float.PositiveInfinity;
+        if (rangeHalfExtent > minExtent)
+            pixelsPerUnit = MathF.Min(pixelsPerUnit, width * (0.5f - RangePadding) / rangeHalfExtent);
+
+        if (float.IsPositiveInfinity(pixelsPerUnit))
+            pixelsPerUnit = 0;
+
+        var thickness = MathF.Max(1, MathF.Round(T3Ui.UiScaleFactor));
+        var triangleSize = 4 * T3Ui.UiScaleFactor;
+        var defaultLineY = MathF.Round(min.Y + height * 0.375f);
+        var rangeLineY = MathF.Round(min.Y + height * 0.625f);
+
+        DrawRangeLine(drawList,
+                      centerX + (defaultRange.X - defaultCenter) * pixelsPerUnit,
+                      centerX + (defaultRange.Y - defaultCenter) * pixelsPerUnit,
+                      defaultLineY, thickness, -triangleSize, UiColors.ForegroundFull.Fade(0.25f));
+        DrawRangeLine(drawList,
+                      centerX + (range.X - defaultCenter) * pixelsPerUnit,
+                      centerX + (range.Y - defaultCenter) * pixelsPerUnit,
+                      rangeLineY, thickness, triangleSize, rangeColor);
+    }
+
+    /** Triangles grow inward from start and end, so an inverted range shows them pointing outward. A negative triangleHeight points up. */
+    private static void DrawRangeLine(ImDrawListPtr drawList, float startX, float endX, float y, float thickness, float triangleHeight, Color color)
+    {
+        startX = MathF.Round(startX);
+        endX = MathF.Round(endX);
+        drawList.AddRectFilled(new Vector2(MathF.Min(startX, endX), y),
+                               new Vector2(MathF.Max(startX, endX) + thickness, y + thickness),
+                               color);
+
+        var baseY = triangleHeight < 0 ? y : y + thickness;
+        var tipY = baseY + triangleHeight;
+        var size = MathF.Abs(triangleHeight);
+        var startCorner = new Vector2(startX, baseY);
+        var endCorner = new Vector2(endX + thickness, baseY);
+
+        // Keep a clockwise winding for ImGui's antialiased fill when the triangles flip downward.
+        if (triangleHeight < 0)
+        {
+            drawList.AddTriangleFilled(startCorner, new Vector2(startX, tipY), new Vector2(startX + size, baseY), color);
+            drawList.AddTriangleFilled(endCorner, new Vector2(endCorner.X - size, baseY), new Vector2(endCorner.X, tipY), color);
+        }
+        else
+        {
+            drawList.AddTriangleFilled(startCorner, new Vector2(startX + size, baseY), new Vector2(startX, tipY), color);
+            drawList.AddTriangleFilled(endCorner, new Vector2(endCorner.X, tipY), new Vector2(endCorner.X - size, baseY), color);
+        }
     }
 
     public override void ApplyValueToAnimation(IInputSlot inputSlot, InputValue inputValue, Animator animator, double time)
@@ -228,6 +304,12 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
 
     public Vec2Controls UseVec2Control;
     private static Vector2 _valueInDragStart;
+
+    /** Fraction of the control width left free on each side of the default range when nothing forces a rescale. */
+    private const float DefaultRangePadding = 0.3f;
+
+    /** Fraction of the control width the current range keeps free on each side before the view zooms out. */
+    private const float RangePadding = 0.1f;
 
     public enum Vec2Controls
     {

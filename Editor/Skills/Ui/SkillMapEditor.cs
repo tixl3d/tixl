@@ -65,13 +65,24 @@ internal static class SkillMapEditor
                 }
 
                 ImGui.SameLine();
-                if (CustomComponents.StateButton("Sync Levels", CustomComponents.ButtonStates.Default))
+                if (CustomComponents.StateButton("Import Levels", CustomComponents.ButtonStates.Default))
                 {
-                    SkillQuestStructureSync.SyncFromRepository();
+                    SkillQuestStructureSync.ImportFromRepository();
                 }
 
-                CustomComponents.TooltipForLastItem("Sync level structure from the skillquest content repository",
-                                                    "Builds category/topic sections in EditSkillQuest, creates stub levels for new markdown headings and applies tour points.");
+                CustomComponents.TooltipForLastItem("Import level structure from the skillquest content repository",
+                                                    "Builds category/topic sections in EditSkillQuest, links or creates levels for markdown headings and writes their ids back. " +
+                                                    "Tour points are only imported into levels without a tour of their own.");
+
+                ImGui.SameLine();
+                if (CustomComponents.StateButton("Export Levels", CustomComponents.ButtonStates.Default))
+                {
+                    SkillQuestStructureSync.ExportToRepository();
+                }
+
+                CustomComponents.TooltipForLastItem("Export level tours to the skillquest content repository",
+                                                    "Rewrites the markdown section of every listed level from its symbol, including tour point ids and targets. " +
+                                                    "Review the result with git diff in the skillquest repository.");
 
                 if (ImGui.IsWindowAppearing())
                 {

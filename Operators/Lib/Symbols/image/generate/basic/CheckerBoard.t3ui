@@ -9,7 +9,9 @@
       "Position": {
         "X": -11.0660095,
         "Y": -61.245407
-      }
+      },
+      "Min": 0.0,
+      "ClampMin": true
     },
     {
       "InputId": "48d5cd1d-3ca1-4075-a55e-21cec39b4525"/*UseAspectRatio*/,
@@ -48,7 +50,9 @@
       "Position": {
         "X": -11.0660095,
         "Y": 78.75459
-      }
+      },
+      "Min": 0.0,
+      "ClampMin": true
     },
     {
       "InputId": "cb36f66b-99d7-4468-adbf-86e168a76ade"/*Offset*/,

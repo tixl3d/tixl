@@ -9,9 +9,10 @@ arch=('x86_64')
 url="https://tixl.app"
 license=('MIT')
 # shader-slang from extra provides slangc; TiXL is tested with its 2026.18 line.
-depends=('dotnet-sdk>=10' 'vulkan-icd-loader' 'shader-slang' 'gcc-libs' 'glibc')
-makedepends=('git' 'file')
-optdepends=('vulkan-validation-layers: diagnostics for the Vulkan backend'
+depends=('dotnet-runtime>=10' 'vulkan-icd-loader' 'shader-slang' 'gcc-libs' 'glibc')
+makedepends=('dotnet-sdk>=10' 'git' 'file')
+optdepends=('dotnet-sdk>=10: compile projects that use NuGet packages or custom build steps'
+            'vulkan-validation-layers: diagnostics for the Vulkan backend'
             'libpulse: audio through PipeWire or PulseAudio'
             'alsa-lib: audio through ALSA')
 provides=('tixl')
@@ -28,8 +29,8 @@ pkgver() {
 build() {
     cd tixl
     export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 NUGET_PACKAGES="$srcdir/nuget"
-    # dotnet-sdk is a dependency anyway, so the editor uses the system runtime.
-    Installer/Linux/build-tarball.sh --stage-only --system-dotnet
+    # The editor runs on the system runtime; it compiles operators without the SDK.
+    Installer/Linux/build-tarball.sh --stage-only --system-dotnet --system-slang
 }
 
 package() {

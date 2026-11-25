@@ -288,32 +288,18 @@ public abstract partial class Instance
                     InvalidateConnected(commandInput);
                 break;
 
-            case Slot<MeshGeometry> geometryOutput when mainInputSlot is Slot<MeshGeometry> geometryInput:
+            case Slot<Geometry> unifiedOutput when mainInputSlot is Slot<Geometry> unifiedInput:
                 if (shouldBypass)
                 {
-                    wasByPassed = geometryOutput.TrySetBypassToInput(geometryInput);
+                    wasByPassed = unifiedOutput.TrySetBypassToInput(unifiedInput);
                 }
                 else
                 {
-                    geometryOutput.RestoreUpdateAction();
+                    unifiedOutput.RestoreUpdateAction();
                 }
 
                 if (invalidate)
-                    InvalidateConnected(geometryInput);
-                break;
-
-            case Slot<CurveGeometry> curveOutput when mainInputSlot is Slot<CurveGeometry> curveInput:
-                if (shouldBypass)
-                {
-                    wasByPassed = curveOutput.TrySetBypassToInput(curveInput);
-                }
-                else
-                {
-                    curveOutput.RestoreUpdateAction();
-                }
-
-                if (invalidate)
-                    InvalidateConnected(curveInput);
+                    InvalidateConnected(unifiedInput);
                 break;
 
             case Slot<BufferWithViews> bufferOutput when mainInputSlot is Slot<BufferWithViews> bufferInput:

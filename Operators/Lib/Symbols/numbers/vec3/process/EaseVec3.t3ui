@@ -15,7 +15,8 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "2a450207-489e-4a8d-83ab-37ed8167eebe"/*UseAppRunTime*/,

@@ -14,6 +14,7 @@ using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
+using T3.Editor.Skills.Training;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
@@ -76,7 +77,8 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             return;
 
         var selectionBounds = NodeSelection.GetSelectionBounds(_projectView.NodeSelection, _projectView.CompositionInstance);
-        FitAreaOnCanvas(selectionBounds);
+
+        FitAreaOnCanvas(selectionBounds, reservedTopFraction: SkillTraining.ReservedGraphTopFraction);
     }
 
     public void FlagStructureAsChanged()
@@ -88,7 +90,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     {
         var areaOnCanvas = NodeSelection.GetSelectionBounds(context.Selector, context.CompositionInstance);
         areaOnCanvas.Expand(200);
-        FitAreaOnCanvas(areaOnCanvas);
+        FitAreaOnCanvas(areaOnCanvas, reservedTopFraction: SkillTraining.ReservedGraphTopFraction);
     }
 
     void IGraphView.OpenAndFocusInstance(IReadOnlyList<Guid> path)

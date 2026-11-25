@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "00618c91-f39a-44ea-b9d8-175c996460dc"/*LoadGltfScene*/,
-  "Description": "Loads a scene with meshes, materials, transforms, skeletons and animations from a glTF file.\n\nSupports .glb files as well as .gltf files with their .bin and texture files. Connect the ResultSetup output to [DrawScene] to render it. The Mesh and Material outputs provide a single child selected by MeshChildIndex, e.g. for [DrawMesh]. Rigged and animated models can be used with [SampleGltfAnimation], [PoseToSkinMatrices] and [SkinMesh].\n\nAKA: gltf, glb, model, import, scene\n\nSee also: [DrawScene], [LoadObj]\n\nAlso check out the [HowToDrawThings] tutorial.",
+  "Description": "Loads a scene with meshes, materials, transforms, skeletons and animations from a glTF file.\n\nSupports .glb files as well as .gltf files with their .bin and texture files. Connect the ResultSetup output to [DrawScene] to render it. The Mesh and Material outputs provide a single child selected by MeshChildIndex, e.g. for [DrawMesh]. MeshChildIndex -1 merges all children into one mesh (useful for characters split into one part per material). Rigged and animated models can be used with [SampleGltfAnimation], [PoseToSkinMatrices] and [SkinMesh].\n\nAKA: gltf, glb, model, import, scene\n\nSee also: [DrawScene], [LoadObj]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -63,7 +63,7 @@
         "X": 51.512096,
         "Y": 406.99597
       },
-      "Description": "Defines which visible child will be used for Mesh and Material output.",
+      "Description": "Defines which visible child will be used for Mesh and Material output. -1 merges all children into one mesh with the first child's material. For skinned scenes, only the parts bound to the first skeleton are merged.",
       "AddPadding": "True"
     }
   ],

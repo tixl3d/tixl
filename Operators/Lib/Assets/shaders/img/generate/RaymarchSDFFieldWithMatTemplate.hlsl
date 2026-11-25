@@ -179,6 +179,8 @@ struct PSOutput
     float4 color : SV_Target0;
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
     float depth : SV_Depth;
 };
 
@@ -195,6 +197,8 @@ float3 UnpackNormal(float4 packedNormal)
     return normalize(normal);
 }
 
+static float SdfSpecular = 1;
+#define PBR_SPECULAR SdfSpecular
 #include "shared/pbr-render.hlsl"
 
 static const float3 w1 = float3(+1, -1, -1);
@@ -459,6 +463,19 @@ PSOutput psMain(vsOutput input)
     float3 fieldPos = r.fieldPos;
     float3 absN = abs(normal);
 
+#ifndef MAPPING_GLOBAL_TRIPLANAR
+#define MAPPING_GLOBAL_TRIPLANAR 0
+#endif
+#ifndef MAPPING_LOCAL_TRIPLANAR
+#define MAPPING_LOCAL_TRIPLANAR 0
+#endif
+#ifndef MAPPING_XY
+#define MAPPING_XY 0
+#endif
+#ifndef MAPPING_XZ
+#define MAPPING_XZ 0
+#endif
+
 #if MAPPING_GLOBAL_TRIPLANAR
     float2 uv = (absN.x > absN.y && absN.x > absN.z) ? p.yz / TextureScale : (absN.y > absN.z) ? p.zx / TextureScale
                                                                                                : p.xy / TextureScale;
@@ -482,7 +499,16 @@ PSOutput psMain(vsOutput input)
     //frag.Roughness = SpecularAA;
     //frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
 
-    frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
+    // Per-object materials from [SetSDFMaterial]: pass 2 holds roughness, metal and specular, pass 3 how much of each
+    // is not set there (field generators default to 1). Blends mix both passes alike, so the set part can be recovered.
+    float3 sdfMaterial = GetField(float4(p, 2)).rgb;
+    float3 notSet = saturate(GetField(float4(p, 3)).rgb);
+    float3 setMaterial = (sdfMaterial - notSet) / max(1 - notSet, 1e-4);
+    float3 parameterMaterial = float3(roughnessMetallicOcclusion.x + Roughness, roughnessMetallicOcclusion.y + Metal, Specular);
+    float3 material = lerp(setMaterial, parameterMaterial, notSet);
+    SdfSpecular = max(material.z, 0);
+
+    frag.Metalness = saturate(material.y);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, uv);
     frag.uv = uv;
@@ -491,7 +517,7 @@ PSOutput psMain(vsOutput input)
     frag.worldPosition = mul(float4(p, 1), ObjectToWorld).xyz;
     frag.fog = 0;
 
-    frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness, SpecularAA);
+    frag.Roughness = AdjustRoughnessForSpecularAA(material.x, SpecularAA);
     
     float4 litColor = ComputePbr();
     litColor *= fieldColor;
@@ -522,5 +548,6 @@ PSOutput psMain(vsOutput input)
     float4 clipPosition = mul(float4(p, 1), WorldToClipSpace);
     float4 previousClipPosition = a >= 0.999 ? mul(float4(p, 1), PrevWorldToClipSpace) : 0;
     result.Velocity = EncodeVelocity(clipPosition, previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    GetMaterialTargets(fieldColor.rgb, a >= 0.999 ? 1 : 0, result.BaseColor, result.Material);
     return result;
 }

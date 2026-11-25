@@ -90,10 +90,10 @@ internal static class NdiRuntime
     private static string BuildMissingMessage()
     {
         if (OperatingSystem.IsWindows())
-            return $"NDI runtime not found. {WindowsLibraryName} should sit next to the editor; reinstalling TiXL restores it.";
+            return $"NDI runtime not found. {WindowsLibraryName} should sit next to the Ndi package; reinstalling it restores it.";
 
         if (OperatingSystem.IsMacOS())
-            return $"NDI runtime not found. Install NDI Tools or the NDI SDK from ndi.video, or set {RuntimeDirVariable} to the folder containing {MacLibraryName}.";
+            return $"NDI runtime not found. NDI Tools alone doesn't include it: install the NDI runtime ({MacRuntimeUrl}), then restart TiXL, or set {RuntimeDirVariable} to the folder containing {MacLibraryName}.";
 
         return $"NDI runtime not found. Install it (Arch: ndi-sdk from the AUR; other distributions: the NDI SDK from ndi.video), or set {RuntimeDirVariable} to the folder containing {LinuxLibraryName}.";
     }
@@ -102,6 +102,7 @@ internal static class NdiRuntime
     private const string WindowsLibraryName = "Processing.NDI.Lib.x64.dll";
     private const string LinuxLibraryName = "libndi.so.6";
     private const string MacLibraryName = "libndi.dylib";
+    private const string MacRuntimeUrl = "https://downloads.ndi.tv/SDK/NDI_SDK_Mac/libNDI_for_Mac.pkg";
 
     /** Set by the NDI installers, and the SDK's documented way for applications to find the runtime. */
     private const string RuntimeDirVariable = "NDI_RUNTIME_DIR_V6";

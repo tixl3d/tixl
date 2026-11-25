@@ -14,11 +14,22 @@ public sealed class RenderBundle
     public Texture2D? Normal;
     public Texture2D? Velocity;
 
+    /// <summary>Unlit surface color (rgb) and occlusion (a) of PBR draws.</summary>
+    public Texture2D? BaseColor;
+
+    /// <summary>Roughness, metalness, specular (rgb) and relight coverage (a) of PBR draws.</summary>
+    public Texture2D? Material;
+
     /// <summary>The camera that drew the image: the innermost camera inside the render op (see <see cref="RenderPassState.RecordCamera"/>).</summary>
     public ICameraPropertiesProvider? Camera;
 
-    /// <summary>Short suffix for captions, e.g. "+DNV" for depth, normal and velocity; empty without buffers.</summary>
-    public string Label => Labels[(Depth != null ? 1 : 0) | (Normal != null ? 2 : 0) | (Velocity != null ? 4 : 0)];
+    /// <summary>Short suffix for captions, e.g. "+DNVM" for depth, normal, velocity and material; empty without buffers.</summary>
+    public string Label => Labels[(Depth != null ? 1 : 0) | (Normal != null ? 2 : 0) | (Velocity != null ? 4 : 0)
+                                  | (Material != null ? 8 : 0)];
 
-    private static readonly string[] Labels = ["", " +D", " +N", " +DN", " +V", " +DV", " +NV", " +DNV"];
+    private static readonly string[] Labels =
+        [
+            "", " +D", " +N", " +DN", " +V", " +DV", " +NV", " +DNV",
+            " +M", " +DM", " +NM", " +DNM", " +VM", " +DVM", " +NVM", " +DNVM",
+        ];
 }

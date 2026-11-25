@@ -498,7 +498,7 @@ public static class ValueUtils
             };
 
     /** Step ids are ignored: they identify steps for editing and differ between otherwise identical gradients. */
-    private static bool AreGradientsEqual(Gradient? a, Gradient? b)
+    private static bool AreGradientsEqual(Gradient a, Gradient b)
     {
         if (ReferenceEquals(a, b))
             return true;

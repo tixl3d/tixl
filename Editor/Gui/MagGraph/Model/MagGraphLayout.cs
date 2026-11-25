@@ -870,7 +870,11 @@ internal sealed class MagGraphLayout
                 var targetInput = targetFromInputItem.Instance.Inputs.FirstOrDefault(i => i.Input.InputDefinition.Id == c.TargetSlotId);
                 Debug.Assert(targetInput != null);
 
-                FindVisibleIndex(targetFromInputItem, targetInput, out var targetInputIndex, out var targetMultiInputIndex);
+                if (!TryFindVisibleIndex(targetFromInputItem, targetInput, out var targetInputIndex, out var targetMultiInputIndex))
+                {
+                    ReportHiddenConnection(c, targetFromInputItem, symbolInput, targetInput);
+                    continue;
+                }
 
                 var connectionFromSymbolInput = new MagGraphConnection
                                                     {
@@ -974,7 +978,11 @@ internal sealed class MagGraphLayout
                 continue;
             }
 
-            FindVisibleIndex(targetItem, input, out var inputLineIndex, out var multiInputIndex2);
+            if (!TryFindVisibleIndex(targetItem, input, out var inputLineIndex, out var multiInputIndex2))
+            {
+                ReportHiddenConnection(c, targetItem, output, input);
+                continue;
+            }
 
             int outputLineIndex;
             for (outputLineIndex = 0; outputLineIndex < sourceItem.OutputLines.Length; outputLineIndex++)
@@ -1007,7 +1015,7 @@ internal sealed class MagGraphLayout
 
             if (!valid)
             {
-                Log.Warning($"Input line index {inputLineIndex} ouf of range?");
+                Log.Warning($"Input line index {inputLineIndex} out of range?");
                 continue;
             }
                 
@@ -1021,7 +1029,28 @@ internal sealed class MagGraphLayout
     /// This method needs to be rethought and cleaned up.
     /// MultiInputIndex will always return max count?
     /// </summary>
-    private static void FindVisibleIndex(MagGraphItem targetItem, IInputSlot input, out int visibleInputIndex, out int multiInputIndex)
+    /// <summary>
+    /// Reports, once per connection, a connection that has no visible input line, usually because the editor rejected
+    /// it: its source type no longer matches the input after an operator changed a slot's type. The entry carries the
+    /// target instance, so clicking it in the log focuses the operator.
+    /// </summary>
+    private void ReportHiddenConnection(Symbol.Connection connection, MagGraphItem targetItem, ISlot? source, IInputSlot input)
+    {
+        if (!_reportedHiddenConnections.Add(connection.GetHashCode()) || targetItem.Instance == null)
+            return;
+
+        var reason = source != null && source.ValueType != input.ValueType
+                         ? $"{source.ValueType.Name} can't connect to {input.ValueType.Name}"
+                         : "the input has no visible line";
+        Log.Warning($"Connection into {targetItem.Instance.SymbolChild.ReadableName}.{input.Input.InputDefinition.Name} isn't shown: {reason}.",
+                    targetItem.Instance);
+    }
+
+    /** Connections already reported by <see cref="ReportHiddenConnection"/>, so the log isn't flooded on every layout pass. */
+    private readonly HashSet<int> _reportedHiddenConnections = new();
+
+    /// <returns>False if the input has no visible line for another connection.</returns>
+    private static bool TryFindVisibleIndex(MagGraphItem targetItem, IInputSlot input, out int visibleInputIndex, out int multiInputIndex)
     {
         // Find connected index
         multiInputIndex = 0;
@@ -1046,9 +1075,10 @@ internal sealed class MagGraphLayout
             }
 
             // Is a match
-            return;
+            return true;
         }
-        Log.Warning("Input line not found?");
+
+        return false;
     }
 
     // Reuse lists to avoid allocations

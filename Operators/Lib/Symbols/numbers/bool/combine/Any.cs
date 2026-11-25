@@ -21,6 +21,7 @@ internal sealed class Any : Instance<Any>
         }
             
         Result.Value = result;
+        Input.DirtyFlag.Clear();
     }
 
     [Input(Guid = "374AD549-676B-4BD0-AE6A-421892B92BDB")]

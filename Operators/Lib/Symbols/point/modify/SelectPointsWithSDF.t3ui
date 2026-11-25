@@ -48,7 +48,8 @@
       "Position": {
         "X": 887.8982,
         "Y": 2040.8657
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "af41409a-81ce-43c0-8cf7-1787e3b47b70"/*Points*/,
@@ -100,7 +101,8 @@
         "X": 887.89813,
         "Y": 2110.8657
       },
-      "GroupTitle": "Selection Range"
+      "GroupTitle": "Selection Range",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "f38834a9-1bfe-4edc-9b70-2d0c57967556"/*Strength*/,

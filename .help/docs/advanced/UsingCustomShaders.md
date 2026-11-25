@@ -266,7 +266,8 @@ p.Rotation = qLookAt(fwd, up);
 - **Open the template.** The `TemplateFile` parameter points to the full shader source — it is the authoritative reference for what surrounds your code and which registers are bound.
 - **Use the presets as starting points.** They are regular parameter snapshots; saving your own preset captures the shader code along with all parameters.
 - **Comment your parameters.** A line like `// A: Falloff` at the top of the fragment makes presets reusable for others.
-- **Compile errors** appear on the operator — click it to read the HLSL compiler message; line numbers refer to the assembled shader, so check the template for context.
+- **Compile errors** appear below the code field, with the line counted within the field.
+- **Edit in a larger window.** The icon at the right end of the ShaderCode row opens a resizable code editor with line numbers. Its footer lists every error and warning the compiler reported; click one to jump to its line. **Compiled source** shows the whole shader your code was pasted into, read-only and with its own line numbers. Use it for errors outside your code (listed as *Template line*), e.g. caused by a define. `Esc` closes the editor and keeps your changes.
 
 ## See also
 

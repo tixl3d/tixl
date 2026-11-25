@@ -36,7 +36,7 @@ internal sealed class RadialGradient : Instance<RadialGradient>
         public readonly InputSlot<bool> PolarOrientation = new InputSlot<bool>();
 
         [Input(Guid = "5e93ba7d-a33d-4574-a438-a13c03361c29")]
-        public readonly InputSlot<System.Numerics.Vector2> BiasAndGain = new InputSlot<System.Numerics.Vector2>();
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "f22859b1-044b-44c7-8953-ea0f9cee36e8")]
         public readonly InputSlot<float> Noise = new InputSlot<float>();

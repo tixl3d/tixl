@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
+using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -20,6 +21,8 @@ namespace T3.Editor.Gui.InputUi.SimpleInputUis;
 public sealed class StringInputUi : InputValueUi<string>
 {
     private const int MaxStringLength = 32000;
+
+    private static Instance? _drawnInstance;
 
     public enum UsageType
     {
@@ -38,10 +41,19 @@ public sealed class StringInputUi : InputValueUi<string>
         /// A MIDI device name or alias. Lets the settings panel find every device reference across loaded projects.
         /// </summary>
         MidiDevice,
+
+        /// <summary>
+        /// Source code, e.g. the snippet of a Custom* op. Drawn like <see cref="Multiline"/>, and marked when the operator
+        /// reports a problem with it through <see cref="IInputStatusProvider"/>. <see cref="CodeLanguage"/> names the language.
+        /// </summary>
+        Code,
     }
 
     public UsageType Usage { get; private set; } = UsageType.Default;
     public string FileFilter { get; set; } = string.Empty;
+
+    /// <summary>The language of a <see cref="UsageType.Code"/> input, e.g. "Hlsl" or "CSharp"; empty when unknown.</summary>
+    public string CodeLanguage { get; set; } = string.Empty;
 
     public override IInputUi Clone()
     {
@@ -54,7 +66,17 @@ public sealed class StringInputUi : InputValueUi<string>
                        Size = Size,
                        Usage = Usage,
                        FileFilter = FileFilter,
+                       CodeLanguage = CodeLanguage,
                    };
+    }
+
+    /** Keeps the drawn op for the code controls: a pinned parameter window can show another op than the selected one. */
+    protected override InputEditStateFlags DrawValueControl(string name, InputSlot<string> inputSlot, ref string? value, bool readOnly)
+    {
+        _drawnInstance = inputSlot.Parent;
+        var result = base.DrawValueControl(name, inputSlot, ref value, readOnly);
+        _drawnInstance = null;
+        return result;
     }
 
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref string? value, bool readOnly)
@@ -69,7 +91,12 @@ public sealed class StringInputUi : InputValueUi<string>
                 inputEditStateFlags = DrawDefaultTextEdit(ref value) ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
                 break;
             case UsageType.Multiline:
-                inputEditStateFlags = DrawMultilineTextEdit(ref value);
+                inputEditStateFlags = DrawMultilineTextEdit(ref value, null);
+                break;
+            case UsageType.Code:
+                var hasStatus = TryGetInputStatus(input, out var status);
+                inputEditStateFlags = DrawCodeEditorButton(input, ref value, hasStatus ? status : null);
+                inputEditStateFlags |= DrawMultilineTextEdit(ref value, hasStatus ? status : null, startsOnNewLine: true);
                 break;
             case UsageType.FilePath:
                 inputEditStateFlags = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, FileFilter, ref value);
@@ -154,10 +181,56 @@ public sealed class StringInputUi : InputValueUi<string>
 
 
     
-    private static InputEditStateFlags DrawMultilineTextEdit(ref string value)
+    /// <summary>
+    /// An icon at the right end of the name row that opens the larger <see cref="CodeEditorPopup"/>, tinted when the code
+    /// has a problem. The popup is drawn here too, before the inline field, so that field stays the last item.
+    /// </summary>
+    private InputEditStateFlags DrawCodeEditorButton(Symbol.Child.Input input, ref string value, InputStatus? status)
     {
-        // Wrap to next line
-        ImGui.Dummy(new Vector2(1, 1));
+        var instance = GetDrawnInstance();
+        if (instance == null)
+        {
+            // Without the icon, nothing ends the name row for the field below.
+            ImGui.Dummy(new Vector2(1, 1));
+            return InputEditStateFlags.Nothing;
+        }
+
+        var iconWidth = MathF.Round(Icons.FontSize + 4 * T3Ui.UiScaleFactor);
+        var origin = ImGui.GetCursorScreenPos();
+        var availableWidth = ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin;
+        ImGui.SetCursorScreenPos(new Vector2(origin.X + availableWidth - iconWidth, origin.Y));
+
+        var hasError = status is { IsError: true, Message.Length: > 0 };
+        var clicked = hasError
+                          ? CustomComponents.IconButton(Icon.PopUp, new Vector2(iconWidth, ImGui.GetFrameHeight()), UiColors.StatusError)
+                          : CustomComponents.IconButton(Icon.PopUp, new Vector2(iconWidth, ImGui.GetFrameHeight()));
+        if (clicked)
+            CodeEditorPopup.Open(instance, input.InputDefinition.Id, new Vector2(origin.X, ImGui.GetItemRectMax().Y + 4 * T3Ui.UiScaleFactor));
+
+        CustomComponents.TooltipForLastItem("Edit code", "A larger editor with line numbers and every problem the compiler reported.");
+
+        return CodeEditorPopup.Draw(instance, input.InputDefinition.Id, input.Name, CodeLanguage, ref value, status);
+    }
+
+    private static Instance? GetDrawnInstance()
+    {
+        return _drawnInstance ?? ProjectView.Focused?.NodeSelection.GetSelectedInstanceWithoutComposition();
+    }
+
+    /// <summary>What the drawn operator reports for this input, e.g. a snippet that doesn't compile.</summary>
+    private static bool TryGetInputStatus(Symbol.Child.Input input, out InputStatus status)
+    {
+        var instance = GetDrawnInstance();
+        status = default;
+        return instance != null && CodeInputStatus.TryGet(instance, input.InputDefinition.Id, out status);
+    }
+
+    /// <param name="status">An error marks the field with a border and shows the message below it; a note is shown dimmed.</param>
+    /// <param name="startsOnNewLine">False when the field follows the parameter name on its row and must wrap below it.</param>
+    private static InputEditStateFlags DrawMultilineTextEdit(ref string value, InputStatus? status, bool startsOnNewLine = false)
+    {
+        if (!startsOnNewLine)
+            ImGui.Dummy(new Vector2(1, 1));
         
         ImGui.PushFont(Fonts.Code);
         var lineCount = value.LineCount().Clamp(1, 30) + 1;
@@ -166,9 +239,31 @@ public sealed class StringInputUi : InputValueUi<string>
         var requestedContentHeight = lineCount * lineHeight;
         var clampedToWindowHeight = MathF.Min(requestedContentHeight, ImGui.GetWindowSize().Y * 0.5f);
         
+        var hasError = status is { IsError: true, Message.Length: > 0 };
+        if (hasError)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Border, UiColors.StatusError.Rgba);
+            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1);
+        }
+
         var changed = ImGui.InputTextMultiline("##textEdit", ref value, MaxStringLength, new Vector2(-1, clampedToWindowHeight));
+        if (hasError)
+        {
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+        }
+
         ImGui.PopStyleColor();
         ImGui.PopFont();
+        if (status is { Message.Length: > 0 } shown)
+        {
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.PushStyleColor(ImGuiCol.Text, (shown.IsError ? UiColors.StatusError : UiColors.TextMuted).Rgba);
+            ImGui.TextWrapped(shown.Message);
+            ImGui.PopStyleColor();
+            ImGui.PopFont();
+        }
+
         FormInputs.AddVerticalSpace(3);
         return changed ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
     }
@@ -254,6 +349,18 @@ public sealed class StringInputUi : InputValueUi<string>
             }
         }
 
+        if (Usage == UsageType.Code)
+        {
+            FormInputs.DrawFieldSetHeader("Code Language");
+            var language = CodeLanguage;
+            if (FormInputs.AddStringInput("##Code Language", ref language, null, null,
+                                          "Language of the code, e.g. Hlsl or CSharp. Used for highlighting; empty for plain text."))
+            {
+                modified = true;
+                CodeLanguage = language;
+            }
+        }
+
         return modified;
     }
 
@@ -265,6 +372,9 @@ public sealed class StringInputUi : InputValueUi<string>
 
         if (!string.IsNullOrEmpty(FileFilter))
             writer.WriteObject(nameof(FileFilter), FileFilter);
+
+        if (!string.IsNullOrEmpty(CodeLanguage))
+            writer.WriteObject(nameof(CodeLanguage), CodeLanguage);
     }
 
     public override void Read(JToken? inputToken)
@@ -281,5 +391,6 @@ public sealed class StringInputUi : InputValueUi<string>
         }
 
         FileFilter = inputToken[nameof(FileFilter)]?.Value<string>() ?? string.Empty;
+        CodeLanguage = inputToken[nameof(CodeLanguage)]?.Value<string>() ?? string.Empty;
     }
 }

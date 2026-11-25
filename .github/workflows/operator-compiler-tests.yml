@@ -1,0 +1,51 @@
+name: Operator Compiler Tests
+
+# Runs OperatorCompiler.Tests on every platform when the in-process compiler, its tests or what the fixture projects
+# compile against changes. The equivalence tests build the same fixtures with the SDK installed here and compare;
+# TIXL_REQUIRE_SDK_COMPARISON makes them fail instead of skipping when that comparison can't run.
+on:
+  workflow_dispatch:
+  push:
+    # Any branch, but not tags: a version push sends commit and tag together, and the tag run would repeat the
+    # branch run of the same commit
+    branches:
+      - '**'
+    paths:
+      - 'OperatorCompiler/**'
+      - 'OperatorCompiler.Tests/**'
+      - 'Editor/Compilation/**'
+      - 'Core/Operator/**'
+      - 'Tixl.props'
+      - 'Directory.Build.*'
+      - '.github/workflows/operator-compiler-tests.yml'
+  pull_request:
+    paths:
+      - 'OperatorCompiler/**'
+      - 'OperatorCompiler.Tests/**'
+      - 'Editor/Compilation/**'
+      - 'Core/Operator/**'
+      - 'Tixl.props'
+      - 'Directory.Build.*'
+      - '.github/workflows/operator-compiler-tests.yml'
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    env:
+      TIXL_REQUIRE_SDK_COMPARISON: '1'
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Tests
+        run: dotnet test OperatorCompiler.Tests/OperatorCompiler.Tests.csproj --logger "console;verbosity=normal"

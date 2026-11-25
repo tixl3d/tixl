@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "1b4e3de2-31c9-4bc8-845d-8335e401944e"/*M04c_CombiningEverything*/,
   "Description": "Combining Everything",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

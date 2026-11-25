@@ -25,7 +25,7 @@ cbuffer Params : register(b1)
 
     float Scale;
     float AlphaCutOff;
-    float UseFlatShading;
+    float ShadingMode; // 0 default, 1 flat, 2 unlit
     float SpecularAA;
 };
 
@@ -96,6 +96,8 @@ struct psOutput
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
 };
 
 sampler WrappedSampler : register(s0);
@@ -256,7 +258,7 @@ static bool IsFrontFacing = true;
 float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 {
     float3 N;
-    if (UseFlatShading > 0.5)
+    if (ShadingMode > 0.5 && ShadingMode < 1.5)
     {
         // Flat shading: calculate geometric normal from world position derivatives
         float3 dpdx = ddx(pin.worldPosition);
@@ -326,9 +328,20 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
     float4 eyePosition = mul(float4(0, 0, 0, 1), CameraToWorld);
     frag.Lo = normalize(eyePosition.xyz - frag.worldPosition);
 
-    float4 litColor = ComputePbr();
+    float4 litColor;
+    if (ShadingMode > 1.5)
+    {
+        // Unlit: the texture as it is, e.g. a video that must keep its exact colors.
+        litColor = frag.albedo * Color;
+        litColor.rgb = lerp(litColor.rgb, FogColor.rgb, frag.fog * FogColor.a);
+    }
+    else
+    {
+        litColor = ComputePbr();
+    }
 
-    litColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0));
+    float4 fieldColor = GetField(float4(pin.worldPosition.xyz, 0));
+    litColor.rgba *= fieldColor;
 
     if (AlphaCutOff > 0 && litColor.a < AlphaCutOff)
     {
@@ -339,6 +352,7 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 
     output.Normal = float4 (frag.N,1);
     output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
+    GetMaterialTargets(fieldColor.rgb, 1, output.BaseColor, output.Material);
     
     return output;
 }

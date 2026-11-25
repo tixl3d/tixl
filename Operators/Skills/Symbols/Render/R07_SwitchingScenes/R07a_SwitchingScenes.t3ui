@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "a401f4a5-ccc4-4218-a433-6b854adc6fa7"/*R07a_SwitchingScenes*/,
   "Description": "Switching Scenes",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

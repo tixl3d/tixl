@@ -47,7 +47,7 @@ the `Load layout` menu) while still in focus mode.
 ## Step: Limiting the fill resolution
 
 **Action:**
-In *Settings → Interface → Output*, set **Max Fill Resolution** to `720p`, then press `F12`.
+In *Settings → Rendering → Output*, set **Max Fill Resolution** to `720p`, then press `F12`.
 Open the Output Window again afterwards with its resolution set to "Fill", then to `1080p`.
 
 **Expected:**

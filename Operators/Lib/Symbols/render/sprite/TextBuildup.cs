@@ -15,6 +15,9 @@ internal sealed class TextBuildup : Instance<TextBuildup>
     [Input(Guid = "8fd700f3-875a-4412-ad1d-2b8e867aa6f6", MappedType = typeof(Units))]
     public readonly InputSlot<int> Unit = new();
 
+    [Input(Guid = "121a4436-f7a2-43db-aba9-b689e2fb1b50", MappedType = typeof(RangeModes))]
+    public readonly InputSlot<int> RangeMode = new();
+
     [Input(Guid = "cd867336-0aca-47e1-a8fd-7559c143b8c2")]
     public readonly InputSlot<float> RangeEnd = new();
 
@@ -58,5 +61,11 @@ internal sealed class TextBuildup : Instance<TextBuildup>
     {
         Characters,
         Groups,
+    }
+
+    private enum RangeModes
+    {
+        Index,
+        Normalized,
     }
 }

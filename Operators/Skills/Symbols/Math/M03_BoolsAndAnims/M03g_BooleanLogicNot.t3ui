@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "492e4984-66cf-4924-9b7a-87fa23ef0668"/*M03g_BooleanLogicNot*/,
   "Description": "Boolean Logic: Not",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

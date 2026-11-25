@@ -179,7 +179,7 @@ float4 subDivideCel(float4 cel, float2 splitProbability)
     float4 orgCel = cel;
     float2 hash = hash22(cel.xy + float2(Seed+0.1, cel.w) - cel.zw);
 
-    float2 scrollFactor = hash > ScrollProbability ? 0: hash;
+    float2 scrollFactor = select(hash > ScrollProbability, (float2)0, hash);
     float2 randomShift =(beatTime * ScrollSpeed  - orgCel.zw) * scrollFactor; //2
     P= frac(P);
     P -= randomShift;    

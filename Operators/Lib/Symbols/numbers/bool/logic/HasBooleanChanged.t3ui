@@ -17,7 +17,8 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "- Changed: True on any change.\n- Increased: True when switching from false to true.\n- Decreased: True when switching from true to false."
+      "Description": "- Changed: True on any change.\n- Increased: True when switching from false to true.\n- Decreased: True when switching from true to false.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

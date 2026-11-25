@@ -11,7 +11,8 @@
         "Y": 90.0
       },
       "Description": "Changed: any change in either direction.\nIncreased: only increases.\nDecreased: only decreases.",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1e03f11b-f6cc-497e-9528-ed9490e878b5"/*Threshold*/,

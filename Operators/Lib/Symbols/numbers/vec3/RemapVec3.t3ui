@@ -31,7 +31,8 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Normal: no limits.\nClamped: limits the result to the output range.\nModulo: wraps the result by the size of the output range."
+      "Description": "Normal: no limits.\nClamped: limits the result to the output range.\nModulo: wraps the result by the size of the output range.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a341c041-a993-4e71-92ef-8239db7327f6"/*Value*/,

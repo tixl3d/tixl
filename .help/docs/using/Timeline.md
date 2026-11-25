@@ -28,6 +28,8 @@ It is muted when neither side has keyframes.
 
 Hold `Shift` while scrubbing to snap to the bar raster and other timeline elements.
 
+The current time field in the timeline toolbar works like any numeric parameter: drag it to scrub, or click it to type a time. The value uses the unit of the timeline format — frames in **F30** / **F60**, seconds in **Secs** (e.g. `83.5` for 01:23:50) and bars in **Bars**.
+
 ### Snapping and the time raster
 
 In the background the **time raster** shows the current grid. Switch between:
@@ -243,6 +245,12 @@ Ways to edit the remap:
 ### Splitting clips
 
 Select one or more clips and run **Cut at Time** from the context menu. Each clip splits at the current playback time; the new clip is renamed and reconnected to the same target group.
+
+### Removing gaps and reordering clips
+
+**Remove Gaps** in the clip context menu (also under **Edit → Timeline Clips**) slides clips to the left so that each one starts where the previous clip on its layer ends. With several clips selected, only the selected clips move and the earliest one on each layer stays in place; otherwise all clips are packed. Clips that are not moved still block the ones behind them.
+
+To reorder clips that sit back to back, hold `Alt` and hover one of them: a hollow circle appears on it. Drag the circle sideways and the clip hops past its neighbor once its leading edge passes the neighbor's center; the neighbor moves into the freed space. If the hovered clip is part of a selection of back-to-back clips, the circle appears on all of them and they move together. Reordering never opens a gap: the clips keep their total span, only their order changes. Clips separated by a gap can't be swapped — use **Remove Gaps** first.
 
 ### Nesting timing
 

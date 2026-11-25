@@ -147,6 +147,7 @@ internal static partial class SkillTraining
         FitViewToSelectionHandling.FitViewToSelection();
 
         _context.LevelFeedback = LevelFeedback.TryCreate(rootInstance);
+        _context.PlayedLevel = _context.ActiveLevel;
 
         _context.StateMachine.SetState(SkillTrainingStates.Playing, _context);
     }
@@ -262,6 +263,8 @@ internal static partial class SkillTraining
             var someLevelsNotCompleted = false;
             var someLevelsSkipped = false;
             topic.CompletedLevelCount = 0;
+            topic.SkippedLevelCount = 0;
+            topic.NeverPlayedLevelCount = 0;
 
             foreach (var level in topic.Levels)
             {
@@ -269,6 +272,7 @@ internal static partial class SkillTraining
                 if (!_cache.ResultsForLevelId.TryGetValue(level.SymbolId, out var results))
                 {
                     topic.ProgressionState = QuestTopic.ProgressStates.NoResultsYet;
+                    topic.NeverPlayedLevelCount++;
                     someLevelsNotCompleted = true;
                     continue;
                 }
@@ -475,6 +479,12 @@ internal static partial class SkillTraining
                                         _context.StateMachine.CurrentState == SkillTrainingStates.Completed);
 
     /// <summary>Active level feedback, or null when not in play mode or no solution snapshot exists.</summary>
+    /// <summary>
+    /// Fraction of the graph window height covered by the instruction panel during a quest.
+    /// Fitting the view to the selection keeps the puzzle below it.
+    /// </summary>
+    internal static float ReservedGraphTopFraction => IsInPlayMode ? 0.3f : 0f;
+
     internal static LevelFeedback? ActiveLevelFeedback => IsInPlayMode ? _context.LevelFeedback : null;
 
     public static void DrawLevelHeader()
@@ -486,7 +496,7 @@ internal static partial class SkillTraining
             return;
 
         var topic = _context.ActiveTopic;
-        var level = _context.ActiveLevel;
+        var level = _context.PlayedLevel;
         if (topic == null || level == null)
             return;
 

@@ -46,6 +46,10 @@ public sealed class QuestTopic
     [JsonIgnore]
     public int SkippedLevelCount;
 
+    /** Levels without any saved result, i.e. never started by the player. */
+    [JsonIgnore]
+    public int NeverPlayedLevelCount;
+
     [JsonIgnore]
     public HashSet<Guid> RequiredTopicIds = [];
 

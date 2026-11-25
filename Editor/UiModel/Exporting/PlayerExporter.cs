@@ -720,6 +720,7 @@ internal static partial class PlayerExporter
             }
             case StringInputUi.UsageType.Default:
             case StringInputUi.UsageType.Multiline:
+            case StringInputUi.UsageType.Code:
             case StringInputUi.UsageType.CustomDropdown:
             default:
                 break;

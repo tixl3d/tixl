@@ -1,0 +1,83 @@
+{
+  "FormatVersion": 3,
+  "Id": "a4055ada-4668-5205-b5e1-e45b032e754d",
+  "Description": "Benchmark: evaluates a chain of six float operators once per [Loop] iteration. The Load input sets the iteration count; the benchmark suite sweeps it to measure operator evaluation overhead on the CPU.",
+  "InputUis": [
+    {
+      "InputId": "b2699554-87c0-5438-b21f-1fe46d0096b0",
+      "Relevancy": "Required",
+      "Position": {
+        "X": -750.0,
+        "Y": 0.0
+      },
+      "Description": "The amount the benchmark suite sweeps."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "16a7f723-432a-50d1-98d8-2a8795e233b6",
+      "SymbolName": "Lib.flow.Loop",
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "eda850e3-e70f-5c1e-8059-5750aa5a88ea",
+      "SymbolName": "Lib.flow.context.SetFloatVar",
+      "Position": {
+        "X": 150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "64fd0858-4462-56be-8fbd-2e77f7c3a447",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "aab84bc7-1896-53a8-b022-9ae7b75e159c",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
+      "Position": {
+        "X": -150.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "7129d3f0-2621-51cd-b24c-a81493a74729",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "Position": {
+        "X": -300.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "eafeb0d2-56fd-57d0-862f-cfde2bdfde30",
+      "SymbolName": "Lib.numbers.float.trigonometry.Sin",
+      "Position": {
+        "X": -450.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b85adfd5-ca10-57d5-b8d8-2b7dc327dbe7",
+      "SymbolName": "Lib.flow.context.GetFloatVar",
+      "Position": {
+        "X": -600.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "59f13348-26f2-59c1-adde-93403c908497",
+      "Position": {
+        "X": 450.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

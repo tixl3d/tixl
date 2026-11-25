@@ -38,6 +38,16 @@ Allocations are acceptable for explicit user-triggered actions.
 
 Apply these rules where they matter — code that actually runs every frame and shows up in a profile. **Don't speculatively micro-optimise** cold paths: precomputed reciprocals (`inv = 1f / x`), hand-unrolled loops, or hoisting obvious divisions out of a small loop often hurt readability for a perf delta nobody will ever notice. Write the division the way you'd describe the math; reach for the optimised form only when a measurement says to.
 
+### Benchmark sanity check
+
+After a change to operator evaluation (slots, dirty flags, `Instance`), the render core, the graphics backends, or
+shaders and operators that most scenes use, run the benchmark suite over the debug bridge (`runBenchmark` with a
+`note` saying what is uncommitted, then poll `getBenchmarkStatus`; see [`DEBUG_PROTOCOL.md`](DEBUG_PROTOCOL.md)).
+The finished status compares the run with the previous one of the same machine and build configuration. Report
+every test marked `Regressed` or `Improved` with its change, and say when `testChanged` is set: then the test's
+operators changed and the numbers aren't comparable. Without an earlier run, run the suite on the unchanged build
+first. Compare Debug with Debug: CPU times differ by about 2.5× between configurations.
+
 ## State and Resource Handling
 - Avoid storing long-lived direct references to instances/resources.
 - Prefer storing and resolving by `Guid`.
@@ -92,6 +102,12 @@ Set these in the `.t3ui` (or the editor's parameter settings) when designing an 
 - **Group related parameters.** Set `GroupTitle` ("Display as: Start with group") on the first parameter of each group once an operator has more than a handful, for example `Occlusion`, `Ray Tracing`, `Temporal Accumulation`. Keep required inputs ungrouped at the top.
 - **Give numeric parameters a reasonable `Min` and `Max`.** The range drives the virtual slider and the drag speed, so it should span the values people actually use, not everything that is technically valid.
 - **Clamp only real limits.** `ClampMin` / `ClampMax` are for values that break or lose their meaning outside the range, such as a negative radius or a blend factor above 1. Leave the other end open where larger values remain useful.
+- **Show an enum as a segmented switch only where seeing the options helps.** `"DisplayAs": "SegmentedSwitch"` puts every option side by side. That surfaces the choice, but every switch makes the parameter list busier, so it is the exception:
+  - *Only if* the enum has at most 4 short options, is a fixed list (not a shared, growing enum like `BlendModes` or texture formats), and is not a flag enum. Too-wide switches fall back to a dropdown on their own.
+  - *Use it for* a mode switch that changes how the operator works or which other parameters matter (`MapPointAttributes.InputMode`, `RepeatAtPoints.CombineMode`, `VolumeShape`), or the primary choice of a small operator whose options explain themselves (`TorusSDF.Axis`, `RepeatAxis.Axis`).
+  - *Keep a dropdown for* settings that are set once and forgotten (`FillMode`, `Shading`, `CullMode`, `ShowGizmo`), and for options whose labels mean nothing without the docs (`AllowSpeedFactor`: `FactorA` / `FactorB`).
+  - *At most one or two per operator.* A switch helps only while it stands out; if more qualify, keep the mode switch.
+  - *Decide per enum family, not per operator.* The `None / F1 / F2` attribute selectors (`StrengthFactor`, `ScaleFactor`, …) are segmented everywhere, because showing F1 and F2 teaches point attributes. They count toward the budget.
 
 ### Operators vs. helper classes in an operator package
 
@@ -106,6 +122,14 @@ placement is a packaging convention:
   `GeometryMeshCompiler`, `SvgLoader`), kept `internal`. They compile into the package DLL like any
   other file and need no registration.
 - A helper used by exactly one operator stays a nested private class of that operator.
+
+### Extensions (optional operator packages)
+
+Operators with a licence that isn't MIT-compatible, large libraries or models, one-platform or special-hardware
+needs, or a niche domain belong in an **extension**: a package under `Operators/<Name>/` with
+`<TixlDistribution>Optional</TixlDistribution>`, which users install from Settings → Extensions and source builds
+skip unless `TIXL_DEBUG_EXTENSIONS` names it. Creating one, and splitting a large contribution into reviewable pull
+requests, follows [`EXTENSIONS.md`](EXTENSIONS.md). An extension never changes code outside its own folder.
 
 ### Operator descriptions
 

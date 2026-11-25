@@ -55,7 +55,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb= SampleGradient(g);\n\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb= SampleGradient(g).rgb;\n\n\n"
         }
       }
     },
@@ -75,7 +75,7 @@
             "Y": 0.81,
             "Z": 1.0
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g= dot(mul(frag.N.xyz, transpose((float3x3)CameraToWorld)), normalize(Offset));\nc.rgb= SampleGradient( Biased( saturate(g)));\n\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g= dot(mul(frag.N.xyz, transpose((float3x3)CameraToWorld)), normalize(Offset));\nc.rgb= SampleGradient( Biased( saturate(g))).rgb;\n\n\n"
         }
       }
     },
@@ -108,7 +108,7 @@
         "00000000-0000-0000-0000-000000000000": {
           "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 1.0,
           "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.5,
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "\nfloat3 vn=mul(ComputeNormal(pin, pin.tbnToWorld).xyz,transpose((float3x3)CameraToWorld));\npin.texCoord.xy=vn.xy*B*float2(1,-1)+.5;\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\nc=frag.albedo;\n//c = ComputePbr();\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//see the example\nfloat3 vn=mul(ComputeNormal(pin, pin.tbnToWorld).xyz,transpose((float3x3)CameraToWorld));\npin.texCoord.xy=vn.xy*B*float2(1,-1)+.5;\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\nc=frag.albedo;\n//c = ComputePbr();\n\n"
         }
       }
     },
@@ -173,123 +173,9 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C)));",
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C))).rgb;",
           "7f731ea3-c246-4e9c-95b3-b30260887161": true,
           "92736363-ef71-4828-bf2b-4e9f407b1155": false
-        }
-      }
-    },
-    {
-      "Id": "1a2a49ac-5ffe-4c59-8e6b-4561937b034b",
-      "IsPreset": true,
-      "ActivationIndex": 8,
-      "Title": "SDF Bevel",
-      "PosOnCanvas": {
-        "X": -315.47864,
-        "Y": -68.14829
-      },
-      "ParameterSetsForChildIds": {
-        "00000000-0000-0000-0000-000000000000": {
-          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 213.7,
-          "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.86,
-          "dc032839-eca3-48d0-be68-99b06da28167": -0.16,
-          "ada34207-e581-4f35-9ef5-8f6122e0bde5": 0.09,
-          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
-            "Gradient": {
-              "Interpolation": "Linear",
-              "Steps": [
-                {
-                  "Id": "99d34055-ecd2-42dc-93a6-6b8242d235ba",
-                  "NormalizedPosition": 0.0,
-                  "Color": {
-                    "R": 1.0,
-                    "G": 0.4929639,
-                    "B": 0.0,
-                    "A": 1.0
-                  }
-                },
-                {
-                  "Id": "9a83128c-9dc7-4050-9502-23148057a056",
-                  "NormalizedPosition": 1.0,
-                  "Color": {
-                    "R": 0.5215311,
-                    "G": 0.52152604,
-                    "B": 0.5215311,
-                    "A": 1.0
-                  }
-                }
-              ]
-            }
-          },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n"
-        }
-      }
-    },
-    {
-      "Id": "1c10edd6-2cfa-4aae-b430-6bd61c04499f",
-      "IsPreset": true,
-      "ActivationIndex": 9,
-      "Title": "Simple Distance Gradient",
-      "PosOnCanvas": {
-        "X": -315.47864,
-        "Y": -313.24942
-      },
-      "ParameterSetsForChildIds": {
-        "00000000-0000-0000-0000-000000000000": {
-          "3fb1af41-eed4-4c38-9a6a-7efe494612d0": {
-            "X": 0.0,
-            "Y": 0.06,
-            "Z": 0.0
-          },
-          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 0.13,
-          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
-            "Gradient": {
-              "Interpolation": "OkLab",
-              "Steps": [
-                {
-                  "Id": "82e136d5-dc80-43e1-8e9a-2162d1df1cc9",
-                  "NormalizedPosition": 0.0,
-                  "Color": {
-                    "R": 1.0,
-                    "G": 0.72460896,
-                    "B": 0.0,
-                    "A": 1.0
-                  }
-                },
-                {
-                  "Id": "89b138b8-21ab-4327-bf24-0a9819ea5ed1",
-                  "NormalizedPosition": 0.33333334,
-                  "Color": {
-                    "R": 1.0,
-                    "G": 0.48703903,
-                    "B": 0.13195556,
-                    "A": 1.0
-                  }
-                },
-                {
-                  "Id": "0427e1df-b3cd-4e1e-9c1c-a4a5fdae7a3d",
-                  "NormalizedPosition": 0.6666667,
-                  "Color": {
-                    "R": 0.49247694,
-                    "G": 0.08999183,
-                    "B": 0.6582595,
-                    "A": 1.0
-                  }
-                },
-                {
-                  "Id": "1a012b87-da38-4176-ad9e-e517805feec8",
-                  "NormalizedPosition": 1.0,
-                  "Color": {
-                    "R": 0.09676862,
-                    "G": 0.29133904,
-                    "B": 1.0,
-                    "A": 1.0
-                  }
-                }
-              ]
-            }
-          },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(GetDistance(pin.worldPosition - Offset) / A));"
         }
       }
     },
@@ -355,7 +241,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//Needs Fix\n SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
         }
       }
     },
@@ -402,6 +288,126 @@
             }
           },
           "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//A = offset\n//B = scale\n//C = width/blur\n//D = mode switch\n\n\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nc = ComputePbr();\n\nfloat d=GetDistance(pin.worldPosition.xyz);\n\nfloat f=d*B+A;\n\nfloat wd=fwidth(f);\n\nf=abs(frac(f)*2-1)-.5;\nif(D>.5){\nf=f>0;\n}else{\nf=smoothstep(-wd,wd,f*C);\n}\nfloat4 col=SampleGradient(1);\nc.rgb=f;\n//c=lerp(col,c,f);\n"
+        }
+      }
+    },
+    {
+      "Id": "395e08e3-2a8f-4940-8ae5-6f284375f23b",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Simple Distancee",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -313.24942
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3fb1af41-eed4-4c38-9a6a-7efe494612d0": {
+            "X": -0.18,
+            "Y": 0.16,
+            "Z": 0.22
+          },
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 0.09,
+          "4494c16e-1ff2-42db-9204-ac389451088f": {
+            "X": 0.595,
+            "Y": 0.27
+          },
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "5c452739-54bf-4a53-8d64-79ad87d00939",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.72460896,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "34fb1c52-2962-4dde-addc-50774838da20",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.48703903,
+                    "B": 0.13195556,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "2869472c-f77c-44cd-a07e-af152b9c4f18",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.49247694,
+                    "G": 0.08999183,
+                    "B": 0.6582595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "47ee9b7b-e8cb-4719-9439-696611e9a1f8",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.09676862,
+                    "G": 0.29133904,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(length(pin.worldPosition - Offset) / A)).rgb;"
+        }
+      }
+    },
+    {
+      "Id": "2e9b7df7-8621-44a8-a556-92e92bb34422",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Field Mask Bump",
+      "PosOnCanvas": {
+        "X": -315.47864,
+        "Y": -68.14829
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 213.7,
+          "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.86,
+          "dc032839-eca3-48d0-be68-99b06da28167": -0.16,
+          "ada34207-e581-4f35-9ef5-8f6122e0bde5": 0.09,
+          "eff4073a-619b-4b4c-8612-758c54dc12bf": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "0cf6535b-f9be-4686-b036-34b47a1223ef",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.4929639,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "8230b4bb-999e-4428-850f-449a3c11ab8c",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.5215311,
+                    "G": 0.52152604,
+                    "B": 0.5215311,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//See the example\nSetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n",
+          "f5754aaf-f276-474f-b36f-4b608bdbfe88": "float FM(float d){\nfloat f=smoothstep(.3,.7,abs(-1+2*frac((d+B)*A)));\nreturn f;\n}",
+          "3e7b6c69-f4d1-4f96-a693-a2162fe29a77": ""
         }
       }
     }

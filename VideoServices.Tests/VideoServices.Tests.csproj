@@ -18,13 +18,24 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <!-- Managed bindings + native LGPL DLLs so the test host can decode real files. -->
+    <!-- The same FFmpeg builds the Video package ships, so the tests decode with what users get. macOS has no
+         NuGet build; point TIXL_FFMPEG_DIR at the unpacked ffmpeg-*-lgpl-macos-arm64 archive instead. -->
     <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
-    <PackageReference Include="Sdcb.FFmpeg.runtime.windows-x64" Version="7.1.0" />
+    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
+    <PackageReference Include="TqkLibrary.FFmpeg.Lgpl3.Native.Linux.x64" Version="7.1.5.1" Condition="$([MSBuild]::IsOSPlatform('Linux'))" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VideoServices\VideoServices.csproj" />
   </ItemGroup>
+
+  <!-- FfmpegLibrary loads the libraries from the folder of VideoServices.dll, as in the Video package. -->
+  <Target Name="FlattenFFmpegNatives" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <_FFmpegNativeLibs Include="$(OutputPath)/runtimes/win-x64/native/av*.dll;$(OutputPath)/runtimes/win-x64/native/sw*.dll" />
+      <_FFmpegNativeLibs Include="$(OutputPath)/runtimes/linux-x64/native/libav*.so*;$(OutputPath)/runtimes/linux-x64/native/libsw*.so*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_FFmpegNativeLibs)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

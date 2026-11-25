@@ -2,8 +2,81 @@
   "FormatVersion": 3,
   "Id": "666560a3-7857-4acc-bd37-e1e4baff38f8"/*R03c_JumpCuts*/,
   "Description": "Jump Cuts",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
+    {
+      "ChildId": "1a078c29-5613-421d-b07b-9b93794555e8",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 1091.131,
+        "Y": 1505.9686
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "2365b9d5-b0ed-4508-86d9-ff40d0a018dd",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1496.6838,
+        "Y": 2063.6172
+      }
+    },
+    {
+      "ChildId": "26526784-c7f8-4dca-bcde-04557fc95518",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1275.4043,
+        "Y": 1960.03
+      }
+    },
+    {
+      "ChildId": "3ef6785a-2973-4478-9d05-d6450f62d0af",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1496.6838,
+        "Y": 2028.6173
+      }
+    },
+    {
+      "ChildId": "5acec11e-e977-4ddb-9e54-e28fe83e66f5",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1479.657,
+        "Y": 1636.1576
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "68ea62b5-8757-4348-92fb-abfa95f7fec1",
+      "SymbolName": "Lib.numbers.float.process.Damp",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1275.4043,
+        "Y": 2100.03
+      }
+    },
+    {
+      "ChildId": "69b58414-7601-49aa-b9f6-44fd6ea6a67f",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1479.657,
+        "Y": 1601.1576
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "71d4d5ed-0673-4264-8ff7-bdcece482978",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1496.6838,
+        "Y": 1993.6173
+      }
+    },
     {
       "ChildId": "82f23497-4a8a-431c-b433-9a2312464394",
       "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
@@ -13,21 +86,76 @@
       }
     },
     {
-      "ChildId": "c35b5e11-1824-4ecc-b4d7-123f8dd2e7c6",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "89bbc9c3-54e8-4ffe-a4a6-0658b99727b3",
+      "SymbolName": "Lib.numbers.float.process.Damp",
+      "Position": {
+        "X": 1231.1311,
+        "Y": 1642.2275
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9d13660a-fc16-43b4-ae61-5375259d9082",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "Position": {
+        "X": 1479.657,
+        "Y": 1566.1576
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a4e541cb-a7d5-4c2c-bb6f-1e35647d147f",
+      "SymbolName": "Lib.numbers.float.basic.Add",
       "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1275.4043,
+        "Y": 1995.03
       }
     },
     {
-      "ChildId": "ebe5314e-6885-4ddd-b4f3-203eb6a244bd",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "c53fefee-1708-4734-82e9-e410cc2af115",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1231.1312,
+        "Y": 1574.4077
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d02ed6c3-8e66-4463-886b-eafc0e83d86b",
+      "SymbolName": "Lib.numbers.float.basic.Multiply",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1275.4043,
+        "Y": 2065.03
       }
+    },
+    {
+      "ChildId": "e491c402-40ba-4295-8b4e-00bc6ca47caf",
+      "SymbolName": "Lib.numbers.float.basic.Add",
+      "Position": {
+        "X": 1231.131,
+        "Y": 1470.9686
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f8b10db0-9668-41e8-9e0d-0cc74cc174ab",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "SectionId": "c8c9c069-f112-4428-b4ba-3f88ac832553",
+      "Position": {
+        "X": 1135.4043,
+        "Y": 2030.03
+      }
+    },
+    {
+      "ChildId": "fdbb7323-a089-4679-84e9-fa3bb2c0b6ce",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 1091.131,
+        "Y": 1470.9686
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -52,18 +180,21 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1890.0
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 560.0,
+        "Y": 350.0
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "19c14411-60d6-4969-8aa0-5197f884cc86",
-      "Description": "Many [OrbitCamera] parameters come in pairs.\nThe first value defines the base angle, while the second adds a wobble component for secondary motion."
+      "ChildId": "5acec11e-e977-4ddb-9e54-e28fe83e66f5",
+      "InputId": "8b75047f-03b7-4619-8869-2906e66731d1",
+      "Description": "Many [OrbitCamera] parameters come in pairs.\nThe first value defines the base angle, while the second adds a wobble component for secondary motion.",
+      "Style": "InfoFor"
     },
     {
       "Id": "f2efe656-7b5a-44e0-9345-5ff244e58a30",

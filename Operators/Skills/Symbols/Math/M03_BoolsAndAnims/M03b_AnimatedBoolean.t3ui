@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "54e472c5-2df2-46e6-9aec-d1609b7c5efd"/*M03b_AnimatedBoolean*/,
   "Description": "Animated Boolean",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

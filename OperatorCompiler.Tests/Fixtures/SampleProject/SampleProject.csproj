@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <VersionPrefix>1.2.3</VersionPrefix>
+    <Nullable>enable</Nullable>
+    <EditorVersion>4.4.0</EditorVersion>
+    <IsEditorOnly>false</IsEditorOnly>
+    <ImplicitUsings>disabled</ImplicitUsings>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>fixture.SampleProject</RootNamespace>
+    <HomeGuid>2b9a4f8e-0c1d-4e5f-9a7b-3c2d1e0f4a5b</HomeGuid>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
+    <PackageId>7d3c2b1a-9e8f-4a6b-8c5d-1f0e2d3c4b5a</PackageId>
+    <IsArchived>false</IsArchived>
+    <ProjectFormatVersion>4</ProjectFormatVersion>
+    <Deterministic>true</Deterministic>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Export\**;bin\**;obj\**;.temp\**;.meta\**;Assets\**;Screenshots\**;Render\**</DefaultItemExcludes>
+    <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="T3.Graphics.Compat.PrimitiveTopology">
+      <Alias>PrimitiveTopology</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.BindFlags">
+      <Alias>BindFlags</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.BlendOperation">
+      <Alias>BlendOperation</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.BlendOption">
+      <Alias>BlendOption</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.BlendState">
+      <Alias>BlendState</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.Buffer">
+      <Alias>Buffer</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.ColorWriteMaskFlags">
+      <Alias>ColorWriteMaskFlags</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.Comparison">
+      <Alias>Comparison</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.CpuAccessFlags">
+      <Alias>CpuAccessFlags</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.CullMode">
+      <Alias>CullMode</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.DepthStencilState">
+      <Alias>DepthStencilState</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.DepthStencilView">
+      <Alias>DepthStencilView</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.FillMode">
+      <Alias>FillMode</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.Filter">
+      <Alias>Filter</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.InputLayout">
+      <Alias>InputLayout</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.RasterizerState">
+      <Alias>RasterizerState</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.RenderTargetBlendDescription">
+      <Alias>RenderTargetBlendDescription</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.RenderTargetView">
+      <Alias>RenderTargetView</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.ResourceOptionFlags">
+      <Alias>ResourceOptionFlags</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.ResourceUsage">
+      <Alias>ResourceUsage</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.SamplerState">
+      <Alias>SamplerState</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.ShaderResourceView">
+      <Alias>ShaderResourceView</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.StateGroups">
+      <Alias>StateGroups</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.Texture2DDescription">
+      <Alias>Texture2DDescription</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.Texture3DDescription">
+      <Alias>Texture3DDescription</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.TextureAddressMode">
+      <Alias>TextureAddressMode</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.UnorderedAccessView">
+      <Alias>UnorderedAccessView</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Compat.UnorderedAccessViewBufferFlags">
+      <Alias>UnorderedAccessViewBufferFlags</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Format">
+      <Alias>Format</Alias>
+    </Using>
+    <Using Include="T3.Graphics.ScissorRect">
+      <Alias>ScissorRect</Alias>
+    </Using>
+    <Using Include="T3.Graphics.Viewport">
+      <Alias>Viewport</Alias>
+    </Using>
+    <Using Include="System" />
+    <Using Include="System.Collections" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.IO" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Linq.Enumerable">
+      <Static>True</Static>
+    </Using>
+    <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Net" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Numerics.Matrix4x4">
+      <Alias>Matrix4x4</Alias>
+    </Using>
+    <Using Include="System.Numerics.Quaternion">
+      <Alias>Quaternion</Alias>
+    </Using>
+    <Using Include="System.Numerics.Vector2">
+      <Alias>Vector2</Alias>
+    </Using>
+    <Using Include="System.Numerics.Vector3">
+      <Alias>Vector3</Alias>
+    </Using>
+    <Using Include="System.Numerics.Vector4">
+      <Alias>Vector4</Alias>
+    </Using>
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Text" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="T3.Core.DataTypes" />
+    <Using Include="T3.Core.DataTypes.ComputeShader">
+      <Alias>ComputeShader</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.GeometryShader">
+      <Alias>GeometryShader</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.PixelShader">
+      <Alias>PixelShader</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Point">
+      <Alias>Point</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Texture2D">
+      <Alias>Texture2D</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Texture3D">
+      <Alias>Texture3D</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Vector.Int2">
+      <Alias>Int2</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Vector.Int3">
+      <Alias>Int3</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.Vector.Int4">
+      <Alias>Int4</Alias>
+    </Using>
+    <Using Include="T3.Core.DataTypes.VertexShader">
+      <Alias>VertexShader</Alias>
+    </Using>
+    <Using Include="T3.Core.Logging" />
+    <Using Include="T3.Core.Operator" />
+    <Using Include="T3.Core.Operator.Attributes" />
+    <Using Include="T3.Core.Operator.Interfaces" />
+    <Using Include="T3.Core.Operator.Slots" />
+    <Using Include="T3.Core.Resource" />
+    <Using Include="T3.Core.Resource.ResourceManager">
+      <Alias>ResourceManager</Alias>
+    </Using>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="$(T3_ASSEMBLY_PATH)/Graphics.Compat.dll" Private="false" />
+    <Reference Include="$(T3_ASSEMBLY_PATH)/Graphics.dll" Private="false" />
+    <Reference Include="$(T3_ASSEMBLY_PATH)\Core.dll" Private="false" />
+    <Reference Include="$(T3_ASSEMBLY_PATH)\Logging.dll" Private="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Content Include="Symbols/**/*.cs" Exclude="bin/**/*;obj/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Symbols/**/*.t3" Exclude="bin/**/*;obj/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Symbols/**/*.t3ui" Exclude="bin/**/*;obj/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="Assets/**/*" Exclude="bin/**/*;obj/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>Assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Label="OperatorPackages">
+    <Operators Include="Lib" Version="1.0.0" ResourcesOnly="False" />
+  </ItemGroup>
+  <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
+    <ItemGroup Label="Define json structure of referenced operator packages">
+      <OpPacks Include="@(Operators)">
+        <OpPackageInfoJson>
+		{
+			"Identity": "%(Identity)",
+			"Version": "%(Version)", 
+			"ResourcesOnly": "%(ResourcesOnly)"
+		}</OpPackageInfoJson>
+      </OpPacks>
+    </ItemGroup>
+    <PropertyGroup>
+      <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
+      <OperatorPackageInfoJson>{
+	"HomeGuid": "$(HomeGuid)", 
+    "PackageId": "$(PackageId)",
+	"RootNamespace": "$(RootNamespace)",
+	"AssemblyFileName": "$(RootNamespace)",
+	"Version": "$(VersionPrefix)",
+	"EditorVersion": "$(EditorVersion)",
+"IsEditorOnly": "$(IsEditorOnly)",
+	"OperatorPackages": [$(OperatorReferenceArray)
+	]
+}
+</OperatorPackageInfoJson>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+  </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <RemoveDir Directories="$(BaseOutputPath)$(Configuration)" />
+  </Target>
+</Project>

@@ -32,7 +32,8 @@
         "X": 1043.1895,
         "Y": 584.105
       },
-      "Description": "Centered: the surface maps to the gradient center. FromStart: the surface maps to the gradient start. PingPong and Repeat: the gradient repeats every Range."
+      "Description": "Centered: the surface maps to the gradient center. FromStart: the surface maps to the gradient start. PingPong and Repeat: the gradient repeats every Range.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "be783e46-ca50-4e9d-9e81-12029c5a3265"/*Range*/,

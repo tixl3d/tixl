@@ -32,7 +32,8 @@
       "Position": {
         "X": 1079.8354,
         "Y": -25.989014
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [
@@ -176,14 +177,6 @@
       "Position": {
         "X": -136.21303,
         "Y": -23.765808
-      }
-    },
-    {
-      "ChildId": "e59cfdbf-ecc7-410d-93c2-0592ad110c79",
-      "SymbolName": "Lib.render.shading.SetRequestedResolution",
-      "Position": {
-        "X": 419.865,
-        "Y": 670.972
       }
     },
     {

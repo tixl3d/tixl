@@ -67,6 +67,13 @@ public abstract partial class SymbolPackage : IResourcePackage
     private static ConcurrentBag<SymbolPackage> _allPackages = [];
     public static IEnumerable<SymbolPackage> AllPackages => _allPackages;
 
+    /// <summary>
+    /// Operators of packages that are deliberately not loaded in this session, such as optional packages an editor
+    /// source build skips. Children using them are still kept in the files, but their absence is expected and only
+    /// logged at debug level. Set before packages load.
+    /// </summary>
+    public static IReadOnlySet<Guid> ExpectedMissingSymbolIds { get; set; } = new HashSet<Guid>();
+
     public string AssetsFolder { get; private set; } = null!;
 
     public IReadOnlyCollection<DependencyCounter> Dependencies => (ReadOnlyCollection<DependencyCounter>)DependencyDict.Values;

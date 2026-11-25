@@ -7,24 +7,24 @@
     {
       "InputId": "2680baf9-3dbd-4ade-b109-19b3b0f1d40f"/*EnableDepthWrite*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 454.10834
+        "X": 522.4035,
+        "Y": 463.961
       },
       "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes."
     },
     {
       "InputId": "4ca612b7-a899-4567-98e4-8b6e96d5f251"/*Height*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 319.10834
+        "X": 4.449127,
+        "Y": 315.62604
       },
       "Description": "Multiplier for Height"
     },
     {
       "InputId": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 219.10832
+        "X": -135.55087,
+        "Y": 70.62604
       },
       "Description": "Selects a color which will be multiplied with the incoming image.",
       "AddPadding": "True"
@@ -32,16 +32,16 @@
     {
       "InputId": "60cef5fb-b22a-4fa0-83bb-093d0f1d5b56"/*BlendMode*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 364.10834
+        "X": 522.4035,
+        "Y": 393.961
       },
       "GroupTitle": "Options"
     },
     {
       "InputId": "6a91ba46-257d-4c3c-94c5-72cbc06ee816"/*EnableDepthTest*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 409.10834
+        "X": 522.4035,
+        "Y": 428.961
       },
       "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes.",
       "AddPadding": "True"
@@ -49,8 +49,8 @@
     {
       "InputId": "6fd86a21-d06c-4edb-bbe2-39d7411e46d1"/*Position*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 499.10834
+        "X": -135.55087,
+        "Y": 210.62604
       },
       "Description": "Manipulates the position of the Quad\nX = Right / Left\nY = Up / Down",
       "AddPadding": "True"
@@ -58,8 +58,8 @@
     {
       "InputId": "81f7acd7-6704-404b-b8be-9e77d2117fcc"/*Filter*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 544.10834
+        "X": 522.4035,
+        "Y": 218.961
       },
       "GroupTitle": "Advanced Options",
       "Description": "Selects which Filter is used for rendering the incoming texture"
@@ -68,15 +68,15 @@
       "InputId": "92c66734-dce9-402a-95f6-cde0e58bf32f"/*Texture*/,
       "Relevancy": "Relevant",
       "Position": {
-        "X": -158.25935,
-        "Y": 163.10832
+        "X": 312.4035,
+        "Y": 78.96098
       }
     },
     {
       "InputId": "a680706a-3e0f-4b93-9953-05df8d32109a"/*Width*/,
       "Position": {
-        "X": -158.25935,
-        "Y": 269.10834
+        "X": 4.449127,
+        "Y": 280.62604
       },
       "Description": "Multiplier for Width",
       "AddPadding": "True"
@@ -87,32 +87,32 @@
       "ChildId": "13cfa0b8-99cc-48b0-ae82-89d5d3e9e47a",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {
-        "X": 816.2118,
-        "Y": 132.83188
+        "X": 802.4035,
+        "Y": 148.96098
       }
     },
     {
       "ChildId": "1d0d7ef0-45f5-4708-840d-2c8c7fa206a0",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": 454.18555,
-        "Y": 170.9402
+        "X": 592.4035,
+        "Y": 78.96098
       }
     },
     {
       "ChildId": "541d1df8-d9df-4be6-8674-6c533861921c",
       "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "Position": {
-        "X": 615.2267,
-        "Y": 496.60944
+        "X": 662.4035,
+        "Y": 393.961
       }
     },
     {
       "ChildId": "6795c921-894a-449e-a864-acaff7bae5ff",
       "SymbolName": "Lib.numbers.vec4.Vector4Components",
       "Position": {
-        "X": 427.89914,
-        "Y": 223.50838
+        "X": 4.449127,
+        "Y": 70.62604
       }
     },
     {
@@ -124,8 +124,8 @@
         "Y": 128.82043
       },
       "Position": {
-        "X": 607.8124,
-        "Y": 216.16548
+        "X": 144.44913,
+        "Y": 35.626038
       }
     },
     {
@@ -145,104 +145,104 @@
       "ChildId": "810afc82-dc07-4388-9188-c0516b59b897",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 607.8124,
-        "Y": 364.9859
+        "X": 662.4035,
+        "Y": 218.96098
       }
     },
     {
       "ChildId": "81c3ffc4-61f7-4818-8cb3-724bb7c36f7e",
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
-        "X": 639.2975,
-        "Y": 2.451492
+        "X": 662.4035,
+        "Y": 8.960979
       }
     },
     {
       "ChildId": "9e4b170c-c8eb-4b39-8aff-d9cd8ae9551d",
       "SymbolName": "Types.Gfx.VertexShaderStage",
       "Position": {
-        "X": 823.0274,
-        "Y": -10.508526
+        "X": 802.4035,
+        "Y": 8.960979
       }
     },
     {
       "ChildId": "a2a3d2bf-04d9-4056-a354-7c861c931d68",
       "SymbolName": "Lib.render._dx11.api.Draw",
       "Position": {
-        "X": 810.8517,
-        "Y": 442.7809
+        "X": 802.4035,
+        "Y": 498.961
       }
     },
     {
       "ChildId": "a464b19f-8f6c-4ca2-9fa6-4d1b86b93da7",
       "SymbolName": "Types.Gfx.PixelShaderStage",
       "Position": {
-        "X": 816.2118,
-        "Y": 188.83188
+        "X": 802.4035,
+        "Y": 218.96098
       }
     },
     {
       "ChildId": "ad28d2c9-670f-41a1-b0d9-101e915789cf",
       "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": 69.60883,
-        "Y": 87.99952
+        "X": 312.4035,
+        "Y": 113.96098
       }
     },
     {
       "ChildId": "caf3d3c1-76fa-406b-a24c-8c7e0aec0496",
       "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 639.2975,
-        "Y": 101.4515
+        "X": 662.4035,
+        "Y": 288.961
       }
     },
     {
       "ChildId": "cf1ec4e5-ff4a-4100-94a0-d117446d1712",
       "SymbolName": "Types.Gfx.DepthStencilState",
       "Position": {
-        "X": 615.2267,
-        "Y": 427.60944
+        "X": 662.4035,
+        "Y": 428.961
       }
     },
     {
       "ChildId": "d330c026-4e60-4930-b9b8-c780dc45bdd2",
       "SymbolName": "Types.Gfx.RasterizerState",
       "Position": {
-        "X": 639.2975,
-        "Y": 45.451492
+        "X": 662.4035,
+        "Y": 148.96098
       }
     },
     {
       "ChildId": "d82e4dfc-7839-4600-8a72-b60121d20c6b",
       "SymbolName": "Lib.image.use.UseFallbackTexture",
       "Position": {
-        "X": 237.20413,
-        "Y": -48.019855
+        "X": 452.4035,
+        "Y": 78.96098
       }
     },
     {
       "ChildId": "dd3ea474-e0f0-45d0-a7cd-ccc2ebe2e9a4",
       "SymbolName": "Lib.numbers.vec2.Vector2Components",
       "Position": {
-        "X": 427.89914,
-        "Y": 279.50836
+        "X": 4.449127,
+        "Y": 210.62604
       }
     },
     {
       "ChildId": "e6891131-b7ec-4026-8872-c1918e97eb92",
       "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
       "Position": {
-        "X": 810.8517,
-        "Y": 373.7809
+        "X": 802.4035,
+        "Y": 393.961
       }
     },
     {
       "ChildId": "f2a8063c-7138-406c-8d61-7e4293c4cc46",
       "SymbolName": "Lib.render._dx11.api.InputAssemblerStage",
       "Position": {
-        "X": 823.0274,
-        "Y": -53.508522
+        "X": 872.4035,
+        "Y": -61.03902
       }
     }
   ],

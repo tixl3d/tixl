@@ -1,4 +1,6 @@
 ﻿using ImGuiNET;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -19,13 +21,9 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         
     public override IInputUi Clone()
     {
-        return new IntInputUi()
-                   {
-                       InputDefinition = InputDefinition,
-                       Parent = Parent,
-                       PosOnCanvas = PosOnCanvas,
-                       Relevancy = Relevancy
-                   };
+        var clone = (IntInputUi)CloneWithType<IntInputUi>();
+        clone._displayMode = _displayMode;
+        return clone;
     }
         
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref int value, bool readOnly)
@@ -34,7 +32,7 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
             
         if (MappedType != null)
         {
-            result = DrawEnumInputEdit(ref value, MappedType);
+            result = DrawEnumInputEdit(ref value, MappedType, _displayMode);
         }
         else
         {
@@ -66,7 +64,29 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         Curve.UpdateCurveValues(curves, time, IntComponents);
     }
 
-    private static InputEditStateFlags DrawEnumInputEdit(ref int value, Type enumType)
+    public override bool DrawSettings()
+    {
+        var modified = base.DrawSettings();
+        if (MappedType == null || EnumCache.Instance.GetEnumEntry(MappedType).IsFlagEnum)
+            return modified;
+
+        modified |= EnumDisplayModeUi.DrawSettings(ref _displayMode);
+        return modified;
+    }
+
+    public override void Write(JsonTextWriter writer)
+    {
+        base.Write(writer);
+        EnumDisplayModeUi.Write(writer, _displayMode);
+    }
+
+    public override void Read(JToken? inputToken)
+    {
+        base.Read(inputToken);
+        _displayMode = EnumDisplayModeUi.Read(inputToken);
+    }
+
+    private static InputEditStateFlags DrawEnumInputEdit(ref int value, Type enumType, EnumDisplayMode displayMode)
     {
         var enumInfo = EnumCache.Instance.GetEnumEntry(enumType);
 
@@ -115,6 +135,14 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         else
         {
             int index = Array.IndexOf(enumInfo.ValuesAsInt, value);
+            if (EnumDisplayModeUi.TryDrawSegmented(displayMode, enumInfo, ref index, out var segmentedFlags))
+            {
+                if (segmentedFlags != InputEditStateFlags.Nothing)
+                    value = enumInfo.ValuesAsInt[index];
+
+                return segmentedFlags;
+            }
+
             InputEditStateFlags editStateFlags = InputEditStateFlags.Nothing;
             
             // Draw combo box to modify options on hover
@@ -212,6 +240,8 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         }
     }
     
+    private EnumDisplayMode _displayMode;
+
     private static int _lastHoveredComboItem = -1;
     private static int _originalValue = -1;
 }

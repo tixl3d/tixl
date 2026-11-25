@@ -32,17 +32,18 @@ The status describes the current development version. Please report anything tha
 | Video export | Works | Works | Partial |
 
 Windows renders with DirectX 11; Linux and macOS render with Vulkan (on macOS through MoltenVK, which
-translates Vulkan to Metal). Shaders are compiled with the Slang compiler on Linux and macOS, which TiXL
-offers to download on first start.
+translates Vulkan to Metal). Shaders are compiled with the Slang compiler on Linux and macOS, which comes with
+TiXL.
 
-On all three systems TiXL needs the **.NET 10 SDK**, not just the runtime: it compiles operators while it
-runs.
+On all three systems TiXL brings its own .NET runtime and compiles operators itself, so you don't install .NET.
+Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL
+tells you when a project needs it and why; install it from
+[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 **Exported executables** run on the system you exported from — there is no export for another system. On
 macOS the export is a folder with the executable, not an app you can put in Applications.
 
-**Video export on macOS** works only with the development setup for FFmpeg described under
-[Video](#video).
+**Video export on macOS** has no H.264 encoder yet; H.264 exports fall back to MPEG-4. See [Video](#video).
 
 ## Rendering details
 
@@ -63,23 +64,22 @@ scenes. These are bugs being worked on, not missing features.
 
 | Feature | Windows | Linux | macOS |
 |---|---|---|---|
-| Video playback ([PlayVideo], video clips on the timeline) | Works | Works | Partial |
+| Video playback ([PlayVideo], video clips on the timeline) | Works | Works | Works |
 | Network streams (RTSP) | Works | Works | Partial |
 | Hardware-accelerated video export | Works | Not yet | Not yet |
-| Webcams and capture cards | Works | Works | Planned |
-| NDI input and output | Works | Partial | Not yet |
+| Webcams and capture cards | Works | Works | Works |
+| NDI input and output | Works | Partial | Works |
 | Spout (sharing video with other apps) | Works | — | — |
 | Syphon (sharing video with other apps) | — | — | Planned |
 | Screen capture | Works | Not yet | Not yet |
 | Timeline thumbnails of video clips | Works | Not yet | Not yet |
 
-NDI on Linux needs the NDI runtime, which TiXL can't include. [Install on Linux](InstallLinux.md#optional-ndi)
-says where to get it. Without it the NDI operators report "NDI runtime not found".
+NDI on Linux and macOS needs the NDI runtime, which TiXL can't include. [Install on Linux](InstallLinux.md#optional-ndi)
+and [Install on macOS](InstallMacOS.md#ndi) say where to get it; on macOS, NDI Tools alone doesn't bring it.
+Without it the NDI operators report "NDI runtime not found".
 
-TiXL plays and exports video with FFmpeg. Windows and Linux include it. On macOS there is no included
-FFmpeg yet: for now, install it with Homebrew (`brew install ffmpeg@7`) and start TiXL with
-`TIXL_FFMPEG_ALLOW_RESTRICTED=1`. Homebrew's FFmpeg is licensed differently from the one TiXL ships, which
-is why TiXL doesn't use it without being told to.
+TiXL plays and exports video with FFmpeg, which it includes on all three systems. The macOS build has no
+H.264 encoder yet, so H.264 exports fall back to MPEG-4 there.
 
 Spout only exists on Windows, and Syphon only on macOS; Syphon support is planned.
 
@@ -139,10 +139,10 @@ deleting an asset removes it for good instead of moving it to the trash.
 | | Windows | Linux | macOS |
 |---|---|---|---|
 | Package | Installer | Tarball, AUR | App in a DMG (preview) |
-| Signed | Yes | — | Not yet |
+| Signed | Yes | — | Yes, notarized |
 
-The macOS app isn't signed with an Apple developer certificate yet. The first time you open it, macOS
-blocks it; allow it once under **System Settings → Privacy & Security → Open Anyway** — the steps are in
+The macOS app is signed and notarized, so macOS only asks once whether to open an app from the internet.
+Unsigned test builds need **System Settings → Privacy & Security → Open Anyway** — the steps are in
 [Install on macOS](InstallMacOS.md#allow-tixl-to-open). When TiXL first opens your projects, macOS also asks
 for permission to access your Documents folder.
 

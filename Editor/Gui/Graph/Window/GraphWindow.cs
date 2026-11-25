@@ -134,6 +134,7 @@ internal sealed class GraphWindow : Windows.Window
         {
             ProjectView.RestoreSelectionAndHistory(session);
             ProjectView.RestoreFocusMode(session);
+            ProjectView.RestorePlayback(session);
         }
 
         _focusOnNextFrame = true;

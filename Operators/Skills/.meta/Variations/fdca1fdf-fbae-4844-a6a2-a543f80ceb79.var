@@ -1,0 +1,118 @@
+{
+  "Id": "fdca1fdf-fbae-4844-a6a2-a543f80ceb79",
+  "Variations": [
+    {
+      "Id": "d7a5266a-baba-4a4e-8d09-52d87b179a7a",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "3c819a07-950d-4df3-807f-2cb0e6b87c95": {
+          "acf14901-3373-4b0c-8567-03ea0051a21f": {
+            "X": 0.0,
+            "Y": 0.41,
+            "Z": 0.0
+          },
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 1.73,
+          "8b75047f-03b7-4619-8869-2906e66731d1": {
+            "X": 35.0,
+            "Y": 0.0
+          }
+        },
+        "9f558de7-f827-42b0-a47e-13179c32cbd4": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 0.6615385,
+            "Y": 0.5571655,
+            "Z": 0.5157358,
+            "W": 1.0
+          },
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.2,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.2
+        },
+        "5bfe4a3a-824a-45f4-935f-68e27584f7f1": {
+          "8c9dee45-d165-48c8-b8dd-b7f47e77fd00": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          }
+        },
+        "de88dedc-0815-4c69-b22b-424f87146422": {
+          "6e0fa62a-a8e1-4d0b-a5b1-80876ff636c0": "Examples:meshes/marblePlayer-400k.glb",
+          "38232f5a-71a6-4213-bf04-ab80a0e448db": 0
+        },
+        "3da3ac31-07d7-408a-afab-2ff6cc7fb7de": {
+          "e47e9e63-9c94-4c29-9555-2452fa498d57": {
+            "Gradient": {
+              "Interpolation": "Hold",
+              "Steps": [
+                {
+                  "Id": "65760c05-3951-4a86-bd6a-73fa926a5fb1",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "a0346bcd-5385-4fba-8395-54df138c3117",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "53afc8d9-f417-4628-9a97-220bec62919f": {
+            "X": 1024,
+            "Y": 1024
+          }
+        },
+        "23d0c552-9da8-4b12-b3d8-779fc72a6a8a": {
+          "acf14901-3373-4b0c-8567-03ea0051a21f": {
+            "X": 0.0,
+            "Y": 0.41,
+            "Z": 0.0
+          },
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 1.73,
+          "8b75047f-03b7-4619-8869-2906e66731d1": {
+            "X": 35.0,
+            "Y": 0.0
+          }
+        },
+        "2e5ff4a1-07ac-471c-83fe-73a7b84f7490": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 0.6615385,
+            "Y": 0.5571655,
+            "Z": 0.5157358,
+            "W": 1.0
+          },
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.2,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.2
+        },
+        "48fc4773-e60e-400a-9739-d6b34fd06902": {
+          "8c9dee45-d165-48c8-b8dd-b7f47e77fd00": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          }
+        },
+        "2a571e64-d04f-4d7f-b2a3-f446d5a13e1f": {
+          "6e0fa62a-a8e1-4d0b-a5b1-80876ff636c0": "Examples:meshes/marblePlayer-400k.glb",
+          "38232f5a-71a6-4213-bf04-ab80a0e448db": 0
+        }
+      }
+    }
+  ]
+}

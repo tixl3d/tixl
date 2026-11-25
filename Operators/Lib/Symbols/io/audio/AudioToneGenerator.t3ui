@@ -87,7 +87,8 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Gate: the tone sounds while Trigger is true.\nTrigger: a rising edge on Trigger plays the tone for Duration."
+      "Description": "Gate: the tone sounds while Trigger is true.\nTrigger: a rising edge on Trigger plays the tone for Duration.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

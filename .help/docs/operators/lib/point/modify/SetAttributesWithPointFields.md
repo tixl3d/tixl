@@ -10,7 +10,7 @@ Sets various attribute points from the distance of a 2nd (small) set of points.
 | **Amount** (Single) | — |
 | **Range** (Single) | — |
 | **OffsetRange** (Single) | — |
-| **BiasAndGain** (Vector2) | — |
+| **GainAndBias** (Vector2) | — |
 | **Variation** (Single) | — |
 | **AffectColor** (Single) | — |
 | **ColorMode** (Int32) | — |

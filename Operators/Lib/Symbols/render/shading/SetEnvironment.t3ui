@@ -7,8 +7,8 @@
     {
       "InputId": "0299761d-7397-4a2f-b591-81fadb404a92"/*BackgroundDistance*/,
       "Position": {
-        "X": 1516.9678,
-        "Y": 479.1858
+        "X": 2017.085,
+        "Y": 362.39032
       },
       "Description": "Sets the radius for the sphere mesh that surrounds the scene.\n\nProTip: Clipping of the background can be prevented either by this setting or by the \"NearFarClip\" settings in the used camera."
     },
@@ -23,34 +23,34 @@
     {
       "InputId": "486f4f09-2e4e-43b8-bfbc-2722e77d5dbd"/*Orientation*/,
       "Position": {
-        "X": 129.08041,
-        "Y": 546.8303
+        "X": 1.7190475,
+        "Y": 561.354
       },
       "Description": "Rotates an equirectangular Texture around the vertical axis."
     },
     {
       "InputId": "4f573afe-8815-4fd3-a655-89ec40bf3c22"/*RenderBackground*/,
       "Position": {
-        "X": 1376.9678,
-        "Y": 759.1858
+        "X": 1877.085,
+        "Y": 642.3904
       },
       "GroupTitle": "Render Background",
       "Description": "If turned on the environment will be visible to the camera by being mapped on a sphere mesh around the scene."
     },
     {
       "InputId": "5c042a08-74b3-4a6b-a420-2fcfa0fc01ee"/*Texture*/,
-      "Relevancy": "Required",
+      "Relevancy": "Relevant",
       "Position": {
-        "X": -51.30281,
-        "Y": 925.5227
+        "X": -25.607101,
+        "Y": 926.63995
       },
       "Description": "Equirectangular image or cube map. If not connected, the Fallback environment is used."
     },
     {
       "InputId": "650aa9a6-4aa6-4928-be76-3f1f825aa773"/*BackgroundColor*/,
       "Position": {
-        "X": 1376.9678,
-        "Y": 619.1858
+        "X": 1877.085,
+        "Y": 502.39038
       },
       "Description": "Tints the background with the selected color.\n\nDoes not affect the color of the light and/or reflection.",
       "Min": 0.0,
@@ -69,8 +69,8 @@
     {
       "InputId": "96094239-9d82-4a32-bbb0-e9da7f6501da"/*BackgroundBlur*/,
       "Position": {
-        "X": 1376.9678,
-        "Y": 689.1858
+        "X": 1877.085,
+        "Y": 572.3904
       },
       "Description": "Defines how much the image on the sphere in the background is blurred.\n",
       "Min": 0.0,
@@ -90,8 +90,8 @@
     {
       "InputId": "de6b9cb3-69ce-4b23-add6-a564648ec3a8"/*Fallback*/,
       "Position": {
-        "X": 366.52692,
-        "Y": 455.17175
+        "X": 317.14874,
+        "Y": 199.64827
       },
       "Description": "Environment used if no Texture is connected: 0 = studio, 1 = church interior, 2 = black."
     },
@@ -99,8 +99,8 @@
       "InputId": "e4482cab-f20c-4f9f-9179-c64944164509"/*SubTree*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 1376.9678,
-        "Y": 934.18555
+        "X": 1877.085,
+        "Y": 817.39014
       }
     }
   ],
@@ -109,8 +109,8 @@
       "ChildId": "18221d8e-7d80-4258-9a21-23acf7a77206",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 795.6145,
-        "Y": 1091.4104
+        "X": 990.8196,
+        "Y": 1105.8264
       }
     },
     {
@@ -118,16 +118,16 @@
       "SymbolName": "Lib.render.shading._.SetContextTexture",
       "SectionId": "f7160267-14dc-4a30-92cf-4eb74eb9edfe",
       "Position": {
-        "X": 1516.9678,
-        "Y": 934.18555
+        "X": 2017.085,
+        "Y": 817.39014
       }
     },
     {
       "ChildId": "206ed27b-63d8-4228-b185-3ac2e5941b6a",
       "SymbolName": "Lib.image.use.PickTexture",
       "Position": {
-        "X": 880.45544,
-        "Y": 273.2203
+        "X": 607.1533,
+        "Y": 65.86255
       }
     },
     {
@@ -142,8 +142,8 @@
       "ChildId": "335c2a99-4955-4e1a-8de0-d4cdab570928",
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
-        "X": 795.6145,
-        "Y": 916.4103
+        "X": 990.8196,
+        "Y": 930.82623
       }
     },
     {
@@ -159,8 +159,8 @@
       "SymbolName": "Lib.render.shading.TextureToCubeMap",
       "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
-        "X": 418.41245,
-        "Y": 889.7184
+        "X": 558.4124,
+        "Y": 819.7184
       }
     },
     {
@@ -168,8 +168,16 @@
       "SymbolName": "Lib.image.use.PickTexture",
       "SectionId": "49c02188-8b54-4ed7-a5f6-067ae0f121f0",
       "Position": {
-        "X": 1095.3191,
-        "Y": 588.2991
+        "X": 1377.6263,
+        "Y": 401.5036
+      }
+    },
+    {
+      "ChildId": "5621aedc-6f5a-421b-9b80-b7247399318a",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 999.0006,
+        "Y": 302.6424
       }
     },
     {
@@ -194,8 +202,8 @@
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "SectionId": "49c02188-8b54-4ed7-a5f6-067ae0f121f0",
       "Position": {
-        "X": 915.7092,
-        "Y": 673.6948
+        "X": 1198.0166,
+        "Y": 486.89935
       }
     },
     {
@@ -204,6 +212,14 @@
       "Position": {
         "X": 545.03296,
         "Y": 1191.8344
+      }
+    },
+    {
+      "ChildId": "7486689d-8459-4d4b-9586-47a3aad6452c",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
+      "Position": {
+        "X": 572.92456,
+        "Y": 451.14026
       }
     },
     {
@@ -218,8 +234,8 @@
       "ChildId": "7eb179ca-b424-4a82-9ed6-74999a732dda",
       "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 795.6145,
-        "Y": 986.4103
+        "X": 990.8196,
+        "Y": 1000.82623
       }
     },
     {
@@ -231,12 +247,28 @@
       }
     },
     {
+      "ChildId": "846933bb-cd11-439a-9944-5d981a2d4401",
+      "SymbolName": "Lib.render.shading.TextureToCubeMap",
+      "Position": {
+        "X": 546.58185,
+        "Y": 331.18423
+      }
+    },
+    {
       "ChildId": "9457bffd-906c-406e-824f-87665c3894d2",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
         "X": 418.4124,
-        "Y": 994.7184
+        "Y": 959.7184
+      }
+    },
+    {
+      "ChildId": "9bb96bd0-a371-4e30-9724-75652d506cfe",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 546.58185,
+        "Y": 261.18423
       }
     },
     {
@@ -244,16 +276,32 @@
       "SymbolName": "Lib.mesh.generate.SphereMesh",
       "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
-        "X": 1516.9678,
-        "Y": 549.1859
+        "X": 2017.085,
+        "Y": 432.3905
+      }
+    },
+    {
+      "ChildId": "a7d66def-f289-4693-ae63-864806218cdc",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 686.58185,
+        "Y": 261.18423
       }
     },
     {
       "ChildId": "aa7acd2f-79ce-4e8b-b7d1-fc32958a5834",
       "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": 740.45544,
-        "Y": 273.2203
+        "X": 467.15332,
+        "Y": 65.86255
+      }
+    },
+    {
+      "ChildId": "b08453b1-617a-4206-a871-fb6aac425dd4",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 884.4858,
+        "Y": 763.78
       }
     },
     {
@@ -261,16 +309,24 @@
       "SymbolName": "Lib.flow.Execute",
       "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
-        "X": 1516.9678,
-        "Y": 724.1858
+        "X": 2017.085,
+        "Y": 607.3904
+      }
+    },
+    {
+      "ChildId": "c0a198f3-66f1-4372-a5d4-0b9e6d9862e8",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 406.58185,
+        "Y": 331.18423
       }
     },
     {
       "ChildId": "c3cd2794-e1d9-4fc7-a24e-5b32285d990d",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": 795.6145,
-        "Y": 1021.4103
+        "X": 990.8196,
+        "Y": 1035.8263
       }
     },
     {
@@ -282,16 +338,24 @@
         "Y": 166.0
       },
       "Position": {
-        "X": 935.6145,
-        "Y": 881.4103
+        "X": 1130.8196,
+        "Y": 895.82623
       }
     },
     {
       "ChildId": "c939be06-8698-493f-802d-646663b52d3a",
       "SymbolName": "Types.Gfx.GeometryShader",
       "Position": {
-        "X": 795.6145,
-        "Y": 951.4103
+        "X": 990.8196,
+        "Y": 965.82623
+      }
+    },
+    {
+      "ChildId": "c991f394-4ab6-4fcf-86ad-ba275f4fdbc6",
+      "SymbolName": "Lib.image.generate.load.LoadImage",
+      "Position": {
+        "X": 546.58185,
+        "Y": 296.18423
       }
     },
     {
@@ -299,8 +363,8 @@
       "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "SectionId": "84075a2f-1303-42ae-b066-789a44dafc95",
       "Position": {
-        "X": 219.3588,
-        "Y": 783.2045
+        "X": 201.97592,
+        "Y": 764.48456
       }
     },
     {
@@ -308,16 +372,16 @@
       "SymbolName": "Lib.numbers.float.basic.Multiply",
       "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
-        "X": 1516.9678,
-        "Y": 514.1858
+        "X": 2017.085,
+        "Y": 397.39035
       }
     },
     {
       "ChildId": "d97ed28e-9228-401c-916a-254cc67718a9",
       "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": 544.01776,
-        "Y": 350.4251
+        "X": 327.15332,
+        "Y": 135.86255
       }
     },
     {
@@ -325,32 +389,64 @@
       "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
       "SectionId": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
       "Position": {
-        "X": 1516.9678,
-        "Y": 584.1858
+        "X": 2017.085,
+        "Y": 467.39038
+      }
+    },
+    {
+      "ChildId": "de7c7809-c10b-491c-940b-162b50015eed",
+      "SymbolName": "Lib.image.use.PickTexture",
+      "Position": {
+        "X": 1024.4858,
+        "Y": 693.78
+      }
+    },
+    {
+      "ChildId": "e422c2e7-010c-4f6d-bc34-3dca655b96c4",
+      "SymbolName": "Lib.numbers.float.logic.Compare",
+      "Position": {
+        "X": 432.92456,
+        "Y": 451.14026
+      }
+    },
+    {
+      "ChildId": "ed77d656-7108-41a5-81ec-299787e66451",
+      "SymbolName": "Lib.numbers.float.logic.Compare",
+      "Position": {
+        "X": 432.92456,
+        "Y": 486.14026
+      }
+    },
+    {
+      "ChildId": "f1dea1a6-1cdf-4582-9ca9-11364edbcf33",
+      "SymbolName": "Lib.render.shading.TextureToCubeMap",
+      "Position": {
+        "X": 853.0007,
+        "Y": 630.4281
       }
     },
     {
       "ChildId": "f51d575e-683e-4287-8983-6731dc05fe9c",
       "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": 522.31885,
-        "Y": 300.62524
+        "X": 467.15332,
+        "Y": 100.86255
       }
     },
     {
       "ChildId": "f57e04d0-e64e-46e2-ae74-e15502303269",
       "SymbolName": "Lib.render.shading.TextureToCubeMap",
       "Position": {
-        "X": 684.01776,
-        "Y": 350.4251
+        "X": 467.15332,
+        "Y": 135.86255
       }
     },
     {
       "ChildId": "f928533d-0340-4d75-8396-3dd391eeb005",
       "SymbolName": "Lib.flow.Execute",
       "Position": {
-        "X": 1781.9124,
-        "Y": 768.9589
+        "X": 2282.0295,
+        "Y": 652.16345
       }
     }
   ],
@@ -358,8 +454,8 @@
     {
       "OutputId": "1f8cbdfd-ffcd-4604-b4b4-5f1184daf138"/*Output*/,
       "Position": {
-        "X": 1781.9124,
-        "Y": 873.9589
+        "X": 2282.0295,
+        "Y": 757.16345
       }
     }
   ],
@@ -374,8 +470,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1330.0,
-        "Y": 420.0
+        "X": 1830.1172,
+        "Y": 303.20453
       },
       "Size": {
         "X": 350.0,
@@ -392,8 +488,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 889.82074,
-        "Y": 490.0
+        "X": 1172.128,
+        "Y": 303.20453
       },
       "Size": {
         "X": 369.99994,
@@ -428,8 +524,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1330.0,
-        "Y": 875.0
+        "X": 1830.1172,
+        "Y": 758.2046
       },
       "Size": {
         "X": 350.0,

@@ -43,7 +43,7 @@ internal sealed class _LenseFlareHoopPosition : Instance<_LenseFlareHoopPosition
         var rand = new Random(RandomSeed.GetValue(context));
         var fxZoneMode = (ZoneFxModes)FxZoneMode.GetValue(context);
 
-        var pointLight = context.PointLights.GetPointLight(referencedLightIndex);
+        var pointLight = context.Lights.GetLight(referencedLightIndex);
         var lightPosDx = new Vector4(pointLight.Position, 1);
 
         var posInViewDx = Vector4.Transform(lightPosDx, worldToClipSpace);

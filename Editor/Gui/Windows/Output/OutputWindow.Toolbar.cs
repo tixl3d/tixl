@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Rendering;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Video;
@@ -29,6 +30,66 @@ internal sealed partial class OutputWindow
     {
         _setupMode.DrawPinMenuItem();
     }
+
+    /// <summary>
+    /// The overlays the preview of geometry, meshes and points draws (wireframe, points, indices, selection, hover),
+    /// kept per window and handed to the preview through <see cref="EvaluationContext.PreviewOverlay"/>.
+    /// </summary>
+    private void DrawPreviewOverlayMenu()
+    {
+        if (_shownValueType != typeof(Geometry) && _shownValueType != typeof(MeshBuffers)
+                                                 && _shownValueType != typeof(BufferWithViews) && _shownValueType != typeof(StructuredList))
+            return;
+
+        ImGui.SameLine();
+        var size = Vector2.One * ImGui.GetFrameHeight();
+        if (CustomComponents.IconButton(Icon.Visible, size))
+            ImGui.OpenPopup(PreviewOverlayPopupId);
+
+        CustomComponents.TooltipForLastItem("Choose what the preview shows on top: wireframe, points, indices, selection and hover.");
+        if (!ImGui.BeginPopup(PreviewOverlayPopupId))
+            return;
+
+        for (var index = 0; index < PreviewOverlayItems.Length; index++)
+        {
+            var (overlay, icon, label) = PreviewOverlayItems[index];
+            var isOn = (State.PreviewOverlays & overlay) != 0;
+            var cursor = ImGui.GetCursorScreenPos();
+            ImGui.PushID(index);
+            if (ImGui.Selectable("##overlay", false, ImGuiSelectableFlags.NoAutoClosePopups, new Vector2(180 * T3Ui.UiScaleFactor, 0)))
+            {
+                State.PreviewOverlays ^= overlay;
+                FlagSymbolUiAsModified();
+            }
+
+            ImGui.PopID();
+
+            var drawList = ImGui.GetWindowDrawList();
+            var color = isOn ? UiColors.ForegroundFull : UiColors.TextMuted;
+            var lineHeight = ImGui.GetTextLineHeight();
+            Icons.DrawIconAtScreenPosition(icon, cursor + new Vector2(0, MathF.Round((lineHeight - Icons.FontSize) * 0.5f)), drawList, color);
+            drawList.AddText(cursor + new Vector2(Icons.FontSize + 8 * T3Ui.UiScaleFactor, 0), color, label);
+            if (isOn)
+                Icons.DrawIconAtScreenPosition(Icon.Checkmark, cursor + new Vector2(180 * T3Ui.UiScaleFactor - Icons.FontSize, 0), drawList, color);
+        }
+
+        ImGui.EndPopup();
+    }
+
+    private const string PreviewOverlayPopupId = "##previewOverlays";
+
+    private static readonly (PreviewOverlays Overlay, Icon Icon, string Label)[] PreviewOverlayItems =
+        [
+            (PreviewOverlays.Wireframe, Icon.DomainEdges, "Wireframe"),
+            (PreviewOverlays.Points, Icon.DomainPoints, "Points"),
+            (PreviewOverlays.PointIndices, Icon.Sorting, "Point indices"),
+            (PreviewOverlays.Selection, Icon.ApplySelection, "Selection"),
+            (PreviewOverlays.Hover, Icon.Target, "Hover"),
+            (PreviewOverlays.Normals, Icon.Aim, "Normals"),
+        ];
+
+    /** The type of the shown output, e.g. Geometry, even while its preview presents a rendered Command. */
+    private Type? _shownValueType;
 
     private void DrawToolbar(Type? drawnType)
     {
@@ -98,6 +159,8 @@ internal sealed partial class OutputWindow
             CustomComponents.TooltipForLastItem("Toggle gizmos and floor grid.",
                                                 "Gizmos are available for selected transform operators and can be dragged to adjust their position.");
         }
+
+        DrawPreviewOverlayMenu();
 
         // Gizmo Transform mode
         if (State.ShowGizmos != GizmoVisibility.Off)
@@ -267,6 +330,7 @@ internal sealed partial class OutputWindow
         if (!RenderProcess.TryGetRenderResolution(s, out var res))
             return string.Empty;
 
+        RenderTiming.ApplyTimeRange(s);
         var mode = s.TimeRange.ToString(); // Custom / Loop / Soundtrack / Continuous
 
         // Continuous has no fixed end, so a duration / size estimate would be meaningless.

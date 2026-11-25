@@ -1,0 +1,137 @@
+{
+  "FormatVersion": 3,
+  "Id": "c437039d-6678-4036-bafd-4497e681679c"/*SkinMeshExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2f0dded7-259d-4582-92c7-aaa02f3c3d90",
+      "SymbolName": "Types.Values.IntValue",
+      "Position": {
+        "X": 314.2085,
+        "Y": 96.008606
+      }
+    },
+    {
+      "ChildId": "2fd5dcb5-807f-4546-8ff0-47a2f1179c94",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 962.36804,
+        "Y": 219.2959
+      }
+    },
+    {
+      "ChildId": "40941418-d8fd-4c84-b52a-7297474b763c",
+      "SymbolName": "Lib.render.shading.UseMaterial",
+      "Position": {
+        "X": 962.36804,
+        "Y": 9.295898
+      }
+    },
+    {
+      "ChildId": "462697aa-62d5-4368-b114-dd8268594e20",
+      "SymbolName": "Lib.render.skinning.PoseToSkinMatrices",
+      "Position": {
+        "X": 714.6087,
+        "Y": -184.08319
+      }
+    },
+    {
+      "ChildId": "4956c811-c74f-47f6-af75-f01b075ba9ba",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1260.2291,
+        "Y": 317.07373
+      }
+    },
+    {
+      "ChildId": "575af176-8f5a-46b3-bde8-b618d9e9ee85",
+      "SymbolName": "Lib.render.skinning.SkinMesh",
+      "Position": {
+        "X": 962.36804,
+        "Y": -130.7041
+      }
+    },
+    {
+      "ChildId": "58a2cbdc-1d9d-47ba-95a7-193879ae984e",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "Position": {
+        "X": 962.36804,
+        "Y": 149.2959
+      }
+    },
+    {
+      "ChildId": "59295e4e-f3e4-4703-95de-e229f94bc9bc",
+      "SymbolName": "Lib.render.scene.DrawScene",
+      "Position": {
+        "X": 321.94043,
+        "Y": -249.0816
+      }
+    },
+    {
+      "ChildId": "80d497b1-3d71-4acb-847d-d8de8544043a",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 962.36804,
+        "Y": -25.704102
+      }
+    },
+    {
+      "ChildId": "9e628881-f426-49cb-ad71-bd0edc76ce74",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 314.2085,
+        "Y": 131.0086
+      }
+    },
+    {
+      "ChildId": "cf613397-3048-48f8-ae52-a1e40270bb4e",
+      "SymbolName": "Lib.render.skinning.SampleGltfAnimation",
+      "Position": {
+        "X": 454.2085,
+        "Y": 61.008606
+      }
+    },
+    {
+      "ChildId": "dcba201c-ca34-404a-a93c-22e4259d06b4",
+      "SymbolName": "Lib.render.scene.LoadGltfScene",
+      "Position": {
+        "X": 134.14017,
+        "Y": -102.84885
+      }
+    },
+    {
+      "ChildId": "de26c6af-4f3c-4058-9af2-a2843f546cfd",
+      "SymbolName": "Lib.mesh.draw.VisualizeUvMap",
+      "Position": {
+        "X": 1169.9551,
+        "Y": -128.62134
+      }
+    },
+    {
+      "ChildId": "e66fc180-533a-46d5-902a-38cac9935a64",
+      "SymbolName": "Lib.render.shading.SetEnvironment",
+      "Position": {
+        "X": 962.36804,
+        "Y": 79.2959
+      }
+    },
+    {
+      "ChildId": "ef239423-7297-4e58-a620-c5997351ba18",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "Position": {
+        "X": 962.36804,
+        "Y": 184.2959
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "19b2b57f-1343-4e6f-89c7-5e800b1273fb"/*ColorBuffer*/,
+      "Position": {
+        "X": 1670.2291,
+        "Y": 390.15503
+      }
+    }
+  ]
+}

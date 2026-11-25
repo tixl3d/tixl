@@ -139,6 +139,14 @@
       }
     },
     {
+      "ChildId": "2e4c7a19-8b53-4f06-9d2a-6c1f0e83b7d5",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToFloat",
+      "Position": {
+        "X": 88.22717,
+        "Y": 728.8898
+      }
+    },
+    {
       "ChildId": "3484385a-950d-4e58-9c4e-672a56b9b137",
       "SymbolName": "Lib.flow.Execute",
       "Style": "Resizable",

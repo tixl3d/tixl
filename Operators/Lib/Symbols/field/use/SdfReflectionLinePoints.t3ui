@@ -36,7 +36,8 @@
         "X": 973.8281,
         "Y": 1826.3635
       },
-      "Description": "Writes the travelled distance into F1 or F2."
+      "Description": "Writes the travelled distance into F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "94c84de7-ac0c-48c1-9a45-f2d39ab6513f"/*MaxDistance*/,
@@ -91,7 +92,8 @@
         "X": 973.8281,
         "Y": 1861.3635
       },
-      "Description": "Writes the step or reflection index into F1 or F2."
+      "Description": "Writes the step or reflection index into F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

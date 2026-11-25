@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using T3.Core.Logging;
@@ -29,7 +30,15 @@ public static class ShaderCompileFailures
         string OwnerPath,
         Guid OwnerId,
         string? SourcePath,
-        int SourceLineCount);
+        int SourceLineCount,
+        string SourceCode,
+        IReadOnlyList<Diagnostic> Diagnostics);
+
+    /// <summary>One error or warning the compiler reported.</summary>
+    /// <param name="File">Empty when it points into the compiled source itself, otherwise the included file's name.</param>
+    /// <param name="Line">1-based; 0 when the compiler gave no location.</param>
+    /// <param name="Column">1-based; 0 when unknown.</param>
+    public readonly record struct Diagnostic(bool IsError, string File, int Line, int Column, string Text);
 
     /// <summary>Most recent first. A snapshot, safe to walk while compilation continues.</summary>
     public static IReadOnlyList<Failure> Recent
@@ -41,19 +50,39 @@ public static class ShaderCompileFailures
         }
     }
 
+    /// <summary>The most recent failure of exactly this source, e.g. to list all problems of a shader whose op shows only the first.</summary>
+    public static bool TryFindBySource(string sourceCode, [NotNullWhen(true)] out Failure? failure)
+    {
+        lock (_lock)
+        {
+            foreach (var candidate in _failures)
+            {
+                if (candidate.SourceCode.Length != sourceCode.Length || !string.Equals(candidate.SourceCode, sourceCode, StringComparison.Ordinal))
+                    continue;
+
+                failure = candidate;
+                return true;
+            }
+        }
+
+        failure = null;
+        return false;
+    }
+
     public static void Clear()
     {
         lock (_lock)
             _failures.Clear();
     }
 
-    internal static void Record(string name, string entryPoint, string reason, string sourceCode, IResourceConsumer? owner)
+    internal static void Record(string name, string entryPoint, string reason, string sourceCode, IResourceConsumer? owner,
+                                IReadOnlyList<Diagnostic> diagnostics)
     {
         var (ownerPath, ownerId) = DescribeOwner(owner);
         var sourcePath = TryWriteSource(name, entryPoint, sourceCode);
 
         var failure = new Failure(DateTime.UtcNow, name, entryPoint, reason, ownerPath, ownerId, sourcePath,
-                                  CountLines(sourceCode));
+                                  CountLines(sourceCode), sourceCode, diagnostics);
 
         lock (_lock)
         {

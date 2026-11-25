@@ -307,6 +307,7 @@ ImageSequence
 Installer/Windows/Output
 Installer/macOS/Output
 Installer/Linux/Output
+Native/FFmpeg/Output
 Installer/Windows/dependencies/downloads
 
 shadertoolsconfig.json

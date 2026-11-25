@@ -26,7 +26,8 @@
         "X": -248.53421,
         "Y": -105.86792
       },
-      "GroupTitle": "Internal..."
+      "GroupTitle": "Internal...",
+      "UseVec2Control": "Range"
     }
   ],
   "SymbolChildUis": [

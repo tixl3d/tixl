@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "7fe107c5-a541-4fd4-9d6a-0fa985b11be8"/*M06h_Quaternions*/,
   "Description": "Quaternions",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

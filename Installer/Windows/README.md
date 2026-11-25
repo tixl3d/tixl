@@ -23,14 +23,17 @@ This runs:
 1. `dotnet restore`
 2. `dotnet publish` for the Player (self-contained, win-x64) to `Player/bin/ReleasePublished/`
 3. `dotnet build -c Release` for the full solution (Editor post-build copies the published Player into its output)
+4. `Installer/pack-extensions.py`, which packs the optional operator packages (Ableton Link, MediaPipe, NDI) into
+   `Installer/Windows/Output/extensions/`, the files Settings → Extensions installs from. This step needs Python 3
+   (`winget install Python.Python.3.12`); without it the build skips it with a warning.
 
-The result is a complete build in `Editor/bin/Release/net10.0/`.
+The result is a complete build in `Editor/bin/Release/net10.0/`. To try the extensions before they are published,
+set `TIXL_EXTENSIONS_INDEX` to the `extensions` folder before starting `TiXL.exe`.
 
 ## Dependencies
 
 The build script automatically downloads these into `Installer/Windows/dependencies/downloads/` if not already present:
 
-* [.NET SDK 10.0.201](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 * [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 The installer bundles them and installs them on the user's machine if needed.

@@ -27,18 +27,23 @@ jobs:
       - name: Install Build Tools
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates curl file unzip libicu70 libssl3 zlib1g
+          apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates curl file unzip libicu70 libssl3 zlib1g python3
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Fails in seconds when the tag, Tixl.props and the Linux metainfo disagree (Installer/RELEASING.md)
+      - name: Check Release Version
+        if: github.ref_type == 'tag'
+        run: python3 Installer/check-release-version.py ${{ github.ref_name }}
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: '10.0.x'
 
       - name: Cache NuGet Packages
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.nuget/packages
           key: nuget-linux-${{ hashFiles('**/*.csproj', 'Tixl.props', 'Directory.Build.props') }}
@@ -50,8 +55,19 @@ jobs:
       - name: Build Tarball
         run: Installer/Linux/build-tarball.sh
 
+      - name: Check Licences
+        run: python3 Installer/check-licences.py
+
+      # The unit tests against this Release build. The Slang tests use the compiler the tarball bundles; tests
+      # that need a GPU skip themselves in the container.
+      - name: Run Tests
+        run: |
+          export TIXL_SLANGC="$PWD/Installer/Linux/Output/tixl-linux-x64/slang/bin/slangc"
+          dotnet test Core.Tests/Core.Tests.csproj -c Release --no-build
+          dotnet test VideoServices.Tests/VideoServices.Tests.csproj -c Release --no-build
+
       - name: Upload Tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixl-linux-x64
           path: Installer/Linux/Output/*.tar.gz
@@ -59,7 +75,7 @@ jobs:
 
       - name: Attach Tarball to Release
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ github.ref_name }}
           files: Installer/Linux/Output/*.tar.gz
@@ -83,10 +99,10 @@ jobs:
         shell: bash
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download Tarball
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: tixl-linux-x64
           path: Installer/Linux/Output
@@ -105,7 +121,7 @@ jobs:
           echo "bundle=tixl-$version.flatpak" >> "$GITHUB_OUTPUT"
 
       - name: Build Flatpak Bundle
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        uses: flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3 # v6.8
         with:
           manifest-path: Installer/Linux/flatpak/app.tixl.TiXL.yml
           bundle: ${{ steps.unpack.outputs.bundle }}
@@ -115,7 +131,7 @@ jobs:
 
       - name: Attach Bundle to Release
         if: github.ref_type == 'tag'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ github.ref_name }}
           files: ${{ steps.unpack.outputs.bundle }}

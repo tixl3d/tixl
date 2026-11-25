@@ -346,6 +346,13 @@ M0 is independent and can ship first. M1 and later come after Phase 3 above; the
   previous center; meshes at points also use the previous rotation. `PreviousClipUnlessJumped` (velocity-functions)
   reports unknown motion when a center moves more than a quarter of the screen in one frame (respawned particles).
   Color-only sprite shaders write an empty normal with alpha 0, so blended sprites keep the normals behind them.
+- **Layer2d, DrawQuad, RaymarchField (2026-11-19, untested):** the shared `dx11/draw-Quad-vs.hlsl` writes velocity
+  from the transform change (previous transforms at b2); `RaymarchSDFFieldWithMatTemplate.hlsl` from the camera
+  change of the world-space hit (field changes unknown, faded near misses unknown).
+- **Decision: velocity without depth stays rejected.** `[Layer2d]` (and often `[DrawPoints]`) default to no depth
+  write, so `TryDecodeVelocity`'s depth match ignores their velocity. Accepting it (e.g. "encoded depth not behind the
+  scene") would let AO and reflections reproject the background behind a transparent layer with the layer's motion.
+  As in other engines, translucent draws only contribute motion when they write depth.
 - **M5. MotionBlur** reads the same velocity target. A velocity-based blur needs one render pass instead of
   `[RepeatFrame]`'s subframes (which since 2026-11-15 blur damped motion correctly too, via subframe steps). Velocity is displacement per *frame*, which is what TXAA needs
   (its history is one frame old), but it follows frame-duration jitter: motion blur must scale it by

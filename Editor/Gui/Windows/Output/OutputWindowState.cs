@@ -6,6 +6,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using T3.Editor.Gui.Windows.OutputSetup;
 using T3.Core.DataTypes;
+using T3.Core.Rendering;
 using T3.Core.Operator;
 using T3.Editor.UiModel.Selection;
 
@@ -25,6 +26,10 @@ internal sealed class OutputWindowState
 
     [JsonConverter(typeof(StringEnumConverter))]
     public TransformGizmoModes TransformGizmoMode = TransformGizmoModes.Move;
+
+    /// <summary>What previews of geometry, meshes and points draw on top, chosen per window in the toolbar.</summary>
+    [JsonConverter(typeof(StringEnumConverter))]
+    public PreviewOverlays PreviewOverlays = PreviewOverlayState.Defaults;
 
     // Background
     public float[] BackgroundColor = [0.1f, 0.1f, 0.1f, 1.0f];

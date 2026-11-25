@@ -14,11 +14,11 @@ namespace Lib.Utils;
 /// </summary>
 internal sealed class MeshInsideTester
 {
-    public MeshInsideTester(MeshGeometry geometry)
+    public MeshInsideTester(Geometry geometry)
     {
         var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
+        var offsets = geometry.PrimitiveVertexOffsets;
+        var corners = geometry.VertexPoints;
 
         Min = new Vector3(float.MaxValue);
         Max = new Vector3(float.MinValue);
@@ -34,8 +34,11 @@ internal sealed class MeshInsideTester
         _b = new Vector3[triangleCount];
         _c = new Vector3[triangleCount];
         var t = 0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < geometry.PrimitiveCount; faceIndex++)
         {
+            if (geometry.PrimitiveKind[faceIndex] != PrimitiveKinds.Polygon)
+                continue;
+
             var start = offsets[faceIndex];
             var end = offsets[faceIndex + 1];
             for (var c = start + 2; c < end; c++)

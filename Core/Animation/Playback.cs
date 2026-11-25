@@ -83,14 +83,16 @@ public class Playback
         
     /// <summary>
     /// The frame rate relative to 60 fps, e.g. 2 on a 120 Hz display or 25/60 when exporting at 25 fps.
-    /// Live it is measured (<see cref="FrameTiming.FrameRateRelativeTo60"/>); while rendering to file it is the value
-    /// set here by the exporter.
+    /// Live it follows <see cref="LastFrameDuration"/>, so simulations step like damping does; while rendering to file
+    /// it is the value set here by the exporter.
     ///
     /// If possible simulation operators like [ParticleSystem] or [FeedbackEffect] should apply this factor to their overall speed factor.
     /// </summary>
     public double FrameSpeedFactor
     {
-        get => IsRenderingToFile ? _frameSpeedFactorForFileRendering : FrameTiming.FrameRateRelativeTo60;
+        get => IsRenderingToFile
+                   ? _frameSpeedFactorForFileRendering
+                   : LastFrameDuration > 0 ? ReferenceFrameDurationSec / LastFrameDuration : 1;
         set => _frameSpeedFactorForFileRendering = value;
     }
     public bool IsLooping = false;
@@ -99,14 +101,26 @@ public class Playback
     public static double RunTimeInSecs => RunTimeWatch.Elapsed.TotalSeconds;
     public static int FrameCount;
     /// <summary>
-    /// Duration of the current frame in seconds: the visual frame duration live, the file time step while rendering
-    /// to file, or <see cref="FixedFrameDurationSec"/> while that is set.
+    /// How far ops that integrate per frame (damping, springs, simulations) advance this frame, in seconds. Live it is
+    /// how long the previous frame stayed on screen, or the locked frame duration with
+    /// <see cref="UseLockedFrameDuration"/>; the file time step while rendering to file; or
+    /// <see cref="FixedFrameDurationSec"/> while that is set.
     /// </summary>
-    public static double LastFrameDuration
-    {
-        get => FixedFrameDurationSec ?? _lastFrameDuration;
-        protected set => _lastFrameDuration = value;
-    }
+    public static double LastFrameDuration => FixedFrameDurationSec ?? _lastFrameDuration;
+
+    /// <summary>
+    /// How far playback time advanced this frame, in seconds: always the time the previous frame really stayed on
+    /// screen (or the file time step), so the timeline and the audio that follows it keep real time.
+    /// </summary>
+    public static double LastPlaybackStepSec => FixedFrameDurationSec ?? _lastPlaybackStepSec;
+
+    /// <summary>
+    /// Makes <see cref="LastFrameDuration"/> the locked frame duration (one refresh, or the frame the frame-rate
+    /// setting asks for) even when a frame was dropped. Paths of particles and damped values then stay even, and a
+    /// dropped frame makes them lag for that frame instead of catching up. On by default, so the Player and exports
+    /// behave like the editor's default; the editor sets it from the user's setting every frame.
+    /// </summary>
+    public static bool UseLockedFrameDuration { get; set; } = true;
 
     /// <summary>
     /// While set, <see cref="LastFrameDuration"/> returns this instead of a measured duration, so frame-duration
@@ -125,9 +139,9 @@ public class Playback
 
         var wallClockDuration = currentRuntime - _lastFrameStart;
         _lastFrameStart = currentRuntime;
-        LastFrameDuration = IsRenderingToFile ? wallClockDuration : GetLiveFrameDuration(wallClockDuration);
+        UpdateFrameDurations(wallClockDuration);
 
-        var timeSinceLastFrameInSecs = LastFrameDuration;
+        var timeSinceLastFrameInSecs = LastPlaybackStepSec;
         var isPlaying = Math.Abs(PlaybackSpeed) > 0.001;
 
         if (IsRenderingToFile)
@@ -178,20 +192,30 @@ public class Playback
     }
 
     /// <summary>
-    /// The time animations advance by in live playback: the visual frame duration when the host recorded this frame
-    /// with <see cref="FrameTiming.RecordFrameStart"/> (whole refresh periods under vsync), otherwise the wall-clock duration.
+    /// Sets <see cref="LastFrameDuration"/> and <see cref="LastPlaybackStepSec"/> from the frame recorded with
+    /// <see cref="FrameTiming.RecordFrameStart"/>. Rendering to file, or a second update within one frame, uses the
+    /// wall-clock (or file time) duration for both.
     /// </summary>
-    protected static double GetLiveFrameDuration(double wallClockDuration)
+    protected void UpdateFrameDurations(double wallClockDuration)
     {
-        if (FrameTiming.RecordedFrameCount == _lastUsedTimingFrame)
-            return wallClockDuration;
+        if (IsRenderingToFile || FrameTiming.RecordedFrameCount == _lastUsedTimingFrame)
+        {
+            _lastPlaybackStepSec = wallClockDuration;
+            _lastFrameDuration = wallClockDuration;
+            return;
+        }
 
         _lastUsedTimingFrame = FrameTiming.RecordedFrameCount;
-        return FrameTiming.VisualDeltaSec;
+        _lastPlaybackStepSec = FrameTiming.VisualDeltaSec;
+        _lastFrameDuration = UseLockedFrameDuration ? FrameTiming.LockedFrameDurationSec : FrameTiming.VisualDeltaSec;
     }
+
+    /** Per-frame simulations were tuned at 60 fps. */
+    private const double ReferenceFrameDurationSec = 1.0 / 60.0;
 
     private static double _lastFrameStart;
     private static double _lastFrameDuration;
+    private static double _lastPlaybackStepSec;
     private static long _lastUsedTimingFrame = -1;
     private double _frameSpeedFactorForFileRendering = 1;
     private double _previousTimeInBars;

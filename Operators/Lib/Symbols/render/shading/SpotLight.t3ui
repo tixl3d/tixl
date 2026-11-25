@@ -1,0 +1,223 @@
+{
+  "FormatVersion": 3,
+  "Id": "9dc0b2de-1f79-4d8b-8d87-6f3764875220"/*SpotLight*/,
+  "Description": "Adds a spot light with a cone gizmo to the connected subgraph.\n\nThe light shines from Position toward Target in a cone of ConeAngle degrees. Distance falloff uses Range and Decay like [PointLight]. With the operator selected, the move gizmo moves the light and the rotate gizmo swings Target around it, so the cone keeps its aim while you move it. Spot, point and directional lights share the limit of 8 lights.\n\nOperators with their own lighting (cel shading, hatching, tubes, ribbons) treat it as a point light for now.\n\nAKA: spotlight, cone light, stage light, lamp\n\nSee also: [SetSpotLight], [PointLight], [DirectionalLight], [SetShadow]",
+  "InputUis": [
+    {
+      "InputId": "0d4c855d-4122-4f68-8cd4-a8c30cfa850f"/*ConeAngle*/,
+      "Position": {
+        "X": 78.02582,
+        "Y": 155.93604
+      },
+      "GroupTitle": "Cone",
+      "Description": "Full opening angle of the cone in degrees.",
+      "Min": 1.0,
+      "Max": 120.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "1acd0b18-378a-4337-8089-4e07ddc79989"/*Target*/,
+      "Position": {
+        "X": 78.02582,
+        "Y": -127.043304
+      },
+      "Description": "The light points at this point. The rotate gizmo swings it around Position."
+    },
+    {
+      "InputId": "31b0cc5b-2351-4b49-8af6-ad74bc793ad9"/*Command*/,
+      "Position": {
+        "X": 875.94586,
+        "Y": -273.27655
+      }
+    },
+    {
+      "InputId": "49e9bdd3-6930-41a1-8c25-f94a24dcd61a"/*Position*/,
+      "Position": {
+        "X": 78.02582,
+        "Y": -35.99173
+      },
+      "Description": "World space position of the light.",
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "6889c5f5-3431-4800-ac75-8128b23ce57f"/*Range*/,
+      "Position": {
+        "X": 735.94586,
+        "Y": -28.27655
+      },
+      "Description": "Distance at which the light intensity has dropped to half. The intensity falls off as Intensity / ((distance / Range) ^ Decay + 1).",
+      "Min": 0.01,
+      "Max": 1000.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "86c6c87c-5e8d-4e59-b047-2eec0a55059a"/*Decay*/,
+      "Position": {
+        "X": 735.94586,
+        "Y": 6.7234497
+      },
+      "GroupTitle": "Decay",
+      "Description": "Exponent of the falloff beyond Range. Higher values make the light fade faster with distance.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "9c4db6b3-bccf-4045-ad8e-cf200244aa9d"/*IsEnabled*/,
+      "Position": {
+        "X": 1073.454,
+        "Y": -83.55928
+      },
+      "Description": "Turns the light on or off. The connected subgraph is drawn in both cases.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a93b2a2d-676c-4dad-a2fc-1433bce4662b"/*ShowGizmo*/,
+      "Position": {
+        "X": 735.9458,
+        "Y": 462.68475
+      },
+      "GroupTitle": "Gizmo Settings",
+      "Description": "Off = The gizmo is never visible\nOn = The gizmo is always visible\nIfSelected = The gizmo is visible while the operator is selected\nInherit = Follows the \"Toggle gizmos and floor grid\" setting of the output window"
+    },
+    {
+      "InputId": "c10e20ae-ceb8-47d4-bb93-5ac38368210f"/*Intensity*/,
+      "Position": {
+        "X": 78.02582,
+        "Y": 33.421204
+      },
+      "Description": "Brightness of the light.",
+      "Min": 0.0,
+      "Scale": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "ddf6d27a-4e9b-4097-944f-f1042ef60f3f"/*GizmoSize*/,
+      "Position": {
+        "X": 735.94586,
+        "Y": 392.68475
+      },
+      "Description": "Size of the drawn cone. Its opening follows ConeAngle.",
+      "Min": 0.0,
+      "Scale": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f3c26d77-de8a-4383-a24b-ab5d1063f62a"/*Color*/,
+      "Position": {
+        "X": 78.02582,
+        "Y": 100.618744
+      },
+      "Description": "Sets the color of the light.",
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00a21d67-6e55-40ef-a637-6a7e9ab1ec7a",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
+      "Position": {
+        "X": 875.94586,
+        "Y": 427.68475
+      }
+    },
+    {
+      "ChildId": "04a85dab-a5ed-45ae-bf15-f8421385ac05",
+      "SymbolName": "Lib.render.transform.RotateTowards",
+      "Position": {
+        "X": 875.94586,
+        "Y": 252.68475
+      }
+    },
+    {
+      "ChildId": "1c6c5645-7d8c-439a-a9e4-f0dcacb1516a",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 1353.454,
+        "Y": -48.55928
+      }
+    },
+    {
+      "ChildId": "5e3dfc1c-29ac-4ef8-84a6-9214ad211ceb",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 875.94586,
+        "Y": 182.68475
+      }
+    },
+    {
+      "ChildId": "75afbb8a-ab84-4d90-a215-2fcdc0e605b1",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 1213.454,
+        "Y": -83.55928
+      }
+    },
+    {
+      "ChildId": "93c48992-4b01-4e8b-9c63-a123b306696f",
+      "SymbolName": "Lib.flow.Switch",
+      "Position": {
+        "X": 1353.454,
+        "Y": -153.55928
+      }
+    },
+    {
+      "ChildId": "98f88481-8c53-4352-a875-cf844684989a",
+      "SymbolName": "Lib.numbers.float.basic.Expression",
+      "Position": {
+        "X": 403.81268,
+        "Y": 222.45294
+      }
+    },
+    {
+      "ChildId": "a0b2ee1d-25c7-4dd1-b2fb-fcbc8a181e64",
+      "SymbolName": "Types.Values.Vector3",
+      "Position": {
+        "X": 543.8127,
+        "Y": 222.45294
+      }
+    },
+    {
+      "ChildId": "a91ec57e-a7f8-44df-9104-df5110ab0a80",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 875.94586,
+        "Y": 322.68475
+      }
+    },
+    {
+      "ChildId": "cdeb44c8-0a25-407d-a990-5193155a9cb0",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "Position": {
+        "X": 875.94586,
+        "Y": 77.68475
+      }
+    },
+    {
+      "ChildId": "cfa6bbca-82ca-4a9a-ac8f-48ccd2e687d0",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
+      "Position": {
+        "X": 735.94586,
+        "Y": 77.68475
+      }
+    },
+    {
+      "ChildId": "e3b397c2-06ba-406d-ae2b-c2fdb551899c",
+      "SymbolName": "Lib.render.shading.SetSpotLight",
+      "Position": {
+        "X": 875.94586,
+        "Y": -238.27655
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "77faf1c9-34b1-4e6b-9cae-74a523225b10"/*Output*/,
+      "Position": {
+        "X": 1353.454,
+        "Y": 21.440735
+      }
+    }
+  ]
+}

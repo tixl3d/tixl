@@ -14,7 +14,6 @@
     },
     {
       "InputId": "4f52683c-f2aa-4d3f-a964-f5232fa98872"/*Visibility*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 45.0

@@ -28,7 +28,7 @@ internal sealed class PerlinNoise3 : Instance<PerlinNoise3>
         var rangeMax = RangeMax.GetValue(context);
         var scale = Amplitude.GetValue(context);
         var scaleXYZ = AmplitudeXYZ.GetValue(context);
-        var biasAndGain = BiasAndGain.GetValue(context);
+        var gainAndBias = GainAndBias.GetValue(context);
         var offset = Offset.GetValue(context);
 
         var scaleToUniformFactor = 1.37f;
@@ -41,8 +41,8 @@ internal sealed class PerlinNoise3 : Instance<PerlinNoise3>
 
         float ScalarNoise(int seedOffset)
         {
-            return (MathUtils.PerlinNoise(value,period, octaves, seed + seedOffset) * scaleToUniformFactor + 1f) 
-                   * 0.5f.ApplyGainAndBias(biasAndGain.X, biasAndGain.Y);
+            return ((MathUtils.PerlinNoise(value, period, octaves, seed + seedOffset) * scaleToUniformFactor + 1f) * 0.5f)
+                  .ApplyGainAndBias(gainAndBias.X, gainAndBias.Y);
         }
 
         // Vector3 Remap3(Vector3 value3, Vector3 inMin, Vector3 inMax, Vector3 outMin, Vector3 outMax)
@@ -82,7 +82,7 @@ internal sealed class PerlinNoise3 : Instance<PerlinNoise3>
     public readonly InputSlot<Vector3> RangeMax = new();
 
     [Input(Guid = "B7B95FC2-C73F-4DB1-BDAB-2445FE62F032")]
-    public readonly InputSlot<Vector2> BiasAndGain = new();
+    public readonly InputSlot<Vector2> GainAndBias = new();
 
     [Input(Guid = "1cd2174e-aeb2-4258-8395-a9cc16f276b5")]
     public readonly InputSlot<int> Seed = new();

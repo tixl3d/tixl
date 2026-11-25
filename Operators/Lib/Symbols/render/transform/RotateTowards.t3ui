@@ -39,7 +39,8 @@
         "Y": 135.0
       },
       "Description": "TowardsCamera = Points at the position of the current camera\nTowardsPosition = Points at AlternativeTarget",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

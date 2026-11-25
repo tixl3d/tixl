@@ -112,6 +112,14 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
 - `setVSync` (`value`: bool, optional) switches the user's Use VSync setting and returns `useVSync`; without
   `value` it only reports. Restore the previous value after a measurement — the setting is saved.
   `setTargetFrameRate` (`value`: fps, 0 = every refresh) works the same way for the Frame Rate setting.
+- `runBenchmark` (optional `note`, stored with the result: say what is uncommitted on top of the build's commit)
+  starts the Benchmark window's suite and returns at once; the run advances one measured frame per editor frame
+  (30–40 s). Poll `getBenchmarkStatus` (`isRunning`, `progress`, `resultPath`) until `isRunning` is false. The
+  finished status adds `comparison`: the previous run of the same label (OS, backend, configuration) and GPU, and
+  per test `previousMs`, `currentMs` (duration at the test's Reference), `changePercent`, `verdict`
+  (`Unchanged`, `Improved`, `Regressed`, `NotComparable`; changes count above 10 % and 0.05 ms) and `testChanged`.
+  `getBenchmarkHistory` (optional `label`, e.g. `linux-vulkan-debug`) lists saved runs newest first with `commit`,
+  `note` and `referenceMs` per test. The run switches VSync off and restores it at the end.
 - `stallMainThread` sleeps on the main thread to exercise the stall overlay (`StallWatchdog`).
   With an `estimateKey` it runs inside a `MainThreadActivity` scope, so the second run with the
   same key shows estimated progress. The overlay is presented by another thread, so neither
@@ -136,6 +144,10 @@ Parameter shapes are defined in `DebugServer.cs` — read the handler when unsur
   geometry ops without screenshots. Add `dumpObj: "<path>"` to also write the
   geometry as OBJ (one object per part, `# cut` before IsCut faces) for offline
   analysis of exactly which edges are open.
+- `getOutput` on a `Geometry` slot (the unified CPU geometry) returns point, vertex and primitive counts, polygons vs
+  curves (and how many are closed), part count, `boundaryEdges` (polygon edges with one face; 0 = closed), bounds, the vertex counts of the first 16 curves and the attribute
+  list with domain and type info. `readCount` (and `readOffset`) adds the points with their `handleIn`/`handleOut`
+  offsets, e.g. to check that subdivided points run along each curve.
 - `getOutput` on a `Texture2D` slot returns its shape (size, format, mips, array size, bind/option
   flags, disposed) - enough to see whether an op produced a texture at all.
 - `getOutput` on a `BufferWithViews` (GPU) or `StructuredList` (CPU) slot returns size, stride and

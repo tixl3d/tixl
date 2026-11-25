@@ -264,6 +264,13 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
 
     public void AddConnection(ISlot sourceSlot, int index = 0)
     {
+        // Checked before any state changes: a rejected first connection must not leave ConnectedUpdate without a source.
+        if (sourceSlot.ValueType != _valueType)
+        {
+            Log.Warning($"Type mismatch during connection: {sourceSlot.ValueType.Name} can't connect to {_valueType.Name}");
+            return;
+        }
+
         if (!HasInputConnections)
         {
             if (UpdateAction != null)
@@ -282,13 +289,10 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             _dirtyFlag.ValueVersion = -1;
         }
             
-        if (sourceSlot.ValueType != _valueType)
-        {
-            Log.Warning("Type mismatch during connection");
-            return;
-        }
-
         ArrayUtils.InsertAtIndexOrEnd(ref InputConnections, (Slot<T>)sourceSlot, index);
+
+        // A multi-input that limits its invalidation walk would not notice the new connection by its version.
+        _dirtyFlag.ValueVersion = -1;
     }
 
     private Action<EvaluationContext>? _actionBeforeAddingConnecting;
@@ -305,6 +309,8 @@ public class Slot<T> : ISlot, ITimeClipRemapTarget
             {
                 Log.Error($"{Parent} trying to delete connection at index {index}, but {GetType()} only has {InputConnections.Length} connections");
             }
+
+            _dirtyFlag.ValueVersion = -1;
         }
 
         if (!HasInputConnections)

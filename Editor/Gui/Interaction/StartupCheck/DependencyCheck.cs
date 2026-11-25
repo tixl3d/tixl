@@ -8,6 +8,7 @@ using System.Text;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
 using T3.Editor.App;
+using T3.Editor.Compilation;
 
 namespace T3.Editor.Gui.Interaction.StartupCheck;
 
@@ -109,9 +110,15 @@ internal static class DependencyCheck
         }
     }
 
-    /** User projects and package updates are compiled with the dotnet CLI, the same way <c>Compiler</c> calls it. */
+    /// <summary>
+    /// The editor compiles projects itself when it ships its compiler support files; then only projects with NuGet
+    /// packages or custom build steps need the SDK, and those say so when they are compiled.
+    /// </summary>
     private static void CheckDotNetSdk(List<MissingDependency> missing)
     {
+        if (Compiler.CanCompileWithoutSdk)
+            return;
+
         string sdkList;
         try
         {

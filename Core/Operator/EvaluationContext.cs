@@ -8,7 +8,7 @@ using T3.Core.Output.Rendering;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using Buffer = T3.Graphics.Compat.Buffer;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -48,13 +48,14 @@ public sealed class EvaluationContext
             
         LocalTime = Playback.TimeInBars;
         LocalFxTime = Playback.FxTimeInBars;
-        PointLights.Clear();
+        Lights.Clear();
         FloatVariables.Clear();
         BoolVariables.Clear();
         IntVariables.Clear();
         ObjectVariables.Clear();
         StringVariables.Clear();
         RenderPass = default;
+        PreviewOverlay = default;
             
         PbrContextSettings.SetDefaultToContext(this);
     }
@@ -283,7 +284,7 @@ public sealed class EvaluationContext
     /// </summary>
     public Dictionary<string, Texture2D> ContextTextures { get; set; } = new(10);
     // public Texture2D PrbPrefilteredSpecular { get; set; }
-    public PointLightStack PointLights { get; } = new();
+    public LightStack Lights { get; } = new();
         
     /// <summary>
     /// This should be set by RenderTargets and other ops can could be directly used by SetFog.
@@ -324,6 +325,9 @@ public sealed class EvaluationContext
     /// whole struct before and restore it after their subtree. See <see cref="RenderPassState"/>.
     /// </summary>
     public RenderPassState RenderPass;
+
+    /// <summary>Overlays and the selected or hovered elements an output window asks its preview to draw; see [GetPreviewState].</summary>
+    public PreviewOverlayState PreviewOverlay;
 
     public LegacyParticleSystem LegacyParticleSystem;
     public ParticleSystem ParticleSystem;

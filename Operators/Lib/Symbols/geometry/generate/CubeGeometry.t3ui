@@ -1,0 +1,40 @@
+{
+  "FormatVersion": 3,
+  "Id": "85c19291-2bc1-4271-88f9-f1b50696da1b"/*CubeGeometry*/,
+  "Description": "Generates a cube as CPU-side procedural geometry: six faces, each split into a grid of quads by Segments, with hard-edge corner normals and per-face UVs.\n\nUse [GeometryToMesh] to compile the geometry for rendering with [DrawMesh].",
+  "InputUis": [
+    {
+      "InputId": "51c56d70-2a5b-4525-b4d1-87c867c25ae2"/*Segments*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
+      },
+      "Description": "Number of segments along X, Y and Z. Each face becomes a grid of quads, e.g. 10, 1, 3 for a bar that bends along X; points along the edges are shared, so the cube stays closed."
+    },
+    {
+      "InputId": "d5c13c76-103e-4264-8056-88a33a9f0e99"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Edge lengths of the cube."
+    },
+    {
+      "InputId": "e6b1a8f2-3c4d-4f7a-9b2e-5d8c1a6f3e47"/*UniformScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a3b04e1c-aa43-41fe-bf6a-1c21f6f2efd3"/*Geometry*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

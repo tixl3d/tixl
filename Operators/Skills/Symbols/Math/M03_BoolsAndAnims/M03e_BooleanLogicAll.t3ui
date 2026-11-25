@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "b3fe4803-fa91-45c4-ac77-e827edd78d76"/*M03e_BooleanLogicAll*/,
   "Description": "Boolean Logic: All",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -74,7 +74,8 @@
         "Y": 475.0
       },
       "GroupTitle": "Envelope",
-      "Description": "Gate plays while PlayAudio stays true. Trigger starts the sample on a rising edge (a one-frame pulse is enough) and lets it play until it ends, StopAudio fires, or the envelope finishes."
+      "Description": "Gate plays while PlayAudio stays true. Trigger starts the sample on a rising edge (a one-frame pulse is enough) and lets it play until it ends, StopAudio fires, or the envelope finishes.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a5de0d72-5924-4f3a-a02f-d5de7c03f07f"/*Seek*/,

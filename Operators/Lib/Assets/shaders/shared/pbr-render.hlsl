@@ -1,5 +1,10 @@
 #include "shared/pbr.hlsl"
 
+// Shaders with a specular value per pixel (e.g. raymarched fields with per-object materials) define this before the include.
+#ifndef PBR_SPECULAR
+#define PBR_SPECULAR Specular
+#endif
+
 
 #ifndef __AdjustRoughnessForSpecularAA
 #define __AdjustRoughnessForSpecularAA
@@ -22,6 +27,18 @@ inline float AdjustRoughnessForSpecularAA(float baseRoughness, float specularAA)
 #endif
 
 
+
+/**
+ * Values for the base color (SV_Target3) and material (SV_Target4) targets of [RenderTarget], read from frag after
+ * ComputePbr(). tint is any color multiplied onto the lit result afterwards, coverage 0 marks pixels without a surface.
+ * Material alpha is the relight coverage: 1 for PBR surfaces, 0 where nothing relightable was drawn. Unlike an id it
+ * survives the MSAA resolve, which averages samples.
+ */
+void GetMaterialTargets(float3 tint, float coverage, out float4 baseColor, out float4 material)
+{
+    baseColor = float4(saturate(frag.albedo.rgb * BaseColor.rgb * Color.rgb * tint), saturate(frag.Occlusion));
+    material = float4(saturate(frag.Roughness), saturate(frag.Metalness), saturate(PBR_SPECULAR), saturate(coverage));
+}
 
 // based on https://github.com/Nadrin/PBR/blob/master/data/shaders/hlsl/pbr.hlsl
 float4 ComputePbr()
@@ -46,13 +63,9 @@ float4 ComputePbr()
     float3 directLighting = 0.0;
     for (uint i = 0; i < (uint)ActiveLightCount; ++i)
     {
-        float3 Lvec = Lights[i].position - frag.worldPosition;
-        float dist = length(Lvec);
-        float3 L = Lvec / max(dist, 1e-4); // normalize once
-
-        float intensity = Lights[i].intensity / (pow(dist / Lights[i].range, Lights[i].decay) + 1);
-
-        float3 Lradiance = Lights[i].color.rgb * intensity;
+        float3 L;
+        float3 Lradiance;
+        EvaluateLight(Lights[i], frag.worldPosition, L, Lradiance);
 
         float NdotV = saturate(dot(N, V));
         float NdotL = saturate(dot(N, L));
@@ -65,7 +78,7 @@ float4 ComputePbr()
 
         float3 kd = lerp(1.0 - F, 0.0, frag.Metalness);
         float3 diffuseBRDF = kd * frag.albedo.rgb;
-        float3 specularBRDF = ((F * D * G) / max(Epsilon, 4.0 * NdotL * NdotV)) * Specular;
+        float3 specularBRDF = ((F * D * G) / max(Epsilon, 4.0 * NdotL * NdotV)) * PBR_SPECULAR;
 
         directLighting += (diffuseBRDF + specularBRDF) * Lradiance * NdotL;
     }

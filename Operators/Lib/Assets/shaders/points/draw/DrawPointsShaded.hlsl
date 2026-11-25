@@ -103,6 +103,8 @@ struct psOutput
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
     float4 Velocity : SV_Target2;
+    float4 BaseColor : SV_Target3;
+    float4 Material : SV_Target4;
 
     // The sphere's front lies between the quad and the camera, so depth only ever moves closer.
     float Depth : SV_DepthLessEqual;
@@ -268,13 +270,15 @@ psOutput psMain(psInput pin)
     frag.Lo = normalize(eyePosition - frag.worldPosition);
 
     float4 litColor = ComputePbr();
-    litColor.rgba *= GetField(float4(frag.worldPosition.xyz, 0)).rgba;
+    float4 fieldColor = GetField(float4(frag.worldPosition.xyz, 0));
+    litColor.rgba *= fieldColor;
     if (litColor.a < 0.04)
         discard;
 
     output.Color = litColor;
 
     output.Normal = float4 (frag.N,1);
+    GetMaterialTargets(fieldColor.rgb, 1, output.BaseColor, output.Material);
 
     return output;
 }

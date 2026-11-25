@@ -11,6 +11,7 @@ using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.InputUi.SingleControl;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.OutputUi;
+using T3.Editor.Gui.OutputUi.GeometryViews;
 using T3.Editor.UiModel.InputsAndTypes;
 using Int3 = T3.Core.DataTypes.Vector.Int3;
 using Point = T3.Core.DataTypes.Point;
@@ -91,8 +92,7 @@ internal static class UiRegistration
                                 typeof(T3.Graphics.Compat.PrimitiveTopology));
         
         RegisterTypesToProperty(UiProperties.CpuGeometry,
-                                typeof(MeshGeometry),
-                                typeof(CurveGeometry));
+                                typeof(Geometry));
 
         RegisterTypesToProperty(UiProperties.CpuFields,
                                 typeof(ScalarField),
@@ -144,8 +144,9 @@ internal static class UiRegistration
         RegisterIOType(typeof(Texture3dWithViews), null, () => new Texture3dOutputUi());
         RegisterIOType(typeof(Command), null, () => new CommandOutputUi());
         RegisterIOType(typeof(BufferWithViews), null, () => new BufferWithViewsOutputUi());
+        RegisterIOType(typeof(MeshBuffers), null, () => new MeshBuffersOutputUi());
         RegisterIOType(typeof(SceneSetup), () => new SceneSetupInputUi(), () => new SceneSetupOutputUi());
-        RegisterIOType(typeof(MeshGeometry), null, () => new MeshGeometryOutputUi());
+        RegisterIOType(typeof(Geometry), null, () => new GeometryOutputUi());
         RegisterIOType(typeof(AudioGraphNode), null, () => new AudioGraphNodeOutputUi());
 
         return;

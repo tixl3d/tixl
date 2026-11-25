@@ -65,13 +65,12 @@ internal static class LayoutHandling
             if (_saveLayoutActions[i].Triggered())
             {
                 SaveLayout(i);
-                ActionToast.Show("{Saved window layout " + (i + 1) + "}   [F" + (i + 1) + "] restores it");
                 break;
             }
 
             if (_loadLayoutActions[i].Triggered())
             {
-                LoadAndApplyLayoutOrFocusMode((Layouts)i);
+                LoadLayoutWithToast(i);
                 break;
             }
         }
@@ -87,7 +86,7 @@ internal static class LayoutHandling
                 if (CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, "F" + (i + 1), isEnabled: DoesLayoutExists(i),
                                                   reserveIconColumn: false))
                 {
-                    LoadAndApplyLayoutOrFocusMode((Layouts)i);
+                    LoadLayoutWithToast(i);
                 }
             }
 
@@ -196,19 +195,32 @@ internal static class LayoutHandling
         return titles;
     }
 
-    public static void LoadAndApplyLayoutOrFocusMode(Layouts layoutId)
+    /** Switches to a numbered layout on the user's request. Restoring the layout on startup stays silent. */
+    private static void LoadLayoutWithToast(int index)
+    {
+        if (!LoadAndApplyLayoutOrFocusMode((Layouts)index))
+        {
+            ActionToast.Show("{Window layout " + GetLayoutNumber(index) + " is empty}" + KeyHint(_saveLayoutActions[index], " saves the current one"));
+            return;
+        }
+
+        ActionToast.Show("{Window layout " + GetLayoutNumber(index) + "}");
+    }
+
+    /// <returns>False if the layout couldn't be loaded</returns>
+    public static bool LoadAndApplyLayoutOrFocusMode(Layouts layoutId)
     {
         var index = (int)layoutId;
 
         var relativePath = Path.Combine(LayoutSubfolder, GetLayoutFilename(index));
         if (!UserData.TryLoading(relativePath, out var jsonBlob))
-            return;
+            return false;
 
         var serializer = JsonSerializer.Create();
         if (serializer.Deserialize(new StringReader(jsonBlob), typeof(Layout)) is not Layout layout)
         {
             Log.Error("Can't load layout");
-            return;
+            return false;
         }
 
         // Reset stale layouts saved against an older ImGui version. ImGui's ini
@@ -231,12 +243,12 @@ internal static class LayoutHandling
             }
 
             if (!UserData.TryLoading(relativePath, out jsonBlob))
-                return;
+                return false;
 
             if (serializer.Deserialize(new StringReader(jsonBlob), typeof(Layout)) is not Layout reloaded)
             {
                 Log.Error("Can't load default layout");
-                return;
+                return false;
             }
             layout = reloaded;
         }
@@ -264,6 +276,8 @@ internal static class LayoutHandling
         {
             UiConfig.RestoreBackgroundAfterFocusMode();
         }
+
+        return true;
     }
 
     private static Window? FindWindowToRestoreFocus()
@@ -384,6 +398,18 @@ internal static class LayoutHandling
 
         serializer.Serialize(file, layout);
         UserSettings.Config.WindowLayoutIndex = index;
+
+        ActionToast.Show("{Saved window layout " + GetLayoutNumber(index) + "}" + KeyHint(_loadLayoutActions[index], " restores it"));
+    }
+
+    /** Layouts are numbered from 1 in the UI, matching their F-keys. */
+    internal static string GetLayoutNumber(int index) => (index + 1).ToString();
+
+    /** A toast hint like "[F2] restores it", or nothing if the action has no shortcut in the current keymap. */
+    internal static string KeyHint(UserActions action, string text)
+    {
+        var shortcuts = action.ListShortcuts();
+        return string.IsNullOrEmpty(shortcuts) ? string.Empty : "   [" + shortcuts + "]" + text;
     }
 
     /// <summary>

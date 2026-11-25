@@ -67,6 +67,7 @@ internal partial class EditableSymbolProject
             if(gotSymbol)
             {
                 newSymbolUi!.FlagAsModified();
+                NotifySymbolStructureChange();
             }
 
             _allProjectsCache = null;

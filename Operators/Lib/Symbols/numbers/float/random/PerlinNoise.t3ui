@@ -13,7 +13,7 @@
       "Description": "Offset added to the time."
     },
     {
-      "InputId": "296d0f7f-d484-4781-b01f-48839def0324"/*BiasAndGain*/,
+      "InputId": "296d0f7f-d484-4781-b01f-48839def0324"/*GainAndBias*/,
       "Position": {
         "X": -2.7436478,
         "Y": -54.555206

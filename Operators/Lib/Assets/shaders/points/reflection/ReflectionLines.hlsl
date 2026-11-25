@@ -67,6 +67,9 @@ bool intersect(
     out float3 b,
     out float t)
 {
+    b = 0;
+    t = 0;
+
     // Edge vectors
     float3 e_1 = v1 - v0;
     float3 e_2 = v2 - v0;

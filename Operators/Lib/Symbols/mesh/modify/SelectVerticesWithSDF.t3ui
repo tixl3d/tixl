@@ -9,7 +9,8 @@
         "X": 945.3048,
         "Y": 1775.2576
       },
-      "Description": "Additionally weights Strength.\n\nNone: no extra weighting.\nF1 / F2: weights by the existing vertex selection."
+      "Description": "Additionally weights Strength.\n\nNone: no extra weighting.\nF1 / F2: weights by the existing vertex selection.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1140dc1e-430a-4a29-806e-6fb0b8eccaad"/*Mode*/,
@@ -122,7 +123,8 @@
         "Y": 1845.2576
       },
       "GroupTitle": "Selection Range",
-      "Description": "How the distance is mapped to the selection.\n\nCentered: the transition is centered on the field surface.\nFromStart: the transition starts at the field surface.\nPingPong: repeats back and forth with the distance.\nRepeat: repeats with the distance."
+      "Description": "How the distance is mapped to the selection.\n\nCentered: the transition is centered on the field surface.\nFromStart: the transition starts at the field surface.\nPingPong: repeats back and forth with the distance.\nRepeat: repeats with the distance.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [

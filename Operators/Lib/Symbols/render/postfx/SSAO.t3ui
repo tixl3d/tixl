@@ -58,7 +58,8 @@
         "Y": 1812.5299
       },
       "Description": "Near and far clip planes used to linearize the depth buffer. Should match the clip planes of the camera.",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "938b9656-f0ad-4f4c-be45-e56185f7a94a"/*DepthBuffer*/,

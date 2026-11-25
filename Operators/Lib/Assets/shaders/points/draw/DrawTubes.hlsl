@@ -2,15 +2,17 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/velocity-functions.hlsl"
 
-static const float3 Corners[] = 
+/** x selects the segment's start or end ring, y the side of the quad between two ring vertices. */
+static const float2 Corners[] =
 {
-  float3(0, -1, 0),
-  float3(1, -1, 0), 
-  float3(1,  1, 0), 
-  float3(1,  1, 0), 
-  float3(0,  1, 0), 
-  float3(0, -1, 0),  
+  float2(0, -1),
+  float2(1, -1),
+  float2(1,  1),
+  float2(1,  1),
+  float2(0,  1),
+  float2(0, -1),
 };
 
 cbuffer Transforms : register(b0)
@@ -33,28 +35,20 @@ cbuffer Params : register(b1)
     float Width;
     float Spin;
     float Twist;
-    float UseWAsU;
-    float2 TextureRange;    
     float WidthFX;
-    float UseScale;
-    float UniformScale;
-    float CapStart;
-    float CapEnd;
-    float Smooth;
-    float RoundAmount;
-    float SubSegCount;
-    float DistanceFade;
-    float FadeStartDist;
-    float FadeEndDist;
-    float MinWidthFactor;
-    float TextureScale;
+    float UsePointScale;
+    float CapInset;
+    float FlatAround;
+    float FlatAlong;
+    float Miter;
+    float2 TextureRange;
 };
 
 cbuffer FogParams : register(b2)
 {
     float4 FogColor;
     float FogDistance;
-    float FogBias;   
+    float FogBias;
 }
 
 cbuffer PointLights : register(b3)
@@ -75,406 +69,313 @@ cbuffer PbrParams : register(b4)
 cbuffer IntParams : register(b5)
 {
     int SideCount;
+    int TextureMode;
+    int CloseEnds;
 };
 
-
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b6)
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
 
 struct psInput
 {
     float2 texCoord : TEXCOORD;
     float4 pixelPosition : SV_POSITION;
     float3 worldPosition : POSITION;
-    float3x3 tbnToWorld : TBASIS;    
-    float fog:VPOS;
-    float4 color: COLOR;
+    float3x3 tbnToWorld : TBASIS;
+    float fog : VPOS;
+    float4 color : COLOR;
+    float4 clipPosition : CLIPPOSITION;
+    float4 previousClipPosition : PREVIOUSCLIPPOSITION;
+
+    // The normals of this vertex's angle on the rings before, at the start, at the end and after its segment, in
+    // world space, for curved interpolation along the tube.
+    float3 normalBefore : NORMALBEFORE;
+    float3 normalStart : NORMALSTART;
+    float3 normalEnd : NORMALEND;
+    float3 normalAfter : NORMALAFTER;
+    float segmentFraction : SEGMENTFRACTION;
+    float smoothAlong : SMOOTHALONG;
 };
 
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
 StructuredBuffer<Point> Points : register(t0);
-//Texture2D<float4> texture2 : register(t1);
-
-// Cumulative arc length (fixed-point millimeters) at each point, from the arc-length
-// pre-pass + exclusive prefix sum. VS-only; bound at t6 by the vertex stage.
-StructuredBuffer<uint> ArcCumMM : register(t6);
 
 Texture2D<float4> BaseColorMap : register(t1);
 Texture2D<float4> EmissiveColorMap : register(t2);
 Texture2D<float4> RSMOMap : register(t3);
 Texture2D<float4> NormalMap : register(t4);
-TextureCube<float4> PrefilteredSpecular: register(t5);
-
-
+TextureCube<float4> PrefilteredSpecular : register(t5);
 Texture2D<float4> BRDFLookup : register(t6);
 
-static const int DrawsPerQuad =6;
-static int DrawsPerStep = DrawsPerQuad * SideCount;
-static const float Tau = 3.141578 * 2;
+// Registers are unique across both stages: Vulkan derives a slot's descriptor type from its declaration, so a
+// buffer and a texture sharing one would bind the wrong type.
 
-// Redistributes spacing along the line around each point (independent scale mode only).
-// A point with Scale.x > 1 pulls its neighbors apart along the line, < 1 pushes them together.
-float3 LineStretch(int i, uint pointCount)
+
+static const int DrawsPerQuad = 6;
+static const float Tau = 3.14159265 * 2;
+
+/** Sharper corners than this keep a narrower joint instead of throwing out long spikes, like SVG's miter limit. */
+static const float MaxMiterStretch = 4;
+
+#include "points/draw/DrawTubesCenterline.hlsl"
+
+/** Per point, the ring orientation and distances from the rotation-minimizing frame pre-pass. VS-only. */
+StructuredBuffer<RingFrame> RingFrames : register(t7);
+
+/** The points one frame earlier, in the same order. Unbound or shorter, points count as not moving. VS-only. */
+StructuredBuffer<Point> PreviousPoints : register(t8);
+
+/** Position of a point along the tube as chosen by TextureMode, before TextureRange: drives both the texture and
+    the twist, so a twisting texture stays aligned with its stripes. */
+float GetCoordinateAlongTube(int pointIndex, uint pointCount)
 {
-    if (pointCount < 2 || UseScale < 0.5 || UniformScale >= 0.5) return float3(0, 0, 0);
+    // The continuous modes let the distance run on through all lines of the buffer instead of restarting per line.
+    RingFrame frame = RingFrames[pointIndex];
+    bool isContinuous = TextureMode >= 5;
+    float distance = isContinuous ? frame.Line.y : frame.NormalAndDistance.w;
+    float totalDistance = isContinuous ? frame.Line.z : frame.Line.x;
+    bool isNormalized = TextureMode == 4 || TextureMode == 6;
 
-    float3 pos = Points[i].Position;
-    float3 disp = 0;
+    // Distance is in world units, so points added at a line's end leave the texture before them in place.
+    return TextureMode == 1   ? Points[pointIndex].FX1
+           : TextureMode == 2 ? Points[pointIndex].FX2
+           : TextureMode >= 3 ? (isNormalized ? distance / max(totalDistance, Epsilon) : distance)
+                              : (float)pointIndex / max((float)pointCount - 1, 1);
+}
 
-    if (i > 0)
+/** How far a point moved since the last frame, or zero without a matching previous point. */
+float3 GetPointMovement(int pointIndex, uint pointCount)
+{
+    uint previousCount, previousStride;
+    PreviousPoints.GetDimensions(previousCount, previousStride);
+    if (previousCount != pointCount)
+        return 0;
+
+    // An unbound buffer reads zeros; a zero rotation marks such a point.
+    Point previousPoint = PreviousPoints[pointIndex];
+    if (dot(previousPoint.Rotation, previousPoint.Rotation) < 1e-6)
+        return 0;
+
+    return Points[pointIndex].Position - previousPoint.Position;
+}
+
+/** One vertex of a ring: the corner at cornerY of side sideIndex on the ring at a point. */
+struct RingVertex
+{
+    float3 Direction;
+
+    /** Offset from the point for a Width of 1, with the cross-section scale and the miter stretch. */
+    float3 Side;
+
+    float3 Normal;
+    float RingFraction;
+};
+
+RingVertex GetRingVertex(int ringIndex, int sideIndex, float cornerY, uint pointCount)
+{
+    RingVertex vertex;
+    Point ringPoint = Points[ringIndex];
+    float3 direction = CenterlineTangent(ringIndex, pointCount);
+    float3 ringNormal = RingFrames[ringIndex].NormalAndDistance.xyz;
+    ringNormal = SafeNormalize(ringNormal - dot(ringNormal, direction) * direction, AnyPerpendicular(direction));
+
+    // This handedness makes the outside of the tube its front face.
+    float3 ringBinormal = cross(ringNormal, direction);
+    float2 crossSectionScale = UsePointScale > 0.5 ? ringPoint.Scale.yz : 1;
+
+    float ringFraction = (sideIndex + (cornerY * 0.5 + 0.5)) / SideCount;
+    float angleOffset = (Spin + Twist * GetCoordinateAlongTube(ringIndex, pointCount)) * 3.14159265 / 180.0;
+    float angle = ringFraction * Tau + angleOffset;
+
+    // FlatAround turns both edges of a side towards the normal of its center, so at 1 each side reads as one facet.
+    float sideCenterAngle = (sideIndex + 0.5) / SideCount * Tau + angleOffset;
+    float normalAngle = lerp(angle, sideCenterAngle, FlatAround);
+
+    float3 side = ringNormal * (cos(angle) * crossSectionScale.x) + ringBinormal * (sin(angle) * crossSectionScale.y);
+
+    // A round ring in the bisector plane pinches the corner; stretching it along the bend by 1 / cos(half the bend
+    // angle) keeps both segments at their full width.
+    float3 miterAxis = 0;
+    float miterStretch = 1;
+    float3 outgoing = DirectionToDistinctNeighbour(ringIndex, 1, pointCount);
+    float3 incoming = DirectionToDistinctNeighbour(ringIndex, -1, pointCount);
+    if (dot(outgoing, outgoing) > 0.5 && dot(incoming, incoming) > 0.5)
     {
-        // The branch is dead when a caller inlines this with a constant i of 0, but the compiler still
-        // emits the access, and a literal Points[-1] is invalid SPIR-V. max() keeps the index in range.
-        int prev = max(i - 1, 0);
-        float s = Points[prev].Scale.x;
-        s = isnan(s) ? 1 : s;
-        disp += (s - 1.0) * 0.5 * (pos - Points[prev].Position);
+        float cosHalfBend = dot(direction, outgoing);
+        float3 bend = outgoing - cosHalfBend * direction;
+        if (dot(bend, bend) > 1e-8)
+        {
+            miterAxis = normalize(bend);
+            float fullStretch = min(1 / max(cosHalfBend, 1 / MaxMiterStretch), MaxMiterStretch);
+            miterStretch = max(lerp(1, fullStretch, Miter), 0.01);
+        }
     }
+    side += miterAxis * (dot(side, miterAxis) * (miterStretch - 1));
 
-    if (i < (int)pointCount - 1)
-    {
-        float s = Points[i + 1].Scale.x;
-        s = isnan(s) ? 1 : s;
-        disp += (s - 1.0) * 0.5 * (pos - Points[i + 1].Position);
-    }
+    // The normal of an elliptic cross-section leans towards its narrow axis.
+    float3 normal = SafeNormalize(ringNormal * (cos(normalAngle) / max(crossSectionScale.x, Epsilon))
+                                  + ringBinormal * (sin(normalAngle) / max(crossSectionScale.y, Epsilon)), side);
 
-    return disp;
+    // On a mitered joint the average of both segments' normals is the stretched ring's own normal: inverse stretch.
+    vertex.Normal = SafeNormalize(normal + miterAxis * (dot(normal, miterAxis) * (1 / miterStretch - 1)), normal);
+    vertex.Direction = direction;
+    vertex.Side = side;
+    vertex.RingFraction = ringFraction;
+    return vertex;
 }
 
-float3 EffectivePos(int i, uint pointCount)
-{
-    return Points[i].Position + LineStretch(i, pointCount);
-}
-
-float3 getTangent(int i, uint pointCount)
-{
-    if (pointCount < 2) return float3(1,0,0);
-    if (i == 0)          return EffectivePos(1, pointCount) - EffectivePos(0, pointCount);
-    if (i == (int)pointCount - 1) return EffectivePos(i, pointCount) - EffectivePos(i-1, pointCount);
-    return (EffectivePos(i+1, pointCount) - EffectivePos(i-1, pointCount)) * 0.5;
-}
-
-float3 hermitePos(float3 p0, float3 m0, float3 p1, float3 m1, float t)
-{
-    float t2 = t*t, t3 = t2*t;
-    return (2*t3-3*t2+1)*p0 + (t3-2*t2+t)*m0 + (-2*t3+3*t2)*p1 + (t3-t2)*m1;
-}
-
-psInput vsMain(uint id: SV_VertexID)
+psInput vsMain(uint id : SV_VertexID)
 {
     uint pointCount, pointStride;
     Points.GetDimensions(pointCount, pointStride);
 
     psInput output;
-    int subSegs = (Smooth >= 0.5) ? (int)SubSegCount : 1;
-    uint tubeVerts = (pointCount - 1) * (uint)subSegs * DrawsPerStep;
-    uint capVertsPerCap = (SideCount + 1) * 3;
-    uint capVerts = capVertsPerCap * 2;
 
-    if (id < tubeVerts)
+    int drawsPerSegment = DrawsPerQuad * SideCount;
+    int segmentIndex = id / drawsPerSegment;
+    int indexInSegment = id % drawsPerSegment;
+    int sideIndex = indexInSegment / DrawsPerQuad;
+    float2 corner = Corners[indexInSegment % DrawsPerQuad];
+
+    // Each ring sits at a point and is shared by the segments on both sides of it, so joints stay closed.
+    int pointIndex = segmentIndex + (int)corner.x;
+    Point linePoint = Points[pointIndex];
+
+    // The draw covers one segment less than there are points; a separator at either end collapses the segment.
+    bool hasSegment = segmentIndex + 1 < (int)pointCount;
+    if (hasSegment)
+        hasSegment = IsLinePoint(segmentIndex, pointCount) && IsLinePoint(segmentIndex + 1, pointCount);
+
+    // Closed ends turn the segment at each line end into a cone: its end ring collapses into a tip on the axis,
+    // which CapInset moves towards the neighbour ring until the cone flattens into a disc.
+    int ringIndex = pointIndex;
+    int tipIndex = pointIndex;
+    bool isCapSegment = false;
+    bool isTip = false;
+    float3 tipPosition = 0;
+    float3 capAxis = 0;
+    float capLength = 0;
+    if (CloseEnds != 0 && hasSegment)
     {
-        int indexInLineStep = id % DrawsPerStep;
-        int cornerIndex = indexInLineStep % DrawsPerQuad;
-        int sideIndex = indexInLineStep / DrawsPerQuad;
+        bool startIsLineEnd = !IsLinePoint(segmentIndex - 1, pointCount);
+        bool endIsLineEnd = !IsLinePoint(segmentIndex + 2, pointCount);
 
-        int subSegId = id / DrawsPerStep;
-        int sourceSeg = subSegId / subSegs;
-        int subIndex = subSegId % subSegs;
-
-float3 cornerFactors = Corners[cornerIndex];
-        float t = (cornerFactors.x < 0.5 ? (float)subIndex : (float)(subIndex + 1)) / (float)subSegs;
-        float f = ((float)sourceSeg + t) / clamp((float)(pointCount - 1), 1.0, 100000.0);
-
-        Point p0 = Points[sourceSeg];
-        Point p1 = Points[sourceSeg + 1];
-
-        bool separator = IsSeparator(p0) || IsSeparator(p1);
-
-        float3 scale0 = p0.Scale;
-        scale0.x = isnan(scale0.x) ? 1 : scale0.x;
-        scale0.y = isnan(scale0.y) ? 1 : scale0.y;
-        scale0.z = isnan(scale0.z) ? 1 : scale0.z;
-        float3 scale1 = p1.Scale;
-        scale1.x = isnan(scale1.x) ? 1 : scale1.x;
-        scale1.y = isnan(scale1.y) ? 1 : scale1.y;
-        scale1.z = isnan(scale1.z) ? 1 : scale1.z;
-        float3 pointScale = lerp(scale0, scale1, t);
-
-        bool independentScale = (UseScale >= 0.5 && UniformScale < 0.5);
-
-float3 pos0 = EffectivePos(sourceSeg, pointCount);
-        float3 pos1 = EffectivePos(sourceSeg + 1, pointCount);
-        float3 pPos;
-        if (Smooth >= 0.5)
+        // A line of two points has no inner ring to close towards, so it stays open.
+        if (startIsLineEnd != endIsLineEnd)
         {
-            float3 m0 = getTangent(sourceSeg, pointCount);
-            float3 m1 = getTangent(sourceSeg + 1, pointCount);
-            pPos = hermitePos(pos0, m0, pos1, m1, t);
+            tipIndex = startIsLineEnd ? segmentIndex : segmentIndex + 1;
+            ringIndex = startIsLineEnd ? segmentIndex + 1 : segmentIndex;
+            float3 basePosition = Points[ringIndex].Position;
+            float3 endPosition = Points[tipIndex].Position;
+            tipPosition = lerp(endPosition, basePosition, CapInset);
+            capAxis = SafeNormalize(endPosition - basePosition, float3(1, 0, 0));
+            capLength = length(tipPosition - basePosition);
+            isCapSegment = true;
+            isTip = pointIndex == tipIndex;
         }
-        else
-        {
-            pPos = lerp(pos0, pos1, t);
-        }
+    }
 
-        float4 q0 = p0.Rotation;
-        float4 q1 = p1.Rotation;
-        if (dot(q0, q1) < 0) q1 = -q1;
-        float4 pointRotation = normalize(lerp(q0, q1, t));
+    // A cap segment takes its frame, width and spin from the ring it closes, so its rim meets that ring exactly.
+    Point ringPoint = Points[ringIndex];
+    RingVertex ringVertex = GetRingVertex(ringIndex, sideIndex, corner.y, pointCount);
+    float3 direction = ringVertex.Direction;
+    float3 normal = ringVertex.Normal;
+    float ringFraction = ringVertex.RingFraction;
 
-        float w0, w1;
-        if (UseScale >= 0.5 && UniformScale >= 0.5)
-        {
-            w0 = scale0.x;
-            w1 = scale1.x;
-        }
-        else if (WidthFX >= 0.5 && WidthFX < 1.5)
-        {
-            w0 = isnan(p0.FX1) ? 1 : p0.FX1;
-            w1 = isnan(p1.FX1) ? 1 : p1.FX1;
-        }
-        else if (WidthFX >= 1.5)
-        {
-            w0 = isnan(p0.FX2) ? 1 : p0.FX2;
-            w1 = isnan(p1.FX2) ? 1 : p1.FX2;
-        }
-        else
-        {
-            w0 = 1; w1 = 1;
-        }
-        float WidthFactor = lerp(w0, w1, t);
-        if (independentScale)
-        {
-            WidthFactor = 1.0; // Cross-section is scaled per-axis below
-        }
-        if (separator)
-        {
-            WidthFactor = NAN; // Collapse the segment at separators
-        }
-        WidthFactor *= (1.0 + RoundAmount * sin(3.14159265 * t));
+    float widthFactor = WidthFX < 0.5   ? 1
+                        : WidthFX < 1.5 ? ringPoint.FX1
+                                        : ringPoint.FX2;
+    if (!hasSegment)
+        widthFactor = NAN;
 
-        float distFactor = 1.0;
-        if (DistanceFade >= 0.5)
-        {
-            float4 centerCamPos = mul(float4(pPos, 1), ObjectToCamera);
-            float camDist = -centerCamPos.z;
-            float distT = saturate((camDist - FadeStartDist) / max(FadeEndDist - FadeStartDist, 0.001));
-            distFactor = lerp(1.0, MinWidthFactor, distT);
-        }
+    float3 radius = ringVertex.Side * Width * widthFactor;
+    float3 pInObject = isTip ? tipPosition : ringPoint.Position + radius;
 
-        float fRing = (sideIndex + (cornerFactors.y / 2 + 0.5)) / SideCount;
-        float angleOffset = (Spin + Twist * f) * 3.14159265 / 180.0;
-        float spinRad = fRing * Tau + angleOffset;
+    // Linear interpolation turns the normal at a constant rate within a segment and changes that rate at every point,
+    // which highlights show as bands. The pixel shader instead follows a curve through the normals of this vertex's
+    // angle on four consecutive rings; line ends repeat their last ring.
+    float3 normalStart = normal;
+    float3 normalEnd = normal;
+    float3 normalBefore = normal;
+    float3 normalAfter = normal;
+    if (hasSegment && !isCapSegment)
+    {
+        int startIndex = segmentIndex;
+        int endIndex = segmentIndex + 1;
+        int beforeIndex = IsLinePoint(startIndex - 1, pointCount) ? startIndex - 1 : startIndex;
+        int afterIndex = IsLinePoint(endIndex + 1, pointCount) ? endIndex + 1 : endIndex;
+        normalStart = pointIndex == startIndex ? normal : GetRingVertex(startIndex, sideIndex, corner.y, pointCount).Normal;
+        normalEnd = pointIndex == endIndex ? normal : GetRingVertex(endIndex, sideIndex, corner.y, pointCount).Normal;
+        normalBefore = beforeIndex == startIndex ? normalStart : GetRingVertex(beforeIndex, sideIndex, corner.y, pointCount).Normal;
+        normalAfter = afterIndex == endIndex ? normalEnd : GetRingVertex(afterIndex, sideIndex, corner.y, pointCount).Normal;
+    }
 
-        float sy = independentScale ? pointScale.y : 1.0;
-        float sz = independentScale ? pointScale.z : 1.0;
+    float3x3 objectToWorldRotation = (float3x3)ObjectToWorld;
+    output.normalBefore = mul(normalBefore, objectToWorldRotation);
+    output.normalStart = mul(normalStart, objectToWorldRotation);
+    output.normalEnd = mul(normalEnd, objectToWorldRotation);
+    output.normalAfter = mul(normalAfter, objectToWorldRotation);
+    output.segmentFraction = corner.x;
+    output.smoothAlong = isCapSegment ? 0 : 1 - FlatAlong;
 
-        float3 side = float3(0, cos(spinRad) * sy, sin(spinRad) * sz);
-        float3 radiusOffset = qRotateVec3(side, pointRotation) * Width * WidthFactor * distFactor;
-
-        float3 pInObject = pPos + radiusOffset;
-
-        // Physical UVs: constant texel size along the tube (arc length / TextureScale) and
-        // around it (integer repeats of the circumference). Falls back to index-based U when
-        // there are fewer than 2 points or the pre-pass buffer is unavailable.
-        float uCoord;
-        if (pointCount >= 2)
-        {
-            float s0 = (float)ArcCumMM[sourceSeg];
-            float s1 = (float)ArcCumMM[sourceSeg + 1];
-            float arcWorld = (s0 + (s1 - s0) * t) * 0.001;
-            uCoord = arcWorld / max(TextureScale, Epsilon);
-        }
-        else
-        {
-            uCoord = f;
-        }
-        // UseWAsU: drive U from each point's FX1 (interpolated along the tube) instead of arc length.
-        if (UseWAsU >= 0.5)
-        {
-            float fx0 = isnan(p0.FX1) ? uCoord : p0.FX1;
-            float fx1 = isnan(p1.FX1) ? uCoord : p1.FX1;
-            uCoord = lerp(fx0, fx1, t);
-        }
-        uCoord = uCoord * (TextureRange.y - TextureRange.x) + TextureRange.x;
-
-        float nAround = max(1.0, round(Tau * Width / max(TextureScale, Epsilon)));
-        output.texCoord = float2(uCoord, fRing * nAround);
-
-        float3 tangent = normalize(qRotateVec3(float3(1,0,0), pointRotation));
-        float3 normalLocal = normalize(float3(0, cos(spinRad) / max(sy, Epsilon), sin(spinRad) / max(sz, Epsilon)));
-        float3 normal = normalize(qRotateVec3(normalLocal, pointRotation));
-        float3 bitangent = normalize(cross(tangent, normal));
-        float3x3 TBN = float3x3(
-            tangent,
-            bitangent,
-            normal
-            );
-        TBN = mul(TBN, (float3x3)ObjectToWorld);
-        output.tbnToWorld = TBN;
-
-        output.worldPosition =  mul(float4(pInObject,1), ObjectToWorld).xyz;
-        output.pixelPosition = mul(float4(pInObject,1), ObjectToClipSpace);
-
-        float4 posInCamera = mul(float4(pInObject,1), ObjectToCamera);
-        output.fog = pow(saturate(-posInCamera.z/FogDistance), FogBias);
-        output.color = Color * lerp(p0.Color, p1.Color, t);
+    // FlatAlong turns the normal from across the bend at the point to across this segment, so at 1 each segment
+    // shades like a straight cylinder piece. A cone's surface tilts towards its axis by its radius over its length.
+    if (isCapSegment)
+    {
+        normal = SafeNormalize(normal * capLength + capAxis * length(radius), capAxis);
     }
     else
     {
-        uint capId = id - tubeVerts;
-        uint capIndex = capId / capVertsPerCap;
-        uint triLocalId = capId % capVertsPerCap;
-        uint triInCap = triLocalId / 3;
-        uint vertInTri = triLocalId % 3;
-
-        Point p;
-        float3 capNormal;
-        bool capEnabled;
-
-        // The point rotation's X axis is the line tangent: outward for the end cap, inward for the start cap.
-        if (capIndex == 1)
-        {
-            p = Points[pointCount - 1];
-            capNormal = normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
-            capEnabled = CapEnd >= 0.5;
-        }
-        else
-        {
-            p = Points[0];
-            capNormal = -normalize(qRotateVec3(float3(1, 0, 0), p.Rotation));
-            capEnabled = CapStart >= 0.5;
-        }
-
-        bool separator = IsSeparator(p);
-
-        float WidthFactor;
-        if (UseScale >= 0.5 && UniformScale >= 0.5)
-        {
-            WidthFactor = isnan(p.Scale.x) ? 1 : p.Scale.x;
-        }
-        else if (WidthFX >= 0.5 && WidthFX < 1.5)
-        {
-            WidthFactor = isnan(p.FX1) ? 1 : p.FX1;
-        }
-        else if (WidthFX >= 1.5)
-        {
-            WidthFactor = isnan(p.FX2) ? 1 : p.FX2;
-        }
-        else
-        {
-            WidthFactor = 1;
-        }
-        float sy = 1.0, sz = 1.0;
-        if (UseScale >= 0.5 && UniformScale < 0.5)
-        {
-            WidthFactor = 1; // Cross-section is scaled per-axis below
-            sy = isnan(p.Scale.y) ? 1 : p.Scale.y;
-            sz = isnan(p.Scale.z) ? 1 : p.Scale.z;
-        }
-        if (separator)
-        {
-            WidthFactor = NAN; // Collapse the cap at separators
-        }
-        float radius = Width * WidthFactor;
-        int capPointIndex = (capIndex == 1) ? (int)pointCount - 1 : 0;
-        float3 capCenter = EffectivePos(capPointIndex, pointCount);
-        if (DistanceFade >= 0.5)
-        {
-            float4 capCamPos = mul(float4(capCenter, 1), ObjectToCamera);
-            float camDist = -capCamPos.z;
-            float distT = saturate((camDist - FadeStartDist) / max(FadeEndDist - FadeStartDist, 0.001));
-            radius *= lerp(1.0, MinWidthFactor, distT);
-        }
-
-        // Physical-scale planar disk center for this cap, placed adjacent to the tube end so
-        // its texel density matches the body (a seam at the junction is inherent to mixing a
-        // cylindrical side with a planar cap).
-        float capS = max(TextureScale, Epsilon);
-        float nAroundCap = max(1.0, round(Tau * Width / capS));
-        float totalArcWorld = (pointCount >= 2) ? (float)ArcCumMM[pointCount - 1] * 0.001 : 0.0;
-        // UseWAsU: center the disk on the endpoint's FX1 so it aligns with the body in U-space.
-        float capCenterU = (UseWAsU >= 0.5 && !isnan(p.FX1)) ? p.FX1
-            : ((capIndex == 1) ? (totalArcWorld + radius) / capS : -radius / capS);
-        float2 capCenterUV = float2(capCenterU, nAroundCap * 0.5);
-
-        uint rimIndex;
-        if (vertInTri == 0)
-        {
-            rimIndex = 0xFFFFFFFF;
-        }
-        else if (vertInTri == 1)
-        {
-            // The start cap's winding is flipped so its front faces outward, matching its normal.
-            rimIndex = (capIndex == 0) ? triInCap + 1 : triInCap;
-        }
-        else
-        {
-            rimIndex = (capIndex == 0) ? triInCap : triInCap + 1;
-        }
-
-        float3 pInObject;
-        float3 tangent;
-        float3 normal;
-        float3 bitangent;
-        float2 texCoord;
-
-        if (!capEnabled)
-        {
-            pInObject = capCenter;
-            tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
-            normal = float3(0, 0, 0);
-            bitangent = normalize(cross(normal, tangent));
-            texCoord = float2(0, 0);
-        }
-        else if (rimIndex == 0xFFFFFFFF)
-        {
-            pInObject = separator ? float3(NAN, NAN, NAN) : capCenter;
-            tangent = normalize(qRotateVec3(float3(0, 1, 0), p.Rotation));
-            normal = capNormal;
-            bitangent = normalize(cross(normal, tangent));
-            texCoord = capCenterUV;
-        }
-        else
-        {
-            float capF = (capIndex == 1) ? 1.0 : 0.0;
-            float capAngleOffset = (Spin + Twist * capF) * 3.14159265 / 180.0;
-            float colF = (float)(rimIndex % (SideCount + 1));
-            float angle = colF / SideCount * Tau + capAngleOffset;
-            float3 dir = float3(0, cos(angle) * sy, sin(angle) * sz);
-            pInObject = capCenter + qRotateVec3(dir, p.Rotation) * radius;
-
-            tangent = normalize(qRotateVec3(float3(0, -sin(angle), cos(angle)), p.Rotation));
-            normal = capNormal;
-            bitangent = normalize(cross(normal, tangent));
-            texCoord = capCenterUV + float2(cos(angle), sin(angle)) * (radius / capS);
-        }
-
-        output.texCoord = texCoord;
-
-        float3x3 TBN = float3x3(
-            tangent,
-            bitangent,
-            normal
-            );
-        TBN = mul(TBN, (float3x3)ObjectToWorld);
-        output.tbnToWorld = TBN;
-
-        output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld).xyz;
-        output.pixelPosition = mul(float4(pInObject, 1), ObjectToClipSpace);
-
-        float4 posInCamera = mul(float4(pInObject, 1), ObjectToCamera);
-        output.fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);
-        output.color = Color * p.Color;
+        int nextIndex = min(segmentIndex + 1, (int)pointCount - 1);
+        float3 segmentDirection = SafeNormalize(Points[nextIndex].Position - Points[segmentIndex].Position, direction);
+        float3 acrossSegment = normal - dot(normal, segmentDirection) * segmentDirection;
+        normal = SafeNormalize(lerp(normal, acrossSegment, FlatAlong), normal);
     }
 
+    float u = GetCoordinateAlongTube(pointIndex, pointCount);
+    output.texCoord = float2(lerp(TextureRange.x, TextureRange.y, u), ringFraction);
+
+    float3x3 TBN = float3x3(direction, normalize(cross(direction, normal)), normal);
+    output.tbnToWorld = mul(TBN, (float3x3)ObjectToWorld);
+
+    output.worldPosition = mul(float4(pInObject, 1), ObjectToWorld).xyz;
+    output.pixelPosition = mul(float4(pInObject, 1), ObjectToClipSpace);
+
+    // Rings move with their point; a cap's tip moves like the point it sits between. Ring rotation and width changes
+    // are left out, as for point sprites.
+    float3 ringMovement = GetPointMovement(ringIndex, pointCount);
+    float3 movement = isTip ? lerp(GetPointMovement(tipIndex, pointCount), ringMovement, CapInset) : ringMovement;
+    float4 previousClipPosition = mul(float4(pInObject - movement, 1), PrevObjectToClipSpace);
+    float4 centerClipPosition = mul(float4(ringPoint.Position, 1), ObjectToClipSpace);
+    float4 previousCenterClipPosition = mul(float4(ringPoint.Position - ringMovement, 1), PrevObjectToClipSpace);
+    output.clipPosition = output.pixelPosition;
+    output.previousClipPosition = PreviousClipUnlessJumped(previousClipPosition, centerClipPosition, previousCenterClipPosition);
+
+    float4 posInCamera = mul(float4(pInObject, 1), ObjectToCamera);
+    output.fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);
+    output.color = Color * linePoint.Color;
     return output;
 }
-
 
 struct psOutput
 {
     float4 Color : SV_Target0;
     float4 Normal : SV_Target1;
+    float4 Velocity : SV_Target2;
 };
 
 psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
@@ -495,7 +396,15 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
 
 
     //return float4(pin.tbnToWorld[0],1);
-    N = normalize(mul(N,pin.tbnToWorld));
+    // The curve through four rings minus the straight blend between the two that the TBN carries.
+    float t = pin.segmentFraction;
+    float3 curvedNormal = 0.5 * (2 * pin.normalStart
+                                 + (pin.normalEnd - pin.normalBefore) * t
+                                 + (2 * pin.normalBefore - 5 * pin.normalStart + 4 * pin.normalEnd - pin.normalAfter) * t * t
+                                 + (3 * pin.normalStart - pin.normalBefore - 3 * pin.normalEnd + pin.normalAfter) * t * t * t);
+    float3x3 tbnToWorld = pin.tbnToWorld;
+    tbnToWorld[2] += (curvedNormal - lerp(pin.normalStart, pin.normalEnd, t)) * pin.smoothAlong;
+    N = normalize(mul(N, tbnToWorld));
 
     // Back faces of geometry drawn without culling need the normal facing the viewer.
     if (!isFrontFace)
@@ -609,5 +518,6 @@ psOutput psMain(psInput pin, bool isFrontFace : SV_IsFrontFace)
     psOutput output;
     output.Color = litColor;
     output.Normal = float4(N, 1);
+    output.Velocity = EncodeVelocity(pin.clipPosition, pin.previousClipPosition, CameraToClipSpace, PrevCameraToClipSpace);
     return output;
 }

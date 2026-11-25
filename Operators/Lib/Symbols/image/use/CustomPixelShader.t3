@@ -38,7 +38,7 @@
     },
     {
       "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
-      "DefaultValue": "float d= 1 - length(uv - 0.5 - Offset * float2(1,-1));\nd = ApplyGainAndBias(d, GainAndBias);\n\nc= ImageA.Sample(Sampler, uv);\nc.rgb*= Gradient.SampleLevel( ClampedSampler, float2(d, 0.5),0); "
+      "DefaultValue": "float d= 1 - length(uv - 0.5 - Offset * float2(1,-1));\nd = ApplyGainAndBias(d, GainAndBias);\n\nc= ImageA.Sample(Sampler, uv);\nc.rgb*= Gradient.SampleLevel( ClampedSampler, float2(d, 0.5),0).rgb; "
     },
     {
       "Id": "8ea35e89-137a-4cb3-b26d-ba6bd9e5ce12"/*CustomSampler*/,

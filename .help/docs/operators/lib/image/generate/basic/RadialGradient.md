@@ -19,7 +19,7 @@ Similar Ops: [LinearGradient] [NGon] [RoundedRect] [Rings]  [Blob]
 | **Repeat** (Boolean) | Repeats the gradient. |
 | **Center** (Vector2) | Center of the gradient |
 | **PolarOrientation** (Boolean) | If enabled switches to a "star like" polar coordiante orienation. |
-| **BiasAndGain** (Vector2) | Applies Gain and Bias before sampling the gradiant. |
+| **GainAndBias** (Vector2) | Applies Gain and Bias before sampling the gradiant. |
 | **Noise** (Single) | Adding slight noise can improve color banding. |
 | **BlendMode** (Int32) | Blendmode when applied onto a connected input image. |
 | **Resolution** (Int2) | The resolution. <br/><br/>If 0,0 will use requested resuition of the input resolution if connected. |

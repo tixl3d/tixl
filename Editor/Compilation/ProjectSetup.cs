@@ -102,6 +102,7 @@ internal static partial class ProjectSetup
 
         UpdateSymbolPackage(newProject);
         InitializePackageResources(newProject);
+        EditorSymbolPackage.NotifySymbolStructureChange();
         return true;
     }
 

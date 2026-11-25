@@ -33,9 +33,6 @@ internal sealed class VisualizePoints : Instance<VisualizePoints>
     [Input(Guid = "40a04de8-54aa-4f66-acea-80ffc4dab7bd")]
     public readonly InputSlot<float> PointSize = new();
 
-    [Input(Guid = "f6942098-3f69-41fb-9228-96bd2ffb1cbf")]
-    public readonly InputSlot<bool> UseWForSize = new();
-
     [Input(Guid = "bbc26907-416d-4168-9e89-72ee1c6a530e")]
     public readonly InputSlot<bool> ShowAttributeList = new();
 

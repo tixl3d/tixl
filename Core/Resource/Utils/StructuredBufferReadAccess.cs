@@ -21,6 +21,7 @@ public sealed class StructuredBufferReadAccess : IDisposable
         public required Buffer CpuAccessBuffer;
         public required int ElementCount;
         public required int StructureByteStride;
+        public int FirstElement { get; init; }
 
         internal bool IsReady => RequestIndex == BufferReadAccess._frameCounter - (BufferCount - 2);
         internal bool IsObsolete => RequestIndex < BufferReadAccess._frameCounter - (BufferCount - 2);
@@ -68,14 +69,34 @@ public sealed class StructuredBufferReadAccess : IDisposable
 
     public bool InitiateRead(Buffer sourceBuffer, int elementCount, int structureByteStride, OnReadComplete onSuccess)
     {
+        return InitiateRead(sourceBuffer, elementCount, structureByteStride, onSuccess, firstElement: 0);
+    }
+
+    /// <summary>
+    /// Copies <paramref name="elementCount"/> elements starting at <paramref name="firstElement"/> into a staging
+    /// buffer, so a viewer of a large buffer only transfers the range it shows.
+    /// </summary>
+    public bool InitiateRead(Buffer sourceBuffer, int elementCount, int structureByteStride, OnReadComplete onSuccess, int firstElement)
+    {
         if (sourceBuffer == null! || sourceBuffer.IsDisposed)
             return false;
 
         var sizeInBytes = elementCount * structureByteStride;
         PrepareCpuAccessBuffers(sizeInBytes, structureByteStride);
+        if (_cpuAccessBuffers.Count < BufferCount)
+            return false;
 
         var cpuAccessBuffer = _cpuAccessBuffers[_frameCounter % BufferCount];
-        ResourceManager.Device.ImmediateContext.CopyResource(sourceBuffer, cpuAccessBuffer);
+        var context = ResourceManager.Device.ImmediateContext;
+        if (firstElement == 0)
+        {
+            context.CopyResource(sourceBuffer, cpuAccessBuffer);
+        }
+        else
+        {
+            var startByte = firstElement * structureByteStride;
+            context.CopySubresourceRegion(sourceBuffer, 0, new ResourceRegion(startByte, 0, 0, startByte + sizeInBytes, 1, 1), cpuAccessBuffer, 0);
+        }
 
         _readRequests.Add(new ReadRequestItem
         {
@@ -84,6 +105,7 @@ public sealed class StructuredBufferReadAccess : IDisposable
             CpuAccessBuffer = cpuAccessBuffer,
             ElementCount = elementCount,
             StructureByteStride = structureByteStride,
+            FirstElement = firstElement,
             OnSuccess = onSuccess,
         });
 

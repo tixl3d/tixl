@@ -26,6 +26,11 @@
     <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
     <IsArchived>false</IsArchived>
+    <!-- Bundled: in release builds. Optional: installed on demand. DevOnly: never shipped. -->
+    <TixlDistribution>Bundled</TixlDistribution>
+    <TixlPlatforms>win-x64;linux-x64;osx-arm64</TixlPlatforms>
+    <!-- The package code together with the natives in its dependencies/ folder; NuGet licences are checked separately. -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <!-- Set the output path based on the version and release mode -->
     <!-- Analyzers roughly double operator compile time and run on every hot-reload compile; keep them for Release builds. -->
     <RunAnalyzers Condition="'$(Configuration)' == 'Debug'">false</RunAnalyzers>
@@ -143,6 +148,7 @@
     <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="4.148.0" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <PackageReference Include="SixLabors.Fonts" Version="$(SixLaborsFontsVersion)" />
     <PackageReference Include="LibTessDotNet" Version="1.1.15" />
+    <PackageReference Include="CDT.NET" Version="1.1.0" />
   </ItemGroup>
   <!-- Copy package content into this project's own output only (not transitively to other projects).
        Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
@@ -203,6 +209,9 @@
   <!-- OpenCV's FFmpeg video plugin is unused now that VideoStreamInput decodes via FFmpeg directly, so drop
        it to avoid shipping a second FFmpeg alongside the LGPL FFmpeg build. -->
   <Target Name="DropUnusedOpenCvFfmpegPlugin" AfterTargets="AfterBuild">
-    <Delete Files="$(OutputPath)/runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll" />
+    <ItemGroup>
+      <_OpenCvFfmpegPlugin Include="$(OutputPath)/runtimes/*/native/opencv_videoio_ffmpeg*.dll" />
+    </ItemGroup>
+    <Delete Files="@(_OpenCvFfmpegPlugin)" />
   </Target>
 </Project>

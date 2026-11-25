@@ -42,7 +42,7 @@ internal sealed class StructuredListInputUi : InputValueUi<StructuredList>
         //                       ImGui.GetCursorScreenPos() + size);
         //
         // //var modified= GradientEditor.Draw(slist, ImGui.GetWindowDrawList(), area);
-        var modified = TableList.Draw(slist);
+        var modified = TableList.DrawCompact(slist);
         return modified ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
     }
 
@@ -54,11 +54,6 @@ internal sealed class StructuredListInputUi : InputValueUi<StructuredList>
             return;
         }
 
-        //ImGui.TextUnformatted($"{value.Type.Name}[{value.GetCount()}]");
-        ImGui.NewLine();
-
-        var modified = TableList.Draw(slist);
-        //return modified ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;            var modified = TableView.TableList.Draw(slist);
-        //return modified ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
+        TableList.DrawCompact(slist);
     }
 }

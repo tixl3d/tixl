@@ -19,7 +19,8 @@
         "X": 1067.6344,
         "Y": 1714.1138
       },
-      "Description": "Additionally scales each copy by a point attribute.\n\nNone: no extra scaling.\nF1: scales by the point's F1.\nF2: scales by the point's F2."
+      "Description": "Additionally scales each copy by a point attribute.\n\nNone: no extra scaling.\nF1: scales by the point's F1.\nF2: scales by the point's F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*ApplyPointScale*/,
@@ -54,7 +55,8 @@
         "Y": 1749.1138
       },
       "GroupTitle": "VAT Fx",
-      "Description": "Multiplies the V coordinate of TexCoord2 by a point attribute (None, F1 or F2).\n\nUseful to desynchronize vertex animation textures, see [DisplaceMeshVAT]."
+      "Description": "Multiplies the V coordinate of TexCoord2 by a point attribute (None, F1 or F2).\n\nUseful to desynchronize vertex animation textures, see [DisplaceMeshVAT].",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "f8fb6e15-00dd-485e-a7fe-fa75c77182c2"/*InputMesh*/,

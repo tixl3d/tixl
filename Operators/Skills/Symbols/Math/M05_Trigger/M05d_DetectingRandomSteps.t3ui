@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "2613c4cd-aa5a-4c73-876a-d4367236e370"/*M05d_DetectingRandomSteps*/,
   "Description": "Detecting Random Steps",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

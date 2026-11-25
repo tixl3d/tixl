@@ -24,6 +24,10 @@ internal static partial class SkillTraining
             if (HasUnderscoreSegment(symbol.Namespace))
                 continue;
 
+            var symbolUi = symbol.GetSymbolUi();
+            if ((symbolUi.Tags & HiddenLevelStates) != 0)
+                continue;
+
             var startingNewTopic = symbol.Namespace != lastNamespace;
             if (startingNewTopic)
             {
@@ -60,7 +64,6 @@ internal static partial class SkillTraining
             if (topic == null)
                 continue;
 
-            var symbolUi = symbol.GetSymbolUi();
             var topicName = string.IsNullOrEmpty(symbolUi.Description)
                                 ? RemovePrefix(symbol.Name)
                                 : symbolUi.Description;
@@ -73,6 +76,9 @@ internal static partial class SkillTraining
 
         }
     }
+
+    /// <summary>Levels that are only planned or still being built are not shown to players.</summary>
+    private const SymbolUi.SymbolTags HiddenLevelStates = SymbolUi.SymbolTags.Planned | SymbolUi.SymbolTags.Draft;
 
     private static bool HasUnderscoreSegment(string symbolNamespace)
     {

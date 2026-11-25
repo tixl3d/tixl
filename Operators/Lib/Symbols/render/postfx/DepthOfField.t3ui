@@ -21,7 +21,8 @@
         "X": 206.6908,
         "Y": -757.60004
       },
-      "Description": "Near and far clip planes used to linearize the depth buffer. Should match the clip planes of the camera."
+      "Description": "Near and far clip planes used to linearize the depth buffer. Should match the clip planes of the camera.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "493c40f0-21e6-466b-afc2-eff570229c86"/*MaxSamples*/,

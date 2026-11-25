@@ -46,9 +46,7 @@ float4 GetNoiseFromRandom(float2 uv)
     float4 grayScale = (hash.r + hash.g + hash.b) / 3;
     float4 noise = (lerp(grayScale, hash, Color) - 0.5) * 2;
 
-    noise = noise < 0
-                ? -pow(-noise, Exponent)
-                : pow(noise, Exponent);
+    noise = select(noise < 0, -pow(-noise, Exponent), pow(noise, Exponent));
 
     noise += Brightness;
     return noise;

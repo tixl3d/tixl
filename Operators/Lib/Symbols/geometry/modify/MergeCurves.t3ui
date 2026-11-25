@@ -1,0 +1,42 @@
+{
+  "FormatVersion": 3,
+  "Id": "edfa6c74-9efb-4209-b099-2c8d20cb3e37"/*MergeCurves*/,
+  "Description": "Merges overlapping closed curves into clean outlines, e.g. letters whose strokes cross or the dot of an i that overlaps the T next to it.\n\nUnion removes the segments inside other shapes, Xor turns overlaps into holes and Intersect keeps only the overlaps. The curves are merged flat in the XY plane after flattening, so the result consists of straight segments. Letters that don't touch stay separate parts, with all their pieces (the dot of an i); touching ones become one part with the pivot and attributes of the first of them. Open curves and polygons pass through.\n\nAKA: boolean, union, unite, combine shapes, remove overlap, pathfinder\n\nTips\n- [StringToCurves] -> MergeCurves -> [ExtrudeCurves] avoids walls inside overlapping strokes.",
+  "InputUis": [
+    {
+      "InputId": "ad16ec6a-842a-44fd-9fd0-4212be66d128"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Maximum deviation when flattening the curves before merging. Smaller values keep round shapes rounder; the result consists of straight segments."
+    },
+    {
+      "InputId": "d5994346-fa1f-4152-9bd4-a0e15a6122af"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Union removes the segments inside other shapes, Xor turns overlapping areas into holes, Intersect keeps only the areas where shapes overlap.",
+      "DisplayAs": "SegmentedSwitch"
+    },
+    {
+      "InputId": "db5a0ef8-d464-4606-a7c4-4a57063deb27"/*Curves*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "59b509a9-252c-4cb0-bde9-b7ecf04bc604"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

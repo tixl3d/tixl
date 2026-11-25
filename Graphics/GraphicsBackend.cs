@@ -16,6 +16,9 @@ public interface IGraphicsBackend : IDisposable
     /// </summary>
     string BackendDescription => AdapterName;
 
+    /// <summary>The driver's name and version, e.g. "radv Mesa 26.0.1"; empty where the API doesn't report it.</summary>
+    string DriverDescription => string.Empty;
+
     /// <summary>
     /// How many resources the backend is holding. A count that climbs while the graph does the same work every
     /// frame is a leak, which is otherwise only visible once the process exits. Zero where a backend does not
@@ -104,6 +107,12 @@ public interface IGraphicsBackend : IDisposable
 
     /// <summary>Submits the frame's work and presents if a swapchain is attached.</summary>
     void EndFrame(ICommandList commands);
+
+    /// <summary>
+    /// Submits what has been recorded and blocks until the GPU has finished it; recording continues afterwards.
+    /// For measurements that need the wall-clock time of a piece of GPU work, such as the benchmark suite.
+    /// </summary>
+    void WaitForGpu();
 
     /// <summary>
     /// Blocks until the GPU has finished with the resource and maps it for reading. The operators that copy,

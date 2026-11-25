@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "8d5cd7bb-e349-4e22-8402-6dca63728b35"/*Direction*/,
@@ -16,7 +17,8 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Horizontal: one row per list. Vertical: one column per list."
+      "Description": "Horizontal: one row per list. Vertical: one column per list.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a80458c5-685a-434e-989b-9212324d0e14"/*Values*/,
@@ -39,7 +41,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "X: value that maps to OutputRange.X. Y: value that maps to OutputRange.Y."
+      "Description": "X: value that maps to OutputRange.X. Y: value that maps to OutputRange.Y.",
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "dbfd49e3-c357-4d07-963d-6df985a2f66e"/*GainAndBias*/,

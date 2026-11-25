@@ -414,6 +414,18 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
     /// </summary>
     public ICommandList BeginFrame() => _commands;
 
+    public void WaitForGpu()
+    {
+        _gpuDoneQuery ??= new Query(Device, new QueryDescription { Type = QueryType.Event });
+        var context = Device.ImmediateContext;
+        context.End(_gpuDoneQuery);
+        context.Flush();
+        while (!context.GetData(_gpuDoneQuery, AsynchronousFlags.None, out int _))
+        {
+            Thread.Yield();
+        }
+    }
+
     public void EndFrame(ICommandList commands)
     {
     }
@@ -488,6 +500,7 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
     public void Dispose()
     {
         _commands.ReleaseInlineConstants();
+        _gpuDoneQuery?.Dispose();
 
         foreach (var pipeline in _pipelines.Values)
         {
@@ -507,4 +520,5 @@ public sealed class D3D11Backend : IGraphicsBackend, IDisposable
     private readonly bool _ownsDevice;
     private readonly Dictionary<GraphicsPipelineDescription, D3D11Pipeline> _pipelines = [];
     private readonly Dictionary<ComputePipelineDescription, D3D11Pipeline> _computePipelines = [];
+    private Query? _gpuDoneQuery;
 }

@@ -89,6 +89,7 @@
     <ProjectReference Include="..\Graphics.Compat\Graphics.Compat.csproj" />
     <ProjectReference Include="..\SdlPlatform\SdlPlatform.csproj" />
         <ProjectReference Include="..\IoServices\IoServices.csproj" />
+        <ProjectReference Include="..\OperatorCompiler\OperatorCompiler.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
@@ -192,24 +193,14 @@
 
     <!-- ======================== Operator Packages ========================== -->
 
-    <!-- Specify the operator packages in the Operators directory to be included in Release builds - 
-    their csproj file name should match their directory name -->
-    <ItemGroup>
-        <PackageNames Include="Lib" />
-        <PackageNames Include="Examples" />
-        <PackageNames Include="TypeOperators" />
-        <!-- <PackageNames Include="pixtur"/>-->
-        <PackageNames Include="Unsplash" />
-        <PackageNames Include="Skills" />
-        <PackageNames Include="Spout" />
-        <PackageNames Include="Ndi" />
-        <PackageNames Include="Video" />
-        <PackageNames Include="Io" />
-        <PackageNames Include="Mediapipe">
-            <Name>t3.mediapipe</Name>
-        </PackageNames>
-        <!-- Add more as needed -->
-    </ItemGroup>
+    <!-- Release builds include every operator package whose csproj declares TixlDistribution=Bundled and lists the
+         platform being built in TixlPlatforms (see CopyTixlOpProject). Optional packages are installed on demand. -->
+    <PropertyGroup>
+        <TixlBuildPlatform Condition="'$(TixlEditorRuntime)' != ''">$(TixlEditorRuntime)</TixlBuildPlatform>
+        <TixlBuildPlatform Condition="'$(TixlBuildPlatform)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">win-x64</TixlBuildPlatform>
+        <TixlBuildPlatform Condition="'$(TixlBuildPlatform)' == '' and $([MSBuild]::IsOSPlatform('OSX'))">osx-arm64</TixlBuildPlatform>
+        <TixlBuildPlatform Condition="'$(TixlBuildPlatform)' == ''">linux-x64</TixlBuildPlatform>
+    </PropertyGroup>
     <PropertyGroup>
         <OperatorDirectoryName>Operators</OperatorDirectoryName>
     </PropertyGroup>
@@ -231,6 +222,20 @@
 
         <Message Importance="high" Text="Attempting to copy $(PackageName)..." />
 
+        <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj" Query="//TixlDistribution/text()" Condition="Exists('$(SourceDir)/$(PackageName).csproj')">
+            <Output TaskParameter="Result" PropertyName="PackageDistribution" />
+        </XmlPeek>
+        <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj" Query="//TixlPlatforms/text()" Condition="Exists('$(SourceDir)/$(PackageName).csproj')">
+            <Output TaskParameter="Result" PropertyName="PackagePlatforms" />
+        </XmlPeek>
+        <PropertyGroup>
+            <ShipPackage>false</ShipPackage>
+            <ShipPackage Condition="'$(PackageDistribution)' == 'Bundled' and $([System.String]::Copy(';$(PackagePlatforms);').Contains(';$(TixlBuildPlatform);'))">true</ShipPackage>
+        </PropertyGroup>
+        <Error Condition="Exists('$(SourceDir)/$(PackageName).csproj') and '$(PackageDistribution)' == ''"
+               Text="Operator package $(PackageName) declares no TixlDistribution (Bundled, Optional or DevOnly)." />
+        <Message Importance="high" Condition="'$(ShipPackage)' != 'true' and Exists('$(SourceDir)/$(PackageName).csproj')" Text="Skipping $(PackageName): $(PackageDistribution), platforms '$(PackagePlatforms)', building $(TixlBuildPlatform)" />
+
         <!-- Packages don't share one target framework (platform-neutral ones target net10.0), so read each
              package's own to find its build folder. -->
         <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj" Query="//TargetFramework/text()" Condition="Exists('$(SourceDir)/$(PackageName).csproj')">
@@ -245,7 +250,7 @@
 
         <Message Importance="high" Text="Path for $(PackageName): $(PackageBuildDirectory)" />
 
-        <Error Condition="Exists('$(SourceDir)/$(PackageName).csproj') and !Exists('$(PackageBuildDirectory)/OperatorPackage.json')" Text="Operator package $(PackageName) has no Release build output at $(PackageBuildDirectory). Build the package before packaging Editor." />
+        <Error Condition="'$(ShipPackage)' == 'true' and !Exists('$(PackageBuildDirectory)/OperatorPackage.json')" Text="Operator package $(PackageName) has no Release build output at $(PackageBuildDirectory). Build the package before packaging Editor." />
 
         <ItemGroup>
             <ProjectFiles Include="$(PackageBuildDirectory)/**" />
@@ -256,12 +261,16 @@
         Directories="$(DestinationDir)/$(PackageName)/"/>-->
 
         <!-- Copy the files from the project directory to the export folder -->
-        <Copy SourceFiles="@(ProjectFiles)" DestinationFolder="$(DestinationDir)/$(PackageName)/%(RecursiveDir)" UseHardlinksIfPossible="true" />
+        <Copy SourceFiles="@(ProjectFiles)" DestinationFolder="$(DestinationDir)/$(PackageName)/%(RecursiveDir)" UseHardlinksIfPossible="true" Condition="'$(ShipPackage)' == 'true'" />
     </Target>
 
-    <!-- Invokes the above target for all of the packages defined by the PackageNames property -->
+    <!-- Invokes the above target for every operator package in the Operators folder -->
     <Target Name="CopyTixlOperators" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
-        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="CopyTixlOpProject" Properties="PackageName=%(PackageNames.Identity);ParentFolder=$(OperatorDirectoryName)" />
+        <ItemGroup>
+            <OperatorPackageProjects Include="../$(OperatorDirectoryName)/*/*.csproj" />
+        </ItemGroup>
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="CopyTixlOpProject"
+                 Properties="PackageName=%(OperatorPackageProjects.Filename);ParentFolder=$(OperatorDirectoryName);TixlBuildPlatform=$(TixlBuildPlatform)" />
 
         <!-- special case for pixtur project being nested under Operators/user/ -->
         <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="CopyTixlOpProject" Properties="PackageName=pixtur;ParentFolder=$(OperatorDirectoryName)/user" />
@@ -276,4 +285,6 @@
     </Target>
 
     <!-- =========================//================================ -->
+    <!-- Reference assemblies and source generators for compiling operator projects without the .NET SDK -->
+    <Import Project="../OperatorCompiler/CompilerSupport.targets" />
 </Project>

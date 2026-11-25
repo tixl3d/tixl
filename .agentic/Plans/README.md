@@ -129,6 +129,7 @@ These matter more than any filing decision.
 | [Plan_KeyboardControl](Plan_KeyboardControl.md) | Navigation, popover, toasts, bookmarks and peek shipped, on both branches | Shared keycap renderer, mouse slider modifiers aligned with the popover, verbs `␣g`/`␣x`, toast mute UI, toast/peek test set, new Default keymap. Phase 0 obsolete; palette parked |
 | [Plan_FrameTiming](Plan_FrameTiming.md) | Last commit 2026-10-22; branches diverge (linux deleted the estimator) | `PerformanceMetrics` window, hard-coded 60s, MediaPipe `33333`, NDI timecode, blocking export readback, 4.3 baseline. §A4 contradicts the decision to use SDL's display mode |
 | [Plan_CrossPlatformV5](Plan_CrossPlatformV5.md) | Foundation shipped on linux, up to v4.4.0.4 tags; none on `main` | Merge, sub-allocator, pipeline cache, SharpDX removal, `[SupportedPlatforms]`, tests in CI, Silk. See [decision 4](#decisions-for-you) |
+| [Plan_Release_v4.4](Plan_Release_v4.4.md) | Nothing shipped (written 2026-11-20) | Release order for stable 4.4 on all platforms: licence cleanup of `Dependencies/`, slang in the Linux tarball, LGPL FFmpeg on macOS, signing, CI tests |
 | [Plan_MacOS](Plan_MacOS.md) | Portability, CoreMIDI, DMG, CI shipped on linux | Visual suite (71/97 on 2026-10-08), cube placeholder, line-only OBJ, player `.app`, FFmpeg in DMG, settings folder. Cannot be verified from Linux |
 | [Plan_GamepadControl](Plan_GamepadControl.md) | SDL gamepads, `[Gamepad]` on Linux, usage indicator shipped; camera steering built 2026-11-05 | Test camera steering with a pad, port main's calibration off XInput, SpaceMouse on Linux |
 
@@ -136,6 +137,8 @@ These matter more than any filing decision.
 
 | Plan | State | Note |
 |---|---|---|
+| [Plan_PerformanceBenchmark](Plan_PerformanceBenchmark.md) | Phases 1–2 built 2026-11-24 (uncommitted), tested on Linux only | Benchmark window: CPU, Buffers & Compute, Draw & Fillrate sweeps graphed up to 50 ms with an authored Reference; needs runs on Windows (Vulkan, D3D11) and macOS |
+| [Plan_PreviewOverlays](Plan_PreviewOverlays.md) | Phases 1-4 shipped 2026-11-21 | Per-window overlay toggles and selection/hover in a typed context state (like RenderPassState) read by [GetPreviewState]; preview graphs draw them; new [FilterGeometry]; removes the ImGui overlays. Defaults per preview type open |
 | [Plan_MultiSelectionEditing](Plan_MultiSelectionEditing.md) | Nothing shipped; split out of Plan_KeyboardControl | Popover and Parameter window edit all selected ops; mixed-type rule undecided |
 | [Plan_AutomaticTests](Plan_AutomaticTests.md) | Some tests exist; runner phases don't | Start with CI. "No test projects" is false |
 | [Plan_CleanInstallLayout](Plan_CleanInstallLayout.md) | Nothing shipped | Do before InstallVerification and WindowsSigning: manifest paths and the signed exe depend on it |
@@ -155,6 +158,8 @@ These matter more than any filing decision.
 | [Plan_CameraOverhaul](Plan_CameraOverhaul.md) | Research only, written 2026-11-05 | Pivot + quaternion camera model, Godot pitch stop with roll, Unreal fly-mode WASD, persp/ortho blend. Phase 1 is editor-only and could land in 4.4 |
 | [Plan_ContextVariableInvalidation](Plan_ContextVariableInvalidation.md) | Parked 2026-11-13; Phase 0 and a targeted resolution patch shipped | Full variable redesign judged not worth it after the baseline. Keeps the analysis, the baseline scripts and the design |
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
+| [Plan_CodeInputs](Plan_CodeInputs.md) | Nothing shipped; written 2026-11-20 | `UsageType.Code` + `CodeLanguage` for snippet inputs; `// A: Scale 0..1` comments relabel A–D per instance; highlighting later. Syntax and 4 other decisions open |
+| [Plan_CatAnimationDemo](Plan_CatAnimationDemo.md) | Nothing shipped; written 2026-11-23 | Rigify cat on top of the glTF pose ops: distance-driven cycle phase, gait blending, quadruped foot IK with stateless locking, PBD powered ragdoll + tail, GPU verlet whiskers. Phase 0 = GltfAnimation verification items. 5 questions open |
 
 ## Parked
 

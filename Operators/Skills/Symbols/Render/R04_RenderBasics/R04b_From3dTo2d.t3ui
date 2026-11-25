@@ -1,0 +1,344 @@
+{
+  "FormatVersion": 3,
+  "Id": "59333bff-6604-4e02-bcc5-05bfc2c68082"/*R04b_From3dTo2d*/,
+  "Description": "From 3D to 2D",
+  "SymbolTags": "32768",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01620cab-c459-433a-8594-f4a65f957148",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2588.1362
+      }
+    },
+    {
+      "ChildId": "05c16e89-1fe6-4fcb-b968-6dbdc5a73f40",
+      "SymbolName": "Lib.mesh.modify.DisplaceMeshNoise",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1580.3624
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "11016669-68e9-4d7e-8527-8706b229ee6d",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2229.338
+      }
+    },
+    {
+      "ChildId": "13f34b28-8588-492f-818c-44653b35bc7f",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1436.5819
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1622e52d-d24a-4d2c-8c75-0e97d32f68b4",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1417.2644,
+        "Y": 2508.9236
+      }
+    },
+    {
+      "ChildId": "1bbe72e3-77b4-4bd0-befd-d91f9d10d970",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2338.1184
+      }
+    },
+    {
+      "ChildId": "1c1f95d1-d393-4a30-9e22-db2cbc477f23",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1417.2644,
+        "Y": 2403.9236
+      }
+    },
+    {
+      "ChildId": "1d06efa3-3267-47fc-8ca1-abe33444dd13",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1650.3624
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1ff1971e-1b61-4e7e-aad8-dbb65cf3fc0e",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2658.1362
+      }
+    },
+    {
+      "ChildId": "2a4b327c-bf69-45a5-999a-7081e9585d76",
+      "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2693.1362
+      }
+    },
+    {
+      "ChildId": "2b0850a7-eaf7-407b-a1a5-efa35eb5143d",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2443.1184
+      }
+    },
+    {
+      "ChildId": "2e93eb46-6f60-4edf-8e5e-2ae1c94c0468",
+      "SymbolName": "Lib.geometry.modify.BevelGeometry",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1795.3801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "376e9646-9e9f-46b7-945d-19aca49e69be",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "3c77f5ce-572b-4dee-9bcd-bce907e02f27",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2553.1362
+      }
+    },
+    {
+      "ChildId": "50dba459-d330-4ae1-b367-ba3f280ee40a",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1417.2644,
+        "Y": 2543.9236
+      }
+    },
+    {
+      "ChildId": "5bbb5215-fae9-4af7-be3c-a83760800fd9",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2264.338
+      }
+    },
+    {
+      "ChildId": "5ed475a0-0697-4c14-a99a-162d175035ca",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1830.3801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "616af575-58de-478e-9a13-f92f20336dde",
+      "SymbolName": "Lib.mesh.modify.DisplaceMeshNoise",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2373.1184
+      }
+    },
+    {
+      "ChildId": "7e124ce3-f181-49cb-ace6-931a99548002",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "Position": {
+        "X": 946.4922,
+        "Y": 1615.3624
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "83b428e9-ffe6-40ec-9ed0-26253b44711f",
+      "SymbolName": "Lib.geometry.convert.GeometryToMesh",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2623.1362
+      }
+    },
+    {
+      "ChildId": "8ccbe72f-f432-41fa-b18c-690912a30dd9",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1363.6042,
+        "Y": 1793.9099
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "926dbbb6-89c9-4d0e-8612-3ac7a7b751fb",
+      "SymbolName": "Lib.geometry.generate.CubeGeometry",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1760.3801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9fc52bc3-74ca-4c5a-99b2-cdade34f87ce",
+      "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1140.1523,
+        "Y": 2478.1184
+      }
+    },
+    {
+      "ChildId": "a7044b8f-7b22-475d-9aae-04d1b00a532b",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1865.3801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b8a93408-b633-4738-a75b-c942b2c76353",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1685.3624
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "bd1718e1-2cf5-4ea1-b4d9-5c313e067f81",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1363.6042,
+        "Y": 1716.1676
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c59f69d9-ea4b-422f-a0ea-dd0160ab6e43",
+      "SymbolName": "Lib.mesh.generate.SphereMesh",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1545.3624
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e130240d-8429-46eb-b2ee-9e87be3d3047",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1363.6042,
+        "Y": 1611.1676
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e72ef067-6f4e-43be-a46e-ebfa3bc153c5",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1471.5819
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f8c85400-ad79-4d13-af2f-863b6a15fef9",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 1086.4922,
+        "Y": 1900.3801
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ff6bf105-363f-4356-8157-5aae0a3842ab",
+      "SymbolName": "Lib.numbers.anim.time.Time",
+      "SectionId": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Position": {
+        "X": 1000.15234,
+        "Y": 2408.1184
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "91126863-cdc0-40df-9397-205aee5d8c6d"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Sections": [
+    {
+      "Id": "3f1318b7-3385-4cc0-a8a1-dd3fa8d4d978",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 880.3921,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 729.6079,
+        "Y": 788.00586
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "571552b7-6ba1-4836-a64f-cb5f46644387",
+      "Description": "The final output of most things you build in TiXL are images.\nThese are sometimes called textures or image buffers.\nYou can explore the SkillQuest topics on working with images to learn about other ways to generate and use them."
+    },
+    {
+      "Id": "8180ac1d-c4a0-4dc4-8c9b-f7c343d42b0b",
+      "Description": "The [RenderTarget] operator is used to render 3D geometry into an image.\nIt is one of the most important operators in TiXL and is used in many projects.\nIt can be helpful to understand how the RenderTarget works internally."
+    },
+    {
+      "Id": "f4502c64-c647-45c5-9aac-8e9c67c29b99",
+      "Description": "You can think of the **RenderTarget** as a blank canvas.\nAll geometry connected to it (from the left or above) is prepared to be drawn onto this canvas."
+    },
+    {
+      "Id": "246bcc6b-e2e2-468a-a7db-04c651bf6c74",
+      "Description": "At the beginning of each frame, the RenderTarget is cleared with a solid color.\nAfter that, any draw operator (the teal command operators) can render onto it."
+    },
+    {
+      "Id": "a1e4679c-aab8-4fb2-9e6d-3a031371e67b",
+      "Description": "In this example, clearing is disabled."
+    },
+    {
+      "Id": "1181a314-c295-4d06-8349-50e4aff15488",
+      "Description": "Reproduce the challenge.",
+      "Style": "CallToAction"
+    }
+  ]
+}

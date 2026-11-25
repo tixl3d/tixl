@@ -43,8 +43,8 @@ inline float3 TwistFunction(float3 position, float twistAmount)
     float angle;
     float cosA;
     float sinA;
-    float3 twisted;
     float3 posWithPivot = position - TwistPivot; 
+    float3 twisted = posWithPivot;
     switch ((int)TwistAxis)
     {
     case 0:

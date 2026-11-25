@@ -519,6 +519,13 @@
       "Outputs": []
     },
     {
+      "Id": "4deb5dcf-ab1b-4c0a-b064-e4ccbb075f1f"/*RenderTarget*/,
+      "SymbolId": "f9fe78c5-43a6-48ae-8e8c-6cdbbc330dd1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "54cb0215-30b4-47d7-afd7-b83dd2a1b435"/*RepeatPolar*/,
       "SymbolId": "1d9f133d-eba6-4b28-9dfd-08f6c5417ed6",
       "SymbolName": "Lib.field.space.RepeatPolar",
@@ -554,7 +561,7 @@
         {
           "Id": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C)));"
+          "Value": "float3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C))).rgb;"
         },
         {
           "Id": "7f731ea3-c246-4e9c-95b3-b30260887161"/*EnableZTest*/,
@@ -851,6 +858,32 @@
       "Outputs": []
     },
     {
+      "Id": "700d9cd5-2bfa-476c-b4d4-423966282c40"/*Camera*/,
+      "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
+      "SymbolName": "Lib.render.camera.Camera",
+      "InputValues": [
+        {
+          "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": -0.44799858,
+            "Y": 0.23039946,
+            "Z": 0.35551843
+          }
+        },
+        {
+          "Id": "a7acb25c-d60c-43a6-b1df-2cd5c6e183f3"/*Target*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": 0.15553515,
+            "Y": 0.5504044,
+            "Z": -0.09991118
+          }
+        }
+      ],
+      "Outputs": []
+    },
+    {
       "Id": "71499827-6238-449e-81a8-a88a4bea7aa9"/*SelectPointsWithSDF*/,
       "SymbolId": "695d20dc-d1fe-4648-80fb-e1159b8aead4",
       "SymbolName": "Lib.point.modify.SelectPointsWithSDF",
@@ -992,7 +1025,7 @@
         {
           "Id": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "SetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(pin.worldPosition,WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n"
+          "Value": "//See the example\nSetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n"
         },
         {
           "Id": "ada34207-e581-4f35-9ef5-8f6122e0bde5"/*D*/,
@@ -1017,7 +1050,7 @@
               "Interpolation": "Linear",
               "Steps": [
                 {
-                  "Id": "4d05d3d9-bc46-4221-a4d2-0e471e769b97",
+                  "Id": "a7905a47-cd1b-4240-8b1e-03bf29665ff9",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 1.0,
@@ -1027,7 +1060,7 @@
                   }
                 },
                 {
-                  "Id": "2981f78a-a028-4730-b1be-98825400987b",
+                  "Id": "a3e4a240-0520-4cba-a35d-e54564e2a3be",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.5215311,
@@ -1139,7 +1172,7 @@
         {
           "Id": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "//Unlit shader combining TexCoord and TexCoord2\nSetupFrag(pin);\n\nfloat2 uv2 = pin.texCoord2.xy;\nfloat4 TexCoor2Image = Image.Sample(ClampedSampler ,uv2);\nc.rgb =max( TexCoor2Image , frag.albedo);"
+          "Value": "//Unlit shader combining TexCoord and TexCoord2\nSetupFrag(pin);\n\nfloat2 uv2 = pin.texCoord2.xy;\nfloat4 TexCoor2Image = Image.Sample(ClampedSampler ,uv2);\nc.rgb =max( TexCoor2Image , frag.albedo).rgb;"
         }
       ],
       "Outputs": []
@@ -1288,7 +1321,7 @@
         {
           "Id": "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 pv=mul(float4(pin.worldPosition.xyz,1),WorldToCamera);\nfloat3 nw=ComputeNormal(pin, pin.tbnToWorld).xyz;\nfloat3 vn=mul(nw,transpose((float3x3)CameraToWorld));\n//pv.xy+=vn.xy*A;\nfloat3 rd=pv.xyz;\n\nrd=normalize(mul(rd,transpose((float3x3)WorldToCamera)));\nrd=refract(rd,nw,B);\n\npv.xyz=normalize(mul(rd,transpose((float3x3)CameraToWorld)));\n\nfloat4 pp=mul(pv,CameraToClipSpace);\n//pp=mul(float4(pin.worldPosition.xyz,1),WorldToClipSpace);\nfloat2 uv=(pp.xy/pp.w)*.5*float2(1,-1)+.5;\n\nc.rg=uv;\nc=BaseColorMap.Sample(WrappedSampler, uv);\nfloat g=mul(nw.xyz,transpose((float3x3)CameraToWorld)).z;\nSetupFrag(pin);\nc.rgb*=(length(rd)>0)*SampleGradient(pow(g,1));\n\n\nfrag.Metalness=1;\nfrag.Roughness=.04;\nfrag.albedo=1;\n\nc=lerp(c,ComputePbr(),pow(1-g,1));\nc.a=1;"
+          "Value": "float4 pv=mul(float4(pin.worldPosition.xyz,1),WorldToCamera);\nfloat3 nw=ComputeNormal(pin, pin.tbnToWorld).xyz;\nfloat3 vn=mul(nw,transpose((float3x3)CameraToWorld));\n//pv.xy+=vn.xy*A;\nfloat3 rd=pv.xyz;\n\nrd=normalize(mul(rd,transpose((float3x3)WorldToCamera)));\nrd=refract(rd,nw,B);\n\npv.xyz=normalize(mul(rd,transpose((float3x3)CameraToWorld)));\n\nfloat4 pp=mul(pv,CameraToClipSpace);\n//pp=mul(float4(pin.worldPosition.xyz,1),WorldToClipSpace);\nfloat2 uv=(pp.xy/pp.w)*.5*float2(1,-1)+.5;\n\nc.rg=uv;\nc=BaseColorMap.Sample(WrappedSampler, uv);\nfloat g=mul(nw.xyz,transpose((float3x3)CameraToWorld)).z;\nSetupFrag(pin);\nc.rgb*=(length(rd)>0)*SampleGradient(pow(g,1)).rgb;\n\n\nfrag.Metalness=1;\nfrag.Roughness=.04;\nfrag.albedo=1;\n\nc=lerp(c,ComputePbr(),pow(1-g,1));\nc.a=1;"
         },
         {
           "Id": "e7dc01ac-cb1d-409a-b8f3-ad22b1255771"/*A*/,
@@ -1791,6 +1824,12 @@
       "TargetSlotId": "876f6f64-7cb4-4060-8571-e0b78b437d41"
     },
     {
+      "SourceParentOrChildId": "700d9cd5-2bfa-476c-b4d4-423966282c40",
+      "SourceSlotId": "2e1742d8-9ba3-4236-a0cd-a2b02c9f5924",
+      "TargetParentOrChildId": "4deb5dcf-ab1b-4c0a-b064-e4ccbb075f1f",
+      "TargetSlotId": "4da253b7-4953-439a-b03f-1d515a78bddf"
+    },
+    {
       "SourceParentOrChildId": "60763813-851d-44d2-a431-f27f1612fc64",
       "SourceSlotId": "1aaaf637-a2f1-4706-909e-fa4fb102619d",
       "TargetParentOrChildId": "54cb0215-30b4-47d7-afd7-b83dd2a1b435",
@@ -1837,6 +1876,12 @@
       "SourceSlotId": "82527072-beb2-492f-b737-faf9ed454e3f",
       "TargetParentOrChildId": "6dc457cd-b2f1-4b66-98c5-b85f46380018",
       "TargetSlotId": "6262f448-92fb-41ed-8613-2b387f2e72f2"
+    },
+    {
+      "SourceParentOrChildId": "6dbdee10-84fd-45bb-af4a-4f17e5b9a6f3",
+      "SourceSlotId": "32b87a4d-bef3-4646-be76-8f8224ebd5c2",
+      "TargetParentOrChildId": "700d9cd5-2bfa-476c-b4d4-423966282c40",
+      "TargetSlotId": "047b8fae-468c-48a7-8f3a-5fac8dd5b3c6"
     },
     {
       "SourceParentOrChildId": "28c429d3-c82f-4d99-aeef-30011fa6cb33",

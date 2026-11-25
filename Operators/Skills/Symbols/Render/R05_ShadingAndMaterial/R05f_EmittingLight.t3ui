@@ -2,31 +2,141 @@
   "FormatVersion": 3,
   "Id": "99520f2a-7e6a-4bc2-ae1f-f1e6e3407766"/*R05f_EmittingLight*/,
   "Description": "Emitting Light",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "17f75760-b58d-44d1-9a47-744bdde052d8",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "0dee29e2-4681-45fc-9b70-2ef0a73aace5",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1330.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "0fa31cf3-4ed1-48ee-a4a7-e3077e03a8a1",
+      "SymbolName": "Lib.render.shading.SetMaterial",
       "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1347.1488,
+        "Y": 2002.4382
       }
     },
     {
-      "ChildId": "817c532b-f461-47a2-be19-773f82cc5185",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "23252a9a-dfe5-4686-b0a6-1cc9a05efe2c",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
+        "X": 1347.1488,
+        "Y": 2072.4382
       }
     },
     {
-      "ChildId": "d84d2d9f-e13f-4b9c-abd3-8a96dfcafbe2",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "3956aa1c-c108-442e-82a5-39a094a132a1",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1470.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4d1f2b01-9840-4788-a3ff-b23dbeec8e5a",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern1",
+      "Position": {
+        "X": 1228.8466,
+        "Y": 1430.6431
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "51311675-593f-4c1c-afc3-11a0db7c73b4",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1347.1488,
+        "Y": 2142.4382
+      }
+    },
+    {
+      "ChildId": "7fd5f070-85b9-468c-866c-2b41fa4c42da",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1505.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "9d3114e6-bb8e-4bd5-a3c5-875c5fb35eb9",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1400.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ace48eb1-c80c-4b5c-b7e4-f4edee7758a3",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1365.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "afc83a85-0fd0-4971-b08c-1dff0f2fe5e4",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1347.1488,
+        "Y": 1967.4382
+      }
+    },
+    {
+      "ChildId": "ccab2b87-5357-401b-95d8-885b689d1690",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
+      }
+    },
+    {
+      "ChildId": "cff48882-f58e-40f6-961e-5dea351898c0",
+      "SymbolName": "Lib.image.generate.pattern.RyojiPattern1",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1132.76,
+        "Y": 2032.8794
+      }
+    },
+    {
+      "ChildId": "df158b5d-da31-46f3-99b1-7ac717883d87",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1347.1488,
+        "Y": 2107.4382
+      }
+    },
+    {
+      "ChildId": "ecbb086d-d3de-4ddd-a93e-7b0d1cd02f44",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1443.2354,
+        "Y": 1435.2019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f96491ba-b890-415f-9f32-7d80f37f7934",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "a0b89640-9a1a-44f3-b3de-0b3efad0c748",
+      "Position": {
+        "X": 1347.1488,
+        "Y": 1932.4382
       }
     }
   ],
@@ -52,26 +162,33 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1785.0
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 455.0
       }
     }
   ],
   "TourPoints": [
     {
       "Id": "706f1fbb-46d7-4e4e-b85d-58ab699533dc",
-      "Description": "Materials can emit light using the emission color and emission texture parameters.\nThe texture and color values are multiplied.\nThe default emission color is black, so emission textures remain invisible until the color brightness is increased."
+      "ChildId": "9d3114e6-bb8e-4bd5-a3c5-875c5fb35eb9",
+      "InputId": "2c91c306-1815-4b22-a70f-746232f024d7",
+      "Description": "Materials can emit light using the emission color and emission texture parameters.\nThe texture and color values are multiplied.\nThe default emission color is black, so emission textures remain invisible until the color brightness is increased.",
+      "Style": "InfoFor"
     },
     {
       "Id": "5f8601ab-d4a2-46fc-8523-0fa82cff9ec8",
-      "Description": "HDR emission values greater than 1 work particularly well when combined with a [Bloom] post-processing effect."
+      "ChildId": "7fd5f070-85b9-468c-866c-2b41fa4c42da",
+      "Description": "HDR emission values greater than 1 work particularly well when combined with a [Bloom] post-processing effect.",
+      "Style": "InfoFor"
     },
     {
       "Id": "4d002807-9e37-46f7-a8b6-cfce16e25459",
-      "Description": "In this example, the highlight color of [RyojiPattern] is brightened to create a glow effect."
+      "ChildId": "4d1f2b01-9840-4788-a3ff-b23dbeec8e5a",
+      "Description": "In this example, the highlight color of [RyojiPattern1] is brightened to create a glow effect.",
+      "Style": "InfoFor"
     },
     {
       "Id": "78209e2a-0930-4bc2-b54d-634d447b7455",

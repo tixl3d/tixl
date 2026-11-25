@@ -41,7 +41,8 @@
         "Y": 225.0
       },
       "Description": "Horizontal: one row per list. Vertical: one column per list.",
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "748fe756-c7ee-4cc1-929e-078f99bea628"/*Offset*/,

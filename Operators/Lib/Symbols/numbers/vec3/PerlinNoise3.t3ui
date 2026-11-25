@@ -57,7 +57,7 @@
       "Description": "Defines the lowest value of the noise."
     },
     {
-      "InputId": "b7b95fc2-c73f-4db1-bdab-2445fe62f032"/*BiasAndGain*/,
+      "InputId": "b7b95fc2-c73f-4db1-bdab-2445fe62f032"/*GainAndBias*/,
       "Position": {
         "X": -2.7436478,
         "Y": 125.44479

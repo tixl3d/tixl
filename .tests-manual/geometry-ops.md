@@ -96,11 +96,28 @@ Feed the beveled cube into a `[VoronoiFracture]`, its `Points` from a
   `FillInterior` reproduces the old dark gaps (expected for that setting, which
   exists for open or non-manifold meshes).
 
+## Step: Toggling interior cells and preserving openings
+
+**Action:**
+Use a closed cube extending from -1 to 1 on each axis with seven seed points: the center and one at each of ±0.5 on X, Y and Z.
+Feed it into [VoronoiFracture] with **Async** disabled, then toggle **FillInterior** and inspect the output parts.
+
+**Expected:**
+- With **FillInterior** enabled, seven fragments are present, including the center cell.
+- With **FillInterior** disabled, six fragments remain and the center cell is absent.
+
+**Action:**
+Remove the cube's top face and use two seed points at (-0.5, 0, 0) and (0.5, 0, 0).
+Toggle **FillInterior** again and inspect the pieces' open edges.
+
+**Expected:**
+- Both settings preserve the top openings; enabling **FillInterior** does not seal the input's missing face.
+
 ## Step: Fracturing a concave shape
 
 **Action:**
 Feed a concave solid into `[VoronoiFracture]` instead of the cube: either
-`[TextToCurves]` -> `[CurvesToGeometry]` (text `Xg8`, Depth 0.2) or
+`[StringToCurves]` -> `[ExtrudeCurves]` (text `Xg8`, Depth 0.2) or
 `Lib:meshes/ring-bevelled.obj` via `[LoadObjGeometry]`. Scatter 10 to 40 seeds
 across it and pin the fracture's output.
 
@@ -114,7 +131,7 @@ across it and pin the fracture's output.
 ## Step: Sweeping the seed orientation
 
 **Action:**
-Feed `[VoronoiFracture]` (input: `[TextToCurves]` text `X` -> `[CurvesToGeometry]`)
+Feed `[VoronoiFracture]` (input: `[StringToCurves]` text `X` -> `[ExtrudeCurves]`)
 with 100 seeds from `[RadialCPoints]`, radius 1, and animate the `Axis` with a
 `[PerlinNoise]` so the ring of seeds tumbles through the glyph.
 
@@ -304,7 +321,7 @@ Insert a `[TriangulateGeometry]` directly after `[CubeGeometry]`.
 ## Step: Text as lines
 
 **Action:**
-In a new graph add `[TextToCurves]` (default text "TiXL", font
+In a new graph add `[StringToCurves]` (default text "TiXL", font
 `Lib:fonts/Inter-Variable.ttf`), connect it to `[CurvesToPoints]`, then
 `[ListToBuffer]` and `[DrawLines]`.
 
@@ -321,7 +338,7 @@ In a new graph add `[TextToCurves]` (default text "TiXL", font
 
 **Action:**
 In the text-as-lines graph set `LetterSpacing` to 0.2, then toggle `Alignment`
-between Left, Center and Right. Drag the move gizmo of `[TextToCurves]` in the
+between Left, Center and Right. Drag the move gizmo of `[StringToCurves]` in the
 output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
 (or check the point rotations in the list view).
 
@@ -335,9 +352,9 @@ output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
 ## Step: Offsetting outlines
 
 **Action:**
-Insert `[OffsetCurves]` between `[TextToCurves]` and `[CurvesToPoints]`. Sweep
+Insert `[OffsetCurves]` between `[StringToCurves]` and `[CurvesToPoints]`. Sweep
 `Offset` from -0.03 to 0.05 and switch `Join` between Miter, Round and Bevel.
-Then feed the offset curves into `[CurvesToGeometry]` instead.
+Then feed the offset curves into `[ExtrudeCurves]` instead.
 
 **Expected:**
 - Positive values grow every letter and shrink its holes; negative values thin
@@ -345,14 +362,14 @@ Then feed the offset curves into `[CurvesToGeometry]` instead.
   and cut flat with Bevel.
 - Lowering `MiterLimit` towards 1 turns the sharpest miters (the tip of A) into
   bevels.
-- The filled `[CurvesToGeometry]` result has no gaps at corners.
+- The filled `[ExtrudeCurves]` result has no gaps at corners.
 - Very large negative offsets can fold thin strokes into small loops; this is a
   known limit.
 
 ## Step: Text as solid mesh
 
 **Action:**
-Replace `[CurvesToPoints]` and the line ops with `[CurvesToGeometry]` ->
+Replace `[CurvesToPoints]` and the line ops with `[ExtrudeCurves]` ->
 `[GeometryToMesh]` -> `[DrawMesh]`. Set `Text` to `TiXL Xg8&@`.
 
 **Expected:**
@@ -373,4 +390,223 @@ Replace `[CurvesToPoints]` and the line ops with `[CurvesToGeometry]` ->
 - `EvenOdd` turns the X's overlap into a hole; front/back/side flags remove the
   respective faces.
 - `[ColorFacesFromAttribute]` with the part-index option colors each letter
-  differently; the `IsSide` face attribute separates walls from caps.
+  differently; the `IsSide` primitive attribute separates walls from caps.
+
+## Step: Set an attribute per letter
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Parts, Name `W`, Code
+`return i == 1 ? 1f : 0f;`) -> [TransformGeometry] (Translation Y 0.1, Selection `W`), and look at the Output Window.
+
+**Expected:**
+- Only the `i` moves up; the other letters stay.
+- In the Table of [CustomGeometryAttribute]'s output, **Parts** shows a `W` column with 1 for the `i` and 0 elsewhere.
+- A typo in Code gives the Code field an error border with the snippet's line and error below it; the last working values stay.
+
+## Step: Color letters from an attribute
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Parts, Name `W`, Code
+`return i * 0.25f;`) -> [ColorGeometry] (Domain Parts, Attribute `W`, Mapping FromStart, a black-to-white gradient)
+-> [CurvesToPoints] (Sampling Points), and look at the Output Window.
+
+**Expected:**
+- The four letters get four grey levels, from black for the `T` to light grey for the `L`.
+- Switching Domain to Points and Input Mode to Index gives a ramp along all points; Random gives noise that changes with Seed.
+- With an empty or misspelled Attribute the colors stay unchanged and the op shows a warning.
+- An upstream [SelectGeometry] (Every 2) recolors only every second point.
+
+## Step: Subdivide a cube
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] and look at the Output Window, Stats tab.
+
+**Expected:**
+- Smoothness 0 with 1 iteration gives 26 points and 24 quads; the volume stays 1 and the cube looks unchanged.
+- Smoothness 1 gives a rounded shape (volume about 0.42) that shrinks with more iterations; Boundary edges stays 0 and the shading is smooth. 0.5 lies in between.
+- Insert [SelectGeometry] (Domain Points, Count 3) before it and set SmoothnessAttribute to `Selection`: only the region around those points rounds off.
+- With [StringToCurves] as input the curves pass through unchanged.
+
+## Step: See and limit a face selection
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] (Linear) -> [SelectGeometry] (Domain Primitives, Every 5) ->
+[TransformGeometry] (Translation Y 0.2), select [SelectGeometry] and look at the Output Window.
+
+**Expected:**
+- The selected faces are outlined in white with their corners as dots; edges hidden behind the cube are faint.
+- Count 2 keeps only two faces from Offset; animating Offset moves them around the cube.
+- On [TransformGeometry], Selection shows `<Auto: Selection>`. Typing opens a list with `<Auto>`, `<All>` and the float attributes; `<All>` moves the whole cube.
+
+## Step: Read attributes in a snippet
+
+**Action:**
+Connect [CubeGeometry] -> [CustomGeometryAttribute] (Domain Points, Name `W`, Code `return p.Y;`) ->
+[SelectGeometry] (Mode Custom) -> [TransformGeometry] (Translation Y 0.2).
+
+**Expected:**
+- Code `return @W > 0;` moves the top four corners.
+- Domain Primitives with `return @W > 0.4f;` selects only the top face; Domain Vertices with `return @Normal.Y > 0.5f;` too.
+- `return @Nope > 0;` moves nothing and the op warns that the attribute is missing.
+- Add a [CustomGeometryAttribute] (Domain Primitives, Name `FN`, Type Vector3, Code `return Vector3.Normalize(@Normal);`)
+  after the cube. Below its Code field a dimmed note says `@Normal averaged from vertices`.
+- [SelectGeometry] (Domain Primitives) with `return @FN.Y > 0.9f;` moves only the top face.
+
+## Step: Sample a field into an attribute
+
+**Action:**
+Connect [CubeGeometry] -> [SubdivideGeometry] (Smoothness 0, Iterations 3) -> [AttributeFromField] (Domain Points,
+Name `N`, Field from a [NoiseField]) -> [ColorGeometry] (Attribute `N`) and look at the Output Window.
+
+**Expected:**
+- The cube shows the noise as a gradient; changing the noise changes the colors.
+- Without a connected Field the op warns and passes the geometry through.
+
+## Step: Flat text and a depth wave
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) directly to [GeometryToMesh] -> [DrawMesh].
+
+**Expected:**
+- The letters render flat and filled, holes included; turning FillCurves off on [GeometryToMesh] hides them and the op
+  warns that there is nothing to draw.
+- [StringToCurves] -> [FillCurves] -> [GeometryToMesh] looks the same; the Stats of [FillCurves] show polygons, one part
+  per letter.
+- Insert [CustomGeometryAttribute] (Domain Parts, Name `Depth`, Code `return 0.5f + 0.5f * Sin(i * 0.8f + A);`) and
+  [ExtrudeCurves] (DepthAttribute `Depth`) before [GeometryToMesh]: each letter gets its own depth; animating A moves
+  the wave. A misspelled DepthAttribute warns and extrudes all letters equally.
+- With KeepCurves on [ExtrudeCurves], the front caps don't flicker: [GeometryToMesh] doesn't fill the kept curves again.
+
+## Step: Segmented cube and curves through mesh ops
+
+**Action:**
+Set Segments of [CubeGeometry] to 2, 1, 3 and look at the Stats. Then connect [ExtrudeCurves] (KeepCurves on) to
+[BevelGeometry], [TriangulateGeometry], [SeparateLooseParts] and [VoronoiFracture] in turn.
+
+**Expected:**
+- The cube has 24 points and 22 quads, Boundary edges 0 and volume 1; 1, 1, 1 gives the plain cube.
+- Each op's output still contains the letter outlines as curves (Stats, Table Primitives), after all parts.
+- After [TriangulateGeometry], the IsSide primitive attribute has one value per triangle.
+
+## Step: Adaptive subdivision
+
+**Action:**
+Connect [CubeGeometry] -> [SelectGeometry] (Domain Primitives, Offset 4, Count 1) -> [SubdivideGeometry]
+(Smoothness 0, Iterations 3, LevelAttribute `Selection`) and look at the Output Window, Stats tab.
+
+**Expected:**
+- Only the top face is refined: 69 polygons (64 + 5), Boundary edges 0, volume 1.
+- Smoothness 1 rounds the top while the border to the other faces stays closed (Boundary edges 0).
+- With [GeometryToMesh] -> [DrawMesh] after it, the cube's edges stay hard (SmoothAngle 60); SmoothAngle 180 blends
+  the shading across them.
+- A [SelectGeometry] Custom snippet `return i == 4 ? 0.5f : 0f;` with Iterations 4 refines the top face twice (21 polygons).
+- With LevelAttribute empty, a [CubeGeometry] of Size 4, 1, 1 and MaxEdgeLength 0.6 gives far fewer faces than
+  without MaxEdgeLength, with the long sides refined more than the ends.
+
+## Step: Merge overlapping curves
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [MergeCurves] -> [ExtrudeCurves] and look at the Stats of each.
+
+**Expected:**
+- Without overlaps, [MergeCurves] keeps 5 curves in 4 parts; the dot of the `i` stays in the `i`'s part.
+- With LetterSpacing -0.2 on [StringToCurves], the letters merge into one outline in one part, and the extrusion is
+  closed (Boundary edges 0) without walls inside the overlaps.
+- Xor turns overlaps into holes; Intersect keeps only the overlapping areas.
+- A [CubeGeometry] as input passes through with the warning that there are no closed curves.
+
+## Step: Weld duplicated points
+
+**Action:**
+Load an .obj whose positions are listed once per face, e.g. one exported by [WriteObj] after [GeometryToMesh], with
+[LoadObjGeometry] -> [MergeVertices] (Tolerance 0.0001), and look at the Stats of each.
+
+**Expected:**
+- [LoadObjGeometry] has one point per `v` line and many more vertices; its Boundary edges show that no faces share
+  edges.
+- After [MergeVertices], Points drops to the number of unique positions, Vertices stays the same, and Boundary edges
+  shrink because the faces now share edges through the welded points. The status reports how many points were merged.
+- With the output of [FillCurves] as input, the status says no points to merge: the fill already shares its points.
+- A Tolerance larger than the spacing of the mesh collapses thin faces; 0 merges only exactly coincident points.
+
+## Step: Merge duplicate mesh vertices
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [FillCurves] -> [GeometryToMesh] -> [WriteObj], export once with Merge
+Duplicate Vertices off and once with it on, and count the `v` lines of both files.
+
+**Expected:**
+- With the option off, the export has one vertex per face corner, several times the Points count of [FillCurves].
+- With it on, the exported vertex count equals the Points count of [FillCurves]; the faces, UVs and normals are
+  unchanged and the render looks the same.
+- Corners whose position, normal, UVs or color differ, e.g. at a UV seam, stay separate vertices.
+
+## Step: Lattice caps
+
+**Action:**
+Connect [StringToCurves] (text `TiXL`) -> [ExtrudeCurves] (Lattice 0.05) -> [SubdivideGeometry] (Smoothness 1,
+Iterations 2) -> [GeometryToMesh] -> [DrawMesh], and compare with Lattice 0.
+
+**Expected:**
+- With Lattice, the front and back caps are a grid of squares with small pieces along the outline; without it, long
+  thin triangles span the letters. The subdivided result shows no streaks across the caps.
+- The Stats of [ExtrudeCurves] and [SubdivideGeometry] show Boundary edges 0; the volume of [ExtrudeCurves] is the
+  same with and without Lattice.
+- With a Bevel, or a Lattice so small that it needs more than 40000 cells, the op warns and builds the plain caps.
+- [FillCurves] with Lattice gives the same grid as a flat surface.
+
+## Step: Inset the filled outline
+
+**Action:**
+Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] (Inset 0.02)
+-> [GeometryToMesh] -> [DrawMesh] and look at the Stats of [FillCurves].
+
+**Expected:**
+- A ring of quads runs along every outline, with the fill inside it; the outer bounds and the silhouette don't change.
+- The Stats show no non-manifold edges; boundary edges are the outline edges, plus a few where a tiny counter collapses.
+- Set Lattice 0.05: the cap inside the ring becomes a grid, but the ring stays one quad per outline edge: the cap's
+  border cells snap to the nearest inset point instead of adding points on the ring. No non-manifold edges appear.
+  Without the ring, the letters show long triangles from the outline.
+- Set Inset 0.5 on letters with a thin stem: the op warns that the inset was limited, and the rings stop before
+  opposite outlines overlap.
+- Weight still offsets the whole letter first; the ring is built inside the offset outline.
+- Add [ColorFacesFromAttribute] (Attribute `IsInset`, Colors white and blue): the ring faces become blue and the cap
+  stays white; with Inset 0 every face stays white.
+- With Lazenby Computer Liquid and text `Cc`, both letters get a complete inset ring: hairline edges in the outlines
+  are welded before insetting.
+
+## Step: Constrained Delaunay caps
+
+**Action:**
+Connect [StringToCurves] (text `aeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] -> [GeometryToMesh]
+-> [DrawMesh]. Toggle ConstrainedDelaunay and compare, also with Inset and Lattice on.
+
+**Expected:**
+- With ConstrainedDelaunay on, the caps show fewer and less extreme long thin triangles than the default fill; holes
+  stay open and the Stats keep the same area.
+- Turning it off restores the default fill. With Lattice and ConstrainedDelaunay on, the cap keeps the lattice's point
+  density but is triangulated into better-shaped triangles instead of quads; with Lattice alone it stays a grid of
+  quads. With Inset the cap still meets the ring without gaps or non-manifold edges. Where the inset rings cross, the
+  op warns and falls back to the regular cap (the lattice grid if it is on, otherwise the default fill).
+- On very thin stems some slivers can remain because the outline points are fixed; the op does not warn.
+
+## Step: Polygon edges as lines
+
+**Action:**
+Connect [CubeGeometry] -> [CurvesToPoints] -> [ListToBuffer] -> [DrawLines] and set PolygonEdges.
+
+**Expected:**
+- None draws nothing (no curves), All and Sharp draw the 12 cube edges.
+- After [SubdivideGeometry] (Smoothness 0, Iterations 2), All draws the whole grid, Sharp still only the cube's edges.
+- On [ExtrudeCurves] of a text, Sharp outlines the letters on both caps and the corners of the walls, without lines
+  across the caps, also with Lattice.
+
+## Step: Filter by a selection
+
+**Action:**
+Connect [CubeGeometry] -> [SelectGeometry] -> [FilterGeometry] and look at the Stats of [FilterGeometry].
+
+**Expected:**
+- [SelectGeometry] Domain Points, Count 2: 2 points and no primitives remain (loose points).
+- Domain Primitives, Offset 4, Count 1: the top face with its 4 points remains; Invert keeps the other 5 faces.
+- A misspelled Attribute warns and passes the geometry through.

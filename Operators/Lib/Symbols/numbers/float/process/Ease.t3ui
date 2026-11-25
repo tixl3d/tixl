@@ -45,7 +45,8 @@
         "X": 36.0,
         "Y": 604.0
       },
-      "Description": "Which end of the transition is eased: In, Out or InOut."
+      "Description": "Which end of the transition is eased: In, Out or InOut.",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

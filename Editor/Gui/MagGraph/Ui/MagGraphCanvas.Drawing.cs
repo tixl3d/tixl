@@ -304,6 +304,7 @@ internal sealed partial class MagGraphView
             DrawPendingOutputConnection(drawList);
 
             _context.ConnectionHovering.PrepareNewFrame(_context);
+            _context.ItemMovement.UpdateWireSplitIndicator(drawList);
             _context.Placeholder.Update(_context);
 
             // Draw animated Snap indicator

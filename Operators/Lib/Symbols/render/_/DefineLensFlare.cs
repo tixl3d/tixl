@@ -55,7 +55,7 @@ internal sealed class DefineLensFlare : Instance<DefineLensFlare>
         var spriteCount = SpriteCount.GetValue(context).Clamp(0, 1000);
 
         var startLightIndex = 0;
-        var endLightIndex = context.PointLights.Count;
+        var endLightIndex = context.Lights.Count;
         var textureStart = TextureIndex.GetValue(context);
 
 
@@ -77,7 +77,7 @@ internal sealed class DefineLensFlare : Instance<DefineLensFlare>
 
         for (int lightIndex = startLightIndex; lightIndex < endLightIndex; lightIndex++)
         {
-            var pointLight = context.PointLights.GetPointLight(lightIndex);
+            var pointLight = context.Lights.GetLight(lightIndex);
             var lightPosDx = new Vector4(pointLight.Position, 1);
 
             var posInViewDx = Vector4.Transform(lightPosDx, worldToClipSpace);

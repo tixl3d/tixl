@@ -36,7 +36,7 @@ Texture2D<float4> inputTexture : register(t1);
 RWStructuredBuffer<PbrVertex> ResultVertices : register(u0);
 sampler texSampler : register(s0);
 
-static float3 variationOffset;
+static float3 variationOffset = 0;
 static float3x3 TBN;
 
 float3 GetOffset(float3 pos, float3 variation)

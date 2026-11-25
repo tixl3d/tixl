@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "ffd94e5a-bc98-4e70-84d8-cce831e6925f"/*DrawPoints*/,
-  "Description": "Draws a point buffer as camera-facing sprites.\n\nThe orientation of the points is ignored. The size is PointSize multiplied by the point's Scale (see UsePointsScale) and optionally its F1 or F2 attribute (see ScaleFactor). A PointSize of 1 results in a diameter of 0.2 world units. Point colors are multiplied with Color and the optional texture, which replaces the default round shape.\n\nPoints are drawn in buffer order and not sorted by distance to the camera, which can cause artifacts with transparent blending. Try other blend modes or disable depth writing for additive effects. Very large points cause high fill rates and can drastically impact performance.\n\nSee also: [DrawBillboards], [DrawPointsShaded], [DrawLines], [DrawRibbons]\nAlso check out the [HowToDrawThings] and [HowToUsePoints] tutorials.",
+  "Description": "Draws a point buffer as camera-facing sprites.\n\nThe orientation of the points is ignored. The size is PointSize multiplied by the point's Scale (see UsePointsScale) and optionally its F1 or F2 attribute (see ScaleFactor). A PointSize of 1 results in a diameter of 0.2 world units; with SizeMode Pixels, PointSize is the diameter in pixels. Point colors are multiplied with Color and the optional texture, which replaces the default round shape.\n\nPoints are drawn in buffer order and not sorted by distance to the camera, which can cause artifacts with transparent blending. Try other blend modes or disable depth writing for additive effects. Very large points cause high fill rates and can drastically impact performance.\n\nSee also: [DrawBillboards], [DrawPointsShaded], [DrawLines], [DrawRibbons]\nAlso check out the [HowToDrawThings] and [HowToUsePoints] tutorials.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -77,6 +77,15 @@
       "GroupTitle": "Draw options"
     },
     {
+      "InputId": "9d1361e9-8ee7-412c-9bff-6e791de324c6"/*SizeMode*/,
+      "Position": {
+        "X": 2059.2307,
+        "Y": 4210.0303
+      },
+      "Description": "WorldUnits: PointSize 1 is 0.2 units across, so points shrink with distance. Pixels: PointSize is the diameter in pixels on the output, e.g. for markers that keep their size while zooming.",
+      "DisplayAs": "SegmentedSwitch"
+    },
+    {
       "InputId": "cc442161-e9ca-40ea-be3b-f87189d4e155"/*Color*/,
       "Position": {
         "X": 1922.5884,
@@ -99,7 +108,8 @@
         "X": 2059.2305,
         "Y": 4140.0303
       },
-      "Description": "Point attribute that multiplies the size: None, F1 or F2."
+      "Description": "Point attribute that multiplies the size: None, F1 or F2.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "fe99f40a-607a-4f62-9949-17f4715db859"/*ColorField*/,
@@ -184,8 +194,8 @@
       "ChildId": "5ce3570b-ecb6-4bbf-acff-a48a4dd45a4b",
       "SymbolName": "Lib.render.shading._.ContextCBuffers",
       "Position": {
-        "X": 2503.4253,
-        "Y": 4151.7017
+        "X": 2647.7083,
+        "Y": 4076.041
       }
     },
     {
@@ -197,8 +207,8 @@
         "Y": 23.0
       },
       "Position": {
-        "X": 2503.4253,
-        "Y": 4046.7017
+        "X": 2647.7083,
+        "Y": 3971.041
       }
     },
     {
@@ -223,8 +233,8 @@
         "Y": 536.0807
       },
       "Position": {
-        "X": 2643.4253,
-        "Y": 3976.7017
+        "X": 2787.7083,
+        "Y": 3901.041
       }
     },
     {
@@ -265,6 +275,14 @@
       "Position": {
         "X": 2199.2307,
         "Y": 4105.0303
+      }
+    },
+    {
+      "ChildId": "99d49be7-ff89-462c-bf60-1405591ae5b4",
+      "SymbolName": "Lib.render._dx11.api.ResolutionConstBuffer",
+      "Position": {
+        "X": 2443.4253,
+        "Y": 4226.7017
       }
     },
     {
@@ -329,6 +347,14 @@
       "Position": {
         "X": 2372.9258,
         "Y": 3956.7456
+      }
+    },
+    {
+      "ChildId": "d8c790af-ea42-43ed-ad7b-400389deaa5a",
+      "SymbolName": "Lib.render.utils.RequestedResolution",
+      "Position": {
+        "X": 2303.4253,
+        "Y": 4226.7017
       }
     },
     {

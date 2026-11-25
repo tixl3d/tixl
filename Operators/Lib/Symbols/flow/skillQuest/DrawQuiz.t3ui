@@ -10,7 +10,8 @@
         "Y": -105.86792
       },
       "GroupTitle": "Internal...",
-      "Scale": 0.01
+      "Scale": 0.01,
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "8f4f0caa-b710-47c1-94dd-346f03fac3c8"/*DoNotChange*/,

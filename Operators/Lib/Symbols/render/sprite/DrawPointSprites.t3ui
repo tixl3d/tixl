@@ -55,7 +55,8 @@
         "X": -674.21533,
         "Y": 706.9566
       },
-      "Description": "Selects a point attribute (F1 or F2) that is multiplied with the sprite size."
+      "Description": "Selects a point attribute (F1 or F2) that is multiplied with the sprite size.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "c694946c-37b6-4792-8fc5-4204ede69f90"/*Color*/,

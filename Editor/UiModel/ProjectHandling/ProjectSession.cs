@@ -9,7 +9,8 @@ using T3.Serialization;
 namespace T3.Editor.UiModel.ProjectHandling;
 
 /// <summary>
-/// How the user left a project: open composition, selection, navigation history, window layout and focus mode.
+/// How the user left a project: open composition, selection, navigation history, playback time and loop range,
+/// window layout and focus mode.
 /// It lives in the project's untracked .temp folder, so restoring a session never marks the project as modified
 /// and sharing or committing a project doesn't carry it along.
 /// </summary>
@@ -32,6 +33,12 @@ internal sealed class ProjectSession
 
     /** The operator shown as graph background in focus mode. */
     public string? BackgroundOutputPath;
+
+    /** Playhead and loop range in bars. Null in sessions written before they were stored. */
+    public double? TimeInBars;
+    public bool? IsLooping;
+    public float? LoopStartInBars;
+    public float? LoopEndInBars;
 
     /** Optional fields can be added without bumping this; bump only for shape changes old readers would misread. */
     private const int CurrentVersion = 1;

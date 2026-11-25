@@ -22,14 +22,26 @@ cbuffer ParamConstants : register(b0)
 
 #include "shared/screen-space-tracing.hlsl"
 
-/** Tilts the normal by a noise offset that averages out over the temporal accumulation. */
-float3 RoughenNormal(float3 normal, float2 pixelSeed)
+// From [RenderTarget] WithMaterialBuffer. Unbound maps read 0, whose coverage of 0 falls back to the parameters.
+Texture2D<float4> MaterialMap : register(t6);
+Texture2D<float4> BaseColorMap : register(t7);
+
+/** Roughness, metalness, specular and coverage at uv; roughness falls back to the parameter where nothing was written. */
+float4 FetchMaterial(float2 uv)
 {
-    if (Roughness <= 0.0)
+    float4 material = MaterialMap.SampleLevel(texSampler, uv, 0);
+    material.r = lerp(Roughness, material.r, material.a);
+    return material;
+}
+
+/** Tilts the normal by a noise offset that averages out over the temporal accumulation. */
+float3 RoughenNormal(float3 normal, float2 pixelSeed, float roughness)
+{
+    if (roughness <= 0.0)
         return normal;
 
     float3 random = hash32(pixelSeed) * 2.0 - 1.0;
-    return normalize(normal + random * Roughness * Roughness);
+    return normalize(normal + random * roughness * roughness);
 }
 
 float4 psTrace(vsOutput input) : SV_TARGET
@@ -46,7 +58,8 @@ float4 psTrace(vsOutput input) : SV_TARGET
     float3 viewDirection = normalize(surface - EyePosition());
     float2 pixelSeed = uv * float2(TargetWidth, TargetHeight) + fmod(FrameIndex, 1024.0) * float2(17.13, 31.71);
 
-    float3 rayDirection = reflect(viewDirection, RoughenNormal(normal, pixelSeed));
+    float roughness = FetchMaterial(uv).r;
+    float3 rayDirection = reflect(viewDirection, RoughenNormal(normal, pixelSeed, roughness));
 
     // Flipping keeps the scatter of rays that point into the surface. Falling back to the mirror ray would sharpen high roughness.
     float belowSurface = dot(rayDirection, normal);
@@ -186,10 +199,11 @@ TemporalOutput psTemporal(vsOutput input)
 
     float3 surface = UvDepthToWorld(uv, depth);
     float3 viewRay = surface - EyePosition();
+    float roughness = FetchMaterial(uv).r;
 
     // A mirror image moves like an object behind the mirror, not with the surface showing it.
     // Rough reflections have no single depth, so they blend toward moving with the surface.
-    float virtualDistance = raw.a * (1.0 - saturate(Roughness * 2.0));
+    float virtualDistance = raw.a * (1.0 - saturate(roughness * 2.0));
     float3 virtualPoint = surface + normalize(viewRay) * virtualDistance;
     // A moving mirror carries its image along.
     bool surfaceMoves;
@@ -223,7 +237,7 @@ TemporalOutput psTemporal(vsOutput input)
     float disagreement = saturate(length(historyYCoCg - clampedYCoCg) / 0.05);
 
     // Rough reflections skip the clamp to keep their rare hits, but a moving reflected object would then trail.
-    float rareHits = reflectionMoves ? 0.0 : saturate(Roughness * 4.0);
+    float rareHits = reflectionMoves ? 0.0 : saturate(roughness * 4.0);
     history = lerp(YCoCgToRgb(clampedYCoCg), history, rareHits);
     disagreement *= 1.0 - rareHits;
 
@@ -257,9 +271,16 @@ float4 psComposite(vsOutput input) : SV_TARGET
     float3 viewDirection = normalize(EyePosition() - UvDepthToWorld(uv, depth));
     float grazing = 1.0 - saturate(dot(normal, viewDirection));
     float grazing2 = grazing * grazing;
-    float fresnel = Reflectivity + (1.0 - Reflectivity) * grazing2 * grazing2 * grazing;
+
+    // PBR surfaces: metals reflect in their own color, very rough ones are left to the lighting's blurred environment.
+    float4 material = FetchMaterial(uv);
+    float coverage = material.a;
+    float3 baseColor = BaseColorMap.SampleLevel(texSampler, uv, 0).rgb;
+    float3 f0 = lerp(Reflectivity.xxx, lerp(Reflectivity.xxx, baseColor, material.g), coverage);
+    float materialScale = lerp(1.0, material.b * (1.0 - smoothstep(0.6, 0.95, material.r)), coverage);
+    float3 fresnel = f0 + (1.0 - f0) * grazing2 * grazing2 * grazing;
 
     float3 reflection = Finite(Accumulated.SampleLevel(texSampler, uv, 0)).rgb;
-    float reflectionAmount = saturate(fresnel * Intensity) * (1.0 - GetHighlightProtection(image.rgb));
+    float3 reflectionAmount = saturate(fresnel * Intensity * materialScale) * (1.0 - GetHighlightProtection(image.rgb));
     return float4(lerp(image.rgb, reflection, reflectionAmount), image.a);
 }

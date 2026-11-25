@@ -125,7 +125,7 @@ psInput vsMain(uint id : SV_VertexID)
     float height = 7;
 
     float2 s = float2(width / targetSize.x, 7.0 / targetSize.y) * Scale;
-    int2 intLabelOffset = (int2)(LabelOffset.x + 30.0, LabelOffset.y - 10);
+    int2 intLabelOffset = int2(LabelOffset.x + 30.0, LabelOffset.y - 10);
 
     posInClipSpace.xyz /= posInClipSpace.w;
     posInClipSpace.w = 1;
@@ -266,7 +266,7 @@ float4 psMain(psInput input) : SV_TARGET
             discard;
         }
 
-        decimalIndex += (decimalIndex <= decimalPosition - 1) ? 1 : 0;
+        decimalIndex += (int2)(decimalIndex <= decimalPosition - 1);
 
         int requiredDigitCount = floatValue == 0 ? 1 : (log10(floatValue) + decimalPosition);
         bool needsLeadingZero = floatValue < 1;
@@ -295,7 +295,5 @@ float4 psMain(psInput input) : SV_TARGET
             discard;
 
         return Color;
-
-        return 1;
     }
 }

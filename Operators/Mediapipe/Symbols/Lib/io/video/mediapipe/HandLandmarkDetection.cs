@@ -43,7 +43,7 @@ internal class HandLandmarkDetectionResultPacket
 }
 
 [Guid("4567890a-bcde-f123-4567-890abcdef123")]
-[ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Emgu.CV.dll", "cvextern.dll", "OpenGL.Net.dll", "CppSharp.Runtime.dll", "Google.Protobuf.dll")]
+[ExportDependencies("mediapipe_c.dll", "OpenCvSharpExtern.dll", "Google.Protobuf.dll")]
 public class HandLandmarkDetection : Instance<HandLandmarkDetection>
 {
     [Output(Guid = "def01234-5678-90ab-cdef-1234567890ab", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]

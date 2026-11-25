@@ -26,7 +26,8 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
 {
     public Device Device { get; set; }
 
-    protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
+    protected override bool CompileShaderFromSource<TShader>(ShaderCompilationArgs args, out byte[] blob, out string errorMessage,
+                                                             List<ShaderCompileFailures.Diagnostic> diagnostics)
     {
         CompilationResult compilationResult = null;
         string resultMessage;
@@ -49,7 +50,9 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
                                                        flags, 
                                                        EffectFlags.None, 
                                                        null, 
-                                                       new IncludeHandler(args.Owner));
+                                                       new IncludeHandler(args.Owner),
+                                                       // Named, so errors in the source itself can be told from errors in its includes.
+                                                       args.Name);
 
             success = compilationResult.ResultCode == SharpDX.Result.Ok;
             resultMessage = compilationResult.Message;
@@ -67,8 +70,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
         }
         else
         {
-            resultMessage = ExtractMeaningfulShaderErrorMessage(resultMessage);
-            errorMessage = resultMessage;
+            errorMessage = FxcDiagnostics.Describe(resultMessage, args.Name, diagnostics);
             blob = null;
         }
 
@@ -85,57 +87,6 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
         var debugNameInfo = shaderType.GetProperty("DebugName");
         debugNameInfo?.SetValue(shader, name);
     }
-    public static string ExtractMeaningfulShaderErrorMessage(string message)
-    {
-        var lines = message.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-        (string ShaderName, string LineNumber, string ErrorMessage)? firstWarning = null;
-
-        foreach (var line in lines)
-        {
-            var shaderErrorMatch = ShaderErrorPatternRegex().Match(line);
-            if (shaderErrorMatch.Success)
-            {
-                var shaderName = shaderErrorMatch.Groups[1].Value;
-                var lineNumber = shaderErrorMatch.Groups[2].Value;
-                var errorMessage = shaderErrorMatch.Groups[3].Value.Trim();
-
-                if (errorMessage.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
-                    return $"Line {lineNumber}: {errorMessage}\n\n{shaderName}";
-
-                if (firstWarning == null && errorMessage.IndexOf("warning", StringComparison.OrdinalIgnoreCase) >= 0)
-                    firstWarning = (shaderName, lineNumber, errorMessage);
-
-                continue;
-            }
-
-            // Some compiler lines don't contain file/line info. Still prefer an error if one is present.
-            if (line.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0)
-                return line.Trim();
-
-            if (firstWarning == null && line.IndexOf("warning", StringComparison.OrdinalIgnoreCase) >= 0)
-                firstWarning = (string.Empty, string.Empty, line.Trim());
-        }
-
-        if (firstWarning != null)
-        {
-            if (!string.IsNullOrEmpty(firstWarning.Value.ShaderName))
-                return $"Line {firstWarning.Value.LineNumber}: {firstWarning.Value.ErrorMessage}\n\n{firstWarning.Value.ShaderName}";
-
-            return firstWarning.Value.ErrorMessage;
-        }
-
-        return message;
-    }
-    
-    /// <summary>
-    /// Matches errors like....
-    ///
-    /// Failed to compile shader 'ComputeWobble': C:\Users\pixtur\coding\t3\Resources\compute-ColorGrade.hlsl(32,12-56): warning X3206: implicit truncation of vector type
-    /// </summary>
-    [GeneratedRegex(@"(.*?)\((.*)\):(.*)")]
-    private static partial Regex ShaderErrorPatternRegex();
-
     private static readonly IReadOnlyDictionary<Type, Func<Device, byte[], AbstractShader> > _shaderConstructors = new Dictionary<Type, Func<Device, byte[], AbstractShader>>()
                                                                                    {
                                                                                        { typeof(T3.Core.DataTypes.VertexShader), (device, data) => new DataTypes.VertexShader(new VertexShader(device, data, null), data) },

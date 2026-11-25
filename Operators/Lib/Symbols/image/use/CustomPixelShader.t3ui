@@ -71,7 +71,8 @@
         "Y": 285.80954
       },
       "Description": "Body of the pixel shader. Must assign the result color to c.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "8ea35e89-137a-4cb3-b26d-ba6bd9e5ce12"/*CustomSampler*/,
@@ -133,7 +134,8 @@
       },
       "GroupTitle": "Additional Options...",
       "Description": "Code inserted before the shader function, e.g. helper functions or resource declarations.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "db522fd4-5cfc-49f6-9983-02ec0dd6090a"/*D*/,

@@ -320,6 +320,26 @@ public sealed partial class SymbolUi : ISelectionContainer
         NeedsFix = 1 << 10,
         HasUpdate = 1 << 11,
         Obsolete = 1 << 12,
+
+        // Work states. A symbol has at most one; untagged means no state was assigned.
+        // SkillQuest hides Planned and Draft levels from players.
+        Planned = 1 << 13,
+        Draft = 1 << 14,
+        Done = 1 << 15,
+        Tested = 1 << 16,
+    }
+
+    internal const SymbolTags WorkStateTags = SymbolTags.Planned | SymbolTags.Draft | SymbolTags.Done | SymbolTags.Tested;
+
+    /// <summary>Toggles a tag. Work states are exclusive: setting one replaces the current work state.</summary>
+    internal static SymbolTags ToggleTag(SymbolTags tags, SymbolTags tag)
+    {
+        if ((tag & WorkStateTags) == 0)
+            return tags ^ tag;
+
+        var wasSet = tags.HasFlag(tag);
+        tags &= ~WorkStateTags;
+        return wasSet ? tags : tags | tag;
     }
 
     internal bool ReadOnly;

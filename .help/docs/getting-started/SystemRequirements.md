@@ -17,7 +17,7 @@ lists which features work where.
 - **GPU:** a Vulkan driver — Mesa for AMD and Intel, or NVIDIA's proprietary driver.
 - **Distribution:** from late 2023 or later, for example Ubuntu 24.04, Debian 13, Fedora 39, Linux Mint 22 or a
   current Arch.
-- The Slang shader compiler; TiXL offers to download it.
+- The Slang shader compiler comes with TiXL.
 
 See [Install on Linux](../install/InstallLinux.md) for the details per distribution.
 
@@ -25,15 +25,15 @@ See [Install on Linux](../install/InstallLinux.md) for the details per distribut
 
 - **Mac:** Apple Silicon (M1 or newer). Intel Macs aren't supported.
 - **OS:** macOS 14 Sonoma or newer.
-- The Slang shader compiler; TiXL offers to download it.
+- The Slang shader compiler comes with TiXL.
 
 The graphics chip shares the Mac's memory, so plan for more memory than on a PC with a separate graphics
 card. See [Install on macOS](../install/InstallMacOS.md).
 
 ## On every system
 
-- **.NET 10 SDK**, not just the runtime: TiXL compiles operators while it runs. The Windows installer
-  includes it; on Linux and macOS you install it once.
+- **.NET:** nothing to install. TiXL brings its own runtime and compiles operators itself. Only projects that
+  use NuGet packages, embedded resources or custom build steps need the .NET 10 SDK.
 - **RAM:** 16 GB comfortable. Large video assets push memory use up quickly.
 - **Disk:** about 600 MB for TiXL itself. Projects with video and image assets grow fast — keep those on a
   fast SSD.
@@ -44,6 +44,6 @@ card. See [Install on macOS](../install/InstallMacOS.md).
 
 - Visual Studio 2022, Visual Studio Code or JetBrains Rider (free for non-commercial use). On Linux and macOS,
   Rider or Visual Studio Code.
-- The .NET 10 SDK — the same one TiXL needs to run.
+- The .NET 10 SDK.
 
 See [Set up a development environment](../install/InstallDev.md) for the full walk-through.

@@ -20,7 +20,7 @@ This creates PerlinNoise in 3 dimensions. See [PerlinNoise] and [PerlinNoise2] f
 | **Offset** (Vector3) | — |
 | **RangeMin** (Vector3) | Defines the lowest value of the noise. |
 | **RangeMax** (Vector3) | Defines the highest value of the noise. |
-| **BiasAndGain** (Vector2) | Defines bias and gain, which can be used to weight the ranges (both in terms of time and intensity) in which the values are most likely to fluctuate |
+| **GainAndBias** (Vector2) | Defines bias and gain, which can be used to weight the ranges (both in terms of time and intensity) in which the values are most likely to fluctuate |
 | **Seed** (Int32) | Defines the seed for the randomness. Two exactly identical copies of the operator with different seeds always create different results. |
 
 ## Outputs

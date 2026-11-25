@@ -5,7 +5,7 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "23548048-e373-4fd6-9c83-1cf7398f952d"/*BiasAndGain*/,
+      "InputId": "23548048-e373-4fd6-9c83-1cf7398f952d"/*GainAndBias*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
@@ -37,7 +37,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Normal: no limits, values outside the input range extrapolate.\nClamped: the result is limited to the output range.\nModulo: the result wraps by the size of the output range."
+      "Description": "Normal: no limits, values outside the input range extrapolate.\nClamped: the result is limited to the output range.\nModulo: the result wraps by the size of the output range.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "cd369755-5062-4934-8f37-e3a5cc9963df"/*RangeInMax*/,

@@ -1,0 +1,75 @@
+{
+  "FormatVersion": 3,
+  "Id": "c8554f60-1c63-4d29-bea0-9f243e2044f9"/*FilterGeometry*/,
+  "Description": "Keeps the points, primitives or parts of a geometry whose float attribute is above a threshold, e.g. only what [SelectGeometry] selected; Invert removes them instead.\n\nA primitive stays only with all its points. Kept points that lose their primitives stay as loose points, parts are rebuilt from what remains, and the attributes of the kept elements come along.\n\nAKA: blast, delete, keep, isolate, remove selection, filter by attribute",
+  "InputUis": [
+    {
+      "InputId": "0147ca4d-7cd7-4380-a08d-8648bcde9ee8"/*WhenMissing*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 250.0
+      },
+      "Description": "What happens when the geometry has no such attribute: KeepAll passes it through with a warning, RemoveAll outputs empty geometry, e.g. to draw a selection only when there is one."
+    },
+    {
+      "InputId": "3fcdb0e5-8432-423d-9343-c6adcbc12703"/*Invert*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Keeps the elements that fail the test instead, i.e. removes the selection."
+    },
+    {
+      "InputId": "561e6e45-b630-4d6a-9a90-09240385145f"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "6832a86a-074e-4f38-9bde-0497f38ec813"/*UseAbsolute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Tests the absolute value, so negative weights count like positive ones."
+    },
+    {
+      "InputId": "b521b655-d7ae-4839-8cf4-c91d6f6d1bf0"/*Domain*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Which elements the attribute decides on. Auto uses the attribute's own domain. A primitive stays only with all its points; kept points without a primitive stay as loose points.",
+      "DisplayAs": "SegmentedSwitch"
+    },
+    {
+      "InputId": "c8509292-8e2b-4af2-9c51-6b4f7c4ebe2b"/*Attribute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Float attribute to test, e.g. the Selection from [SelectGeometry].",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "feff21f7-6bde-4566-8040-f53388b798ea"/*Threshold*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Elements whose value is above this stay."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5f31df04-58f6-4029-b722-3666068d39ea"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

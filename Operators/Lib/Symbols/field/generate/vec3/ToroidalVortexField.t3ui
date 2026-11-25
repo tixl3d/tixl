@@ -17,7 +17,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Axis around which the ring is oriented."
+      "Description": "Axis around which the ring is oriented.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "634933df-5f75-4071-a76a-6440bb3f02ef"/*SwirlGain*/,

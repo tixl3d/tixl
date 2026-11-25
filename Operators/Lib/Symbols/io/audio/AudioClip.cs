@@ -69,6 +69,10 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         AudioClipCollector.RegisterIfActive(this, context.Playback.TimeInBars, context.Playback.TimeInSecs);
         _lastManagedFrame = Playback.FrameCount;
 
+        // A bus or preview pulling this output takes the channel later this frame; flag it now so the
+        // soundtrack path doesn't reclaim the channel before the collected-frame stamp exists.
+        _clip.IsRoutedToGraph = true;
+
         // The stream is created lazily on the first heartbeat, so the source can be invalid for a frame — the
         // bus routes it on the next. Position stays engine-synced; the node carries membership + gain only.
         AudioEngine.TryGetSoundtrackChannel(_handle, out _node.SourceChannel);
@@ -130,11 +134,11 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _clip.IsMuted = mute;
         _clip.IsLooping = loop;
 
-        // Display = BackgroundImage doubles as the main-soundtrack designation (timeline background,
-        // FFT routing, export) — see CompositionSettings.TryGetMainSoundtrack's op-clip union.
+        // Display = BackgroundImage designates the main soundtrack (timeline background, FFT routing, export) —
+        // see CompositionSettings.TryGetMainSoundtrack's op-clip union. Without one, a lone AutoPlay clip is it.
         _clip.Display = (AudioClipDisplay)display;
         _clip.Style = (AudioClipStyle)style;
-        _clip.IsMainSoundtrack = _clip.Display == AudioClipDisplay.BackgroundImage;
+        _clip.IsMainSoundtrack = _clip.Display == AudioClipDisplay.BackgroundImage || IsOnlyAutoPlayClipWithoutBackground();
 
         // TimeRange is timeline placement in bars; SourceRange is file time in seconds (content clip).
         var timeClip = TimeSlot.TimeClip;
@@ -175,6 +179,35 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         _syncedClip = true;
     }
 
+    private bool IsOnlyAutoPlayClipWithoutBackground()
+    {
+        var composition = Parent;
+        if (composition == null || !AutoPlay.TypedInputValue.Value)
+            return false;
+
+        if (!ReferenceEquals(_siblingsComposition, composition) || _siblingsVersion != composition.Symbol.VersionCounter)
+        {
+            _siblingsComposition = composition;
+            _siblingsVersion = composition.Symbol.VersionCounter;
+            _siblingClips.Clear();
+            foreach (var child in composition.Children.Values)
+            {
+                if (child is AudioClip clip && !ReferenceEquals(clip, this))
+                    _siblingClips.Add(clip);
+            }
+        }
+
+        for (var i = 0; i < _siblingClips.Count; i++)
+        {
+            var sibling = _siblingClips[i];
+            if (sibling.AutoPlay.TypedInputValue.Value
+                || sibling.Display.TypedInputValue.Value == (int)AudioClipDisplay.BackgroundImage)
+                return false;
+        }
+
+        return true;
+    }
+
     public IStatusProvider.StatusLevel GetStatusLevel()
     {
         if (!_syncedClip)
@@ -209,6 +242,9 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     private AudioClipResourceHandle? _handle;
     private int _lastManagedFrame;
     private bool _syncedClip;
+    private Instance? _siblingsComposition;
+    private int _siblingsVersion = -1;
+    private readonly List<AudioClip> _siblingClips = new();
 
     [Input(Guid = "97948c5e-10d5-4e18-824e-aea17eb4eb2a")]
     public readonly InputSlot<Command> Command = new();

@@ -1,0 +1,20 @@
+{
+  "_about": "Every file in Dependencies/ that ships with TiXL, who uses it and under which licence. Installer/check-licences.py fails when a file is missing here or its licence is not allowed. builtInCi marks files a release build produces itself, so they are absent in a checkout. Licence texts live in licenses/. installerAdditions lists what the release scripts bundle outside NuGet and Dependencies/; check-licences.py --notices writes all of it into THIRD-PARTY-NOTICES.txt.",
+  "files": {
+    "DanceAi.dll": { "usedBy": "Core (beat phase tracking)", "licence": "MIT", "note": "TiXL's own library" },
+    "dance-phase/bar-phase.onnx": { "usedBy": "Core (beat phase tracking)", "licence": "MIT", "note": "TiXL's own model" },
+    "dance-phase/bar-phase.meta.json": { "usedBy": "Core (beat phase tracking)", "licence": "MIT" },
+    "libusb-1.0.dll": { "platforms": ["win-x64"], "usedBy": "Lib [SwiftCamDevice], Windows", "licence": "LGPL-2.1-or-later", "note": "dynamically loaded" },
+    "tixlaudio.dll": { "platforms": ["win-x64"], "usedBy": "Core audio engine, Windows", "licence": "MIT AND MIT-0", "note": "TiXL code plus miniaudio" },
+    "linux-x64/libtixlaudio.so": { "usedBy": "Core audio engine, Linux", "licence": "MIT AND MIT-0", "note": "TiXL code plus miniaudio" },
+    "osx/libtixlaudio.dylib": { "usedBy": "Core audio engine, macOS", "licence": "MIT AND MIT-0", "note": "TiXL code plus miniaudio", "builtInCi": true }
+  },
+  "installerAdditions": [
+    { "name": ".NET runtime", "licence": "MIT", "platforms": ["win-x64", "linux-x64", "osx-arm64"], "source": "https://github.com/dotnet/runtime", "copyright": "Copyright (c) .NET Foundation and Contributors" },
+    { "name": "Slang shader compiler 2026.18", "licence": "Apache-2.0 WITH LLVM-exception", "platforms": ["win-x64", "linux-x64", "osx-arm64"], "source": "https://github.com/shader-slang/slang", "copyright": "Copyright (c) the Slang contributors", "note": "Licence text in slang/LICENSE" },
+    { "name": "FFmpeg 7.1.5 (LGPL shared libraries)", "licence": "LGPL-2.1-or-later", "platforms": ["osx-arm64"], "source": "https://ffmpeg.org/releases/ffmpeg-7.1.5.tar.xz", "copyright": "Copyright (c) the FFmpeg developers", "note": "Built by Native/FFmpeg/build-macos.sh; source and configure flags in Operators/Video/licenses/ffmpeg/SOURCE.txt" },
+    { "name": "Vulkan loader", "licence": "Apache-2.0", "platforms": ["osx-arm64"], "source": "https://github.com/KhronosGroup/Vulkan-Loader", "copyright": "Copyright (c) The Khronos Group Inc., Valve Corporation and LunarG, Inc." },
+    { "name": "MoltenVK", "licence": "Apache-2.0", "platforms": ["osx-arm64"], "source": "https://github.com/KhronosGroup/MoltenVK", "copyright": "Copyright (c) The Brenwill Workshop Ltd. and the MoltenVK contributors" },
+    { "name": "Microsoft Visual C++ Redistributable", "licence": "LicenseRef-Microsoft-VC-Redistributable", "platforms": ["win-x64"], "source": "https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist", "copyright": "Copyright (c) Microsoft Corporation", "note": "Installed by the Windows installer, not part of the TiXL folder" }
+  ]
+}

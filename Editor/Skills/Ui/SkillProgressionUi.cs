@@ -71,6 +71,7 @@ internal static class SkillProgressionUi
         var leftWidth = 240 * uiScale;
         ImGui.BeginChild("Map", new Vector2(leftWidth, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
+            SkillMapPopup.ApplyFilterSettings(_mapCanvas);
             _mapCanvas.DrawContent(null, out _, TopicSelection);
             if (mode == ContentModes.HubPanel && ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
@@ -188,6 +189,7 @@ internal static class SkillProgressionUi
         var leftWidth = 240 * uiScale;
         ImGui.BeginChild("Map", new Vector2(leftWidth, 0), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         {
+            SkillMapPopup.ApplyFilterSettings(_mapCanvas);
             _mapCanvas.DrawContent(null, out _, TopicSelection);
             if (mode == ContentModes.HubPanel && ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {

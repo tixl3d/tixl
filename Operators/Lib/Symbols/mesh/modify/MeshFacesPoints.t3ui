@@ -42,7 +42,8 @@
         "X": 752.5799,
         "Y": 2039.2845
       },
-      "Description": "Defines which points are created per face. This defines the resulting point count.\n\nCenters: one point per face.\nCorners: three points per face, one at each corner.\nEdgeLines: a closed line around each face (four points and a separator), e.g. for [DrawLines]."
+      "Description": "Defines which points are created per face. This defines the resulting point count.\n\nCenters: one point per face.\nCorners: three points per face, one at each corner.\nEdgeLines: a closed line around each face (four points and a separator), e.g. for [DrawLines].",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "9361aeff-d96f-400c-8837-7d98fb6da99e"/*Fx1*/,

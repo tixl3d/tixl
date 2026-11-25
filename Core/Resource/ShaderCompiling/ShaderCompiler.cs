@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using T3.Core.DataTypes;
 
 namespace T3.Core.Resource.ShaderCompiling;
@@ -27,7 +28,9 @@ public abstract partial class ShaderCompiler
         }
     }
 
-    protected abstract bool CompileShaderFromSource<TShader>(ShaderCompiler.ShaderCompilationArgs args, out byte[] blob, out string errorMessage)
+    /// <param name="diagnostics">Filled with every error and warning the compiler reported when compiling fails.</param>
+    protected abstract bool CompileShaderFromSource<TShader>(ShaderCompiler.ShaderCompilationArgs args, out byte[] blob, out string errorMessage,
+                                                             List<ShaderCompileFailures.Diagnostic> diagnostics)
         where TShader : AbstractShader;
 
     protected abstract void CreateShaderInstance<TShader>(string name, in byte[] blob, out TShader shader)

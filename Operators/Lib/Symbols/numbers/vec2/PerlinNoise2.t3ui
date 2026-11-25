@@ -56,7 +56,7 @@
       "UseVec2Control": "Position"
     },
     {
-      "InputId": "c6e1170e-ae4f-44ae-aaab-e1aeb8f86997"/*BiasAndGain*/,
+      "InputId": "c6e1170e-ae4f-44ae-aaab-e1aeb8f86997"/*GainAndBias*/,
       "Position": {
         "X": -2.7436478,
         "Y": 170.4448

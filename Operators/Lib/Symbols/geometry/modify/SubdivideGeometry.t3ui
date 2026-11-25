@@ -1,0 +1,91 @@
+{
+  "FormatVersion": 3,
+  "Id": "98d9ae64-3784-4141-a509-489ae5775bd6"/*SubdivideGeometry*/,
+  "Description": "Splits every polygon of a geometry into quads and optionally smooths it, from linear (Smoothness 0) to Catmull-Clark (1).\n\nEach polygon gets a new point in its center and on each edge. LevelAttribute and MaxEdgeLength refine only some faces, keeping the surface closed. An attribute can scale the smoothing per point, so only selected regions round off. Attributes like UVs and colors are averaged for the new points, parts keep their polygons and curves pass through unchanged. Where smoothing would turn a face over (long thin faces, e.g. triangulated letter caps), its points keep less smoothing, so the surface never folds.\n\nAKA: subdivision surface, subd, smooth, catmull-clark, tessellate, densify\n\nTips\n- [BevelGeometry] before smoothing keeps edges tighter: a bevelled cube becomes a rounded box.\n- Smoothness 0 before [DisplaceGeometry] gives it enough points to move.\n- [SelectGeometry] -> SubdivideGeometry with SmoothnessAttribute `Selection` rounds only the selected faces.",
+  "InputUis": [
+    {
+      "InputId": "070c122c-2fea-425d-bf5c-62910f393676"/*Smoothness*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Description": "Blends the new points from linear (0, the shape is kept, e.g. to add points for [DisplaceGeometry]) to Catmull-Clark (1, a cube becomes a rounded blob). Values beyond 0 to 1 over- or undershoot."
+    },
+    {
+      "InputId": "07a29562-d391-47cc-a344-fc447dbcd4da"/*Normals*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Auto keeps the input normals interpolated at Smoothness 0 and computes smooth normals otherwise. Interpolate keeps the input's normals, Smooth computes shared point normals (hard above SmoothAngle), Flat leaves the facets visible."
+    },
+    {
+      "InputId": "09b5442d-9eff-43e1-b6e8-79eaed455b74"/*SmoothAngle*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 315.0
+      },
+      "Min": 0.0,
+      "Max": 180.0,
+      "Description": "For smooth normals: edges between faces more than this many degrees apart stay hard, like the corners of a cube next to a rounded region. 180 smooths everything."
+    },
+    {
+      "InputId": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Optional float attribute that refines faces adaptively: a face is subdivided while its value times Iterations exceeds the iteration, so 1 gets every iteration, 0.5 half of them and 0 none. A Selection from [SelectGeometry] on Primitives refines only the selected faces; a soft or noise-driven value gives gradual density. Neighbouring faces stay closed.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "6ff3ad95-376e-4de3-ba02-875a3f620bee"/*MaxEdgeLength*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Description": "When above 0, only faces with an edge longer than this are subdivided, up to Iterations times, so big faces get dense and small ones stay as they are, e.g. before [DisplaceGeometry] on an uneven mesh. 0 subdivides every face."
+    },
+    {
+      "InputId": "951c95ee-c446-41be-ba9e-7211dc78ff2b"/*SmoothnessAttribute*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Optional float attribute (any domain) that scales Smoothness per point, e.g. a Selection from [SelectGeometry] to smooth only part of the shape. Empty uses Smoothness everywhere.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "bef4d855-bedd-45ea-9d28-0f45b9fc3b7a"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "f361912f-b190-4e4f-a192-ef77e8ce5eac"/*Iterations*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Min": 0,
+      "Max": 4,
+      "Description": "How often to subdivide. Each iteration turns every quad into four; the op stops early before 4 million vertices."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6fcf5ce7-5841-45e9-aca3-33b9b85855fb"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

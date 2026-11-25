@@ -9,9 +9,13 @@
   #endif
 #endif
 
-; Overridable from the command line: iscc /DMyAppVersion=4.4.0.5 /DMyAppName=TiXL-v4.4.0.5
+; The version is the file version of the built editor, which comes from TixlVersion in Tixl.props, so it is set in
+; one place only. Overridable from the command line: iscc /DMyAppVersion=4.4.0.5 /DMyAppName=TiXL-v4.4.0.5
 #ifndef MyAppVersion
-  #define MyAppVersion "4.4.0.5"
+  #define MyAppVersion GetVersionNumbersString(SourcePath + "..\..\Editor\bin\Release\net10.0\TiXL.dll")
+  #if MyAppVersion == ""
+    #error Could not read the version of Editor\bin\Release\net10.0\TiXL.dll. Build the Editor in Release first.
+  #endif
 #endif
 #ifndef MyAppName
   #define MyAppName "TiXL-v" + MyAppVersion
@@ -19,7 +23,6 @@
 #define MyAppPublisher "TiXL Community"
 #define MyAppURL "https://tixl.app//"
 #define MyAppExeName "TiXL.exe"
-#define DotNetSdkInstaller "dotnet-sdk-10.0.201-win-x64.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -67,7 +70,6 @@ Source: "..\..\Editor\bin\Release\net10.0\*"; DestDir: "{app}"; Excludes: "*.pro
 ; they ship with the release.
 Source: "..\..\Operators\Lib\.meta\*";      DestDir: "{app}\Operators\Lib\.meta";      Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\Operators\Examples\.meta\*"; DestDir: "{app}\Operators\Examples\.meta"; Excludes: "*.proxy.mov,*.waveform.png,*.waveform.jpg,win-x86,win-arm64,osx*,linux-*,android*,ios,maccatalyst-*,unix"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dependencies\downloads\{#DotNetSdkInstaller}"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "dependencies\downloads\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Icons]
@@ -75,59 +77,11 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Code]
-// Returns the numeric field before the next '.' and removes it from Rest; -1 if not numeric.
-function TakeVersionPart(var Rest: string): Integer;
-var
-  DotPos: Integer;
-begin
-  DotPos := Pos('.', Rest);
-  if DotPos = 0 then
-  begin
-    Result := StrToIntDef(Rest, -1);
-    Rest := '';
-  end
-  else
-  begin
-    Result := StrToIntDef(Copy(Rest, 1, DotPos - 1), -1);
-    Rest := Copy(Rest, DotPos + 1, Length(Rest));
-  end;
-end;
-
-// Any release SDK of major 10 at or above the bundled 10.0.201 is enough.
-// The SDK installer registers versions as value names in the 32-bit registry view.
-function GetDotNetSdkInstalled: Boolean;
-var
-  Versions: TArrayOfString;
-  I, Major, Minor, Patch: Integer;
-  Rest: string;
-begin
-  Result := False;
-  if not RegGetValueNames(HKLM32, 'SOFTWARE\dotnet\Setup\InstalledVersions\x64\sdk', Versions) then
-    Exit;
-
-  for I := 0 to GetArrayLength(Versions) - 1 do
-  begin
-    Rest := Versions[I];
-    if Pos('-', Rest) > 0 then
-      Continue;
-
-    Major := TakeVersionPart(Rest);
-    Minor := TakeVersionPart(Rest);
-    Patch := TakeVersionPart(Rest);
-    if (Major = 10) and ((Minor > 0) or ((Minor = 0) and (Patch >= 201))) then
-    begin
-      Result := True;
-      Exit;
-    end;
-  end;
-end;
-
 function GetvcruntimeVersion: Boolean;
 begin
   Result := FileExists('C:\Windows\System32\vcruntime140.dll');
 end;
 
 [Run]
-Filename: "{tmp}\{#DotNetSdkInstaller}"; StatusMsg: "Install .NET 10 SDK"; Check: not GetDotNetSdkInstalled
 Filename: "{tmp}\VC_redist.x64.exe"; StatusMsg: "Install Visual C++ Redistributable"; check: not GetvcruntimeVersion 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

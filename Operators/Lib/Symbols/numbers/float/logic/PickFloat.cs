@@ -1,4 +1,4 @@
-using T3.Core.Utils;
+using Lib.Utils;
 
 namespace Lib.numbers.@float.logic;
 
@@ -15,32 +15,9 @@ internal sealed class PickFloat : Instance<PickFloat>
 
     private void Update(EvaluationContext context)
     {
-        var connections = FloatValues.GetCollectedTypedInputs();
-        
-        if (connections == null || connections.Count == 0)
-        {
-            FloatValues.DirtyFlag.Clear();
-            return;
-        }
-
-        var index = Index.GetValue(context).Mod(connections.Count);
-        Selected.Value = connections[index].GetValue(context);
-
-        // Clear dirty flag
-        if (_isFirstUpdate)
-        {
-            foreach (var c in connections)
-            {
-                c.GetValue(context);
-                c.DirtyFlag.Clear();
-            }
-        
-            _isFirstUpdate = false;
-        }
-        FloatValues.DirtyFlag.Clear();
+        if (PickedInput.TryGetValue(FloatValues, Index.GetValue(context), context, out var value))
+            Selected.Value = value;
     }
-
-    private bool _isFirstUpdate = true; 
 
     [Input(Guid = "D7EF7F1A-A6BD-4F94-A29A-BB19E2854001")]
     public readonly MultiInputSlot<float> FloatValues = new();

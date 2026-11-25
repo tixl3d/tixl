@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -171,7 +172,19 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             HoveredKeyframeUniqueId = null;
 
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() );
-            if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition))
+
+            // The ruler's translucent child background lands on the graph's backdrop, matching the toolbar above.
+            // Drawn first so the soundtrack image and the time raster stay visible on top.
+            {
+                var rulerMin = ImGui.GetCursorScreenPos();
+                var rulerMax = rulerMin + new Vector2(ImGui.GetContentRegionAvail().X, RulerHeight);
+                Drawlist.AddRectFilled(rulerMin, rulerMax, UiColors.BackgroundGaps);
+                Drawlist.AddRectFilled(rulerMin, rulerMax, UiColors.EditorBackground);
+            }
+
+            // A main soundtrack shown as a clip block (a lone AutoPlay [AudioClip]) isn't drawn as background too.
+            if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition)
+                && (soundtrack.Clip.Display == AudioClipDisplay.BackgroundImage || soundtrack.Owner is not IAudioClipProvider))
             {
                 TimeLineImage.Draw(Drawlist, soundtrack);
             }
@@ -186,6 +199,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 _selectionRangeIndicator.Draw(compositionOp, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
             }
+
+            var rulerBottom = ImGui.GetItemRectMax().Y;
 
 
             // KeySet strip (keyframe-cluster indicators below the ruler)
@@ -302,11 +317,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
                 if (Playback.IsLooping)
                 {
-                    _loopRange.Draw(this, Playback, Drawlist, SnapHandlerForU);
+                    _loopRange.Draw(this, Playback, Drawlist, SnapHandlerForU, rulerBottom);
                 }
                 else if (compositionTimeClip != null)
                 {
-                    _clipRange.Draw(this, compositionOp, compositionTimeClip, Drawlist);
+                    _clipRange.Draw(this, compositionOp, compositionTimeClip, Drawlist, rulerBottom);
                 }
 
                 // When the details pane is up, the top-pane child already handles its

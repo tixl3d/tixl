@@ -7,6 +7,7 @@ using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
+using T3.Editor.ExtensionPackages;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
@@ -52,6 +53,9 @@ internal static partial class ProjectSetup
 
         var totalStopwatch = System.Diagnostics.Stopwatch.StartNew();
 
+        // Installs and removals chosen in Settings -> Extensions; nothing of them is loaded yet
+        InstalledExtensions.ApplyPendingChanges();
+
         if (!isDebugBuild)
         {
             // Load pre-built built-in packages as read-only
@@ -60,10 +64,13 @@ internal static partial class ProjectSetup
 
         // Find project files
         var csProjFiles = FindCsProjFiles(isDebugBuild);
+        OptionalPackagesInSourceBuilds.PublishSkipped();
 
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, out var failedProjects);
         var projectsMs = totalStopwatch.ElapsedMilliseconds;
+
+        LoadInstalledExtensions();
 
         // Keep projects that failed to load visible and recoverable instead of silently dropping them
         // — a single broken project shouldn't just vanish from the Hub.
@@ -151,6 +158,7 @@ internal static partial class ProjectSetup
         var affectedSymbols = 0;
         var totalChildren = 0;
         var details = new StringBuilder();
+        var readOnlyDetails = new StringBuilder();
         foreach (var package in packages)
         {
             foreach (var symbol in package.Symbols.Values)
@@ -161,20 +169,33 @@ internal static partial class ProjectSetup
                 if (package.TryGetSymbolFilePath(symbol, out var symbolFilePath))
                     PreV4_4ChildNameComments.ReadFor(symbol, symbolFilePath);
 
-                affectedSymbols++;
-                totalChildren += symbol.UnresolvedChildren.Count;
+                // Shipped packages such as Examples may use operators of optional packages; that is expected
+                // and can't be fixed by the user, so it only goes to the debug log.
+                var target = details;
+                if (package.IsReadOnly || AreAllExpectedMissing(symbol))
+                {
+                    target = readOnlyDetails;
+                }
+                else
+                {
+                    affectedSymbols++;
+                    totalChildren += symbol.UnresolvedChildren.Count;
+                }
 
-                details.Append($"\n  {package.DisplayName} / [{symbol.Name}]: ");
+                target.Append($"\n  {package.DisplayName} / [{symbol.Name}]: ");
                 for (var index = 0; index < symbol.UnresolvedChildren.Count; index++)
                 {
                     var child = symbol.UnresolvedChildren[index];
                     if (index > 0)
-                        details.Append(", ");
+                        target.Append(", ");
 
-                    details.Append(child.DisplayName);
+                    target.Append(child.DisplayName);
                 }
             }
         }
+
+        if (readOnlyDetails.Length > 0)
+            Log.Debug("Shipped packages use operators of packages that are not installed:" + readOnlyDetails);
 
         if (affectedSymbols == 0)
             return;
@@ -182,6 +203,18 @@ internal static partial class ProjectSetup
         Log.Warning($"{totalChildren} operator(s) in {affectedSymbols} symbol(s) are not available — most likely "
                     + "a missing package or a deleted operator. They are hidden but stay in the files when saving, "
                     + "and return once the package is installed:" + details);
+    }
+
+    /** True when the symbol only misses operators of packages deliberately not loaded (an optional package skipped in a source build). */
+    internal static bool AreAllExpectedMissing(T3.Core.Operator.Symbol symbol)
+    {
+        foreach (var child in symbol.UnresolvedChildren)
+        {
+            if (!SymbolPackage.ExpectedMissingSymbolIds.Contains(child.SymbolId))
+                return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -221,6 +254,20 @@ internal static partial class ProjectSetup
                     });
     }
     
+    /** Extensions load after built-in packages and projects, so one that is already loaded (built from source) is skipped. */
+    private static void LoadInstalledExtensions()
+    {
+        var loadedIds = new HashSet<Guid>();
+        foreach (var package in _activePackages)
+            loadedIds.Add(package.Id);
+
+        foreach (var directory in InstalledExtensions.LoadablePackageDirectories(loadedIds.Contains, Program.Version))
+        {
+            AddToLoadedPackages(new EditorSymbolPackage(new AssemblyInformation(directory), null));
+            Log.Info($"Loaded extension {Path.GetFileName(directory)}");
+        }
+    }
+
     private readonly record struct ProjectLoadInfo(
         FileInfo fileInfo,
         CsProjectFile? csProjFile,
@@ -357,7 +404,8 @@ internal static partial class ProjectSetup
                                                                                                var subDir = Path.GetFileName(path);
                                                                                                return
                                                                                                    !subDir
-                                                                                                      .StartsWith('.'); // ignore things like .git and file sync folders 
+                                                                                                      .StartsWith('.') // ignore things like .git and file sync folders
+                                                                                                   && OptionalPackagesInSourceBuilds.ShouldLoad(path);
                                                                                            }));
             }
             return projectSearchDirectories;

@@ -1,0 +1,175 @@
+{
+  "FormatVersion": 3,
+  "Id": "5c553e6a-923d-4b7b-970b-ecdfa45a88a7"/*RepeatTransform*/,
+  "Description": "Draws the connected subgraph several times, transforming each copy further than the previous one.\n\nThe first copy is always drawn untransformed. In **Accumulate** mode the transform is applied once more for every copy, so copy 3 is moved, rotated and scaled three times. Combining rotation, scale and translation this way produces spirals, tunnels and stair-like stacks. In **Lerp** mode the parameters describe the transform of the last copy, and the copies in between are interpolated from the untransformed original. Gain and bias then shape how the copies are distributed along that path.\n\nScatter adds a random offset, rotation and scale to each copy without changing the path of the others. The Gradient colors the copies from first to last, and copies that are fully transparent are skipped. Ramping IndexOffset moves the copies along their path, wrapping the last one back to the start, which builds endless scrollers. The subgraph is evaluated with the same parameters for each copy otherwise; use [Loop] if the copies need to differ by more.\n\nAKA: duplicate, clone, array, instance, copies, spiral\n\nSee also: [Transform], [Loop], [SpreadIntoGrid], [RepeatAtPoints]\n\nTips:\n- Accumulated scale grows exponentially: 1.1 over 50 copies is more than 100×.\n- Set the Pivot to rotate the copies around a point other than the origin.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "2a8f6300-412e-46cb-8660-3b9483c1d7d2"/*Pivot*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Transform pivot",
+      "Description": "Center point for rotation and scaling."
+    },
+    {
+      "InputId": "396fcf8c-af38-4e7e-9bc9-7a9df0d96a47"/*IndexOffset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Moves the copies along their path by a fraction of a step. Copies that pass the last position wrap back to the first, so ramping this value builds endless scrollers.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Format": "{0:0.000}"
+    },
+    {
+      "InputId": "3a5ae751-df04-4378-849b-ab141b3ab340"/*Translation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Transform",
+      "Description": "Accumulate: the offset added per copy. Lerp: the offset of the last copy."
+    },
+    {
+      "InputId": "3ed374ce-87f8-4a89-964d-c12500e7da80"/*Strength*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "52faaff0-cfc0-46ae-8010-e33e38cd5153"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Lerp distribution",
+      "Description": "Shapes the spacing of the copies in Lerp mode. X: gain, Y: bias. 0.5/0.5 spaces them evenly. Ignored in Accumulate mode.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
+    },
+    {
+      "InputId": "6171ecb0-c774-4f85-a5c9-0d56cbef0723"/*ScatterRotation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Rotates each copy by a random angle up to these degrees around its pivot.",
+      "Min": 0.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "62b3b341-7dea-4817-873a-81d0b7aedf01"/*Rotation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Rotation in degrees around the x-, y- and z-axis. Accumulate: per copy. Lerp: of the last copy; values beyond 180° keep spinning.",
+      "Min": -90.0,
+      "Max": 90.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "71fdc9bc-b32b-4f55-9d24-18cca0d24d89"/*Count*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Number of copies, including the untransformed original.",
+      "Min": 0,
+      "Max": 32,
+      "ClampMin": true
+    },
+    {
+      "InputId": "81f91ea5-ce6b-4d04-9d60-2522deba6dd2"/*Scale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Scale along the individual axes. Accumulate: multiplied per copy. Lerp: of the last copy."
+    },
+    {
+      "InputId": "8dbe4378-7903-42c6-b143-5f2cdc8ea0c4"/*Command*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The subgraph to repeat."
+    },
+    {
+      "InputId": "9b04714f-e5c6-43cc-9d0c-bf83e9bea601"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Accumulate applies the transform once more per copy. Lerp interpolates from the original to the transform of the last copy.",
+      "DisplayAs": "SegmentedSwitch"
+    },
+    {
+      "InputId": "a1d06737-6411-4021-a3c4-fcf973866c0c"/*ScatterScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Randomly scales each copy by up to this factor, e.g. 0.5 for 0.5× to 1.5×.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Format": "{0:0.000}"
+    },
+    {
+      "InputId": "b528461b-e8d0-4525-a628-08da4b60493c"/*Seed*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Picks a different random scatter."
+    },
+    {
+      "InputId": "b96a55d9-135b-4b43-8d7a-16a35ab9586d"/*UniformScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Uniformly scales the copies, combined with Scale.",
+      "AddPadding": "True",
+      "Format": "{0:0.000} ×"
+    },
+    {
+      "InputId": "c3e18172-2496-48ce-b7f7-3d9b5e1340a3"/*ScatterTranslation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Scatter",
+      "Description": "Moves each copy by a random offset up to this distance, independent of the other copies."
+    },
+    {
+      "InputId": "c874d12d-f799-474f-86b6-afe763fa9ad1"/*Gradient*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Color",
+      "Description": "Color of the copies from the first (left) to the last (right), multiplied with the incoming color. Fade both ends to transparent to hide copies wrapping around when animating IndexOffset."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0bf333fa-8d25-4c3b-880b-9a0a09992311"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

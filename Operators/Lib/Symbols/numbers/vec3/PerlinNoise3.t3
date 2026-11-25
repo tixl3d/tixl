@@ -39,7 +39,7 @@
       }
     },
     {
-      "Id": "b7b95fc2-c73f-4db1-bdab-2445fe62f032"/*BiasAndGain*/,
+      "Id": "b7b95fc2-c73f-4db1-bdab-2445fe62f032"/*GainAndBias*/,
       "DefaultValue": {
         "X": 0.5,
         "Y": 0.5

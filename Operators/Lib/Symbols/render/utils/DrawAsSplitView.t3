@@ -255,13 +255,6 @@
       "Outputs": []
     },
     {
-      "Id": "e59cfdbf-ecc7-410d-93c2-0592ad110c79"/*SetRequestedResolution*/,
-      "SymbolId": "5b3a0c1d-87d6-4d88-ae20-ff9f95049ecf",
-      "SymbolName": "Lib.render.shading.SetRequestedResolution",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "eb7bd884-887e-4e87-80da-8d43b6dd8633"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
       "SymbolName": "Lib.flow.Execute",

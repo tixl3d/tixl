@@ -25,7 +25,8 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Round to nearest, Floor (down) or Ceiling (up)."
+      "Description": "Round to nearest, Floor (down) or Ceiling (up).",
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

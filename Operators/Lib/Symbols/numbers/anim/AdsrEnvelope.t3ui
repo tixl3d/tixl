@@ -40,7 +40,8 @@
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"/*Gate*/,
@@ -62,7 +63,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     }
   ],
   "SymbolChildUis": [],

@@ -16,32 +16,61 @@ namespace T3.Editor.UiModel.Modification;
 
 internal static class Combine
 {
+    /// <summary>
+    /// Counts the inputs and outputs <see cref="CombineAsNewType"/> would create for the selection, following the same
+    /// sharing rules: one outside source feeding several selected parameters becomes a single input, one selected
+    /// output feeding several outside ops a single output.
+    /// </summary>
+    public static void CountNewSlots(Symbol parentCompositionSymbol, List<SymbolUi.Child> selectedChildUis, bool shouldBeTimeClip,
+                                     out int inputCount, out int outputCount)
+    {
+        var selectedIds = (from child in selectedChildUis select child.Id).ToList();
+
+        inputCount = 0;
+        var sharedInputSources = new HashSet<(Guid SourceId, Guid SourceSlotId, Type ValueType)>();
+        foreach (var (_, input, con) in CollectInputsToGenerate(parentCompositionSymbol, selectedIds, out _))
+        {
+            var valueType = input.DefaultValue.ValueType;
+            if (!input.IsMultiInput && !sharedInputSources.Add((con.SourceParentOrChildId, con.SourceSlotId, valueType)))
+                continue;
+
+            if (TypeNameRegistry.Entries.ContainsKey(valueType))
+                inputCount++;
+        }
+
+        outputCount = 0;
+        var outputsToGenerate = CollectOutputsToGenerate(parentCompositionSymbol, selectedIds, out _);
+        var sharedOutputs = new HashSet<(Guid ChildId, Guid OutputId)>();
+        foreach (var (child, output, _) in outputsToGenerate)
+        {
+            if (!sharedOutputs.Add((child.Id, output.Id)))
+                continue;
+
+            if (TypeNameRegistry.Entries.ContainsKey(output.ValueType))
+                outputCount++;
+        }
+
+        // A time clip without outgoing connections gets a default clip output.
+        if (shouldBeTimeClip && outputsToGenerate.Length == 0)
+            outputCount++;
+    }
+
+    /// <returns>The id of the new symbol child that replaces the selection, or <see cref="Guid.Empty"/> if combining failed.</returns>
     // todo - convert to proper c# style code generation
-    public static void CombineAsNewType(SymbolUi parentCompositionSymbolUi,
+    public static Guid CombineAsNewType(SymbolUi parentCompositionSymbolUi,
                                         EditableSymbolProject project,
                                         List<SymbolUi.Child> selectedChildUis,
                                         List<Section> selectedSections,
                                         string newSymbolName,
-                                        string nameSpace, string description, bool shouldBeTimeClip)
+                                        string nameSpace, string description, SymbolUi.SymbolTags tags, bool shouldBeTimeClip)
     {
         using var activity = MainThreadActivity.Begin("combine-symbol", $"Combining into {newSymbolName}...");
         Dictionary<Guid, Guid> oldToNewIdMap = new Dictionary<Guid, Guid>();
         Dictionary<Symbol.Connection, Guid> connectionToNewSlotIdMap = new Dictionary<Symbol.Connection, Guid>();
 
-        // get all the connections that go into the selection (selected ops as target)
         var parentCompositionSymbol = parentCompositionSymbolUi.Symbol;
-        var potentialTargetIds = from child in selectedChildUis select child.Id;
-        var inputConnections = (from con in parentCompositionSymbol.Connections
-                                from id in potentialTargetIds
-                                where con.TargetParentOrChildId == id
-                                where potentialTargetIds.All(potId => potId != con.SourceParentOrChildId)
-                                select con).ToArray();
-        var inputsToGenerate = (from con in inputConnections
-                                from child in parentCompositionSymbol.Children.Values
-                                where child.Id == con.TargetParentOrChildId
-                                from input in child.Symbol.InputDefinitions
-                                where input.Id == con.TargetSlotId
-                                select (child, input, con)).ToList().Distinct().ToArray();
+        var potentialTargetIds = (from child in selectedChildUis select child.Id).ToList();
+        var inputsToGenerate = CollectInputsToGenerate(parentCompositionSymbol, potentialTargetIds, out var inputConnections);
         var usingStringBuilder = new StringBuilder();
         var inputStringBuilder = new StringBuilder();
         var outputStringBuilder = new StringBuilder();
@@ -90,17 +119,7 @@ internal static class Combine
             }
         }
 
-        var outputConnections = (from con in parentCompositionSymbol.Connections
-                                 from id in potentialTargetIds
-                                 where con.SourceParentOrChildId == id
-                                 where potentialTargetIds.All(potId => potId != con.TargetParentOrChildId)
-                                 select con).ToArray();
-        var outputsToGenerate = (from con in outputConnections
-                                 from child in parentCompositionSymbol.Children.Values
-                                 where child.Id == con.SourceParentOrChildId
-                                 from output in child.Symbol.OutputDefinitions
-                                 where output.Id == con.SourceSlotId
-                                 select (child, output, con)).ToList().Distinct().ToArray();
+        var outputsToGenerate = CollectOutputsToGenerate(parentCompositionSymbol, potentialTargetIds, out var outputConnections);
 
         // As a time clip, one output becomes the TimeClipSlot that places the symbol on the timeline —
         // prefer the first Command output (the usual render flow), else the first output of any type.
@@ -121,9 +140,18 @@ internal static class Combine
         var connectionsToNewOutputs = new List<Symbol.Connection>(outputConnections.Length);
         int outputNameCounter = 2;
         var outputNameHashSet = new HashSet<string>();
+
+        // One selected output feeding several outside ops becomes a single shared output.
+        var sharedOutputIdsForSources = new Dictionary<(Guid ChildId, Guid OutputId), Guid>();
         for (var outputIndex = 0; outputIndex < outputsToGenerate.Length; outputIndex++)
         {
             var (child, output, origConnection) = outputsToGenerate[outputIndex];
+            if (sharedOutputIdsForSources.TryGetValue((child.Id, output.Id), out var sharedOutputId))
+            {
+                connectionToNewSlotIdMap.Add(origConnection, sharedOutputId);
+                continue;
+            }
+
             var outputValueType = output.ValueType;
             if (TypeNameRegistry.Entries.TryGetValue(outputValueType, out var typeName))
             {
@@ -142,6 +170,7 @@ internal static class Combine
                 var newConnection = new Symbol.Connection(child.Id, output.Id, Guid.Empty, newOutputGuid);
                 connectionsToNewOutputs.Add(newConnection);
                 connectionToNewSlotIdMap.Add(origConnection, newOutputGuid);
+                sharedOutputIdsForSources[(child.Id, output.Id)] = newOutputGuid;
             }
             else
             {
@@ -209,13 +238,14 @@ internal static class Combine
             if (choice != exit)
             {
                 //reason = $"Failed to find soundTrack for [{symbol.Name}] - export cancelled, see log for details";
-                return;
+                return Guid.Empty;
             }
             EditorUi.Instance.ExitApplication();
-            return;
+            return Guid.Empty;
         }
 
         newSymbolUi.Description = description;
+        newSymbolUi.Tags = tags;
         newSymbolUi.FlagAsModified();
 
         // Apply content to new symbol
@@ -245,8 +275,7 @@ internal static class Combine
 
         MoveSnapshotsToNewSymbol(parentCompositionSymbol.Id, newSymbol.Id, oldToNewIdMap);
 
-        var selectedChildrenIds = (from child in selectedChildUis select child.Id).ToList();
-        parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(selectedChildrenIds);
+        parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(potentialTargetIds);
 
         foreach (var con in connectionsFromNewInputs)
         {
@@ -331,6 +360,39 @@ internal static class Combine
         // This needs to be fixed.
         //T3Ui.SaveInBackground(false);
         project.SaveModifiedSymbols();
+        return newSymbolChildId;
+    }
+
+    /** Connections from outside into the selection, and the selected child input each one feeds. */
+    private static (Symbol.Child child, Symbol.InputDefinition input, Symbol.Connection con)[] CollectInputsToGenerate(
+        Symbol parentCompositionSymbol, List<Guid> selectedIds, out Symbol.Connection[] inputConnections)
+    {
+        inputConnections = (from con in parentCompositionSymbol.Connections
+                            where selectedIds.Contains(con.TargetParentOrChildId)
+                            where !selectedIds.Contains(con.SourceParentOrChildId)
+                            select con).ToArray();
+        return (from con in inputConnections
+                from child in parentCompositionSymbol.Children.Values
+                where child.Id == con.TargetParentOrChildId
+                from input in child.Symbol.InputDefinitions
+                where input.Id == con.TargetSlotId
+                select (child, input, con)).Distinct().ToArray();
+    }
+
+    /** Connections from the selection to outside, and the selected child output each one leaves from. */
+    private static (Symbol.Child child, Symbol.OutputDefinition output, Symbol.Connection con)[] CollectOutputsToGenerate(
+        Symbol parentCompositionSymbol, List<Guid> selectedIds, out Symbol.Connection[] outputConnections)
+    {
+        outputConnections = (from con in parentCompositionSymbol.Connections
+                             where selectedIds.Contains(con.SourceParentOrChildId)
+                             where !selectedIds.Contains(con.TargetParentOrChildId)
+                             select con).ToArray();
+        return (from con in outputConnections
+                from child in parentCompositionSymbol.Children.Values
+                where child.Id == con.SourceParentOrChildId
+                from output in child.Symbol.OutputDefinitions
+                where output.Id == con.SourceSlotId
+                select (child, output, con)).Distinct().ToArray();
     }
 
     private static ImRect GetAreaFromChildren(IEnumerable<SymbolUi.Child> childUis)

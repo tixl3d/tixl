@@ -5,88 +5,93 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "4a145906-ca01-4487-81d3-fca21270e6af",
-      "SymbolName": "Types.Values.Value",
+      "ChildId": "25e3875c-9839-475b-ab41-15aed6eae421",
+      "SymbolName": "Skills._._ExampleDrawContent",
       "Position": {
-        "X": 1186.4082,
-        "Y": 1816.0571
-      }
+        "X": 1087.064,
+        "Y": 1747.2545
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "581aa2bc-67b7-4533-ad1f-0a4435ddd436",
-      "SymbolName": "Types.Values.Value",
+      "ChildId": "3c5178b8-e68f-4dcf-9910-82fc783e6b10",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1227.064,
+        "Y": 1712.2545
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "53b8752d-0899-459b-9d9f-24ba1a9870fc",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
-        "X": 1133.8973,
-        "Y": 2180.2126
+        "X": 1221.2977,
+        "Y": 2111.978
       }
     },
     {
-      "ChildId": "77119db7-0d09-4bb3-826f-b1fb06234d20",
-      "SymbolName": "Types.Values.Vector3",
+      "ChildId": "5ceef6ff-bf1d-496e-99dd-13720b5a2cf0",
+      "SymbolName": "Lib.render.camera.Camera",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
-        "X": 1273.8973,
-        "Y": 2110.2126
+        "X": 1221.2977,
+        "Y": 2251.978
       }
     },
     {
-      "ChildId": "8896da69-fcfa-4772-90a4-e25317616bbe",
-      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "ChildId": "644ec72d-6ec1-400d-b828-ceeafb3c0e7c",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
-        "X": 1192.6763,
-        "Y": 1749.7174
-      }
+        "X": 1227.064,
+        "Y": 1677.2545
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "a820ea6b-9886-4a9c-8687-bdd8d9ca7921",
-      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "ChildId": "73452773-2251-4183-92d8-dff8714b24aa",
+      "SymbolName": "Lib.mesh.generate.LoadObj",
+      "Position": {
+        "X": 1227.064,
+        "Y": 1642.2545
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "8f5b538f-60e2-4c47-a2e3-9d13ae1270aa",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 1227.064,
+        "Y": 1782.2545
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "b9b71783-1e38-412a-ba35-24211edd5f05",
+      "SymbolName": "Skills._._ExampleDrawContent",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
-        "X": 1133.8973,
-        "Y": 2145.2126
+        "X": 1081.2977,
+        "Y": 2216.978
       }
     },
     {
-      "ChildId": "b0fa4e1d-d429-4298-9618-55eeb608265b",
-      "SymbolName": "Lib.render.gizmo._.DrawSphere",
-      "Position": {
-        "X": 1423.1134,
-        "Y": 1776.7373
-      }
-    },
-    {
-      "ChildId": "ba7f5396-60b1-489e-920b-e5fb4ab0308e",
-      "SymbolName": "Lib.render.gizmo._.DrawSphere",
+      "ChildId": "dca057d1-7ea4-4ed8-9545-e63deba45ffe",
+      "SymbolName": "Lib.render.transform.Group",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
-        "X": 1273.8973,
-        "Y": 2215.2126
+        "X": 1221.2977,
+        "Y": 2181.978
       }
     },
     {
-      "ChildId": "e0970bb1-33fd-469c-a726-2e085cdeb7c1",
-      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "ChildId": "e7cb3cb2-b120-44af-897e-77407ef67a82",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "SectionId": "fdf64808-869b-4fd9-9274-5aa99d64fa35",
       "Position": {
-        "X": 1133.8973,
-        "Y": 2110.2126
-      }
-    },
-    {
-      "ChildId": "e50dc3d4-01d3-4232-8426-bf49206b26ae",
-      "SymbolName": "Types.Values.Vector3",
-      "Position": {
-        "X": 1423.1135,
-        "Y": 1673.5281
-      }
-    },
-    {
-      "ChildId": "eb406f4a-6275-47c9-92ab-74386afc7fe3",
-      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
-      "Position": {
-        "X": 1192.6763,
-        "Y": 1671.7372
+        "X": 1221.2977,
+        "Y": 2146.978
       }
     },
     {
@@ -131,19 +136,31 @@
   "TourPoints": [
     {
       "Id": "cffb54db-aef9-4b7f-84f5-fb1be3b5fa6a",
-      "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
+      "Description": "Many cameras in TiXL are defined by a position and a target."
     },
     {
-      "Id": "f5a80dc7-6fbf-471c-a307-7b432fd8de29",
-      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
+      "Id": "d259159c-15a8-4646-82ba-a95b4e1db3da",
+      "Description": "TiXL activates these and the other parameters so they will be used for all connected operators."
     },
     {
-      "Id": "a0827bd4-5fa4-4150-9071-0f3a7437238d",
-      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
+      "Id": "ac9c84bb-7f3e-4aef-aa12-75a13294583e",
+      "Description": "Once again, TiXL coordinate system is defines...\n- *X* as left right\n- *Y* as Up\n- *Z* as forward"
     },
     {
-      "Id": "5b018788-1ab7-4760-8af5-8d95696c1509",
-      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
+      "Id": "ab31b5a9-3ee1-4c51-a1e1-d444f975acf6",
+      "ChildId": "8f5b538f-60e2-4c47-a2e3-9d13ae1270aa",
+      "InputId": "313596cc-3854-436b-89da-5fd40164ce76",
+      "Description": "Notice how the **Z position** of the camera is 2.414. \n\nThat's by design, because it will perfectly frame a 1 unit object positioned in world center."
+    },
+    {
+      "Id": "b0bee9c9-767a-42d3-bc65-0176b2e3c7ca",
+      "Description": "Because Camera are always \"activated\" seeing them as gizmo in the scene requires a special setup that we will cover later."
+    },
+    {
+      "Id": "a742983d-9fab-44ec-a76e-9a41c8825444",
+      "ChildId": "8f5b538f-60e2-4c47-a2e3-9d13ae1270aa",
+      "InputId": "313596cc-3854-436b-89da-5fd40164ce76",
+      "Description": "Please position the [Camera] to match the solution.",
       "Style": "CallToAction"
     }
   ]

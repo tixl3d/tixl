@@ -23,7 +23,8 @@
         "Y": 225.0
       },
       "Description": "Optional HLSL code inserted before the function, e.g. for helper functions or #defines.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790"/*C*/,
@@ -63,7 +64,8 @@
       },
       "GroupTitle": " FUNC(p, Offset, A,B,C) { ... }",
       "Description": "HLSL function body that returns the distance for position p.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     }
   ],
   "SymbolChildUis": [],

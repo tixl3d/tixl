@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "1087f2a9-5b45-403c-b074-4c43f50cfbd6"/*M03f_BooleanLogicOrandAny*/,
   "Description": "Boolean Logic: Or and Any",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

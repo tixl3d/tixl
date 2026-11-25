@@ -66,6 +66,7 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
+            TrySpliceIntoWire(context);
             CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
             context.CompleteMacroCommand();
@@ -296,6 +297,8 @@ internal sealed partial class MagItemMovement
         _lastAppliedOffset = Vector2.Zero;
         SpliceSets.Clear();
         DraggedItems.Clear();
+        WireSplitConnection = null;
+        _wireSplitCandidate = null;
 
         // If the drag ended without CompleteDragOperation, take the uncommitted
         // slow-grow preview back
@@ -402,18 +405,75 @@ internal sealed partial class MagItemMovement
     {
         //Log.Debug("Shake it!");
         Debug.Assert(context.MacroCommand != null);
-        if (_connectionsToDraggedItems.Count == 0)
+
+        // Read the current layout, not the connections collected at drag start: an earlier shake or unsnap in this
+        // drag rebuilt the layout, and those stale connections can point at input lines that no longer exist.
+        var symbol = context.CompositionInstance.Symbol;
+        var hasBorderConnections = false;
+        var outgoingConnections = new List<(MagGraphConnection Connection, int CountBefore)>();
+        foreach (var mc in _layout.MagConnections)
+        {
+            if (mc.IsTemporary || !IsBorderConnection(mc, DraggedItems))
+                continue;
+
+            hasBorderConnections = true;
+            if (DraggedItems.Contains(mc.TargetItem))
+                continue;
+
+            outgoingConnections.Add((mc, CountConnectionsToInput(symbol, mc.AsSymbolConnection())));
+        }
+
+        if (!hasBorderConnections)
             return false;
 
         NodeActions.DisconnectNodes(context.CompositionInstance, DraggedItems.Select(i => i.Selectable).ToList());
 
-        // foreach (var c in _borderConnections)
-        // {
-        //     context.MacroCommand.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionOp.Symbol, c.AsSymbolConnection(), 0));
-        // }
+        CollapseLinesOfShakenOffInputs(context, outgoingConnections);
 
         _layout.FlagStructureAsChanged();
         return true;
+    }
+
+    /// <summary>
+    /// Shifts ops snapped below a target up into the input line that shaking freed, matching a manual disconnect.
+    /// Inputs that <see cref="NodeActions.DisconnectNodes"/> rewired to the shaken op's upstream source keep their line.
+    /// </summary>
+    private void CollapseLinesOfShakenOffInputs(GraphUiContext context, List<(MagGraphConnection Connection, int CountBefore)> outgoingConnections)
+    {
+        var symbol = context.CompositionInstance.Symbol;
+        var collapses = new List<(MagGraphItem TargetItem, float YThreshold)>();
+        foreach (var (mc, countBefore) in outgoingConnections)
+        {
+            if (CountConnectionsToInput(symbol, mc.AsSymbolConnection()) >= countBefore)
+                continue;
+
+            if (!DisconnectedInputWouldCollapseLine(mc))
+                continue;
+
+            var yThreshold = mc.TargetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (mc.InputLineIndex + 0.5f);
+            collapses.Add((mc.TargetItem, yThreshold));
+        }
+
+        // Bottom-up, so lifting a lower line doesn't shift the thresholds of the lines above it
+        collapses.Sort((a, b) => b.YThreshold.CompareTo(a.YThreshold));
+        foreach (var (targetItem, yThreshold) in collapses)
+        {
+            var snappedItems = CollectSnappedItemsBelow(targetItem, yThreshold);
+            snappedItems.ExceptWith(DraggedItems);
+            MoveSnappedItemsVertically(context, snappedItems, yThreshold, -MagGraphItem.GridSize.Y);
+        }
+    }
+
+    private static int CountConnectionsToInput(Symbol symbol, Symbol.Connection connection)
+    {
+        var count = 0;
+        foreach (var c in symbol.Connections)
+        {
+            if (c.TargetParentOrChildId == connection.TargetParentOrChildId && c.TargetSlotId == connection.TargetSlotId)
+                count++;
+        }
+
+        return count;
     }
 
     internal static void UpdateLongPressIndicator(float longTapProgress)
@@ -1444,6 +1504,49 @@ internal sealed partial class MagItemMovement
             return false;
         }
 
+        if (!TryRewireThroughSplice(context, connection, spliceLink))
+            return false;
+
+        // Move items
+        if (spliceLink.Direction == MagGraphItem.Directions.Vertical)
+        {
+            MoveSnappedItemsVertically(context,
+                                       CollectSnappedItems(_snapping.TargetItem),
+                                       _snapping.OutAnchorPos.Y - MagGraphItem.GridSize.Y / 2,
+                                       spliceLink.Distance);
+        }
+        else
+        {
+            var leftBatch = CollectSnappedItems(_snapping.SourceItem, null, true, connection.ConnectionHash);
+            var rightBatch = CollectSnappedItems(_snapping.TargetItem, null, true, connection.ConnectionHash);
+            
+            var onlyLeft = new HashSet<MagGraphItem>(leftBatch);
+            onlyLeft.ExceptWith(rightBatch);
+
+            var onlyRight = new HashSet<MagGraphItem>(rightBatch);
+            onlyRight.ExceptWith(leftBatch);
+
+            var intersection = new HashSet<MagGraphItem>(rightBatch);
+            intersection.IntersectWith(leftBatch);
+            
+            MoveItems(context, onlyLeft, -new Vector2(spliceLink.DragPositionWithinBlock.X ,0));            
+            MoveItems(context, onlyRight, new Vector2(spliceLink.Distance - spliceLink.DragPositionWithinBlock.X,0));            
+            MoveSnappedItemsHorizontally(context,
+                                         intersection,
+                                         _snapping.OutAnchorPos.X - MagGraphItem.GridSize.X / 2,
+                                         spliceLink.Distance);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Replaces <paramref name="connection"/> with two connections routed through the splice link's input and output.
+    /// </summary>
+    private static bool TryRewireThroughSplice(GraphUiContext context, MagGraphConnection connection, SpliceLink spliceLink)
+    {
+        Debug.Assert(context.MacroCommand != null);
+
         var connectionIntoSplice = new Symbol.Connection(connection.SourceParentOrChildId,
                                                          connection.SourceOutput.Id,
                                                          spliceLink.InputItemId,
@@ -1474,35 +1577,92 @@ internal sealed partial class MagItemMovement
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                         connectionOutOfSplice, connection.MultiInputIndex));
+        return true;
+    }
 
-        // Move items
-        if (spliceLink.Direction == MagGraphItem.Directions.Vertical)
+    /// <summary>
+    /// Called while drawing a wire that the mouse pointer hovers during a drag. The wire closest to the pointer
+    /// becomes the split target if the dragged items can be spliced into it.
+    /// </summary>
+    internal void RegisterWireSplitCandidate(MagGraphConnection connection, Color color, Vector2 positionOnScreen)
+    {
+        if (_snapping.IsSnapped
+            || DraggedItems.Contains(connection.SourceItem)
+            || DraggedItems.Contains(connection.TargetItem))
+            return;
+
+        var distance = Vector2.Distance(positionOnScreen, ImGui.GetMousePos());
+        if (distance >= _wireSplitCandidateDistance)
+            return;
+
+        var spliceLink = FindSpliceLinkForWire(connection.Type);
+        if (spliceLink == null)
+            return;
+
+        _wireSplitCandidate = connection;
+        _wireSplitCandidateDistance = distance;
+        _wireSplitCandidateLink = spliceLink;
+        _wireSplitCandidatePosOnScreen = positionOnScreen;
+        _wireSplitCandidateColor = color;
+    }
+
+    /// <summary>
+    /// Promotes the split target found while drawing this frame's connections and marks the split point.
+    /// </summary>
+    internal void UpdateWireSplitIndicator(ImDrawListPtr drawList)
+    {
+        WireSplitConnection = _wireSplitCandidate;
+        _wireSplitLink = _wireSplitCandidateLink;
+        _wireSplitCandidate = null;
+        _wireSplitCandidateLink = null;
+        _wireSplitCandidateDistance = float.PositiveInfinity;
+
+        if (WireSplitConnection == null)
+            return;
+
+        drawList.AddCircleFilled(_wireSplitCandidatePosOnScreen, 5 * T3Ui.UiScaleFactor, _wireSplitCandidateColor, 12);
+    }
+
+    private void TrySpliceIntoWire(GraphUiContext context)
+    {
+        if (WireSplitConnection == null || _wireSplitLink == null || _snapping.IsSnapped)
+            return;
+
+        TryRewireThroughSplice(context, WireSplitConnection, _wireSplitLink);
+        WireSplitConnection = null;
+        _wireSplitLink = null;
+    }
+
+    /// <summary>
+    /// Wires can't be spliced into an input that is already connected. Horizontal links are preferred, because they
+    /// match the left-to-right flow of a wire.
+    /// </summary>
+    private SpliceLink? FindSpliceLinkForWire(Type connectionType)
+    {
+        SpliceLink? bestLink = null;
+        foreach (var spliceLink in SpliceSets)
         {
-            MoveSnappedItemsVertically(context,
-                                       CollectSnappedItems(_snapping.TargetItem),
-                                       _snapping.OutAnchorPos.Y - MagGraphItem.GridSize.Y / 2,
-                                       spliceLink.Distance);
+            if (spliceLink.Type != connectionType || IsInputConnected(spliceLink.InputItemId, spliceLink.InputId))
+                continue;
+
+            if (spliceLink.Direction == MagGraphItem.Directions.Horizontal)
+                return spliceLink;
+
+            bestLink ??= spliceLink;
         }
-        else
+
+        return bestLink;
+    }
+
+    private bool IsInputConnected(Guid itemId, Guid inputId)
+    {
+        if (!_layout.Items.TryGetValue(itemId, out var item) || item.Instance == null)
+            return true;
+
+        foreach (var input in item.Instance.Inputs)
         {
-            var leftBatch = CollectSnappedItems(_snapping.SourceItem, null, true, connection.ConnectionHash);
-            var rightBatch = CollectSnappedItems(_snapping.TargetItem, null, true, connection.ConnectionHash);
-            
-            var onlyLeft = new HashSet<MagGraphItem>(leftBatch);
-            onlyLeft.ExceptWith(rightBatch);
-
-            var onlyRight = new HashSet<MagGraphItem>(rightBatch);
-            onlyRight.ExceptWith(leftBatch);
-
-            var intersection = new HashSet<MagGraphItem>(rightBatch);
-            intersection.IntersectWith(leftBatch);
-            
-            MoveItems(context, onlyLeft, -new Vector2(spliceLink.DragPositionWithinBlock.X ,0));            
-            MoveItems(context, onlyRight, new Vector2(spliceLink.Distance - spliceLink.DragPositionWithinBlock.X,0));            
-            MoveSnappedItemsHorizontally(context,
-                                         intersection,
-                                         _snapping.OutAnchorPos.X - MagGraphItem.GridSize.X / 2,
-                                         spliceLink.Distance);
+            if (input.Id == inputId)
+                return input.HasInputConnections;
         }
 
         return true;
@@ -1848,6 +2008,15 @@ internal sealed partial class MagItemMovement
     internal Vector2 LastSnapTargetPositionOnCanvas;
 
     internal readonly List<SpliceLink> SpliceSets = [];
+
+    /** The wire the dragged items get spliced into when dropped, as found while drawing the last frame. */
+    internal MagGraphConnection? WireSplitConnection;
+    private SpliceLink? _wireSplitLink;
+    private MagGraphConnection? _wireSplitCandidate;
+    private SpliceLink? _wireSplitCandidateLink;
+    private float _wireSplitCandidateDistance = float.PositiveInfinity;
+    private Vector2 _wireSplitCandidatePosOnScreen;
+    private Color _wireSplitCandidateColor;
 
     private Vector2 _lastAppliedOffset;
     private const float SnapThreshold = 30;

@@ -6,6 +6,10 @@ name: Native Audio Library
 on:
   workflow_dispatch:
   push:
+    # Any branch, but not tags: a version push sends commit and tag together, and the tag run would repeat the
+    # branch run of the same commit
+    branches:
+      - '**'
     paths:
       - 'Native/TixlAudio/**'
       - '.github/actions/build-audio-dll/**'
@@ -31,13 +35,13 @@ jobs:
           apt-get install -y --no-install-recommends gcc libc6-dev git ca-certificates
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build Library
         run: Native/TixlAudio/build.sh
 
       - name: Upload Library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixlaudio-linux-x64
           path: Dependencies/linux-x64/libtixlaudio.so
@@ -47,13 +51,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build Library
         uses: ./.github/actions/build-audio-dll
 
       - name: Upload Library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixlaudio-windows-x64
           path: Dependencies/tixlaudio.dll
@@ -66,13 +70,13 @@ jobs:
         shell: bash
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build Library
         run: Native/TixlAudio/build-macos.sh
 
       - name: Upload Library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: tixlaudio-osx-arm64
           path: Dependencies/osx/libtixlaudio.dylib

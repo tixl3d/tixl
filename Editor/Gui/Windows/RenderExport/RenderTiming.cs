@@ -14,6 +14,15 @@ internal static class RenderTiming
         public bool AudioRecording;
     }
 
+    /** Loop mode is on in the timeline and its range has a length, so there is something to render. */
+    public static bool IsTimelineLoopUsable()
+    {
+        var playback = Playback.Current;
+        return playback.IsLooping && playback.LoopRange.End > playback.LoopRange.Start;
+    }
+
+    /// <summary>Resolves Loop and Soundtrack ranges into start and end. Call it right before reading them, since
+    /// the timeline loop and the soundtrack can change while the render window is closed.</summary>
     public static void ApplyTimeRange( RenderSettings renderSettings)
     {
         switch (renderSettings.TimeRange)
@@ -25,6 +34,13 @@ internal static class RenderTiming
 
             case RenderSettings.TimeRanges.Loop:
             {
+                // Custom keeps the start and end last resolved from the loop.
+                if (!IsTimelineLoopUsable())
+                {
+                    renderSettings.TimeRange = RenderSettings.TimeRanges.Custom;
+                    break;
+                }
+
                 var playback = Playback.Current;
                 var startInSeconds = playback.SecondsFromBars(playback.LoopRange.Start);
                 var endInSeconds = playback.SecondsFromBars(playback.LoopRange.End);
@@ -187,7 +203,7 @@ internal static class RenderTiming
         Playback.Current.TimeInSecs = ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
         Playback.Current.IsRenderingToFile = false;
         Playback.Current.PlaybackSpeed = 0.0;
-        Playback.Current.FrameSpeedFactor = 1.0; // Only used while rendering to file; live playback measures it.
+        Playback.Current.FrameSpeedFactor = 1.0; // Only used while rendering to file; live playback derives it from the frame duration.
         Playback.FixedFrameDurationSec = null;
         Playback.Current.Update();
 

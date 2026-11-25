@@ -1,0 +1,109 @@
+{
+  "FormatVersion": 3,
+  "Id": "0c17e5f9-266a-480f-a48b-9bf2f69eb383"/*SetSpotLight*/,
+  "Description": "Adds a spot light to the connected subgraph.\n\nThe light shines from Position toward Target in a cone of ConeAngle degrees and fades out over the outer Softness part of the cone. With the operator selected, the move gizmo moves the light and the rotate gizmo swings Target around it. Distance falloff works like [SetPointLight]. Spot and point lights share the limit of 8 lights. Operators with their own lighting (cel shading, hatching, tubes, ribbons) treat it as a point light for now.\n\nAKA: spotlight, cone light, lamp\n\nSee also: [SetPointLight], [SetDirectionalLight], [SetShadow]",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "1d5ad697-5590-4d06-a1e9-caa3356b641d"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "Sets the color of the light."
+    },
+    {
+      "InputId": "24eb2ff1-8a20-4178-ac1a-b43ad6001347"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "482d4b4e-403f-4f7d-beb1-36165acb620b"/*Position*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "World space position of the light.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "84cb4172-56c2-4b91-86b0-951b3656be2a"/*Softness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Description": "Part of the cone, from its edge inwards, over which the light fades out. 0 gives a hard edge.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "91e532b4-3507-449c-a61f-01826b064611"/*Decay*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      },
+      "Description": "Exponent of the falloff beyond Range. Higher values make the light fade faster with distance.",
+      "Min": 0.0,
+      "Max": 4.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a71b26df-b98a-42d5-bdf9-de1fba8798d2"/*Range*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "GroupTitle": "Falloff",
+      "Description": "Distance at which the light intensity has dropped to half. The intensity falls off as Intensity / ((distance / Range) ^ Decay + 1).",
+      "Min": 0.0,
+      "Max": 50.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "aff99952-a008-45c9-9705-f5106b702313"/*Target*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "World space point the light points at."
+    },
+    {
+      "InputId": "cf141c64-fd2f-405e-bee1-38d294999dc2"/*ConeAngle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "GroupTitle": "Cone",
+      "Description": "Full opening angle of the cone in degrees.",
+      "Min": 1.0,
+      "Max": 120.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f4d0b3b9-359e-426c-b91a-28e6965f49f6"/*Intensity*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Brightness of the light.",
+      "Min": 0.0,
+      "Max": 50.0,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c33f48f2-ad65-48ec-80e0-2407e902a421"/*Output*/,
+      "Position": {
+        "X": 30.0,
+        "Y": 90.0
+      }
+    }
+  ]
+}

@@ -156,11 +156,14 @@ internal sealed class ExecuteTests : Instance<ExecuteTests>
             }
         }
 
+        // Ignored tests are excluded from the total; the integration test relies on the "SUCCESS" / "FAILED:" prefix.
         var countTotal = countFails + countSuccess;
-        var passedLabel = countFails == 0 ? "SUCCESS" : "FAILED";
-        var ignoredLabel = countIgnored == 0 ? string.Empty : $"  ({countIgnored} ignored)";
+        var ignoredLabel = countIgnored == 0 ? string.Empty : $", {countIgnored} ignored";
+        var summary = countFails == 0
+                          ? $"SUCCESS:  all {countTotal} passed{ignoredLabel}"
+                          : $"FAILED:  {countFails} of {countTotal} failed{ignoredLabel}";
 
-        _stringBuilder.Insert(0, $"{passedLabel}:   {countSuccess} / {countTotal}{ignoredLabel}  {_stopwatch.ElapsedMilliseconds * 0.001:0.0s}\n\n");
+        _stringBuilder.Insert(0, $"{summary}  ({_stopwatch.ElapsedMilliseconds * 0.001:0.0}s)\n\n");
 
         Result.Value = _stringBuilder.ToString();
 

@@ -97,3 +97,13 @@ Animate points (e.g. a rotating [RadialPoints] or a particle simulation) and dra
 - Each draw blurs along its motion and shows motion in the velocity buffer; still points show none.
 - Respawning particles don't streak across the screen.
 - Blended sprites over a mesh keep the mesh's shading in [ScreenSpaceLighting] (normals behind them stay intact).
+
+## Step: Layers and raymarched fields
+
+**Action:**
+Move a [Layer2d] with an opaque image in front of a mesh, rendered by [RenderScene] → [MotionBlur]; first with
+EnableDepthWrite off, then on. Then orbit the camera around a static [RaymarchField].
+
+**Expected:**
+- With depth writing off the layer doesn't blur (its velocity is ignored, by design); with it on, the layer blurs.
+- The raymarched field blurs with the camera motion and shows motion in the velocity buffer.

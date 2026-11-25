@@ -9,7 +9,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03c_JumpCuts",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 170.0
       }
     },
@@ -26,6 +26,7 @@
       "ChildId": "079854f2-f7a6-4fac-b951-16f77f91e3e2",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01a_TransformingMeshes",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 100.0
@@ -35,8 +36,9 @@
       "ChildId": "09ca79af-b24e-458d-aff3-051c9bd77956",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07b_MultipleSwitches",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
-        "X": 4080.0,
+        "X": 4270.0,
         "Y": 135.0
       }
     },
@@ -72,7 +74,7 @@
       "SymbolName": "Skills.Render.R04_RenderBasics.R04c_ZBuffer",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Position": {
-        "X": 3510.0,
+        "X": 3700.0,
         "Y": 170.0
       }
     },
@@ -81,16 +83,16 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01g_Spreading",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 310.0
       }
     },
     {
       "ChildId": "16b397c0-21b5-4368-8b1c-5bf6113e5597",
-      "SymbolName": "Skills.Render.R03_Camera.R03g_SceneinaScene",
+      "SymbolName": "Skills.Render.R03_Camera.R03g_SceneWithinScene",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 310.0
       }
     },
@@ -109,7 +111,7 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 240.0
+        "Y": 135.0
       }
     },
     {
@@ -117,7 +119,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05f_EmittingLight",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 275.0
       }
     },
@@ -126,7 +128,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01d_Stacking",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 170.0
       }
     },
@@ -136,13 +138,14 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 310.0
+        "Y": 345.0
       }
     },
     {
       "ChildId": "1f938bec-df99-478f-a789-e13667dd77d7",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02e_RoundingtoSteps",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 240.0
@@ -152,8 +155,9 @@
       "ChildId": "217adc68-9ea3-4bfd-9474-55be644ca5e3",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07d_ExecuteNothing",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
-        "X": 4080.0,
+        "X": 4270.0,
         "Y": 205.0
       }
     },
@@ -170,6 +174,7 @@
       "ChildId": "23cd7179-32ba-4a67-bf54-8ed2878bd813",
       "SymbolName": "Skills.Math.M05_Trigger.M05c_MaximumRandomwithReset",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 170.0
@@ -189,7 +194,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03a_CameraControl",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 100.0
       }
     },
@@ -208,7 +213,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 450.0
+        "Y": 555.0
       }
     },
     {
@@ -216,7 +221,7 @@
       "SymbolName": "Skills.Render.R04_RenderBasics.R04a_From3dTo2d",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Position": {
-        "X": 3510.0,
+        "X": 3700.0,
         "Y": 100.0
       }
     },
@@ -224,6 +229,7 @@
       "ChildId": "2d7af9c6-343d-4b4f-8f58-fff75036dca1",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03b_AnimatedBoolean",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 135.0
@@ -242,8 +248,9 @@
       "ChildId": "32dcaded-b16f-4a7c-b731-8a5138d50962",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07e_PickvsSwitch",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
-        "X": 4080.0,
+        "X": 4270.0,
         "Y": 240.0
       }
     },
@@ -251,8 +258,9 @@
       "ChildId": "34f8f46f-4c21-4726-80ca-d13dd3088c71",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07a_SwitchingScenes",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
-        "X": 4080.0,
+        "X": 4270.0,
         "Y": 100.0
       }
     },
@@ -260,6 +268,7 @@
       "ChildId": "3845b17c-07c9-4e94-929e-1978a345f2d2",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04b_CameraShake",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 135.0
@@ -269,6 +278,7 @@
       "ChildId": "3c7837f6-ef85-47be-aebc-91671cdf6061",
       "SymbolName": "Skills.Math.M06_Vectors.M06b_AccessingVectorComponents",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 135.0
@@ -278,6 +288,7 @@
       "ChildId": "3e1602f8-1c86-4f4e-855b-0c657a5aa83b",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02c_AngleStepsRevisited",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 170.0
@@ -288,7 +299,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02b_DrawingMeshes",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 135.0
       }
     },
@@ -297,8 +308,8 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01f_TransformOrder",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
-        "Y": 240.0
+        "X": 3130.0,
+        "Y": 275.0
       }
     },
     {
@@ -306,7 +317,7 @@
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06a_ShadingwithLight",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
       "Position": {
-        "X": 3890.0,
+        "X": 4080.0,
         "Y": 100.0
       }
     },
@@ -315,7 +326,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01b_Transform",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 135.0
       }
     },
@@ -323,6 +334,7 @@
       "ChildId": "4a1d716e-c5b4-44e3-a658-26e7fd3b0840",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03f_BooleanLogicOrandAny",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 275.0
@@ -334,7 +346,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 660.0
+        "Y": 240.0
       }
     },
     {
@@ -360,7 +372,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01e_Instancing",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 205.0
       }
     },
@@ -379,7 +391,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 415.0
+        "Y": 450.0
       }
     },
     {
@@ -388,7 +400,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 240.0
+        "Y": 275.0
       }
     },
     {
@@ -396,7 +408,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03d_CameraZoom",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 205.0
       }
     },
@@ -406,7 +418,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 590.0
+        "Y": 625.0
       }
     },
     {
@@ -422,6 +434,7 @@
       "ChildId": "607b1cbb-5471-4fa4-a0ef-a06a933dd17c",
       "SymbolName": "Skills.Math.M06_Vectors.M06d_ScalingVectors",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 205.0
@@ -437,6 +450,14 @@
       }
     },
     {
+      "ChildId": "626218c2-2216-48aa-a60c-66f34429826f",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
+      "Position": {
+        "X": 4273.87,
+        "Y": -388.53223
+      }
+    },
+    {
       "ChildId": "629c8539-4438-4ad0-85b4-d6c428e236e3",
       "SymbolName": "Skills.Image.I02_Gradients.I02b_GradientRotate",
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
@@ -449,6 +470,7 @@
       "ChildId": "63bc0bae-0c8e-48a8-8e56-8ed1b489299e",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03c_BooleanLogicAnd",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 170.0
@@ -459,7 +481,7 @@
       "SymbolName": "Skills.Render.R04_RenderBasics.R04d_MultisamplingMSAA",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Position": {
-        "X": 3510.0,
+        "X": 3700.0,
         "Y": 205.0
       }
     },
@@ -468,7 +490,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05c_MaterialTextures",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 170.0
       }
     },
@@ -477,7 +499,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02e_TransparentTextures",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 240.0
       }
     },
@@ -485,6 +507,7 @@
       "ChildId": "691ab2b2-1677-4d5e-8ec7-18e688934afa",
       "SymbolName": "Skills.Math.M06_Vectors.M06a_Vectors",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 100.0
@@ -495,7 +518,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05e_Alpha",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 240.0
       }
     },
@@ -504,16 +527,16 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05a_Rendering",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 100.0
       }
     },
     {
       "ChildId": "6ea509e0-1e84-479b-885d-dd25bc768081",
-      "SymbolName": "Skills.Render.R06_ShadingAndLight.R06c_CameraandEnvironmentOrder",
+      "SymbolName": "Skills.Render.R06_ShadingAndLight.R06c_CameraAndEnvironmentOrder",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
       "Position": {
-        "X": 3890.0,
+        "X": 4080.0,
         "Y": 170.0
       }
     },
@@ -522,7 +545,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05d_MultiChannelTextures",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 205.0
       }
     },
@@ -530,6 +553,7 @@
       "ChildId": "6f1cee76-216e-4655-bcc3-ee6592f7bd50",
       "SymbolName": "Skills.Math.M06_Vectors.M06g_RotatingaVector",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 310.0
@@ -548,6 +572,7 @@
       "ChildId": "703d26d0-457f-49b5-83c7-ca3aa07c5edf",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04a_TriggerBasedAnimation",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 100.0
@@ -557,6 +582,7 @@
       "ChildId": "751e2f99-8518-4d38-acec-f1b512346a10",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03d_BooleanLogicRangeTest",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 205.0
@@ -566,6 +592,7 @@
       "ChildId": "755fdb89-ba92-4e97-b0a9-b1a994c02fb9",
       "SymbolName": "Skills.Math.M06_Vectors.M06e_Normalization",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 240.0
@@ -575,6 +602,7 @@
       "ChildId": "79de5f7d-81a1-4822-9696-47a2d9460ded",
       "SymbolName": "Skills.Math.M06_Vectors.M06h_Quaternions",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 345.0
@@ -584,8 +612,9 @@
       "ChildId": "79e74da6-7f05-431e-ad0d-3658af1557c1",
       "SymbolName": "Skills.Render.R07_SwitchingScenes.R07c_SpecialIndexValues",
       "SectionId": "ca7a9fd4-768f-4690-bc0a-49ed0bad3a88",
+      "Comment": "Draft",
       "Position": {
-        "X": 4080.0,
+        "X": 4270.0,
         "Y": 170.0
       }
     },
@@ -611,6 +640,7 @@
       "ChildId": "7ec29f97-841a-4507-9c7e-7a0ee93da3ac",
       "SymbolName": "Skills.Math.M06_Vectors.M06c_VectorLength",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 170.0
@@ -620,6 +650,7 @@
       "ChildId": "83380e16-fd25-46bd-a148-4497bd51ea35",
       "SymbolName": "Skills.Math.M05_Trigger.M05d_DetectingRandomSteps",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 205.0
@@ -629,6 +660,7 @@
       "ChildId": "847c85bb-d32b-4912-a2de-3504999d628a",
       "SymbolName": "Skills.Math.M05_Trigger.M05a_TriggerEvents",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 100.0
@@ -638,6 +670,7 @@
       "ChildId": "88171d4e-eb23-4810-b496-e9cfd3accff7",
       "SymbolName": "Skills.Math.M04_TriggerAnims.M04c_CombiningEverything",
       "SectionId": "e3e0ee2e-c805-4fd8-ba3d-b62fe0959d59",
+      "Comment": "Draft",
       "Position": {
         "X": 1840.0,
         "Y": 170.0
@@ -648,7 +681,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02a_DrawingMeshes",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 100.0
       }
     },
@@ -657,7 +690,7 @@
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06b_CustomEnvironments",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
       "Position": {
-        "X": 3890.0,
+        "X": 4080.0,
         "Y": 135.0
       }
     },
@@ -676,7 +709,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 555.0
+        "Y": 590.0
       }
     },
     {
@@ -684,7 +717,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02d_SolidColorImage",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 205.0
       }
     },
@@ -710,15 +743,25 @@
       "ChildId": "9d867c36-8c74-4106-93b9-a6588f49d7af",
       "SymbolName": "Skills.Math.M06_Vectors.M06f_Orientation",
       "SectionId": "f44545ef-d380-42a4-b26e-60adc1aa1674",
+      "Comment": "Draft",
       "Position": {
         "X": 2220.0,
         "Y": 275.0
       }
     },
     {
+      "ChildId": "9e12c930-45ae-4a14-b855-024bb4f5be6c",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
+      "Position": {
+        "X": 3431.337,
+        "Y": -132.16498
+      }
+    },
+    {
       "ChildId": "a5fb3d31-4c0e-469a-a7c2-5c6673d30244",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03e_BooleanLogicAll",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 240.0
@@ -729,7 +772,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03f_CameraOverrideRules",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 275.0
       }
     },
@@ -748,7 +791,7 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 135.0
+        "Y": 170.0
       }
     },
     {
@@ -756,7 +799,7 @@
       "SymbolName": "Skills.Points.P01_Intro.P01a_PointIntro",
       "SectionId": "703ba814-412f-41f1-94f4-96f9a1c31271",
       "Position": {
-        "X": 2700.0,
+        "X": 2890.0,
         "Y": 100.0
       }
     },
@@ -774,7 +817,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01h_Repeating",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 345.0
       }
     },
@@ -783,7 +826,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05g_NormalMapping",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 310.0
       }
     },
@@ -802,7 +845,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 275.0
+        "Y": 310.0
       }
     },
     {
@@ -819,7 +862,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03b_HelicopterCamera",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 135.0
       }
     },
@@ -827,6 +870,7 @@
       "ChildId": "bd8d8b23-93d8-4678-ae99-eda943107ef8",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01d_MergedVertices",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 205.0
@@ -837,7 +881,7 @@
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05b_IsItShiny",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
       "Position": {
-        "X": 3700.0,
+        "X": 3890.0,
         "Y": 135.0
       }
     },
@@ -846,7 +890,7 @@
       "SymbolName": "Skills.Render.R03_Camera.R03e_CameraMove",
       "SectionId": "365c7cef-5299-4509-9c1a-b8844fdaacdd",
       "Position": {
-        "X": 3320.0,
+        "X": 3510.0,
         "Y": 240.0
       }
     },
@@ -863,6 +907,7 @@
       "ChildId": "c237c208-41c5-45d3-b11e-b9acb161c280",
       "SymbolName": "Skills.Mesh.Me01_CreatingMeshes.Me01e_UVs",
       "SectionId": "7359fb9e-77fd-4745-866b-e8c68b92be95",
+      "Comment": "Draft",
       "Position": {
         "X": 2460.0,
         "Y": 240.0
@@ -879,10 +924,10 @@
     },
     {
       "ChildId": "cb3d71a7-3b2a-44a4-9d5d-21a47891fbbd",
-      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3Dto2D",
+      "SymbolName": "Skills.Render.R04_RenderBasics.R04b_From3dTo2d",
       "SectionId": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Position": {
-        "X": 3510.0,
+        "X": 3700.0,
         "Y": 135.0
       }
     },
@@ -890,6 +935,7 @@
       "ChildId": "cc30a3b4-9851-49f3-a13f-c2ac0df0c821",
       "SymbolName": "Skills.Math.M05_Trigger.M05b_MaximumRandom",
       "SectionId": "311bfac4-2edd-4ac0-aeeb-2a93e4abf082",
+      "Comment": "Draft",
       "Position": {
         "X": 2030.0,
         "Y": 135.0
@@ -908,6 +954,7 @@
       "ChildId": "ce796b7f-e779-4ad1-990e-e0bf2d5706aa",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02f_Precision",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 275.0
@@ -917,6 +964,7 @@
       "ChildId": "cf1230b0-0024-4fcd-a866-a7ec49ac5f6c",
       "SymbolName": "Skills.Math.M02_IntsVsFloats.M02d_RoundingUp",
       "SectionId": "e49e238c-5b90-4a4c-9fa8-9bfa404f4134",
+      "Comment": "Draft",
       "Position": {
         "X": 1460.0,
         "Y": 205.0
@@ -936,7 +984,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01i_Locator",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 380.0
       }
     },
@@ -946,7 +994,7 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 205.0
+        "Y": 240.0
       }
     },
     {
@@ -955,7 +1003,7 @@
       "SectionId": "992b9026-577d-44cb-b9c0-5c99e12833ce",
       "Position": {
         "X": 1270.0,
-        "Y": 170.0
+        "Y": 205.0
       }
     },
     {
@@ -972,7 +1020,7 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01a_MovingThings",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
         "Y": 100.0
       }
     },
@@ -981,7 +1029,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02c_UnlitDrawing",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 170.0
       }
     },
@@ -989,6 +1037,7 @@
       "ChildId": "e1072bdc-7f58-4e9e-8f29-2f14f2f89c28",
       "SymbolName": "Skills.Math.M03_BoolsAndAnims.M03g_BooleanLogicNot",
       "SectionId": "97fafff2-a9fe-4a8f-985c-9e2ee61fc179",
+      "Comment": "Draft",
       "Position": {
         "X": 1650.0,
         "Y": 310.0
@@ -999,7 +1048,7 @@
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06d_Foggy",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
       "Position": {
-        "X": 3890.0,
+        "X": 4080.0,
         "Y": 205.0
       }
     },
@@ -1009,7 +1058,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 380.0
+        "Y": 415.0
       }
     },
     {
@@ -1017,7 +1066,7 @@
       "SymbolName": "Skills.Render.R02_DrawingMeshes.R02f_HatchingStyle",
       "SectionId": "70e2e810-6e86-411f-bc76-a86580de8f42",
       "Position": {
-        "X": 3130.0,
+        "X": 3320.0,
         "Y": 275.0
       }
     },
@@ -1027,7 +1076,15 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 345.0
+        "Y": 380.0
+      }
+    },
+    {
+      "ChildId": "e8d659ba-15bf-49ff-9174-e4d25110ef7f",
+      "SymbolName": "Lib.flow.skillQuest.ValueQuiz",
+      "Position": {
+        "X": 3236.4902,
+        "Y": -129.42065
       }
     },
     {
@@ -1044,7 +1101,16 @@
       "SymbolName": "Skills.Render.R01_MovingThings.R01f_SimpleTransformations",
       "SectionId": "03dbddc0-797d-4ea3-8834-4b485c6024ca",
       "Position": {
-        "X": 2940.0,
+        "X": 3130.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "ChildId": "ef8995bf-2f8c-4acd-9c3f-5c40fde21311",
+      "SymbolName": "Skills.Image.I04_ColorCorrection.I04f_VectorsScope",
+      "SectionId": "9c6d38af-c900-4c51-996d-c8dd5685926c",
+      "Position": {
+        "X": 840.0,
         "Y": 275.0
       }
     },
@@ -1063,7 +1129,7 @@
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
       "Position": {
         "X": 460.0,
-        "Y": 625.0
+        "Y": 660.0
       }
     },
     {
@@ -1089,7 +1155,45 @@
         "W": 1.0
       },
       "Position": {
-        "X": 2925.0,
+        "X": 3115.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "098bb9af-e223-4ce7-9d1f-fb9be326429d",
+      "Label": "R14_MaterialOverrides",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5585.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "178c9bc4-d44f-4b87-8503-4c6411dd6449",
+      "Label": "R17_DrawOrder",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 6155.0,
         "Y": 50.0
       },
       "Size": {
@@ -1145,7 +1249,45 @@
         "W": 1.0
       },
       "Position": {
-        "X": 3305.0,
+        "X": 3495.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "41634656-77e0-45cf-a4aa-1d3c361178c4",
+      "Label": "R15_SetEnvironment",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5775.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "436cba1f-06ce-41fc-9f98-fe2f4935aa6f",
+      "Label": "R10_Variables",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 4825.0,
         "Y": 50.0
       },
       "Size": {
@@ -1163,12 +1305,31 @@
         "W": 1.0
       },
       "Position": {
-        "X": 2910.0,
+        "X": 3100.0,
         "Y": 0.0
       },
       "Size": {
-        "X": 1340.0,
+        "X": 4380.0,
         "Y": 445.0
+      }
+    },
+    {
+      "Id": "45f0c4de-1f1a-4a43-bb35-707745e8f3f5",
+      "Label": "R21_Samplers",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 6915.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
       }
     },
     {
@@ -1182,7 +1343,45 @@
         "W": 1.0
       },
       "Position": {
-        "X": 3685.0,
+        "X": 3875.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "57871229-4103-4ec3-ac15-fb6f17e71eb3",
+      "Label": "R18_DepthSorting",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 6345.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "617ad486-0a69-4991-9b64-97031b3e81f0",
+      "Label": "R12_FlowGraph",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5205.0,
         "Y": 50.0
       },
       "Size": {
@@ -1205,7 +1404,7 @@
       },
       "Size": {
         "X": 960.0,
-        "Y": 760.0
+        "Y": 725.0
       }
     },
     {
@@ -1222,7 +1421,7 @@
         "Y": 0.0
       },
       "Size": {
-        "X": 200.0,
+        "X": 390.0,
         "Y": 305.0
       }
     },
@@ -1237,7 +1436,7 @@
         "W": 1.0
       },
       "Position": {
-        "X": 2685.0,
+        "X": 2875.0,
         "Y": 50.0
       },
       "Size": {
@@ -1256,7 +1455,7 @@
         "W": 1.0
       },
       "Position": {
-        "X": 3115.0,
+        "X": 3305.0,
         "Y": 50.0
       },
       "Size": {
@@ -1299,7 +1498,7 @@
       },
       "Size": {
         "X": 170.0,
-        "Y": 695.0
+        "Y": 660.0
       }
     },
     {
@@ -1321,6 +1520,44 @@
       }
     },
     {
+      "Id": "75f2a7fa-0eba-4eed-b325-92794c90dd4b",
+      "Label": "R13_TimeControl",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5395.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "87a424e1-b82e-46cc-afd0-68583ae33c8b",
+      "Label": "R26_DrawingText",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 7295.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
       "Id": "8d7626c1-9320-44fd-a02c-a8c8f37f6253",
       "Label": "I03_Analyze",
       "ParentSectionId": "669d589e-798c-44af-9cc5-3267a977c64c",
@@ -1336,7 +1573,7 @@
       },
       "Size": {
         "X": 170.0,
-        "Y": 695.0
+        "Y": 660.0
       }
     },
     {
@@ -1349,12 +1586,31 @@
         "W": 1.0
       },
       "Position": {
-        "X": 2670.0,
+        "X": 2860.0,
         "Y": 0.0
       },
       "Size": {
         "X": 200.0,
         "Y": 165.0
+      }
+    },
+    {
+      "Id": "92365458-d0f6-4a2a-aa04-9544024034d3",
+      "Label": "R19_AdvancedRendering",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 6535.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
       }
     },
     {
@@ -1411,7 +1667,26 @@
       },
       "Size": {
         "X": 170.0,
-        "Y": 695.0
+        "Y": 660.0
+      }
+    },
+    {
+      "Id": "9cc958aa-1b52-4ad2-826a-73c77e185876",
+      "Label": "R08_GroupVsExecute",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 4445.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
       }
     },
     {
@@ -1433,6 +1708,44 @@
       }
     },
     {
+      "Id": "a953d95d-b606-486a-8532-dd0c1a80cf42",
+      "Label": "Me02_MeshManipulation",
+      "ParentSectionId": "6a47d451-b58b-4801-8eab-4c76e045fdea",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2635.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "Id": "acb72a61-7dc0-424d-b104-87b77ffad2dc",
+      "Label": "R16_ShufflingScenes",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5965.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
       "Id": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
       "Label": "R06_ShadingAndLight",
       "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
@@ -1443,7 +1756,7 @@
         "W": 1.0
       },
       "Position": {
-        "X": 3875.0,
+        "X": 4065.0,
         "Y": 50.0
       },
       "Size": {
@@ -1467,7 +1780,7 @@
       },
       "Size": {
         "X": 170.0,
-        "Y": 695.0
+        "Y": 660.0
       }
     },
     {
@@ -1486,7 +1799,7 @@
       },
       "Size": {
         "X": 170.0,
-        "Y": 695.0
+        "Y": 660.0
       }
     },
     {
@@ -1500,7 +1813,26 @@
         "W": 1.0
       },
       "Position": {
-        "X": 4065.0,
+        "X": 4255.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "d0cfad2a-6d69-4d72-810a-d5dfb719e3ef",
+      "Label": "R11_Loops",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 5015.0,
         "Y": 50.0
       },
       "Size": {
@@ -1547,6 +1879,44 @@
       }
     },
     {
+      "Id": "e7b32d83-8627-4a3d-bd1f-3ffc007558f1",
+      "Label": "R20_BlendModes",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 6725.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
+      "Id": "f2dc394d-5dca-4267-a302-0d746bcbb95a",
+      "Label": "R09_TheContext",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 4635.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
       "Id": "f44545ef-d380-42a4-b26e-60adc1aa1674",
       "Label": "M06_Vectors",
       "ParentSectionId": "7439fe37-15de-4835-b29a-e838693cbf19",
@@ -1585,6 +1955,25 @@
       }
     },
     {
+      "Id": "fca3f7a3-ac5e-48ef-9c4a-3ecd1bbd9920",
+      "Label": "R22_AdvancedShaderDevelopment",
+      "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 7105.0,
+        "Y": 50.0
+      },
+      "Size": {
+        "X": 170.0,
+        "Y": 380.0
+      }
+    },
+    {
       "Id": "fe9720bb-31f4-4478-8e32-74fb437c2752",
       "Label": "R04_RenderBasics",
       "ParentSectionId": "44866fa9-0bc0-421a-becd-b5c4c7302806",
@@ -1595,7 +1984,7 @@
         "W": 1.0
       },
       "Position": {
-        "X": 3495.0,
+        "X": 3685.0,
         "Y": 50.0
       },
       "Size": {

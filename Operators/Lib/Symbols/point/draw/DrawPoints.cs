@@ -14,6 +14,9 @@ internal sealed class DrawPoints : Instance<DrawPoints>
         [Input(Guid = "414c8045-5086-4449-9d9a-03f28c3966b3")]
         public readonly InputSlot<float> PointSize = new InputSlot<float>();
 
+        [Input(Guid = "9d1361e9-8ee7-412c-9bff-6e791de324c6", MappedType = typeof(SizeModes))]
+        public readonly InputSlot<int> SizeMode = new InputSlot<int>();
+
         [Input(Guid = "e40aeedd-49fe-467c-b886-064a1024cef3", MappedType = typeof(ScaleFXModes))]
         public readonly InputSlot<int> ScaleFactor = new InputSlot<int>();
 
@@ -44,6 +47,12 @@ internal sealed class DrawPoints : Instance<DrawPoints>
         [Input(Guid = "fe99f40a-607a-4f62-9949-17f4715db859")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> ColorField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
         
+        private enum SizeModes
+        {
+            WorldUnits,
+            Pixels,
+        }
+
         private enum ScaleFXModes
         {
             None = 0,

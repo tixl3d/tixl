@@ -9,7 +9,8 @@
         "X": -54.609924,
         "Y": 101.02835
       },
-      "Description": "Normal: values outside the input range extrapolate.\nClamped: results are limited to the output range.\nModulo: results wrap around within the output range."
+      "Description": "Normal: values outside the input range extrapolate.\nClamped: results are limited to the output range.\nModulo: results wrap around within the output range.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "1bcb6cd5-bd78-4d9a-8944-c34d33126a7b"/*RangeInMin*/,
@@ -26,7 +27,7 @@
       }
     },
     {
-      "InputId": "80eed18c-5453-4088-9e96-e5d42f9776c3"/*BiasAndGain*/,
+      "InputId": "80eed18c-5453-4088-9e96-e5d42f9776c3"/*GainAndBias*/,
       "Position": {
         "X": -34.751785,
         "Y": 170.53192

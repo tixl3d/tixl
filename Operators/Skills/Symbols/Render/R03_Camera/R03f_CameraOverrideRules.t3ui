@@ -2,23 +2,133 @@
   "FormatVersion": 3,
   "Id": "b8ff7779-3de5-4930-b9a7-26f1b3436479"/*R03f_CameraOverrideRules*/,
   "Description": "Camera Override Rules",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "3edf3b8f-30e3-4907-832f-4d8b48e9a814",
-      "SymbolName": "Lib.render.basic.Text",
-      "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
-    },
-    {
-      "ChildId": "bba920ec-d95a-4965-b4e6-069475d8cf79",
+      "ChildId": "0628656c-0e90-4c36-9985-83c40d8b61ea",
       "SymbolName": "Lib.render.basic.Text",
       "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
+        "X": 1109.803,
+        "Y": 2241.051
+      }
+    },
+    {
+      "ChildId": "075c5c09-45c6-4f18-9bc3-e1f00568da88",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1611.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1a9f8774-6c4a-4535-9b93-da0cb867cb26",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1389.803,
+        "Y": 2276.051
+      }
+    },
+    {
+      "ChildId": "1f57cc65-509a-418f-8b85-1bdad62e9d54",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1389.803,
+        "Y": 2171.051
+      }
+    },
+    {
+      "ChildId": "24fc7cc6-5233-4116-accd-2e3ae7751a54",
+      "SymbolName": "Lib.render.camera.Camera",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1249.803,
+        "Y": 2241.051
+      }
+    },
+    {
+      "ChildId": "2cbc67fe-f4fa-4623-b414-f4679d049039",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1646.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3eeabb90-8a0c-4ed1-901f-fdd3b29aacf1",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1389.803,
+        "Y": 2206.051
+      }
+    },
+    {
+      "ChildId": "3f322c52-bb7c-445a-ad60-e8c8bfda7a35",
+      "SymbolName": "Lib.render.camera.Camera",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1786.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4378d5ad-5671-46f0-a2f4-555ce0b7cc41",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1751.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "461fe756-acbc-44ec-b88a-427571f7d6fc",
+      "SymbolName": "Lib.render.basic.Text",
+      "Position": {
+        "X": 1261.8911,
+        "Y": 1716.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "79f32848-cc71-4caf-a915-ba434f4fc6f5",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1681.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "867890b9-650c-4f12-95b0-8be36713259d",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1389.803,
+        "Y": 2311.051
+      }
+    },
+    {
+      "ChildId": "9521b292-28dd-450d-9c74-4009c28da424",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1401.8911,
+        "Y": 1821.7001
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ceadbf4f-e5a5-46d0-add5-06f820804be7",
+      "SymbolName": "Lib.mesh._.LoadGltf",
+      "SectionId": "4cf34543-eb59-412e-b192-28ad8d8b116f",
+      "Position": {
+        "X": 1389.803,
+        "Y": 2136.051
       }
     },
     {
@@ -56,7 +166,7 @@
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 397.48975
       }
     }
   ],

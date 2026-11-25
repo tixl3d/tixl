@@ -12,6 +12,7 @@ internal abstract class OutputUi<T> : IOutputUi
     public Symbol.OutputDefinition OutputDefinition { get; set; }
     public Guid Id => OutputDefinition.Id;
     public Type Type { get; } = typeof(T);
+    public virtual Type PresentedType => Type;
     public Vector2 PosOnCanvas { get; set; } = Vector2.Zero;
     public Vector2 Size { get; set; } = SymbolUi.Child.DefaultOpSize;
 
@@ -42,6 +43,25 @@ internal abstract class OutputUi<T> : IOutputUi
     {
         StartInvalidation(slot, context);
         slot.Update(context);
+    }
+
+    /// <summary>
+    /// Evaluates for a data view (a table or stats) that has no 3D view to place transform gizmos in; they would
+    /// otherwise project through whatever viewport is set and draw distorted behind the data.
+    /// </summary>
+    protected void EvaluateWithoutGizmos(ISlot slot, EvaluationContext context)
+    {
+        var showGizmos = context.ShowGizmos;
+        context.ShowGizmos = GizmoVisibility.Off;
+        try
+        {
+            StartInvalidation(slot, context);
+            slot.Update(context);
+        }
+        finally
+        {
+            context.ShowGizmos = showGizmos;
+        }
     }
 
     protected abstract void DrawTypedValue(ISlot slot, string viewId);

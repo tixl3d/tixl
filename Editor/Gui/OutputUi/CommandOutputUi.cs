@@ -36,6 +36,15 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         _outputWindowGridSymbol = outputWindowGridSymbol;
     }
 
+    /// <summary>Renders a command output that is not this UI's own, e.g. an op instantiated only for previewing.</summary>
+    internal void RenderForeignOutput(Slot<Command> slot, EvaluationContext context) => Recompute(slot, context);
+
+    /// <summary>Shows what <see cref="RenderForeignOutput"/> rendered last.</summary>
+    internal void DrawRenderedOutput(Slot<Command> slot, string viewId) => DrawTypedValue(slot, viewId);
+
+    /// <summary>The texture <see cref="RenderForeignOutput"/> rendered last, e.g. to draw it into a part of the window.</summary>
+    internal Texture2D? RenderedTexture => _resolvedColorBuffer ?? _msaaColorBuffer;
+
     protected override void Recompute(ISlot slot, EvaluationContext context)
     {
         if (!EnsureGridOutputsExist())

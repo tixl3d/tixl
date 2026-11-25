@@ -65,7 +65,8 @@
         "Y": 274.84805
       },
       "Description": "HLSL code fragment executed for each particle.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "76ecc997-76a8-477c-9d35-643d12994adb"/*Image*/,
@@ -105,7 +106,8 @@
       },
       "GroupTitle": "Additional Options...",
       "Description": "Additional HLSL code inserted before the main function, e.g. #define statements or helper functions.",
-      "Usage": "Multiline"
+      "Usage": "Code",
+      "CodeLanguage": "Hlsl"
     },
     {
       "InputId": "bf811157-9055-4d8c-94e9-db28893ef207"/*C*/,

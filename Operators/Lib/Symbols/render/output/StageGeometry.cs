@@ -15,7 +15,7 @@ namespace Lib.render.output;
 internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 {
     [Output(Guid = "fcdaba8f-c63c-4913-b5d2-90b586ddc5f4")]
-    public readonly Slot<MeshGeometry?> Geometry = new();
+    public readonly Slot<Geometry?> Geometry = new();
 
     public StageGeometry()
     {
@@ -83,9 +83,9 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         }
 
         EnsureCapacity(pointCount, faceCount, cornerCount, partCount);
-        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Corner, cornerCount);
-        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Corner, cornerCount);
-        var canvasCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord2, AttributeDomain.Corner, cornerCount);
+        var normals = _geometry.Attributes.GetOrCreate<Vector3>(GeometryAttributeNames.Normal, AttributeDomain.Vertex, cornerCount);
+        var texCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord, AttributeDomain.Vertex, cornerCount);
+        var canvasCoords = _geometry.Attributes.GetOrCreate<Vector2>(GeometryAttributeNames.TexCoord2, AttributeDomain.Vertex, cornerCount);
 
         var point = 0;
         var face = 0;
@@ -128,13 +128,13 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 
                 for (var t = 0; t < _triangles.Count; t += 3)
                 {
-                    _geometry.FaceCornerOffsets[face++] = corner;
+                    _geometry.PrimitiveVertexOffsets[face++] = corner;
                     for (var k = 0; k < 3; k++)
                     {
                         var vertex = _triangles[t + k];
                         var inRect = floorRect.ToFractions(plan.Vertices[vertex]); // 0..1 inside the rectangle, y along its depth
                         var position = _geometry.Positions[pointBase + vertex];
-                        _geometry.CornerPointIndices[corner] = pointBase + vertex;
+                        _geometry.VertexPoints[corner] = pointBase + vertex;
                         normals.Values[corner] = Vector3.UnitY;
                         var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
                         texCoords.Values[corner] = hasPhoto
@@ -157,7 +157,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                 {
                     for (var column = 0; column < cells; column++)
                     {
-                        _geometry.FaceCornerOffsets[face++] = corner;
+                        _geometry.PrimitiveVertexOffsets[face++] = corner;
                         // Counter-clockwise seen from the front: bottom-left, bottom-right, top-right, top-left.
                         for (var c = 0; c < 4; c++)
                         {
@@ -166,7 +166,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                             var inSurface = min + (max - min) * inRect;
                             var position = Vector3.Transform(new Vector3(inSurface.X, inSurface.Y, lift), world);
                             _geometry.Positions[point] = position;
-                            _geometry.CornerPointIndices[corner] = point;
+                            _geometry.VertexPoints[corner] = point;
                             normals.Values[corner] = normal;
                             var canvasUv = hasCanvasQuad ? BilinearCanvas(_canvasQuad, inRect.X, 1 - inRect.Y) : new Vector2(inRect.X, 1 - inRect.Y);
                             texCoords.Values[corner] = hasPhoto
@@ -180,12 +180,12 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
                 }
             }
 
-            var pivot = _geometry.Positions[_geometry.CornerPointIndices[_geometry.FaceCornerOffsets[faceStart]]];
-            _geometry.Parts[part] = new GeometryPart(faceStart, face - faceStart, pivot, part, part);
+            var pivot = _geometry.Positions[_geometry.VertexPoints[_geometry.PrimitiveVertexOffsets[faceStart]]];
+            _geometry.Parts[part] = new PrimitivePart(faceStart, face - faceStart, pivot, part, part);
             part++;
         }
 
-        _geometry.FaceCornerOffsets[face] = corner;
+        _geometry.PrimitiveVertexOffsets[face] = corner;
         _geometry.InvalidateTopologyCaches();
         Geometry.Value = _geometry;
         UpdateUnplacedWarning(placedCount > 0 ? unplacedCount : 0, firstUnplacedName);
@@ -395,20 +395,21 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
         if (_geometry.Positions.Length != pointCount)
             _geometry.Positions = new Vector3[pointCount];
 
-        if (_geometry.FaceCornerOffsets.Length != faceCount + 1)
-            _geometry.FaceCornerOffsets = new int[faceCount + 1];
+        if (_geometry.PrimitiveVertexOffsets.Length != faceCount + 1)
+            _geometry.PrimitiveVertexOffsets = new int[faceCount + 1];
+            _geometry.SetAllPrimitiveKinds(PrimitiveKinds.Polygon);
 
-        if (_geometry.CornerPointIndices.Length != cornerCount)
-            _geometry.CornerPointIndices = new int[cornerCount];
+        if (_geometry.VertexPoints.Length != cornerCount)
+            _geometry.VertexPoints = new int[cornerCount];
 
         if (_geometry.Parts.Length != partCount)
-            _geometry.Parts = new GeometryPart[partCount];
+            _geometry.Parts = new PrimitivePart[partCount];
 
         foreach (var name in _cornerAttributeNames)
         {
-            if (_geometry.Attributes.TryGet<Vector3>(name, AttributeDomain.Corner, out var v3) && v3.Count != cornerCount)
+            if (_geometry.Attributes.TryGet<Vector3>(name, AttributeDomain.Vertex, out var v3) && v3.Count != cornerCount)
                 v3.Resize(cornerCount);
-            else if (_geometry.Attributes.TryGet<Vector2>(name, AttributeDomain.Corner, out var v2) && v2.Count != cornerCount)
+            else if (_geometry.Attributes.TryGet<Vector2>(name, AttributeDomain.Vertex, out var v2) && v2.Count != cornerCount)
                 v2.Resize(cornerCount);
         }
     }
@@ -423,7 +424,7 @@ internal sealed class StageGeometry : Instance<StageGeometry>, IStatusProvider
 
     private static readonly string[] _cornerAttributeNames = [GeometryAttributeNames.Normal, GeometryAttributeNames.TexCoord, GeometryAttributeNames.TexCoord2];
 
-    private readonly MeshGeometry _geometry = new();
+    private readonly Geometry _geometry = new();
     private readonly List<int> _triangles = [];
     private readonly Vector2[] _canvasQuad = new Vector2[4];
     private readonly Vector2[] _photoQuad = new Vector2[4];

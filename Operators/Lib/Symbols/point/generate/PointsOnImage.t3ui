@@ -61,7 +61,8 @@
       "Position": {
         "X": -1273.5485,
         "Y": 2507.6665
-      }
+      },
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "a970dad9-e5e9-4756-a84c-86737cce7e8f"/*ClampThreshold*/,

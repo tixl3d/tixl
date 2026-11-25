@@ -13,9 +13,12 @@ public class SoftwareFrameConverterTests
         using var converter = new SoftwareFrameConverter(session!.IsHdr);
 
         Assert.True(session.TryReadNextFrame(out _));
-        var rgba = converter.Convert(session.CurrentFrame).ToImageBuffer(1);
+        var frame = converter.Convert(session.CurrentFrame);
 
-        Assert.Equal(session.Width * session.Height * converter.BytesPerPixel, rgba.Length);
+        Assert.Equal(session.Width, frame.Width);
+        Assert.Equal(session.Height, frame.Height);
+        Assert.Equal((int)converter.OutputFormat, frame.Format);
+        Assert.True(frame.Linesize[0] >= session.Width * converter.BytesPerPixel);
     }
 
     [Fact]
@@ -29,13 +32,21 @@ public class SoftwareFrameConverterTests
         var later = TimeToFrameMapper.SecondsToPts(3.0, session.StreamStartPts, session.TimeBaseNum, session.TimeBaseDen);
 
         Assert.True(session.SeekAndDecodeTo(early, out _));
-        var first = converter.Convert(session.CurrentFrame).ToImageBuffer(1);
+        var first = CopyPixels(converter, session);
 
         // Seek away and back — the full decode→RGBA pipeline must reproduce identical pixels.
         Assert.True(session.SeekAndDecodeTo(later, out _));
         Assert.True(session.SeekAndDecodeTo(early, out _));
-        var second = converter.Convert(session.CurrentFrame).ToImageBuffer(1);
+        var second = CopyPixels(converter, session);
 
         Assert.Equal(first, second);
+    }
+
+    // Through the converter's own copy, as the decoder does: Sdcb's ToImageBuffer fails outside Windows.
+    private static byte[] CopyPixels(SoftwareFrameConverter converter, VideoDecoderSession session)
+    {
+        var pixels = new byte[session.Width * session.Height * converter.BytesPerPixel];
+        converter.CopyPixels(converter.Convert(session.CurrentFrame), pixels);
+        return pixels;
     }
 }

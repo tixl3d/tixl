@@ -33,7 +33,8 @@
         "X": -200.0,
         "Y": 165.0
       },
-      "Description": "If not (0, 0), the range is extended to include this range."
+      "Description": "If not (0, 0), the range is extended to include this range.",
+      "UseVec2Control": "Range"
     }
   ],
   "SymbolChildUis": [],

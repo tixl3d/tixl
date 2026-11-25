@@ -4,7 +4,7 @@
 // using T3.Core.Operator;
 // using T3.Core.Operator.Attributes;
 // using T3.Core.Operator.Slots;
-// using T3.Core.Utils.Geometry;
+// using T3.Core.Utils.Math3d;
 // using Vector3 = System.Numerics.Vector3;
 // using Vector4 = System.Numerics.Vector4;
 

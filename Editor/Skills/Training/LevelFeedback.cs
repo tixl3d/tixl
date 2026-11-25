@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using ImGuiNET;
@@ -22,11 +23,11 @@ internal sealed class LevelFeedback
 {
     internal enum ParamState
     {
-        Untouched, // current = default, not in Solution
-        Required,  // current = default, in Solution
+        Untouched, // current = level start, not in Solution
+        Required,  // current = level start, in Solution
         Correct,   // current = Solution
-        Warm,      // current ≠ Solution but key ∈ Solution
-        Forbidden, // current ≠ default, key ∉ Solution
+        Warm,      // current ≠ Solution and ≠ level start, key ∈ Solution
+        Forbidden, // current ≠ level start, key ∉ Solution
     }
 
     public static LevelFeedback? TryCreate(Instance compositionRoot)
@@ -72,19 +73,13 @@ internal sealed class LevelFeedback
         _requiredByChild.Clear();
         _relevancyByKey.Clear();
 
+        // All children are checked, not only the snapshot-enabled ones: snapshot control just marks
+        // which parameters belong to the solution, while editing any other parameter is a mistake.
         var compositionUi = _composition.GetSymbolUi();
-
         var childIndex = 0;
         foreach (var (childId, childInstance) in _composition.Children)
         {
-            // Snapshots only capture children with EnabledForSnapshots == true (see
-            // VariationHandling.AddSnapshotEnabledChildrenToList). Mirror that filter here,
-            // otherwise non-default values on scaffolding ops would all read as Forbidden
-            // immediately after loading the level.
-            if (!compositionUi.ChildUis.TryGetValue(childId, out var childUi) || !childUi.EnabledForSnapshots)
-                continue;
-
-            _solution.ParameterSetsForChildIds.TryGetValue(childId, out var solutionParams);
+            compositionUi.ChildUis.TryGetValue(childId, out var childUi);
 
             var paramIndex = 0;
             foreach (var inputSlot in childInstance.Inputs)
@@ -98,46 +93,36 @@ internal sealed class LevelFeedback
 
                 // Mirror the type filter used by snapshot capture (SymbolVariationPool).
                 // Non-blendable inputs can never appear in a snapshot, so they are out of scope.
-                if (!ValueUtils.BlendMethods.ContainsKey(input.Value.ValueType))
-                {
-                    paramIndex++;
-                    continue;
-                }
-
-                // Gradient (and similar structured reference types) have no reliable equality
-                // — they fall back to ToString comparison which produces phantom mismatches
-                // even for visually identical gradients. Skip them until a proper sample-based
-                // comparison is added.
-                if (input.Value.ValueType == typeof(Gradient))
+                if (!IsComparable(input.Value.ValueType))
                 {
                     paramIndex++;
                     continue;
                 }
 
                 var inputId = input.InputDefinition.Id;
-                InputValue? solutionValue = null;
-                if (solutionParams != null)
-                    solutionParams.TryGetValue(inputId, out solutionValue);
-                var inSolution = solutionValue != null;
+                var key = new Key(childId, inputId);
+                var startValue = GetStartValue(key, input);
 
-                // Classify by value equality, not the IsDefault flag. Toggling a bool back to
-                // its default value (or typing the default into a numeric field) leaves
-                // IsDefault=false but the parameter is effectively untouched — and should not
-                // linger as Forbidden after the user has corrected it.
-                var isEffectivelyDefault = AreEqual(input.Value, input.DefaultValue);
+                // A solution value equal to the start asks the player to leave the parameter alone,
+                // so it is judged like any parameter outside the solution.
+                var inSolution = TryGetSolutionValue(childId, childUi, input, out var solutionValue)
+                                 && !AreEqual(solutionValue, startValue);
+
+                // Classify by value equality, not the IsDefault flag: setting a value back to where
+                // the level started counts as untouched, even though IsDefault may stay false.
 
                 ParamState state;
-                if (isEffectivelyDefault)
+                if (inSolution && AreEqual(input.Value, solutionValue!))
+                {
+                    state = ParamState.Correct;
+                }
+                else if (AreEqual(input.Value, startValue))
                 {
                     state = inSolution ? ParamState.Required : ParamState.Untouched;
                 }
-                else if (inSolution)
-                {
-                    state = AreEqual(input.Value, solutionValue!) ? ParamState.Correct : ParamState.Warm;
-                }
                 else
                 {
-                    state = ParamState.Forbidden;
+                    state = inSolution ? ParamState.Warm : ParamState.Forbidden;
                 }
 
                 if (state == ParamState.Untouched)
@@ -146,7 +131,6 @@ internal sealed class LevelFeedback
                     continue; // dominant case; skip storage to keep the dict small
                 }
 
-                var key = new Key(childId, inputId);
                 _state[key] = state;
                 _relevancyByKey[key] = ComputeRelevancy(paramIndex, childIndex, input.Value.ValueType);
 
@@ -283,28 +267,26 @@ internal sealed class LevelFeedback
         if (_focusedTip is not { } focused || focused.ChildId != childId || focused.InputId != inputId)
             return 0f;
 
-        if (!_solution.ParameterSetsForChildIds.TryGetValue(childId, out var solutionParams))
-            return 0f;
-
-        if (!solutionParams.TryGetValue(inputId, out var solutionValue))
-            return 0f;
-
         if (!_composition.Children.TryGetChildInstance(childId, out var childInstance))
             return 0f;
 
+        _composition.GetSymbolUi().ChildUis.TryGetValue(childId, out var childUi);
         foreach (var inputSlot in childInstance.Inputs)
         {
             var input = inputSlot.Input;
             if (input == null || input.InputDefinition.Id != inputId)
                 continue;
 
-            return ComputeProximity(input.Value, solutionValue, input.DefaultValue);
+            if (!TryGetSolutionValue(childId, childUi, input, out var solutionValue))
+                return 0f;
+
+            return ComputeProximity(input.Value, solutionValue, GetStartValue(focused, input));
         }
 
         return 0f;
     }
 
-    private static float ComputeProximity(InputValue current, InputValue solution, InputValue defaultValue)
+    private static float ComputeProximity(InputValue current, InputValue solution, InputValue startValue)
     {
         // Discrete and unsupported types: no useful arc. Signal "skip" with a negative
         // sentinel so the renderer can omit both the background ring and the progress fill.
@@ -315,7 +297,7 @@ internal sealed class LevelFeedback
         if (distCurToSol < 0)
             return -1f;
 
-        var distDefToSol = Distance(defaultValue, solution);
+        var distDefToSol = Distance(startValue, solution);
         if (distDefToSol <= 0f)
             return distCurToSol == 0f ? 1f : -1f;
 
@@ -469,6 +451,7 @@ internal sealed class LevelFeedback
     {
         _composition = composition;
         _solution = solution;
+        CaptureStartValues();
 
         var requiredKeyCount = 0;
         foreach (var (_, paramSet) in solution.ParameterSetsForChildIds)
@@ -477,6 +460,65 @@ internal sealed class LevelFeedback
         // Temporary success log — remove once feedback is working end-to-end.
         Log.Info($"[LevelFeedback] Loaded solution snapshot '{solution.Title}' for level '{levelName}' "
                  + $"({solution.ParameterSetsForChildIds.Count} op(s), {requiredKeyCount} required parameter(s)).");
+    }
+
+    /// <summary>
+    /// Records every comparable parameter as the level was authored. Edits are judged against this
+    /// rather than the op defaults, so scaffolding values set by the level author don't read as
+    /// mistakes.
+    /// </summary>
+    private void CaptureStartValues()
+    {
+        foreach (var (childId, childInstance) in _composition.Children)
+        {
+            foreach (var inputSlot in childInstance.Inputs)
+            {
+                var input = inputSlot.Input;
+                if (input == null || !IsComparable(input.Value.ValueType))
+                    continue;
+
+                _startValues[new Key(childId, input.InputDefinition.Id)] = input.Value.Clone();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Snapshots don't store values that are at their default, and applying one resets the
+    /// controlled parameters it doesn't store to their default. So for an op captured in the
+    /// solution, a missing controlled input means its solution value is the default.
+    /// </summary>
+    private bool TryGetSolutionValue(Guid childId, SymbolUi.Child? childUi, Symbol.Child.Input input,
+                                     [NotNullWhen(true)] out InputValue? solutionValue)
+    {
+        solutionValue = null;
+        if (!_solution.ParameterSetsForChildIds.TryGetValue(childId, out var solutionParams))
+            return false;
+
+        var inputId = input.InputDefinition.Id;
+        if (solutionParams.TryGetValue(inputId, out solutionValue))
+            return true;
+
+        if (childUi == null || !childUi.IsInputIncludedForVariation(inputId))
+            return false;
+
+        solutionValue = input.DefaultValue;
+        return true;
+    }
+
+    /// <summary>Ops added while playing have no recorded start, so they start at their defaults.</summary>
+    private InputValue GetStartValue(Key key, Symbol.Child.Input input)
+    {
+        return _startValues.TryGetValue(key, out var startValue) ? startValue : input.DefaultValue;
+    }
+
+    /// <summary>
+    /// Mirrors the type filter of snapshot capture: non-blendable inputs can never be part of a
+    /// solution. Gradients are skipped because they lack reliable equality — the ToString fallback
+    /// reports phantom mismatches for identical gradients.
+    /// </summary>
+    private static bool IsComparable(Type valueType)
+    {
+        return ValueUtils.BlendMethods.ContainsKey(valueType) && valueType != typeof(Gradient);
     }
 
     private void MaybeLogTransition()
@@ -533,6 +575,7 @@ internal sealed class LevelFeedback
 
     private readonly Instance _composition;
     private readonly Variation _solution;
+    private readonly Dictionary<Key, InputValue> _startValues = new(128);
     private readonly Dictionary<Key, ParamState> _state = new(64);
     private readonly Dictionary<Key, float> _relevancyByKey = new(64);
     private readonly Dictionary<Key, double> _hintSeenSince = new(16);

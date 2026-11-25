@@ -1,0 +1,187 @@
+{
+  "FormatVersion": 3,
+  "Id": "8e9ddaba-ef3f-4268-a8c4-e72ef9e45aed"/*DirectionalLight*/,
+  "Description": "Adds a directional light, like sunlight, with an arrow gizmo to the connected subgraph.\n\nAll surfaces are lit along the direction from Position to Target with the same Intensity, independent of distance. Position only places the gizmo. With the operator selected, the move gizmo moves the arrow and the rotate gizmo swings Target around it. It shares the limit of 8 lights with point and spot lights.\n\nAKA: sun, sunlight, distant light, parallel light\n\nSee also: [SetDirectionalLight], [SpotLight], [PointLight], [SetEnvironment]",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "1637524b-a338-4bf7-bc30-ee48f9d9d4f9"/*GizmoSize*/,
+      "Position": {
+        "X": 770.0,
+        "Y": 455.0
+      },
+      "Description": "Size of the drawn arrow.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "314cf0cf-3804-4a48-83b1-1e065aa1006f"/*Intensity*/,
+      "Position": {
+        "X": 840.0,
+        "Y": 245.0
+      },
+      "Description": "Brightness of the light.",
+      "Min": 0.0,
+      "Max": 10.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "343cf9ba-aad6-423a-a341-0fb95bd458da"/*Color*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 280.0
+      },
+      "Description": "Sets the color of the light and the gizmo."
+    },
+    {
+      "InputId": "6fce9306-80c8-4c94-bb60-bdcd2ff6dd73"/*IsEnabled*/,
+      "Position": {
+        "X": 910.0,
+        "Y": 70.0
+      },
+      "Description": "Turns the light on or off. The connected subgraph is drawn in both cases.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "70bfb720-55ff-4936-b3f5-f894b3a4fa71"/*Command*/,
+      "Position": {
+        "X": 770.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a67fdfb7-f18e-44b8-aee8-d112070f5f98"/*Position*/,
+      "Position": {
+        "X": 770.0,
+        "Y": 175.0
+      },
+      "Description": "Where the gizmo is drawn. Only the direction from Position to Target affects the light.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "ca8eaafd-94ee-431e-8f33-d7234a3258e7"/*ShowGizmo*/,
+      "Position": {
+        "X": 980.0,
+        "Y": 490.0
+      },
+      "GroupTitle": "Gizmo",
+      "Description": "Off = The gizmo is never visible\nOn = The gizmo is always visible\nIfSelected = The gizmo is visible while the operator is selected\nInherit = Follows the setting of the Output window"
+    },
+    {
+      "InputId": "d49db40d-47d7-4a07-be8a-5a29ed0cd2a1"/*Target*/,
+      "Position": {
+        "X": 560.0,
+        "Y": 210.0
+      },
+      "Description": "The light travels from Position toward this point. With the operator selected, the rotate gizmo swings it around Position."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0a372d48-37ed-449f-913f-69bb5a99b050",
+      "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
+      "Position": {
+        "X": 1050.0,
+        "Y": 70.0
+      }
+    },
+    {
+      "ChildId": "10932d1d-07f9-4105-96ce-a23c8c822fdb",
+      "SymbolName": "Lib.render.transform.RotateTowards",
+      "Position": {
+        "X": 770.0,
+        "Y": 350.0
+      }
+    },
+    {
+      "ChildId": "1563e391-5cd6-434d-9d82-a564441c5ad4",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
+      "Position": {
+        "X": 350.0,
+        "Y": 315.0
+      }
+    },
+    {
+      "ChildId": "1c84788e-6b6d-4fe1-9d89-62eb23c752dc",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "Position": {
+        "X": 350.0,
+        "Y": 350.0
+      }
+    },
+    {
+      "ChildId": "442d1fb5-cfde-4e0e-be19-1aa7dae63431",
+      "SymbolName": "Lib.mesh.draw.DrawMeshUnlit",
+      "Position": {
+        "X": 350.0,
+        "Y": 490.0
+      }
+    },
+    {
+      "ChildId": "4a457916-1e16-4a18-91e8-ae8c5d86d73d",
+      "SymbolName": "Lib.render.shading.SetDirectionalLight",
+      "Position": {
+        "X": 980.0,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "4af1360d-3492-4e89-8026-e2a34d341cdf",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 560.0,
+        "Y": 350.0
+      }
+    },
+    {
+      "ChildId": "4da95c07-b44c-44ce-8a27-5057fe2c2fc8",
+      "SymbolName": "Lib.render.transform.Transform",
+      "Position": {
+        "X": 980.0,
+        "Y": 350.0
+      }
+    },
+    {
+      "ChildId": "9a491e82-b892-4bf8-a97e-c36d335bf3ff",
+      "SymbolName": "Lib.mesh.generate.CylinderMesh",
+      "Position": {
+        "X": 210.0,
+        "Y": 490.0
+      }
+    },
+    {
+      "ChildId": "af2e4e84-f983-4784-9dbf-487b3b0e4a59",
+      "SymbolName": "Lib.flow.Switch",
+      "Position": {
+        "X": 1190.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c6565d81-ed9b-4d45-a61f-bf3714ced107",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 1400.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "f9026013-1662-49f6-ad73-956b20c04093",
+      "SymbolName": "Lib.render.gizmo.VisibleGizmos",
+      "Position": {
+        "X": 1190.0,
+        "Y": 140.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b4ad9dad-a492-4bc6-afb3-33a10595bc2e"/*Output*/,
+      "Position": {
+        "X": 1600.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

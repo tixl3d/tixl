@@ -71,6 +71,18 @@ run past the clip. Then scrub manually back and forth across the clip.
 - Scrubbing keeps the audio in sync with where you move the playhead.
 - Changing the BPM doesn't change the pitch of the audio.
 
+## Step: AutoPlay clip plays without selection
+
+**Action:**
+With a single [AudioClip] (AutoPlay on, Display set to Clip) in the composition, select it, then
+click empty canvas to deselect it. Play across the clip, then select and deselect it again while
+it plays.
+
+**Expected:**
+- The clip is audible the whole time, selected or not.
+- The Project Audio settings offer "Select and focus Main Soundtrack" for it.
+- The clip keeps its clip block on the timeline; no extra background image appears behind it.
+
 ## Step: Click selection and hover tooltip
 
 **Action:**

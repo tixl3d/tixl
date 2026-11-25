@@ -429,7 +429,7 @@
           "Value": true
         },
         {
-          "Id": "df44d68a-1631-4f05-a616-242fab419e57"/*BiasAndGain*/,
+          "Id": "df44d68a-1631-4f05-a616-242fab419e57"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.125,

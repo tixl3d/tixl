@@ -103,7 +103,8 @@
         "X": 0.0,
         "Y": 675.0
       },
-      "Description": "Relative: CornerRadius 1 rounds the shorter side completely. Absolute: CornerRadius is the radius in units. Both are limited to half the shorter side."
+      "Description": "Relative: CornerRadius 1 rounds the shorter side completely. Absolute: CornerRadius is the radius in units. Both are limited to half the shorter side.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "b1614dae-271c-4d85-bea4-d964159a9a77"/*RoundBottomLeft*/,

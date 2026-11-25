@@ -93,12 +93,23 @@ public static class DrawUtils
         igSetKeyOwner(key, WindowSwitchingBlockerOwnerId, 0);
     }
 
+    /// <summary>
+    /// A focused text field reverts all typing since it was activated when Escape is pressed. Call this every frame
+    /// before drawing a field where that would lose too much, e.g. a code editor, and handle Escape yourself: like
+    /// <see cref="ClaimKeyFromImGuiWindowSwitching"/>, <c>ImGui.IsKey*</c> still sees the key.
+    /// </summary>
+    public static void ClaimEscapeFromTextInputs()
+    {
+        igSetKeyOwner(ImGuiKey.Escape, TextInputEscapeBlockerOwnerId, 0);
+    }
+
     /** Internal ImGui API that ImGui.NET doesn't wrap; cimgui exports it on every platform. */
     [DllImport("cimgui", CallingConvention = CallingConvention.Cdecl)]
     private static extern void igSetKeyOwner(ImGuiKey key, uint ownerId, ImGuiInputFlags flags);
 
     /** Any id other than ImGui's reserved 0 (any owner) and uint.MaxValue (no owner). */
     private const uint WindowSwitchingBlockerOwnerId = 0x54614221;
+    private const uint TextInputEscapeBlockerOwnerId = 0x54614222;
 
     private static bool _keepNavEnableKeyboard;
 

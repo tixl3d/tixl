@@ -144,6 +144,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         /** Frames the loop may run ahead of the display: 1 for the lowest input latency, 2 to absorb late frames. */
         public int FrameLatency = 1;
 
+        /** Damping and simulations step by the locked frame duration even when a frame was dropped. */
+        public bool UseLockedFrameDuration = true;
+
         public bool EnableKeyboardShortCuts = true;
 
         /** Whether a connected game controller drives operators like [Gamepad] or the editor (its camera). */
@@ -213,6 +216,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool ApplyDropdownValuesOnHover = true;
 
         public bool ShowSkillQuestInHub = true;
+        public bool SkillMapShowPlannedTopics = false;
+        public bool SkillMapHighlightNewTopics = false;
 
         /// <summary>Checkout of the skillquest content repository. Empty = auto-discover a "skillquest" folder next to the TiXL checkout.</summary>
         public string SkillQuestRepositoryPath = string.Empty;
@@ -289,6 +294,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool LogPresentationModeChanges = false;
 
         public CompilerOptions.Verbosity CompileCsVerbosity = CompilerOptions.Verbosity.Minimal;
+        public bool CompileOperatorsInProcess = true;
 
         [JsonConverter(typeof(StringEnumConverter))]
         public TimeFormat.TimeDisplayModes TimeDisplayMode = TimeFormat.TimeDisplayModes.Bars;

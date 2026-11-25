@@ -34,6 +34,7 @@ public static partial class T3Ui
     {
         Profiling.KeepFrameData();
         App.DebugProtocol.DebugServer.ProcessMainThreadQueue();
+        Windows.Analyze.Benchmark.BenchmarkRunner.Update();
         //ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
         DragAndDropHandling.Update();
         MagGraph.Ui.DropHandling.DrawDragIndicator();
@@ -52,7 +53,7 @@ public static partial class T3Ui
         if (!Playback.Current.IsRenderingToFile && ProjectView.Focused != null)
         {
             PlaybackUtils.UpdatePlaybackAndSyncing();
-            AudioEngine.CompleteFrame(Playback.Current, Playback.LastFrameDuration);
+            AudioEngine.CompleteFrame(Playback.Current, Playback.LastPlaybackStepSec);
         }
         else if (ProjectView.Focused != null)
         {

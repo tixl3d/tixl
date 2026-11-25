@@ -38,6 +38,16 @@ public abstract class GpuSwapchain(SwapchainDescription description, string? lab
     public abstract void WaitForFrameLatency();
 
     /// <summary>
+    /// Writes the presents the display has reported as shown since the previous call, oldest first, and returns how
+    /// many. A present that never reached the screen is left out. Returns 0 where the backend can't tell, which
+    /// includes D3D11 and Vulkan drivers without VK_EXT_present_timing. Call once per frame.
+    /// </summary>
+    public virtual int ReadShownFrames(Span<ShownFrame> frames)
+    {
+        return 0;
+    }
+
+    /// <summary>
     /// How the system currently shows this swapchain's frames and how many presented frames still wait for the
     /// display. Frame pacing differs between presentation modes, so this is the first thing to check when frame
     /// intervals jitter. False while the backend can't tell, which includes the first few presents.
@@ -50,6 +60,10 @@ public abstract class GpuSwapchain(SwapchainDescription description, string? lab
 }
 
 public readonly record struct PresentationStatistics(PresentationModes Mode, int QueuedFrames);
+
+/// <param name="PresentId">Counts the presents of one swapchain object; starts again when it is recreated.</param>
+/// <param name="ShownTimeNs">When the frame's first pixel went out to the display, in nanoseconds of one clock.</param>
+public readonly record struct ShownFrame(ulong PresentId, long ShownTimeNs);
 
 public enum PresentationModes
 {

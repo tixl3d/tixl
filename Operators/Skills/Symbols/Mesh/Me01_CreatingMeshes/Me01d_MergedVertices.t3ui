@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "7379a5ac-f864-4386-84bf-4a5c50882a7f"/*Me01d_MergedVertices*/,
   "Description": "Merged Vertices",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

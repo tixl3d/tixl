@@ -5,6 +5,14 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "04bba317-ef1b-4de3-a3a0-37f3163bd6d1"/*MaterialMap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Overrides the material buffer of the image's render bundle."
+    },
+    {
       "InputId": "23bd0152-e178-4323-97de-8a39df7974c7"/*DepthMap*/,
       "Position": {
         "X": -200.0,
@@ -27,6 +35,14 @@
         "Y": 150.0
       },
       "Description": "Overrides the velocity buffer from the bundle."
+    },
+    {
+      "InputId": "3f252509-193e-4c56-a0e7-5ca1ba26e7e0"/*BaseColorMap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Overrides the base color buffer of the image's render bundle."
     },
     {
       "InputId": "62694908-74bd-46a2-88e5-7867af1fe55a"/*NormalMap*/,
@@ -74,6 +90,20 @@
       "Position": {
         "X": 0.0,
         "Y": 150.0
+      }
+    },
+    {
+      "OutputId": "792e2626-6d07-4b58-a7c1-4109111b9d7c"/*BaseColor*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "cfdbb2a7-5e0e-4750-88d6-bb690b43e054"/*Material*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
       }
     }
   ]

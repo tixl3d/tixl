@@ -44,6 +44,7 @@ Then keep it current: `git pull` before you start something new, and rebuild.
 | Operator descriptions | Clear first lines, parameter explanations, tips | Using TiXL, writing | [Style conventions](StyleConventions.md) |
 | Examples and tutorials | Example operators, HowTos, Skill Quest levels, video tutorials | Building graphs | [Documentation structure](DocumentationStructure.md) |
 | Operators | New operators built from existing ones, shader operators, C# operators | Graphs, HLSL or C# | [Creating new operators](../advanced/CreatingNewOps.md) |
+| Extensions | Larger operator sets with special licences, big libraries or hardware needs, installed separately | C#, packaging | [Writing extensions](WritingExtensions.md) |
 | Editor and runtime | Fixes, UI features, performance, platform support | C#, .NET, graphics APIs | [Code structure](CodeStructure.md) |
 
 If you are not sure where to start, ask in the [contribute channel](https://discord.gg/FfaTs78Ra2) on Discord. Saying what you enjoy doing is enough; we'll suggest something that fits.
@@ -63,5 +64,6 @@ Docs-only changes are the exception to most of this: small fixes can be made dir
 
 - [Documentation structure](DocumentationStructure.md) — every place TiXL's knowledge lives, why, how it is built and what state it is in.
 - [Code structure](CodeStructure.md) — the repository layout and where to find what.
+- [Writing extensions](WritingExtensions.md) — optional operator packages, and how to split a large contribution into pull requests.
 - [Style conventions](StyleConventions.md) — writing, wiki, operator, UI and code conventions at a glance.
 - [Writing style for these docs](../STYLE.md) — the full style guide for pages in `.help/docs/`.

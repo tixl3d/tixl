@@ -582,6 +582,22 @@ internal static class DebugServer
                 break;
             }
 
+            case "runBenchmark":
+            {
+                // Returns at once; the run advances one measured frame per editor frame. Poll getBenchmarkStatus.
+                Gui.Windows.Analyze.Benchmark.BenchmarkRunner.Start(request["note"]?.Value<string>() ?? string.Empty);
+                context.SendOk(new JObject { ["isRunning"] = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.IsRunning });
+                break;
+            }
+
+            case "getBenchmarkStatus":
+                HandleGetBenchmarkStatus(context);
+                break;
+
+            case "getBenchmarkHistory":
+                HandleGetBenchmarkHistory(request, context);
+                break;
+
             case "setFrameLatency":
             {
                 // 1 or 2 frames in flight; without a value it only reports.
@@ -1054,6 +1070,11 @@ internal static class DebugServer
         var includeDefaults = request["includeDefaults"]?.Value<bool>() ?? false;
         var symbolUi = symbol.GetSymbolUi();
 
+        // Status messages need instances, which exist for the focused composition
+        var compositionInstance = ProjectView.Focused?.CompositionInstance;
+        if (compositionInstance?.Symbol != symbol)
+            compositionInstance = null;
+
         var children = new JArray();
         foreach (var (childId, child) in symbol.Children)
         {
@@ -1085,6 +1106,33 @@ internal static class DebugServer
                 childJson["isBypassed"] = true;
             if (child.IsDisabled)
                 childJson["isDisabled"] = true;
+            if (compositionInstance != null
+                && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var childInstance)
+                && childInstance is T3.Core.Operator.Interfaces.IStatusProvider statusProvider
+                && !string.IsNullOrEmpty(statusProvider.GetStatusMessage()))
+            {
+                childJson["status"] = statusProvider.GetStatusLevel().ToString();
+                childJson["statusMessage"] = statusProvider.GetStatusMessage();
+            }
+
+            // What the parameter window shows below Code inputs
+            if (compositionInstance != null
+                && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var codeInstance))
+            {
+                var codeStatus = new JArray();
+                foreach (var definition in child.Symbol.InputDefinitions)
+                {
+                    if (child.Symbol.GetSymbolUi().InputUis.TryGetValue(definition.Id, out var inputUi)
+                        && inputUi is T3.Editor.Gui.InputUi.SimpleInputUis.StringInputUi { Usage: T3.Editor.Gui.InputUi.SimpleInputUis.StringInputUi.UsageType.Code }
+                        && T3.Editor.Gui.InputUi.SimpleInputUis.CodeInputStatus.TryGet(codeInstance, definition.Id, out var inputStatus))
+                    {
+                        codeStatus.Add(new JObject { ["input"] = definition.Name, ["line"] = inputStatus.Line, ["message"] = inputStatus.Message });
+                    }
+                }
+
+                if (codeStatus.Count > 0)
+                    childJson["codeInputStatus"] = codeStatus;
+            }
             if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
             {
                 childJson["posX"] = childUi.PosOnCanvas.X;
@@ -1210,6 +1258,21 @@ internal static class DebugServer
                                 ["sourcePath"] = f.SourcePath,
                                 ["sourceLineCount"] = f.SourceLineCount,
                             };
+
+            var diagnostics = new JArray();
+            foreach (var d in f.Diagnostics)
+            {
+                diagnostics.Add(new JObject
+                                    {
+                                        ["isError"] = d.IsError,
+                                        ["file"] = d.File,
+                                        ["line"] = d.Line,
+                                        ["column"] = d.Column,
+                                        ["text"] = d.Text,
+                                    });
+            }
+
+            entry["diagnostics"] = diagnostics;
 
             if (includeSource && f.SourcePath != null)
             {
@@ -1374,7 +1437,10 @@ internal static class DebugServer
                          {
                              ["frameDeltaSeconds"] = io.DeltaTime,
                              ["fps"] = io.DeltaTime > 0 ? Math.Round(1f / io.DeltaTime, 1) : 0,
-                             ["framePeriodMs"] = Math.Round(FrameTiming.FramePeriodSec * 1000, 3),
+                             ["lockedFrameDurationMs"] = Math.Round(FrameTiming.LockedFrameDurationSec * 1000, 3),
+                             ["lastFrameDurationMs"] = Math.Round(Playback.LastFrameDuration * 1000, 3),
+                             ["isShownByDisplayReports"] = FrameTiming.IsShownByDisplayReports,
+                             ["droppedRefreshes"] = FrameTiming.DroppedRefreshCount,
                              ["refreshRateHz"] = Math.Round(FrameTiming.RefreshRate, 3),
                              ["visualDeltaMs"] = Math.Round(FrameTiming.VisualDeltaSec * 1000, 3),
                              ["vblanksPerFrame"] = FrameTiming.VblanksPerFrame,
@@ -1400,6 +1466,87 @@ internal static class DebugServer
     }
 
     /// <summary>The Performance window's rolling frame, CPU and present durations (oldest first), the data of its CSV export.</summary>
+    /// <summary>
+    /// Progress while running; once a run has finished, its result path and a comparison with the previous run of the
+    /// same machine and build configuration (duration at each test's Reference).
+    /// </summary>
+    private static void HandleGetBenchmarkStatus(RequestContext context)
+    {
+        var run = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.LatestRun;
+        var isRunning = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.IsRunning;
+        var result = new JObject
+                         {
+                             ["isRunning"] = isRunning,
+                             ["progress"] = Gui.Windows.Analyze.Benchmark.BenchmarkRunner.Progress,
+                             ["resultPath"] = run?.FilePath ?? string.Empty,
+                         };
+
+        if (!isRunning && run != null && !string.IsNullOrEmpty(run.FilePath))
+        {
+            var previous = Gui.Windows.Analyze.Benchmark.BenchmarkHistory.FindPrevious(run, Gui.Windows.Analyze.Benchmark.BenchmarkRun.LoadAll());
+            if (previous != null)
+            {
+                var tests = new JArray();
+                foreach (var comparison in Gui.Windows.Analyze.Benchmark.BenchmarkHistory.Compare(previous, run))
+                {
+                    tests.Add(new JObject
+                                  {
+                                      ["test"] = comparison.Key,
+                                      ["previousMs"] = RoundOrNull(comparison.PreviousMs),
+                                      ["currentMs"] = RoundOrNull(comparison.CurrentMs),
+                                      ["changePercent"] = Math.Round(comparison.ChangePercent, 1),
+                                      ["verdict"] = comparison.Verdict.ToString(),
+                                      ["testChanged"] = comparison.TestChanged,
+                                  });
+                }
+
+                result["comparison"] = new JObject
+                                           {
+                                               ["previousPath"] = previous.FilePath,
+                                               ["previousCommit"] = previous.System.Commit,
+                                               ["previousNote"] = previous.Note,
+                                               ["tests"] = tests,
+                                           };
+            }
+        }
+
+        context.SendOk(result);
+    }
+
+    /// <summary>Saved runs, newest first, with commit, note and the duration at each test's Reference. Optional <c>label</c> filter.</summary>
+    private static void HandleGetBenchmarkHistory(JObject request, RequestContext context)
+    {
+        var label = request["label"]?.Value<string>();
+        var runs = new JArray();
+        foreach (var run in Gui.Windows.Analyze.Benchmark.BenchmarkRun.LoadAll())
+        {
+            if (!string.IsNullOrEmpty(label) && run.Label != label)
+                continue;
+
+            var referenceMs = new JObject();
+            foreach (var test in Gui.Windows.Analyze.Benchmark.BenchmarkSuite.Tests)
+            {
+                Gui.Windows.Analyze.Benchmark.BenchmarkHistory.TryGetReferenceMs(run, test, out var ms, out _);
+                referenceMs[test.Key] = RoundOrNull(ms);
+            }
+
+            runs.Add(new JObject
+                         {
+                             ["startedUtc"] = run.StartedUtc.ToString("o"),
+                             ["label"] = run.Label,
+                             ["adapter"] = run.System.Adapter,
+                             ["commit"] = run.System.Commit,
+                             ["note"] = run.Note,
+                             ["referenceMs"] = referenceMs,
+                             ["path"] = run.FilePath,
+                         });
+        }
+
+        context.SendOk(new JObject { ["runs"] = runs });
+    }
+
+    private static JToken RoundOrNull(double value) => double.IsNaN(value) ? JValue.CreateNull() : Math.Round(value, 3);
+
     private static void HandleGetFrameSamples(RequestContext context)
     {
         var frames = PerformanceMetrics.FrameDuration.AsOrderedSpan(new float[PerformanceMetrics.WindowSize]);
@@ -1895,7 +2042,7 @@ internal static class DebugServer
                                                  Slot<Vector2> s => new JArray(s.Value.X, s.Value.Y),
                                                  Slot<Vector3> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z),
                                                  Slot<Vector4> s => new JArray(s.Value.X, s.Value.Y, s.Value.Z, s.Value.W),
-                                                 Slot<T3.Core.DataTypes.MeshGeometry> s => DescribeGeometry(s.Value, request["dumpObj"]?.Value<string>()),
+                                                 Slot<T3.Core.DataTypes.Geometry> s => DescribeUnifiedGeometry(s.Value, request),
                                                  Slot<T3.Core.DataTypes.Texture2D> s => DescribeTexture(s.Value),
                                                  Slot<T3.Core.DataTypes.BufferWithViews> s => DescribeBuffer(s.Value, request),
                                                  Slot<T3.Core.DataTypes.StructuredList> s => DescribeList(s.Value, request),
@@ -2018,117 +2165,130 @@ internal static class DebugServer
     }
 
     /// <summary>
-    /// Numeric summary of a MeshGeometry so agents can validate geometry ops without
-    /// screenshots: counts, bounds, watertightness and signed volume (positive for
-    /// outward-facing closed solids; a fracture's parts must sum to the input volume).
+    /// A <see cref="T3.Core.DataTypes.Geometry"/> output, so agents can validate geometry ops without screenshots:
+    /// counts per primitive kind, bounds, open and non-manifold polygon edges, signed volume (positive for outward-facing
+    /// closed solids; a fracture's parts must sum to the input volume), vertex counts of the first curves and the
+    /// attribute list. <c>dumpObj</c> also writes the geometry as OBJ. With <c>readCount</c> (from <c>readOffset</c>) also the points with their
+    /// handle offsets, to check order along curves.
     /// </summary>
-    private static JToken DescribeGeometry(T3.Core.DataTypes.MeshGeometry? geometry, string? dumpObjPath = null)
+    private static JToken DescribeUnifiedGeometry(T3.Core.DataTypes.Geometry? geometry, JObject request)
     {
         if (geometry == null)
             return JValue.CreateNull();
 
-        var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-
-        if (!string.IsNullOrEmpty(dumpObjPath))
-            DumpGeometryObj(geometry, dumpObjPath);
-
         var min = new Vector3(float.MaxValue);
         var max = new Vector3(float.MinValue);
-        foreach (var p in positions)
+        foreach (var p in geometry.Positions)
         {
             min = Vector3.Min(min, p);
             max = Vector3.Max(max, p);
         }
 
-        var edgeUse = new Dictionary<(int, int), int>();
-        var edgeOnCut = new Dictionary<(int, int), bool>();
-        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
-        var volume = 0.0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        int polygonCount = 0, curveCount = 0, closedCurveCount = 0;
+        var curveVertexCounts = new JArray();
+        for (var primitive = 0; primitive < geometry.PrimitiveCount; primitive++)
         {
-            var start = offsets[faceIndex];
-            var end = offsets[faceIndex + 1];
-            var faceIsCut = isCut != null && isCut.Values[faceIndex] > 0.5f;
-            for (var c = start; c < end; c++)
+            if (geometry.PrimitiveKind[primitive] == T3.Core.DataTypes.PrimitiveKinds.Polygon)
             {
-                var next = c + 1 == end ? start : c + 1;
-                var a = corners[c];
-                var b = corners[next];
-                var key = a < b ? (a, b) : (b, a);
-                edgeUse[key] = edgeUse.GetValueOrDefault(key) + 1;
-                edgeOnCut[key] = faceIsCut;
+                polygonCount++;
+                continue;
             }
 
-            // Divergence theorem over the fan triangles
-            var p0 = positions[corners[start]];
-            for (var c = start + 2; c < end; c++)
-            {
-                var p1 = positions[corners[c - 1]];
-                var p2 = positions[corners[c]];
-                volume += Vector3.Dot(p0, Vector3.Cross(p1, p2)) / 6.0;
-            }
-        }
+            curveCount++;
+            if (geometry.PrimitiveClosed[primitive])
+                closedCurveCount++;
 
-        var boundaryEdges = 0;
-        var boundaryEdgesOnCuts = 0;
-        var nonManifoldEdges = 0;
-        var boundarySamples = new JArray();
-        foreach (var (key, use) in edgeUse)
-        {
-            if (use == 1)
-            {
-                boundaryEdges++;
-                if (edgeOnCut[key])
-                    boundaryEdgesOnCuts++;
-
-                if (boundarySamples.Count < 6)
-                {
-                    var a = positions[key.Item1];
-                    var b = positions[key.Item2];
-                    boundarySamples.Add(new JArray(a.X, a.Y, a.Z, b.X, b.Y, b.Z, edgeOnCut[key] ? "cut" : "surface"));
-                }
-            }
-            else if (use > 2)
-            {
-                nonManifoldEdges++;
-            }
+            if (curveVertexCounts.Count < 16)
+                curveVertexCounts.Add(geometry.GetPrimitiveVertexCount(primitive));
         }
 
         var attributes = new JArray();
-        foreach (var attribute in geometry.Attributes)
+        for (var index = 0; index < geometry.Attributes.Count; index++)
         {
-            attributes.Add($"{attribute.Name}@{attribute.Domain}");
+            var attribute = geometry.Attributes[index];
+            attributes.Add(new JObject
+                               {
+                                   ["name"] = attribute.Name,
+                                   ["domain"] = attribute.Domain.ToString(),
+                                   ["type"] = attribute.ValueType.Name,
+                                   ["typeInfo"] = attribute.TypeInfo.ToString(),
+                                   ["count"] = attribute.Count,
+                               });
         }
 
-        return new JObject
-                   {
-                       ["pointCount"] = geometry.PointCount,
-                       ["faceCount"] = geometry.FaceCount,
-                       ["cornerCount"] = geometry.CornerCount,
-                       ["partCount"] = geometry.Parts.Length,
-                       ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
-                       ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
-                       ["boundaryEdges"] = boundaryEdges,
-                       ["boundaryEdgesOnCuts"] = boundaryEdgesOnCuts,
-                       ["boundaryEdgeSamples"] = boundarySamples,
-                       ["nonManifoldEdges"] = nonManifoldEdges,
-                       ["volume"] = volume,
-                       ["attributes"] = attributes,
-                   };
+        var stats = new T3.Core.DataTypes.GeometryStats();
+        stats.Measure(geometry);
+        var dumpObjPath = request["dumpObj"]?.Value<string>();
+        if (!string.IsNullOrEmpty(dumpObjPath))
+            DumpGeometryObj(geometry, dumpObjPath);
+
+        var result = new JObject
+                         {
+                             ["pointCount"] = geometry.PointCount,
+                             ["vertexCount"] = geometry.VertexCount,
+                             ["primitiveCount"] = geometry.PrimitiveCount,
+                             ["polygonCount"] = polygonCount,
+                             ["curveCount"] = curveCount,
+                             ["closedCurveCount"] = closedCurveCount,
+                             ["partCount"] = geometry.Parts.Length,
+                             ["boundaryEdges"] = CountBoundaryEdges(geometry),
+                             ["nonManifoldEdges"] = stats.NonManifoldEdges,
+                             ["volume"] = stats.Volume,
+                             ["boundsMin"] = new JArray(min.X, min.Y, min.Z),
+                             ["boundsMax"] = new JArray(max.X, max.Y, max.Z),
+                             ["firstCurveVertexCounts"] = curveVertexCounts,
+                             ["attributes"] = attributes,
+                         };
+
+        var readCount = request["readCount"]?.Value<int>() ?? 0;
+        if (readCount > 0)
+        {
+            var readOffset = Math.Max(0, request["readOffset"]?.Value<int>() ?? 0);
+            geometry.Attributes.TryGet<Vector3>(T3.Core.DataTypes.GeometryAttributeNames.HandleIn, T3.Core.DataTypes.AttributeDomain.Point, out var handlesIn);
+            geometry.Attributes.TryGet<Vector3>(T3.Core.DataTypes.GeometryAttributeNames.HandleOut, T3.Core.DataTypes.AttributeDomain.Point, out var handlesOut);
+            var points = new JArray();
+            for (var point = readOffset; point < Math.Min(geometry.PointCount, readOffset + readCount); point++)
+            {
+                var p = geometry.Positions[point];
+                var entry = new JObject { ["index"] = point, ["position"] = new JArray(p.X, p.Y, p.Z) };
+                if (handlesIn != null)
+                    entry["handleIn"] = new JArray(handlesIn.Values[point].X, handlesIn.Values[point].Y, handlesIn.Values[point].Z);
+
+                if (handlesOut != null)
+                    entry["handleOut"] = new JArray(handlesOut.Values[point].X, handlesOut.Values[point].Y, handlesOut.Values[point].Z);
+
+                points.Add(entry);
+            }
+
+            result["points"] = points;
+        }
+
+        return result;
+    }
+
+    /** Polygon edges with a face on one side only; 0 for a closed surface. */
+    private static int CountBoundaryEdges(T3.Core.DataTypes.Geometry geometry)
+    {
+        var count = 0;
+        foreach (var edge in geometry.Edges.Edges)
+        {
+            if (edge.Face1 < 0)
+                count++;
+        }
+
+        return count;
     }
 
     /// <summary>
-    /// Writes the geometry as OBJ for offline analysis: one object per part, faces in
-    /// original corner order (N-gons kept), IsCut faces preceded by a "# cut" comment.
+    /// Writes the geometry as OBJ for offline analysis: one object per part, polygons as faces in original vertex order
+    /// (N-gons kept), curves as polylines through their points, IsCut faces preceded by a "# cut" comment.
     /// </summary>
-    private static void DumpGeometryObj(T3.Core.DataTypes.MeshGeometry geometry, string path)
+    private static void DumpGeometryObj(T3.Core.DataTypes.Geometry geometry, string path)
     {
         var positions = geometry.Positions;
-        var offsets = geometry.FaceCornerOffsets;
-        var corners = geometry.CornerPointIndices;
-        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Face, out var isCut);
+        var offsets = geometry.PrimitiveVertexOffsets;
+        var corners = geometry.VertexPoints;
+        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsCut, T3.Core.DataTypes.AttributeDomain.Primitive, out var isCut);
 
         var sb = new StringBuilder();
         var culture = System.Globalization.CultureInfo.InvariantCulture;
@@ -2141,12 +2301,12 @@ internal static class DebugServer
 
         var parts = geometry.Parts;
         var partIndex = 0;
-        for (var faceIndex = 0; faceIndex < geometry.FaceCount; faceIndex++)
+        for (var faceIndex = 0; faceIndex < geometry.PrimitiveCount; faceIndex++)
         {
-            while (partIndex < parts.Length && faceIndex >= parts[partIndex].FaceStart + parts[partIndex].FaceCount)
+            while (partIndex < parts.Length && faceIndex >= parts[partIndex].PrimitiveStart + parts[partIndex].PrimitiveCount)
                 partIndex++;
 
-            if (partIndex < parts.Length && faceIndex == parts[partIndex].FaceStart)
+            if (partIndex < parts.Length && faceIndex == parts[partIndex].PrimitiveStart)
             {
                 var pivot = parts[partIndex].Pivot;
                 sb.Append("o part_").Append(partIndex).Append(" # seed ").Append(parts[partIndex].SeedIndex)
@@ -2157,7 +2317,12 @@ internal static class DebugServer
             if (isCut != null && isCut.Values[faceIndex] > 0.5f)
                 sb.Append("# cut\n");
 
-            sb.Append('f');
+            // Curves as OBJ polylines (closed ones repeat their last point first), polygons as faces
+            var isCurve = geometry.PrimitiveKind[faceIndex] == T3.Core.DataTypes.PrimitiveKinds.Curve;
+            sb.Append(isCurve ? 'l' : 'f');
+            if (isCurve && geometry.PrimitiveClosed[faceIndex] && offsets[faceIndex + 1] > offsets[faceIndex])
+                sb.Append(' ').Append(corners[offsets[faceIndex + 1] - 1] + 1);
+
             for (var c = offsets[faceIndex]; c < offsets[faceIndex + 1]; c++)
             {
                 sb.Append(' ').Append(corners[c] + 1);
@@ -2706,7 +2871,7 @@ internal static class DebugServer
             "stopAudioRecording", "startRender", "getRenderStatus", "cancelRender", "connect", "deleteOp",
             "pin", "setBypass", "outputSetup", "resetView", "reload", "stallMainThread", "setVSync",
             "releaseGpuResources", "setTargetFrameRate", "setFrameLatency", "layoutSelection",
-            "deleteSelection", "undo", "redo", "setTime", "setPlayback"
+            "deleteSelection", "undo", "redo", "setTime", "setPlayback", "runBenchmark", "getBenchmarkStatus", "getBenchmarkHistory"
         ];
 
     private static readonly List<string> _recentMessages = new(RecentMessageCapacity);

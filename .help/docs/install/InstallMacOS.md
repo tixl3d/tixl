@@ -11,18 +11,14 @@ The native macOS version is an early preview. Expect rough edges, and please rep
 
 - A Mac with Apple Silicon (M1 or newer). Intel Macs aren't supported.
 - macOS 14 Sonoma or newer.
-- The **.NET 10 SDK**. TiXL compiles operators while it runs, so the runtime alone isn't enough.
 - 16 GB of memory is comfortable. The graphics chip shares the Mac's memory, so large projects use more of it.
 
-Graphics run on Vulkan through MoltenVK, which translates it to Metal. The app brings both along.
+Graphics run on Vulkan through MoltenVK, which translates it to Metal. The app brings both along, as well as its
+own .NET runtime, so there's nothing else to install.
 
-## Install the .NET 10 SDK
-
-Download the **macOS Arm64 installer** for the .NET 10 SDK from
-[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0) and run it. TiXL looks for
-it in `/usr/local/share/dotnet`, where the installer puts it.
-
-If you use Homebrew, `brew install --cask dotnet-sdk` installs the same package.
+Projects that use NuGet packages, embedded resources or custom build steps still need the **.NET 10 SDK**. TiXL
+tells you when a project needs it and why; install it from
+[Microsoft's download page](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ## Download and run TiXL
 
@@ -36,9 +32,12 @@ read-only copy of the app from a hidden location, which can stop TiXL from loadi
 
 ### Allow TiXL to open
 
-The app isn't signed with an Apple developer certificate yet, so macOS blocks it the first time with a
-message that it couldn't verify TiXL. Right-clicking the app and choosing **Open** no longer helps on
-macOS 15 and later. Instead:
+Releases are signed with an Apple developer certificate and notarized by Apple, so macOS only asks once
+whether you want to open an app downloaded from the internet.
+
+Builds from anywhere else, such as test builds from GitHub Actions, aren't signed. macOS blocks those the
+first time with a message that it couldn't verify TiXL. Right-clicking the app and choosing **Open** no longer
+helps on macOS 15 and later. Instead:
 
 1. Try to start TiXL once and close the message with **Done**.
 2. Open **System Settings → Privacy & Security** and scroll down to the message that TiXL was blocked.
@@ -57,27 +56,27 @@ xattr -dr com.apple.quarantine /Applications/TiXL.app
 When TiXL first opens your projects, macOS asks whether it may access your **Documents** folder. Click
 **Allow**: TiXL keeps your projects there, and it waits until you answer.
 
+macOS also asks the first time TiXL uses a microphone (live audio input) or a camera ([WebcamInput]). If you
+declined, allow TiXL under **System Settings → Privacy & Security → Microphone** or **Camera**, then restart
+TiXL. If TiXL isn't listed there and macOS never asked, `tccutil reset Microphone app.tixl.TiXL` (or `Camera`)
+in the Terminal makes macOS ask again on the next start.
+
 ### Missing dependencies
 
-At startup, TiXL checks for the .NET SDK and the Slang shader compiler (`slangc`). If one is missing, a
-dialog explains what to do. TiXL offers to download `slangc` for you. Without the .NET SDK the built-in
-operators still load, but your own operators won't compile.
+The Slang shader compiler (`slangc`) comes with the app. If it's missing anyway, a dialog at startup explains
+what to do and offers to download it.
 
-### Video playback
+### Video
 
-TiXL doesn't include FFmpeg on macOS yet, so video operators don't work out of the box. For now you can
-use Homebrew's FFmpeg 7:
+The app includes FFmpeg, so video playback works out of the box. Video export works too, except that there's
+no H.264 encoder on macOS yet: H.264 exports fall back to the older MPEG-4 codec for now.
 
-```bash
-brew install ffmpeg@7
-```
+### NDI
 
-Homebrew's FFmpeg is licensed differently from the version TiXL ships on other systems, so TiXL only uses
-it when you start it with `TIXL_FFMPEG_ALLOW_RESTRICTED=1`:
-
-```bash
-TIXL_FFMPEG_ALLOW_RESTRICTED=1 /Applications/TiXL.app/Contents/MacOS/TiXL
-```
+The NDI extension (**Settings → Extensions**) needs the NDI runtime, which TiXL can't include. **NDI Tools
+alone isn't enough**: install the runtime package
+[libNDI_for_Mac.pkg](https://downloads.ndi.tv/SDK/NDI_SDK_Mac/libNDI_for_Mac.pkg) and restart TiXL. Without it the NDI operators report "NDI runtime not
+found".
 
 ## Using TiXL on a Mac
 
@@ -110,8 +109,8 @@ folders above until you delete them yourself.
 
 ## What doesn't work on macOS yet
 
-- **Video** without the Homebrew setup above, and hardware-accelerated video export.
-- **NDI, webcams and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
+- **H.264 and hardware-accelerated video export.** H.264 exports fall back to MPEG-4.
+- **Screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
 - **Geometry shaders.** Apple's graphics chips don't have them. TiXL's own operators don't need them, but a
   custom shader with a geometry stage won't render.
 - **Recording what other programs play** (loopback). A virtual audio device like BlackHole can route system

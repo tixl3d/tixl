@@ -375,9 +375,18 @@ internal sealed class ParameterWindow : Window
 
     public static bool DrawSymbolTagsButton(SymbolUi symbolUi)
     {
+        var tags = symbolUi.Tags;
+        if (!DrawSymbolTagsButton(ref tags, "##Tags" + symbolUi.Symbol.Id))
+            return false;
+
+        symbolUi.Tags = tags;
+        return true;
+    }
+
+    /// <summary>Bookmark button that opens a popup for toggling tags, for symbols that don't exist yet.</summary>
+    public static bool DrawSymbolTagsButton(ref SymbolUi.SymbolTags symbolUiTags, string tagsPopupId)
+    {
         var modified = false;
-        var tagsPopupId = "##Tags" + symbolUi.Symbol.Id;
-        var symbolUiTags = symbolUi.Tags;
         var state = GetButtonStatesForSymbolTags(symbolUiTags);
 
         if (CustomComponents.IconButton(Icon.Bookmark, Vector2.Zero, state))
@@ -431,11 +440,11 @@ internal sealed class ParameterWindow : Window
             {
                 if (tagValue == SymbolUi.SymbolTags.None)
                     continue;
-                
+
                 if (DrawSymbolTag(symbolUiTags, tagValue))
                 {
                     modified = true;
-                    symbolUi.Tags ^= tagValue;
+                    symbolUiTags = SymbolUi.ToggleTag(symbolUiTags, tagValue);
                 }
             }
             
@@ -453,7 +462,8 @@ internal sealed class ParameterWindow : Window
         if ((symbolUiTags & (SymbolUi.SymbolTags.Essential | SymbolUi.SymbolTags.Example | SymbolUi.SymbolTags.Project)) != 0)
             state = CustomComponents.ButtonStates.Activated;
 
-        if ((symbolUiTags & (SymbolUi.SymbolTags.Obsolete | SymbolUi.SymbolTags.NeedsFix | SymbolUi.SymbolTags.HasUpdate)) != 0)
+        if ((symbolUiTags & (SymbolUi.SymbolTags.Obsolete | SymbolUi.SymbolTags.NeedsFix | SymbolUi.SymbolTags.HasUpdate
+                             | SymbolUi.SymbolTags.Planned | SymbolUi.SymbolTags.Draft)) != 0)
             state = CustomComponents.ButtonStates.NeedsAttention;
         return state;
     }
@@ -503,6 +513,10 @@ internal sealed class ParameterWindow : Window
                        { SymbolUi.SymbolTags.Obsolete, UiColors.StatusAttention },
                        { SymbolUi.SymbolTags.NeedsFix, UiColors.StatusAttention },
                        { SymbolUi.SymbolTags.HasUpdate, UiColors.StatusAttention },
+                       { SymbolUi.SymbolTags.Planned, UiColors.StatusAttention },
+                       { SymbolUi.SymbolTags.Draft, UiColors.StatusAttention },
+                       { SymbolUi.SymbolTags.Done, UiColors.StatusActivated },
+                       { SymbolUi.SymbolTags.Tested, UiColors.StatusActivated },
                    };
     }
 

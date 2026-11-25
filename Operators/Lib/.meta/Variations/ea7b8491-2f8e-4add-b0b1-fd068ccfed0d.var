@@ -8,7 +8,7 @@
       "Title": "Saws",
       "PosOnCanvas": {
         "X": 326.00018,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -23,7 +23,7 @@
       "Title": "Endless",
       "PosOnCanvas": {
         "X": 326.00003,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -53,7 +53,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -68,7 +68,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -99,7 +99,7 @@
       "Title": "Steps",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

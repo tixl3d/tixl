@@ -544,9 +544,9 @@
       "Outputs": []
     },
     {
-      "Id": "e1d70411-a3e1-4380-b08a-2937627b0864"/*ExtrudeCurves*/,
+      "Id": "e1d70411-a3e1-4380-b08a-2937627b0864"/*ExtrudePointCurves*/,
       "SymbolId": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2",
-      "SymbolName": "Lib.mesh.generate.ExtrudeCurves",
+      "SymbolName": "Lib.mesh.generate.ExtrudePointCurves",
       "InputValues": [
         {
           "Id": "332e7d07-f6a2-4f58-8fe4-d2b368a63f4a"/*Width*/,

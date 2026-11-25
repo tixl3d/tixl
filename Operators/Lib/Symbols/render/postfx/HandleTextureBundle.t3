@@ -3,6 +3,10 @@
   "Id": "879fa99c-f462-4c0d-957c-9243ac60335c"/*HandleTextureBundle*/,
   "Inputs": [
     {
+      "Id": "04bba317-ef1b-4de3-a3a0-37f3163bd6d1"/*MaterialMap*/,
+      "DefaultValue": null
+    },
+    {
       "Id": "23bd0152-e178-4323-97de-8a39df7974c7"/*DepthMap*/,
       "DefaultValue": null
     },
@@ -12,6 +16,10 @@
     },
     {
       "Id": "2d6f7aaa-5952-4bee-865f-11b7937cf1cc"/*VelocityMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "3f252509-193e-4c56-a0e7-5ca1ba26e7e0"/*BaseColorMap*/,
       "DefaultValue": null
     },
     {

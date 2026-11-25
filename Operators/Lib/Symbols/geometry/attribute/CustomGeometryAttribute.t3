@@ -1,0 +1,48 @@
+{
+  "FormatVersion": 3,
+  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff"/*CustomGeometryAttribute*/,
+  "Inputs": [
+    {
+      "Id": "19ea3de4-7a2a-4368-9360-a50123280689"/*Selection*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "5d02de12-6d97-4ad3-ba41-005adc553df4"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "5fdbbd34-2144-4ba0-bea1-2866726ca09b"/*A*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "6b66dbbd-7d8d-4e98-845c-d472bb1cf296"/*Domain*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "837cd3ee-d92e-46c3-8d42-69f438c81e50"/*Code*/,
+      "DefaultValue": "return i / (float)count;"
+    },
+    {
+      "Id": "945f7c9d-fef3-40fa-bd00-b612dc3a7979"/*Name*/,
+      "DefaultValue": "Value"
+    },
+    {
+      "Id": "a9170934-849e-4dcf-9202-89385090e6de"/*B*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e469fa5c-3838-4af1-9e48-7bcb0a687f33"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f1f1fde1-9f97-4618-a020-aa6c800b7466"/*Type*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

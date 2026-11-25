@@ -21,7 +21,6 @@ finish-args:
   # with `flatpak override --env=NDI_RUNTIME_DIR_V6=<that folder> app.tixl.TiXL`.
   # TiXL's own file browser doesn't go through portals, and projects and assets live anywhere.
   - --filesystem=home
-  - --env=TIXL_SLANGC=/app/lib/slang/bin/slangc
   - --env=DOTNET_ROOT=/app/lib/dotnet
   - --env=DOTNET_CLI_TELEMETRY_OPTOUT=1
   - --env=DOTNET_NOLOGO=1
@@ -36,19 +35,7 @@ modules:
       # NETSDK1127 without them) and the workload manifests the SDK verifies on every build.
       - cp -r /usr/lib/sdk/dotnet10/lib/packs /usr/lib/sdk/dotnet10/lib/sdk-manifests /app/lib/dotnet/
 
-  # The Slang release TiXL's shaders are tested with; TIXL_SLANGC above points at it.
-  - name: slang
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /app/lib/slang
-      - cp -a bin lib /app/lib/slang/
-      - install -Dm644 LICENSE /app/share/licenses/slang/LICENSE
-    sources:
-      - type: archive
-        url: https://github.com/shader-slang/slang/releases/download/v2026.18/slang-2026.18-linux-x86_64-glibc-2.27.tar.gz
-        sha256: e45ea4f117d51b8c1e84fa49f562081e73a9f29d02bd4f7fad20678603282829
-        strip-components: 0
-
+  # slangc comes with the staged build, in lib/tixl/slang.
   - name: tixl
     buildsystem: simple
     build-commands:

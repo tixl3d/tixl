@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "ce6dadc1-ace3-49a2-84b8-453d70688dbb"/*M05a_TriggerEvents*/,
   "Description": "Trigger Events",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

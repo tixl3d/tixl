@@ -1,0 +1,23 @@
+{
+  "Id": "2e781d86-2a24-4ee9-95fd-26a051e0aeff",
+  "Variations": [
+    {
+      "Id": "7ea351c0-a2f9-4275-bcf9-0e72a1f9210f",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Set selection",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "6b66dbbd-7d8d-4e98-845c-d472bb1cf296": 3,
+          "945f7c9d-fef3-40fa-bd00-b612dc3a7979": "Selection",
+          "837cd3ee-d92e-46c3-8d42-69f438c81e50": "return Min(1,Max(0,A*i / (float)count));",
+          "5fdbbd34-2144-4ba0-bea1-2866726ca09b": 2.0
+        }
+      }
+    }
+  ]
+}

@@ -14,6 +14,8 @@ internal sealed class SkillTrainingContext // can't be generic because it's used
     internal ProjectView? ProjectView;
     internal required StateMachine<SkillTrainingContext> StateMachine;
     public QuestLevel? ActiveLevel;
+    /** The level loaded in the graph. Unlike ActiveLevel, it keeps pointing at a solved level while its results are shown. */
+    internal QuestLevel? PlayedLevel;
     public QuestTopic? ActiveTopic;
     public GraphWindow? GraphWindow;
     internal LevelFeedback? LevelFeedback;

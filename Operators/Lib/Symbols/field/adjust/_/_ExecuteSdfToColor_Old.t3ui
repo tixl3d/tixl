@@ -17,7 +17,8 @@
       "Position": {
         "X": -200.0,
         "Y": 285.0
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "d4b35b39-659e-4367-a69b-ff77ca74ad5a"/*GradientSrv*/,

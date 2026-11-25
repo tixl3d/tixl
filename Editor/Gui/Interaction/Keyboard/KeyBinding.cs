@@ -41,6 +41,8 @@ internal sealed class KeyBinding
         return true;
     }
 
+    internal bool IgnoresOperatorKeyboardCapture => (_flags & KeyActionHandling.Flags.IgnoresOperatorKeyboardCapture) != 0;
+
     internal bool IsTriggered(ImGuiIOPtr io)
     {
         if (!KeyCombination.ModifiersMatch(io))

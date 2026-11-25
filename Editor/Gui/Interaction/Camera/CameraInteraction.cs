@@ -5,7 +5,7 @@ using T3.Core.Animation;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
+using T3.Core.Utils.Math3d;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.TransformGizmos;
 using T3.Editor.Gui.Styling;
@@ -20,6 +20,15 @@ namespace T3.Editor.Gui.Interaction.Camera;
 internal sealed class CameraInteraction
 {
     internal static ICameraManipulator[] ManipulationDevices = [];
+
+    /// <summary>
+    /// Called by a panel drawn over a 3d view while the mouse is over it, before the camera is updated, so scrolling,
+    /// dragging or typing there doesn't steer the camera.
+    /// </summary>
+    internal static void ClaimMouseForPanel()
+    {
+        _frameMouseWasClaimedByPanel = ImGui.GetFrameCount();
+    }
 
     internal void Update(ICamera? camera, bool allowCameraInteraction)
     {
@@ -162,7 +171,7 @@ internal sealed class CameraInteraction
 
     private bool ManipulateCameraByMouse()
     {
-        if (!ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows))
+        if (!IsViewHovered())
             return false;
 
         var modified = false;
@@ -215,12 +224,18 @@ internal sealed class CameraInteraction
     /// </summary>
     private void TrackWhereDragsStarted()
     {
-        var isHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows);
+        var isHovered = IsViewHovered();
         for (var buttonIndex = 0; buttonIndex < _dragStartedInView.Length; buttonIndex++)
         {
             if (ImGui.IsMouseClicked((ImGuiMouseButton)buttonIndex))
                 _dragStartedInView[buttonIndex] = isHovered;
         }
+    }
+
+    private static bool IsViewHovered()
+    {
+        return ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup | ImGuiHoveredFlags.ChildWindows)
+               && _frameMouseWasClaimedByPanel != ImGui.GetFrameCount();
     }
 
     private bool IsDraggingFromInside(ImGuiMouseButton button)
@@ -395,7 +410,7 @@ internal sealed class CameraInteraction
 
     private bool ManipulateCameraByKeyboard()
     {
-        if (!ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) || ImGui.GetIO().KeyCtrl)
+        if (!IsViewHovered() || ImGui.GetIO().KeyCtrl)
             return false;
 
         if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows))
@@ -509,4 +524,5 @@ internal sealed class CameraInteraction
     /** Indexed by <see cref="ImGuiMouseButton"/>: left, right, middle. */
     private readonly bool[] _dragStartedInView = new bool[3];
     private float _deltaTime;
+    private static int _frameMouseWasClaimedByPanel = -1;
 }

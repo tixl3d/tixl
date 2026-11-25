@@ -44,7 +44,6 @@ static const float3 Offsets[] =
 };
 
 
-#define mod(x,y) ((x)-(y)*floor((x)/(y)))
 
 sampler texSampler : register(s0);
 
@@ -82,7 +81,11 @@ bool GridFind(in float3 position, out uint startIndex, out uint endIndex)
             i = cellEnd;
     }
     if(i >= cellEnd)
+    {
+        startIndex = 0;
+        endIndex = 0;
         return false;
+    }
 
     startIndex = CellRangeIndices[i];
     int count = min(CellPointCounts[i], 50);
@@ -102,13 +105,13 @@ void main(uint3 Gid : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 GTid :
         return; // out of bounds
 
     // Setup Buffers
-    float3 centerForCohesion;
+    float3 centerForCohesion = 0;
     int countForCohesion =0;
 
-    float3 centerForSeparation;
+    float3 centerForSeparation = 0;
     int countForSeparation =0;
 
-    float3 averageDirection;
+    float3 averageDirection = 0;
     int countForAlignment =0;
 
     int pointIndex = DTid.x;
@@ -140,7 +143,7 @@ void main(uint3 Gid : SV_GroupID, uint3 DTid : SV_DispatchThreadID, uint3 GTid :
     float3 jitteredPosition = position + jitter;
 
     float3 posInCel = mod(jitteredPosition, GridCellSize) - GridCellSize /2;
-    float3 sign = posInCel < 0 ? -1 : 1;
+    float3 sign = select(posInCel < 0, (float3)-1, (float3)1);
 
     for(uint offsetIndex = 0; offsetIndex < 4; offsetIndex++) 
     {

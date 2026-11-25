@@ -7,12 +7,10 @@
       "ActivationIndex": 1,
       "Title": "Default",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 0.0
+        "X": 0.0,
+        "Y": -29.55056
       },
-      "ParameterSetsForChildIds": {
-        "00000000-0000-0000-0000-000000000000": {}
-      }
+      "ParameterSetsForChildIds": {}
     },
     {
       "Id": "fb4f8a96-29e1-4eb5-8af0-8aa79a973b7f",
@@ -20,8 +18,8 @@
       "ActivationIndex": 2,
       "Title": "Ocean",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 0.0
+        "X": 162.99995,
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -105,7 +103,7 @@
       "Title": "TiXL",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -125,7 +123,7 @@
       "Title": "CelPainChick",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -147,7 +145,7 @@
       "Title": "AutoIndustrie",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

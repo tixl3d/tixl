@@ -1,5 +1,5 @@
 Texture2D<float> InputTexture : register(t0);
-RWTexture2D<float> OutputTexture : register(u0);
+RWTexture2D<float4> OutputTexture : register(u0);
 
 cbuffer ParamConstants : register(b0)
 {
@@ -36,5 +36,6 @@ cbuffer ParamConstants : register(b0)
         c = (c - OutrangeMin) / (OutrangeMax - OutrangeMin);
     }
 
-    OutputTexture[i.xy] = ClampRange > 0.5 ? saturate(c) : c;
+    float d= ClampRange > 0.5 ? saturate(c) : c;
+    OutputTexture[i.xy] = float4(d.xxx,1);
 }

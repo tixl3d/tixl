@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "eb855258-4821-40f6-8ff8-ec71a808a0d4"/*M06e_Normalization*/,
   "Description": "Normalization",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {

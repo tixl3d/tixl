@@ -105,6 +105,10 @@ FXAA_SUBPIX_CAP - Insures fine detail is not completely removed.
                   7.0/8.0 - high amount of filtering
                   1.0 - no capping of sub-pixel aliasing removal
 ============================================================================*/
+#ifndef FXAA_DEBUG_OFFSET
+    #define FXAA_DEBUG_OFFSET 0
+#endif
+
 #ifndef FXAA_PRESET
     #define FXAA_PRESET 5
 #endif

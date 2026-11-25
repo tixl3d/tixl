@@ -11,7 +11,8 @@
         "Y": 0.0
       },
       "GroupTitle": "Shader Varations",
-      "Description": "Axis around which the ring is oriented."
+      "Description": "Axis around which the ring is oriented.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,

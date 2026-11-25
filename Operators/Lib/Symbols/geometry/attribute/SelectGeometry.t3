@@ -1,0 +1,56 @@
+{
+  "FormatVersion": 3,
+  "Id": "55b64ede-9730-457c-8d3c-981a9fe6120e"/*SelectGeometry*/,
+  "Inputs": [
+    {
+      "Id": "10342312-f3b9-4a53-9413-ab358860eed4"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "2f24c52a-0a48-4c4e-a359-0b6012016270"/*Code*/,
+      "DefaultValue": "return i % 2 == 0;"
+    },
+    {
+      "Id": "427919c7-6b02-4009-a9cc-938986ad1053"/*Domain*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4dba7742-653a-4ad5-9e21-0ea557865bcd"/*Offset*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "6355884b-d2a9-4892-9698-944c8ab3a0de"/*Name*/,
+      "DefaultValue": "Selection"
+    },
+    {
+      "Id": "738d7eae-2dfa-4c56-a85d-a25c00143f6e"/*B*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "7b777d3d-1bec-4297-94c3-f7450a162aeb"/*Every*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "7bac9932-a892-4d15-909d-ded6f6c90564"/*Count*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "952ea8f6-51f4-46b8-94af-83dda89159b0"/*Invert*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "959c2660-ea9c-4c3a-8f00-d4b571d777a6"/*A*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d82c7cd6-f36b-4ca9-97a7-db120670e5c1"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ec982690-0ef4-4b25-83d8-ddddb2c2d24e"/*Combine*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

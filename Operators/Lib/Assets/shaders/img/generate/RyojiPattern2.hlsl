@@ -208,7 +208,7 @@ static float2 P;
 float4 subDivideCel2(float4 cel, float2 splitProbability, float2 split, float2 scrollProbability) 
 {
     float2 hash2 = hash22(cel.xy + Seed);
-    float2 scrollFactor = hash2 > scrollProbability ? 0:1;
+    float2 scrollFactor = select(hash2 > scrollProbability, (float2)0, (float2)1);
     float2 randomShift =(beatTime * ScrollSpeed +1 + ScrollOffset) * scrollFactor * scrollProbability* hash2.x;
     P += randomShift;    
 

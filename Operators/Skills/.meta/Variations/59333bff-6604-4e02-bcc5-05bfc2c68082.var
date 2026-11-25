@@ -1,0 +1,72 @@
+{
+  "Id": "59333bff-6604-4e02-bcc5-05bfc2c68082",
+  "Variations": [
+    {
+      "Id": "fd664cd0-a222-422d-8a4c-edd3333d7af7",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "f8c85400-ad79-4d13-af2f-863b6a15fef9": {
+          "b4a8c16d-5a0f-4867-ae03-92a675abe709": {
+            "X": 0.0,
+            "Y": -0.51,
+            "Z": 0.0
+          }
+        },
+        "a7044b8f-7b22-475d-9aae-04d1b00a532b": {
+          "8c9dee45-d165-48c8-b8dd-b7f47e77fd00": {
+            "X": 0.35590088,
+            "Y": 0.35897434,
+            "Z": 0.3536134,
+            "W": 1.0
+          }
+        },
+        "2e93eb46-6f60-4edf-8e5e-2ae1c94c0468": {
+          "ce40061f-b853-41be-bbef-0db172bbad7f": 0.02,
+          "e9085eac-dc15-4ecf-862d-869e66981418": 1,
+          "c86a32c2-feeb-4c05-b2c0-cf54076247bb": true
+        },
+        "8ccbe72f-f432-41fa-b18c-690912a30dd9": {
+          "abebb02b-bcaa-42c7-8eb8-da3c1b2fc840": true
+        },
+        "05c16e89-1fe6-4fcb-b968-6dbdc5a73f40": {
+          "b7559321-2dbe-4fe0-ab86-52532d008980": 3.66,
+          "4b1a66a4-b5e4-4bc3-97f5-bd3cda668893": 10.0
+        },
+        "c59f69d9-ea4b-422f-a0ea-dd0160ab6e43": {
+          "24a1e643-3e52-4a8b-97b6-7c6f1706d14c": 0.16
+        },
+        "b8a93408-b633-4738-a75b-c942b2c76353": {
+          "b4a8c16d-5a0f-4867-ae03-92a675abe709": {
+            "X": 0.0,
+            "Y": 0.31,
+            "Z": 0.37
+          }
+        },
+        "bd1718e1-2cf5-4ea1-b4d9-5c313e067f81": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.18
+        },
+        "1d06efa3-3267-47fc-8ca1-abe33444dd13": {
+          "8c9dee45-d165-48c8-b8dd-b7f47e77fd00": {
+            "X": 0.796,
+            "Y": 0.075,
+            "Z": 0.443,
+            "W": 1.0
+          }
+        },
+        "e130240d-8429-46eb-b2ee-9e87be3d3047": {
+          "9e24c5d1-191a-4c1a-b88e-03df826fffc0": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": -0.89
+          }
+        }
+      }
+    }
+  ]
+}

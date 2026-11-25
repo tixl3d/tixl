@@ -4,6 +4,25 @@
   "Description": "A small wrapper setup to load and pose an animated GLTF scene.",
   "InputUis": [
     {
+      "InputId": "342ae171-066e-47c7-871c-9b26e5ed3360"/*OverrideTime*/,
+      "Position": {
+        "X": -160.29565,
+        "Y": 218.8483
+      },
+      "Description": "If connected, the clip is sampled at this time in seconds instead of the playback time."
+    },
+    {
+      "InputId": "443aae80-dff3-49bf-bfa9-82f33ccaaa2d"/*Path*/,
+      "Position": {
+        "X": -416.61496,
+        "Y": -2.4053345
+      },
+      "GroupTitle": "Gltf Scene",
+      "Description": "Path to a .glb or .gltf file.",
+      "Usage": "FilePath",
+      "FileFilter": "gltf, glb"
+    },
+    {
       "InputId": "b9ee9f01-0c73-45c7-a72d-5ce28cb56e3c"/*ClipIndex*/,
       "Position": {
         "X": -112.02832,

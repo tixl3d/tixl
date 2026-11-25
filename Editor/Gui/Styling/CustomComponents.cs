@@ -529,11 +529,8 @@ internal static partial class CustomComponents
     public static bool SegmentedButton<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null,
                                           Func<T, string?>? tooltipForItem = null) where T : struct, Enum
     {
-        var scale = T3Ui.UiScaleFactor;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
         var h = ImGui.GetFrameHeight();
-        var segPadding = 14 * scale;
-        var rounding = 4 * scale;
-        var inset = 2 * scale;
 
         var values = Enum.GetValues<T>();
         var selectedString = selectedValue.ToString();
@@ -547,7 +544,7 @@ internal static partial class CustomComponents
             total += ImGui.CalcTextSize(name).X + segPadding * 2;
         }
 
-        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, rounding);
+        DrawSegmentTrack(dl, start, total, h);
 
         // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
         ImGui.PushID(typeof(T).Name);
@@ -565,48 +562,12 @@ internal static partial class CustomComponents
             if (!isFirst)
                 ImGui.SameLine(0, 0);
 
-            // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
-            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)) && !isDisabled)
+            if (DrawSegment(dl, name, new Vector2(x, start.Y), segWidth, isSelected, isDisabled, tooltipForItem?.Invoke(value),
+                            ImGui.GetColorU32(UiColors.ForegroundFull.Rgba)))
             {
                 selectedValue = value;
                 modified = true;
             }
-
-            // Tooltips are shown for disabled segments too — that is where they matter most.
-            if (tooltipForItem != null)
-            {
-                var tooltip = tooltipForItem(value);
-                if (!string.IsNullOrEmpty(tooltip))
-                    TooltipForLastItem(tooltip);
-            }
-
-            var isHovered = !isDisabled && ImGui.IsItemHovered();
-
-            var segMin = new Vector2(x, start.Y);
-            if (isSelected)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton, rounding);
-            }
-            else if (isHovered)
-            {
-                dl.AddRectFilled(segMin + new Vector2(inset, inset),
-                                 segMin + new Vector2(segWidth - inset, h - inset),
-                                 UiColors.BackgroundButton.Fade(0.4f), rounding);
-            }
-
-            var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
-            var textColor = isDisabled
-                                ? UiColors.TextMuted.Fade(0.25f)
-                                : isSelected
-                                    ? UiColors.ForegroundFull
-                                    : (isHovered ? UiColors.Text : UiColors.TextMuted);
-            ImGui.PushFont(font);
-            var textSize = ImGui.CalcTextSize(name);
-            var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
-            dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), name);
-            ImGui.PopFont();
 
             x += segWidth;
             isFirst = false;
@@ -615,6 +576,118 @@ internal static partial class CustomComponents
         ImGui.PopID();
         return modified;
     }
+
+    /// <summary>
+    /// <see cref="SegmentedButton{T}"/> for options given by label, e.g. from a cached enum entry, so it draws without
+    /// allocating. The segments share the extra space when <paramref name="width"/> is wider than their labels need.
+    /// The selected label uses the current text color, so parameter inputs show it muted, changed or animated like other values.
+    /// </summary>
+    public static bool SegmentedButton(string[] labels, ref int selectedIndex, float width = 0,
+                                       bool[]? disabledItems = null, string?[]? tooltips = null)
+    {
+        var h = ImGui.GetFrameHeight();
+        var naturalWidth = GetSegmentedButtonWidth(labels);
+        var totalWidth = MathF.Round(MathF.Max(width, naturalWidth));
+        var extraPerSegment = labels.Length > 0 ? (totalWidth - naturalWidth) / labels.Length : 0;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+
+        var dl = ImGui.GetWindowDrawList();
+        var start = ImGui.GetCursorScreenPos();
+        DrawSegmentTrack(dl, start, totalWidth, h);
+
+        var selectedTextColor = ImGui.GetColorU32(ImGuiCol.Text);
+        var modified = false;
+        var unroundedX = start.X;
+        var x = start.X;
+        for (var index = 0; index < labels.Length; index++)
+        {
+            // Accumulate unrounded and round each edge, so segments sit on whole pixels and still add up to the track.
+            unroundedX += ImGui.CalcTextSize(labels[index]).X + segPadding * 2 + extraPerSegment;
+            var nextX = index == labels.Length - 1 ? start.X + totalWidth : MathF.Round(unroundedX);
+
+            if (index > 0)
+                ImGui.SameLine(0, 0);
+
+            ImGui.PushID(index);
+            var isDisabled = disabledItems != null && disabledItems[index];
+            if (DrawSegment(dl, labels[index], new Vector2(x, start.Y), nextX - x, index == selectedIndex, isDisabled, tooltips?[index],
+                            selectedTextColor))
+            {
+                selectedIndex = index;
+                modified = true;
+            }
+
+            ImGui.PopID();
+            x = nextX;
+        }
+
+        return modified;
+    }
+
+    /** The width <see cref="SegmentedButton(string[], ref int, float, bool[], string[])"/> needs to fit all labels. */
+    public static float GetSegmentedButtonWidth(string[] labels)
+    {
+        var width = 0f;
+        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+        foreach (var label in labels)
+        {
+            width += ImGui.CalcTextSize(label).X + segPadding * 2;
+        }
+
+        return width;
+    }
+
+    /** The input field tint is faded over a button fill, so the track recedes behind the selected segment. */
+    private static void DrawSegmentTrack(ImDrawListPtr dl, Vector2 start, float width, float height)
+    {
+        var max = start + new Vector2(width, height);
+        var rounding = SegmentRounding * T3Ui.UiScaleFactor;
+        dl.AddRectFilled(start, max, UiColors.BackgroundButton, rounding);
+        dl.AddRectFilled(start, max, UiColors.BackgroundInputField.Fade(SegmentTrackInputFieldOpacity), rounding);
+    }
+
+    /** One option of a segmented track. Returns true when an enabled segment was clicked. */
+    private static bool DrawSegment(ImDrawListPtr dl, string label, Vector2 segMin, float segWidth, bool isSelected, bool isDisabled,
+                                    string? tooltip, uint selectedTextColor)
+    {
+        var h = ImGui.GetFrameHeight();
+        var rounding = SegmentRounding * T3Ui.UiScaleFactor;
+        var inset = SegmentInset * T3Ui.UiScaleFactor;
+
+        // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
+        var clicked = ImGui.InvisibleButton(label, new Vector2(segWidth, h)) && !isDisabled;
+
+        // Tooltips are shown for disabled segments too — that is where they matter most.
+        if (!string.IsNullOrEmpty(tooltip))
+            TooltipForLastItem(tooltip);
+
+        var isHovered = !isDisabled && ImGui.IsItemHovered();
+        if (isSelected || isHovered)
+        {
+            dl.AddRectFilled(segMin + new Vector2(inset, inset),
+                             segMin + new Vector2(segWidth - inset, h - inset),
+                             isSelected ? UiColors.BackgroundButton : UiColors.BackgroundButton.Fade(0.4f),
+                             rounding);
+        }
+
+        var textColor = isDisabled
+                            ? ImGui.GetColorU32(UiColors.TextMuted.Fade(0.25f).Rgba)
+                            : isSelected
+                                ? selectedTextColor
+                                : ImGui.GetColorU32((isHovered ? UiColors.Text : UiColors.TextMuted).Rgba);
+        ImGui.PushFont(isSelected ? Fonts.FontBold : Fonts.FontNormal);
+        var textSize = ImGui.CalcTextSize(label);
+        var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
+        dl.AddText(textPos, textColor, label);
+        ImGui.PopFont();
+
+        return clicked;
+    }
+
+    private const float SegmentPadding = 14;
+    private const float SegmentRounding = 4;
+    private const float SegmentInset = 2;
+    private const float SegmentTrackInputFieldOpacity = 0.5f;
 
     private static bool DrawSelectButton(string name, bool isSelected, float width = 0)
     {
@@ -630,4 +703,84 @@ internal static partial class CustomComponents
         ImGui.PopStyleColor(4);
         return clicked;
     }
+
+    /// <summary>
+    /// An invisible button with a drag-indicator icon that moves the current popup while dragged. Popups open below
+    /// the parameter and can cover the operator being edited, so the grip lets users move them aside.
+    /// </summary>
+    public static void DrawPopupMoveGrip(string id, Vector2 size)
+    {
+        ImGui.InvisibleButton(id, size);
+        var isHovered = ImGui.IsItemHovered();
+        var isActive = ImGui.IsItemActive();
+        if (isHovered || isActive)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        if (isActive)
+            ImGui.SetWindowPos(ImGui.GetWindowPos() + ImGui.GetIO().MouseDelta);
+
+        var gripColor = isHovered || isActive ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        Icons.DrawIconOnLastItem(Icon.DragIndicator, gripColor);
+    }
+
+    /// <summary>
+    /// Moves the current popup while its header is dragged. Call it after the header's controls, so a press on a
+    /// control stays with that control and only presses on free header space move the popup.
+    /// </summary>
+    /// <param name="headerBottom">The screen Y where the header ends; the area above it, including the window padding, is draggable.</param>
+    public static void HandlePopupHeaderDrag(float headerBottom, ref bool isMoving)
+    {
+        var windowPos = ImGui.GetWindowPos();
+        var headerMax = new Vector2(windowPos.X + ImGui.GetWindowWidth(), headerBottom);
+        var isHovered = ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseHoveringRect(windowPos, headerMax);
+        if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            isMoving = true;
+
+        if (isMoving && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            isMoving = false;
+
+        if (isHovered || isMoving)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        if (isMoving)
+            ImGui.SetWindowPos(windowPos + ImGui.GetIO().MouseDelta);
+    }
+
+    /// <summary>
+    /// A triangle in the current popup's lower right corner that resizes it. Call it last, so it draws above the content.
+    /// </summary>
+    /// <param name="unscaledSize">The size the popup lays its content out with, before UI scaling.</param>
+    public static void DrawPopupResizeGrip(ref Vector2 unscaledSize, Vector2 minUnscaledSize, ref bool isResizing)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var gripSize = MathF.Round(PopupResizeGripSize * scale);
+        var windowMax = (ImGui.GetWindowPos() + ImGui.GetWindowSize()).Floor();
+        var gripMin = windowMax - new Vector2(gripSize);
+
+        var isHovered = ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(gripMin, windowMax);
+        if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            isResizing = true;
+
+        if (isResizing && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            isResizing = false;
+
+        if (isHovered || isResizing)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNWSE);
+
+        if (isResizing)
+        {
+            unscaledSize += ImGui.GetIO().MouseDelta / scale;
+            unscaledSize = Vector2.Max(unscaledSize, minUnscaledSize);
+        }
+
+        // Inset, so the popup's rounded corner doesn't cut the triangle.
+        var inset = MathF.Round(2 * scale);
+        var triangleMax = windowMax - new Vector2(inset);
+        var triangleMin = triangleMax - new Vector2(gripSize - inset * 2);
+        var color = isHovered || isResizing ? UiColors.Text : UiColors.TextMuted.Fade(0.5f);
+        ImGui.GetWindowDrawList().AddTriangleFilled(new Vector2(triangleMax.X, triangleMin.Y), triangleMax,
+                                                    new Vector2(triangleMin.X, triangleMax.Y), color);
+    }
+
+    private const float PopupResizeGripSize = 12;
 }

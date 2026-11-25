@@ -3,6 +3,7 @@ using System.Diagnostics;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using ImGuiNET;
+using T3.Editor.Skills.Training;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Window;
@@ -535,7 +536,7 @@ internal sealed partial class ProjectView
         var areaOnCanvas = NodeSelection.GetSelectionBounds(NodeSelection, CompositionInstance);
         areaOnCanvas.Expand(200);
         
-        GraphView.Canvas.FitAreaOnCanvas(areaOnCanvas);
+        GraphView.Canvas.FitAreaOnCanvas(areaOnCanvas, reservedTopFraction: SkillTraining.ReservedGraphTopFraction);
     }
     
     

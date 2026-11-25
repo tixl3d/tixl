@@ -16,6 +16,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Animation;
 using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
@@ -147,11 +148,9 @@ public abstract class InputValueUi<T> : IInputUi
         var isAnimated = IsAnimatable && animator.TryGetFirstInputAnimationCurve(inputSlot, out animationCurve);
         MappedType = inputSlot.MappedType;
 
+        // Happens for a frame while a package reload changes the input's type and the instance is being recreated.
         if (inputSlot is not InputSlot<T> typedInputSlot)
-        {
-            Debug.Assert(false);
             return editState;
-        }
 
         var input = inputSlot.Input;
         if (input.IsDefault && skipIfDefault)
@@ -166,6 +165,8 @@ public abstract class InputValueUi<T> : IInputUi
         IReadOnlyList<ConnectionMaker.TempConnection> tempConnections = ConnectionMaker.GetTempConnectionsFor(components.GraphView);
 
         var name = inputSlot.Input.Name;
+        var rowTopLeft = ImGui.GetCursorScreenPos();
+        var rowRight = rowTopLeft.X + ImGui.GetContentRegionAvail().X;
 
         if (inputSlot.HasInputConnections)
         {
@@ -179,6 +180,10 @@ public abstract class InputValueUi<T> : IInputUi
         {
             editState = DrawNormalParameter();
         }
+
+        var rowRect = new ImRect(rowTopLeft,
+                                 new Vector2(rowRight, ImGui.GetItemRectMax().Y));
+        TourInteraction.DrawParameterRowIndicator(symbolChildUi.Id, input.InputDefinition.Id, rowRect);
 
         return editState;
 
@@ -895,7 +900,7 @@ internal static class InputArea
 
             Icons.DrawIconOnLastItem(icon, typeColor);
         }
-        else if (symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id))
+        else if (!SkillTraining.IsInPlayMode && symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id))
         {
             Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled);
         }
@@ -989,7 +994,8 @@ internal static class InputArea
             }
         }
 
-        if (symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
+        // Skill quests don't use snapshots, so the knob would only distract.
+        if (!SkillTraining.IsInPlayMode && symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
         {
             Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled.Rgba);
         }

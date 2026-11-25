@@ -2,6 +2,7 @@
   "FormatVersion": 3,
   "Id": "bd48b0cc-3f01-4e6d-b583-9dac5af4aa1c"/*M06c_VectorLength*/,
   "Description": "Vector Length",
+  "SymbolTags": "16384",
   "InputUis": [],
   "SymbolChildUis": [
     {
