@@ -184,6 +184,13 @@
         "X": 0.0,
         "Y": 400.0
       }
+    },
+    {
+      "OutputId": "f8d50cf0-858e-49dc-9e61-7a3f34fa3780"/*FirstFrameOutput*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 500.0
+      }
     }
   ]
 }

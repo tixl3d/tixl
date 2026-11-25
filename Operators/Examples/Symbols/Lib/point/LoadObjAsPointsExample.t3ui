@@ -7,7 +7,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0ca6a0b1-108d-4ca9-86c5-231ce357be14",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 150.0,
         "Y": 0.0

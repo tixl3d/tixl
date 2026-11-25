@@ -48,7 +48,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "13ba78d9-6b98-428d-abc3-5521d46dc22b",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "Position": {
         "X": -60.0,
         "Y": 250.0
@@ -64,7 +64,7 @@
     },
     {
       "ChildId": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "Position": {
         "X": -60.0,
         "Y": 40.0
@@ -88,7 +88,7 @@
     },
     {
       "ChildId": "a5943dad-6fe7-4822-b4a4-503494301dae",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 80.0,
         "Y": 250.0
@@ -112,7 +112,7 @@
     },
     {
       "ChildId": "e02d0643-a166-4b8c-bf78-6dcf37f4d1b3",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 80.0,
         "Y": 40.0

@@ -55,7 +55,7 @@
     },
     {
       "ChildId": "86aaacc7-3bdc-4c2f-ac8d-f3b561994b7b",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": -115.40506,
         "Y": -26.331146
@@ -87,7 +87,7 @@
     },
     {
       "ChildId": "96b07c33-5cf8-4703-baa6-2c1be41df8aa",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 164.59494,
         "Y": -131.33115
@@ -135,7 +135,7 @@
     },
     {
       "ChildId": "d1e99a52-0188-4a63-85ef-55bfb907816d",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "Position": {
         "X": 24.59494,
         "Y": -131.33115
@@ -151,7 +151,7 @@
     },
     {
       "ChildId": "e1b6d9ca-ae81-4135-ab0f-55bd081feb65",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "Position": {
         "X": -255.40506,
         "Y": -26.331146

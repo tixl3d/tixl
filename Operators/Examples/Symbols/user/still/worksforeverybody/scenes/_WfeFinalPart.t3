@@ -988,9 +988,9 @@
       "Outputs": []
     },
     {
-      "Id": "247e6cf7-3e32-446c-813f-12c0db981aa2"/*ListToBuffer*/,
+      "Id": "247e6cf7-3e32-446c-813f-12c0db981aa2"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -1320,16 +1320,16 @@
       "Outputs": []
     },
     {
-      "Id": "34e76135-d897-4ff0-a782-9972e4d04e30"/*ListToBuffer*/,
+      "Id": "34e76135-d897-4ff0-a782-9972e4d04e30"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
     {
-      "Id": "356e748d-9964-4527-b7df-2e0c3e1fc54e"/*ListToBuffer*/,
+      "Id": "356e748d-9964-4527-b7df-2e0c3e1fc54e"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -1406,9 +1406,9 @@
       "Outputs": []
     },
     {
-      "Id": "3d5f1d22-72e8-43e3-a5a2-fd6571adce55"/*ListToBuffer*/,
+      "Id": "3d5f1d22-72e8-43e3-a5a2-fd6571adce55"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -1562,9 +1562,9 @@
       "Outputs": []
     },
     {
-      "Id": "4c8540b6-ab21-4008-9ce3-b588808375fe"/*ListToBuffer*/,
+      "Id": "4c8540b6-ab21-4008-9ce3-b588808375fe"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -2314,9 +2314,9 @@
       "Outputs": []
     },
     {
-      "Id": "78f9cf5f-8ef0-455c-9f0f-ea6f9e4929db"/*ListToBuffer*/,
+      "Id": "78f9cf5f-8ef0-455c-9f0f-ea6f9e4929db"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -4425,9 +4425,9 @@
       "Outputs": []
     },
     {
-      "Id": "d100b0e4-9ab2-4cdf-b491-c26e0d537f1f"/*ListToBuffer*/,
+      "Id": "d100b0e4-9ab2-4cdf-b491-c26e0d537f1f"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },

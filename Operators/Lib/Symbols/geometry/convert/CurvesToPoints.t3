@@ -1,30 +1,30 @@
 {
   "FormatVersion": 3,
-  "Id": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019"/*CurvesToPoints*/,
+  "Id": "d955fd1d-af90-480b-b4e6-9142a1daf0a9"/*CurvesToPoints*/,
   "Inputs": [
     {
-      "Id": "246c6a25-be64-4d99-8452-b0fd9ac66f2f"/*SharpAngle*/,
-      "DefaultValue": 30.0
-    },
-    {
-      "Id": "4e9a6c1b-d872-4f35-b0e8-7a2d5f9c3e61"/*Tolerance*/,
-      "DefaultValue": 0.002
-    },
-    {
-      "Id": "91c96818-ba39-4cec-af54-ae005c8610a5"/*PolygonEdges*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27"/*Curves*/,
+      "Id": "126f23f9-158b-468f-ba25-dd55c665a63c"/*Curves*/,
       "DefaultValue": null
     },
     {
-      "Id": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/,
+      "Id": "682bab73-6b13-4f0d-9162-a464b1889b56"/*Tolerance*/,
+      "DefaultValue": 0.002
+    },
+    {
+      "Id": "b766fe96-2b4b-4a9e-b8e8-f3ba646970fe"/*CloseLoops*/,
       "DefaultValue": true
     },
     {
-      "Id": "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7"/*Sampling*/,
+      "Id": "bbbca9ff-7678-4549-82e0-aa2a988b49de"/*PolygonEdges*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "d6da84fa-512f-480f-b6db-8bf777f5a3b2"/*Sampling*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f48316ce-a09a-4599-8d60-3fe0fcf24bfe"/*SharpAngle*/,
+      "DefaultValue": 30.0
     }
   ],
   "Children": [],

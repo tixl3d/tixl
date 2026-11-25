@@ -46,7 +46,7 @@
     },
     {
       "ChildId": "0946d3fe-648c-4201-8ec0-8675911f6cb7",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -987.1438,
@@ -281,7 +281,7 @@
     },
     {
       "ChildId": "671f8baa-7c32-47b6-9dcf-f4d5c8cf8c89",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -1267.1436,
@@ -299,7 +299,7 @@
     },
     {
       "ChildId": "68bfb10d-89a7-451a-9ab9-c9babd1edc11",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -987.1438,
@@ -376,7 +376,7 @@
     },
     {
       "ChildId": "785f54b0-e011-494a-aa67-19846c42c116",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -987.1438,
@@ -692,7 +692,7 @@
     },
     {
       "ChildId": "e262a940-6214-4956-b033-0fee904b4515",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -987.1438,
@@ -743,7 +743,7 @@
     },
     {
       "ChildId": "f5a99363-4c5c-449c-9e47-0f787b100cb2",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "d0be7518-a796-4bbb-836b-94285aa9e521",
       "Position": {
         "X": -987.1438,

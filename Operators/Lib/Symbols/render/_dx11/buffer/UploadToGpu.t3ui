@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
-  "Id": "7e28c796-85e7-47ee-99bb-9599284dbeeb"/*ListToBuffer*/,
-  "Description": "Sends the incoming structured list as StructuredBuffers to the GPU.\n\nThis is frequently used to upload multiple [APoint]s for further usage on the graphics card.",
+  "Id": "7e28c796-85e7-47ee-99bb-9599284dbeeb"/*UploadToGpu*/,
+  "Description": "Uploads structured lists, e.g. CPU points, into a GPU structured buffer.\n\nMost often it turns CPU points from [APoint], [LoadSvg] or the CPoints ops into GPU points for [DrawLines] and the other point ops. Several connected lists are joined in order and must share their element type. Length outputs the number of elements.\n\nAKA: ListToBuffer, PointsToGpu, CPointsToPoints, upload, structured buffer\n\nSee also: [IntListToBuffer] for integer lists, [CurvesToPoints] for curves",
   "SymbolTags": "8",
   "InputUis": [
     {

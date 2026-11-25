@@ -88,7 +88,7 @@
     },
     {
       "ChildId": "5143b10c-2c79-4560-a92e-f02b30007588",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 270.8508,
         "Y": 1530.186

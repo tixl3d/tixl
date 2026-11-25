@@ -28,7 +28,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0313dd7b-d6df-40d4-ac36-27d5f953d9a0",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
         "X": 386.79694,
         "Y": 26.067612

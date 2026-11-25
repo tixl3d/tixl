@@ -210,7 +210,7 @@ between `GPoints` and the draw op and raise its `Scale` to ~1.8.
   the chunk draw (vertex colors are used, multiplied with the point color).
 - Dragging the `[TransformPoints]` scale is as smooth as `[DrawMesh]`; changing
   the seed count re-fits the draw table without a visible hitch.
-- Routing `Points` through `[TransformCPoints]` and `[ListToBuffer]` instead of
+- Routing `Points` through `[TransformCPoints]` and `[UploadToGpu]` instead of
   `GPoints` through `[TransformPoints]` gives the same picture for the same
   Scale and Rotation values.
 
@@ -323,7 +323,7 @@ Insert a `[TriangulateGeometry]` directly after `[CubeGeometry]`.
 **Action:**
 In a new graph add `[StringToCurves]` (default text "TiXL", font
 `Lib:fonts/Inter-Variable.ttf`), connect it to `[CurvesToPoints]`, then
-`[ListToBuffer]` and `[DrawLines]`.
+`[DrawLines]`.
 
 **Expected:**
 - The word renders as outlines, one closed loop per contour (the i-dot and the
@@ -340,7 +340,7 @@ In a new graph add `[StringToCurves]` (default text "TiXL", font
 In the text-as-lines graph set `LetterSpacing` to 0.2, then toggle `Alignment`
 between Left, Center and Right. Drag the move gizmo of `[StringToCurves]` in the
 output. Then insert `[DrawPoints]` or oriented sprites after `[CurvesToPoints]`
-(or check the point rotations in the list view).
+(or check the point rotations in the list view of `[CurvesToCPoints]`).
 
 **Expected:**
 - The letters spread evenly; with Center and Right the lines stay centered and
@@ -408,7 +408,7 @@ Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Part
 **Action:**
 Connect [StringToCurves] (text `TiXL`) -> [CustomGeometryAttribute] (Domain Parts, Name `W`, Code
 `return i * 0.25f;`) -> [ColorGeometry] (Domain Parts, Attribute `W`, Mapping FromStart, a black-to-white gradient)
--> [CurvesToPoints] (Sampling Points), and look at the Output Window.
+-> [CurvesToCPoints] (Sampling Points), and look at the Output Window.
 
 **Expected:**
 - The four letters get four grey levels, from black for the `T` to light grey for the `L`.
@@ -593,7 +593,7 @@ Connect [StringToCurves] (text `aeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05)
 ## Step: Polygon edges as lines
 
 **Action:**
-Connect [CubeGeometry] -> [CurvesToPoints] -> [ListToBuffer] -> [DrawLines] and set PolygonEdges.
+Connect [CubeGeometry] -> [CurvesToPoints] -> [DrawLines] and set PolygonEdges.
 
 **Expected:**
 - None draws nothing (no curves), All and Sharp draw the 12 cube edges.

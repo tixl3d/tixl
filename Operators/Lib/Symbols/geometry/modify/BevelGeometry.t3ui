@@ -42,9 +42,9 @@
         "X": 0.0,
         "Y": 360.0
       },
+      "Description": "Faces meeting at less than this angle (degrees) are merged and their shared edge gets no bevel. 0 bevels every edge.",
       "Min": 0.0,
-      "Max": 10.0,
-      "Description": "Faces meeting at less than this angle (degrees) are merged and their shared edge gets no bevel. 0 bevels every edge."
+      "Max": 10.0
     },
     {
       "InputId": "8d5c2a97-40e1-4b68-93fd-6b0e8c4a2d75"/*Async*/,

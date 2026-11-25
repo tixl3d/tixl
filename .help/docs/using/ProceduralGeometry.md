@@ -82,7 +82,7 @@ The curve operators turn fonts into 3D text:
 - [ExtrudeCurves] fills the outlines. With **Depth** above 0 it extrudes them into solid letters; **Bevel** and **BevelSegments** round or chamfer the edges. Keep the bevel below half the thinnest stroke, otherwise the surface folds over itself.
 - [SubdivideCurves] splits long segments into shorter ones without changing the shape — useful before deforming outlines.
 - [OffsetCurves] grows or shrinks outlines by a distance. Sharp corners stay closed with a miter, round or bevel join, and holes shrink while outlines grow.
-- [CurvesToPoints] flattens curves into a point list for [DrawLines] and the other point operators. Each point's Z axis faces away from the filled area, so oriented sprites, ribbons and instances follow the outline.
+- [CurvesToPoints] flattens curves into GPU points for [DrawLines] and the other point operators; [CurvesToCPoints] outputs the same as a CPU list for the CPoints operators. Each point's Z axis faces away from the filled area, so oriented sprites, ribbons and instances follow the outline.
 
 ## Parts, fracture and chunks
 

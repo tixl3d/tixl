@@ -35,9 +35,9 @@
   ],
   "Children": [
     {
-      "Id": "13ba78d9-6b98-428d-abc3-5521d46dc22b"/*CurvesToPoints*/,
+      "Id": "13ba78d9-6b98-428d-abc3-5521d46dc22b"/*CurvesToCPoints*/,
       "SymbolId": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "InputValues": [
         {
           "Id": "f9897a6d-acb2-4291-a3e0-aa2fee90cfd7"/*Sampling*/,
@@ -71,9 +71,9 @@
       ]
     },
     {
-      "Id": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8"/*CurvesToPoints*/,
+      "Id": "2d5e1e9f-358f-44bb-8608-6a5f09794eb8"/*CurvesToCPoints*/,
       "SymbolId": "6a1d8c3f-2b57-4e90-a4f6-c8e2d5b7f019",
-      "SymbolName": "Lib.geometry.convert.CurvesToPoints",
+      "SymbolName": "Lib.geometry.convert.CurvesToCPoints",
       "InputValues": [
         {
           "Id": "91c96818-ba39-4cec-af54-ae005c8610a5"/*PolygonEdges*/,
@@ -124,9 +124,9 @@
       "Outputs": []
     },
     {
-      "Id": "a5943dad-6fe7-4822-b4a4-503494301dae"/*ListToBuffer*/,
+      "Id": "a5943dad-6fe7-4822-b4a4-503494301dae"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -177,9 +177,9 @@
       "Outputs": []
     },
     {
-      "Id": "e02d0643-a166-4b8c-bf78-6dcf37f4d1b3"/*ListToBuffer*/,
+      "Id": "e02d0643-a166-4b8c-bf78-6dcf37f4d1b3"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     }
