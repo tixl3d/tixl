@@ -54,37 +54,9 @@ internal sealed class NewProjectDialog : ModalDialog
                                       autoFocus: ImGui.IsWindowAppearing());
                 
             // ProjectName
-            var warning = string.Empty;
-            var nameCorrect = true;
-            
-            if (!GraphUtils.IsIdentifierValid(_newProjectName))
-            {
-                warning = "Name must be a valid C# identifier.";
-                nameCorrect = false;
-            }   
-            else if (_newProjectName.Contains('.'))
-            {
-                warning = "Name must not contain dots.";
-                nameCorrect = false;
-            }
-            else if (!char.IsUpper(_newProjectName[0]))
-            {
-                // The name becomes the home symbol's class name; all-lowercase type names
-                // trigger CS8981 (reserved for future language keywords) on every build.
-                warning = "Name must start with a capital letter.";
-                nameCorrect = false;
-            }
-            else if (string.IsNullOrWhiteSpace(_newProjectName))
-            {
-                nameCorrect = false;
-            }
-            else if(DoesProjectWithNameExists(_newProjectName))
-            {
-                // Todo - can we actually just allow this provided the project namespaces are different?
-                warning = "A project with this name already exists.";
-                nameCorrect = false;
-            }
-                
+            var warning = ProjectRenaming.ValidateName(_newProjectName, renamedProjectFolder: null);
+            var nameCorrect = warning == null;
+
             //ImGui.SetKeyboardFocusHere();
             
             FormInputs.AddStringInput("Name", ref _newProjectName, "(mandatory)", warning, 
@@ -243,36 +215,6 @@ internal sealed class NewProjectDialog : ModalDialog
         }
     }
         
-    private static bool DoesProjectWithNameExists(string name)
-    {
-        foreach (var package in SymbolPackage.AllPackages)
-        {
-            if (package is not EditorSymbolPackage symbolPackage)
-                continue;
-            
-            if (!symbolPackage.HasHome)
-                continue;
-            
-            // TODO: it would be great with SymbolPackage would have a "Name" field
-            if (DoesStringMatchesLastPathItem(name, symbolPackage.AssemblyInformation.Name))
-            {
-                return true;
-            }
-        }
-            
-        return false;
-    }
-
-    private static bool DoesStringMatchesLastPathItem(string name, ReadOnlySpan<char> path)
-    {
-        var lastDot = path.LastIndexOf('.');
-        if (lastDot < 0) 
-            return false;
-        
-        var lastSegment = path.Slice(lastDot + 1);
-        return lastSegment.Equals(name, StringComparison.OrdinalIgnoreCase);
-    }
-
     private string _newProjectName = string.Empty;
     private string _newSubNamespace = string.Empty;
     private string _userName = string.Empty;

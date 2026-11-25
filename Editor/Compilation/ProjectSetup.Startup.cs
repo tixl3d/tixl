@@ -56,6 +56,9 @@ internal static partial class ProjectSetup
         // Installs and removals chosen in Settings -> Extensions; nothing of them is loaded yet
         InstalledExtensions.ApplyPendingChanges();
 
+        // Renames requested in the Hub; must run before the project files are found
+        ProjectRenaming.ApplyPendingRenames();
+
         if (!isDebugBuild)
         {
             // Load pre-built built-in packages as read-only

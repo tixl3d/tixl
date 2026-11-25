@@ -220,6 +220,7 @@ public static partial class T3Ui
     internal static readonly NewProjectDialog NewProjectDialog = new();
     internal static readonly ShareProjectDialog ShareProjectDialog = new();
     internal static readonly RestoreBackupDialog RestoreBackupDialog = new();
+    internal static readonly RenameProjectDialog RenameProjectDialog = new();
     private static readonly CouldNotLoadProjectDialog _couldNotLoadProjectDialog = new();
     private static readonly MissingOperatorsDialog _missingOperatorsDialog = new();
     private static readonly SendCrashReportsDialog _sendCrashReportsDialog = new();

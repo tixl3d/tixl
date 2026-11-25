@@ -8,7 +8,7 @@ Use **Add Project...** to create a new one. The gear icon next to it opens the p
 
 ## Loading
 
-Click a project to load and open it. Loading compiles the project and can take a moment; projects marked **(loaded)** switch instantly. To save GPU memory, only the few most recently shown projects stay loaded (see **Keep Projects Loaded** in the settings). Right-click → **Unload Project** frees one manually.
+Right-click a project, or click the gear icon on its row, for its options. Click a project to load and open it. Loading compiles the project and can take a moment; projects marked **(loaded)** switch instantly. To save GPU memory, only the few most recently shown projects stay loaded (see **Keep Projects Loaded** in the settings). Right-click → **Unload Project** frees one manually.
 
 ## Archiving
 
@@ -19,3 +19,7 @@ Right-click → **Archive Project** hides a project from the list without deleti
 TiXL writes a backup of your projects every few minutes into `.temp/Backup/` inside the project folder. Right-click a project → **Restore from Backup** to roll back to an earlier version; the current state is backed up first, so a restore can be undone. Projects that fail to load are listed under **Broken**, where you can restore a backup the same way.
 
 Right-click → **Share Project...** exports a copy of a project to pass on to others.
+
+## Renaming
+
+Right-click → **Rename Project...** changes the project's name. TiXL renames its folder, `.csproj`, namespace and home operator while it restarts. Other projects keep working with its operators. A backup of the state before the rename is kept, and restoring it undoes the rename.

@@ -159,14 +159,19 @@ internal static class ProjectsPanel
         ImGui.PushID(package.Folder);
         var isOpened = OpenedProject.OpenedProjects.TryGetValue(package, out var openedProject);
         var name = package.DisplayName;
+
+        // The options icon drawn on top of the row must win the hit test.
+        ImGui.SetNextItemAllowOverlap();
         var clicked = ImGui.InvisibleButton(name, ProjectItemSize);
-        var isHovered = ImGui.IsItemHovered();
+        ImGui.OpenPopupOnItemClick(ProjectContextMenuId, ImGuiPopupFlags.MouseButtonRight);
+        var isHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenOverlappedByItem);
         var backgroundColor = isHovered
                                   ? UiColors.ForegroundFull.Fade(0.1f)
                                   : UiColors.ForegroundFull.Fade(0.05f);
 
         var min = ImGui.GetItemRectMin();
         var max = ImGui.GetItemRectMax();
+        var cursorAfterRow = ImGui.GetCursorScreenPos();
         dl.AddRectFilled(min, max, backgroundColor, 6);
 
         var padding = 3f * T3Ui.UiScaleFactor;
@@ -208,6 +213,11 @@ internal static class ProjectsPanel
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
                        UiColors.StatusAttention, corruptLabel);
         }
+        else if (ProjectRenaming.GetPending(package.Folder) is { } pendingRename)
+        {
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
+                       UiColors.StatusAttention, GetPendingRenameLabel(pendingRename.NewName));
+        }
         else
         {
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, min + new Vector2(x, y),
@@ -223,17 +233,28 @@ internal static class ProjectsPanel
             ImGui.EndTooltip();
         }
 
+        var optionsIconSize = new Vector2(ImGui.GetFrameHeight());
+        var optionsIconPos = new Vector2(max.X - optionsIconSize.X - padding, min.Y + padding).Floor();
+
+        var thumbnailHeight = ProjectItemSize.Y - padding * 2;
+        var thumbnailSize = new Vector2(thumbnailHeight * 4 / 3f, thumbnailHeight);
+        var thumbnailPos = new Vector2(optionsIconPos.X - thumbnailSize.X - padding, min.Y + padding);
         var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package, ThumbnailManager.Categories.PackageMeta);
         if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
         {
-            var height = ProjectItemSize.Y - padding * 2;
-            var size = new Vector2(height * 4 / 3f, height);
-            var pos = new Vector2(max.X - size.X - padding, min.Y + padding);
             dl.AddImage((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId,
-                        pos,
-                        pos + size,
+                        thumbnailPos,
+                        thumbnailPos + thumbnailSize,
                         thumbnail.UvMin, thumbnail.UvMax);
         }
+
+        // Makes the context menu discoverable for people who don't think of right-clicking.
+        ImGui.SetCursorScreenPos(optionsIconPos);
+        if (CustomComponents.IconButton(Icon.Settings2, optionsIconSize))
+            ImGui.OpenPopup(ProjectContextMenuId);
+
+        CustomComponents.TooltipForLastItem("Project options");
+        ImGui.SetCursorScreenPos(cursorAfterRow);
 
         var wasOpened = false;
         if (clicked && hasCorruptFiles)
@@ -261,7 +282,7 @@ internal static class ProjectsPanel
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-        if (ImGui.BeginPopupContextItem("windows_context_menu"))
+        if (ImGui.BeginPopup(ProjectContextMenuId))
         {
             if (CustomComponents.DrawMenuItem(_revealInExplorerId, PlatformNames.RevealInFileBrowser, reserveIconColumn: false))
             {
@@ -273,6 +294,11 @@ internal static class ProjectsPanel
                 if (CustomComponents.DrawMenuItem(_shareProjectId, "Share Project...", reserveIconColumn: false))
                 {
                     T3Ui.ShareProjectDialog.ShowNextFrame(shareableProject);
+                }
+
+                if (CustomComponents.DrawMenuItem(_renameProjectId, "Rename Project...", reserveIconColumn: false))
+                {
+                    T3Ui.RenameProjectDialog.ShowNextFrame(shareableProject);
                 }
             }
 
@@ -438,6 +464,18 @@ internal static class ProjectsPanel
         ImGui.PopStyleVar();
 
         ImGui.PopID();
+    }
+
+    /** Cached per name: the row is drawn every frame and must not build the string each time. */
+    private static string GetPendingRenameLabel(string newName)
+    {
+        if (!_pendingRenameLabels.TryGetValue(newName, out var label))
+        {
+            label = $"Renamed to {newName} after restart";
+            _pendingRenameLabels[newName] = label;
+        }
+
+        return label;
     }
 
     public static Vector2 ProjectItemSize => new Vector2(400, 65) * T3Ui.UiScaleFactor;
@@ -693,7 +731,9 @@ internal static class ProjectsPanel
     private const string HelpDocId = "ProjectPanel";
     private const string HelpUrl = "https://help.tixl.app/using/";
 
+    private const string ProjectContextMenuId = "windows_context_menu";
     private static readonly Dictionary<string, (double LastUpdate, string Label)> _savedInfoLabels = new();
+    private static readonly Dictionary<string, string> _pendingRenameLabels = new();
     private static readonly List<(string Label, AutoBackup.AutoBackup.BackupEntry Entry)> _backupMenuItems = new();
     private static readonly Dictionary<string, int> _backupSymbolCountsByPath = new();
     private static readonly ConcurrentDictionary<string, BackupContentStats> _backupContentStats = new();
@@ -707,6 +747,7 @@ internal static class ProjectsPanel
 
     private static readonly int _revealInExplorerId = nameof(_revealInExplorerId).GetHashCode();
     private static readonly int _shareProjectId = nameof(_shareProjectId).GetHashCode();
+    private static readonly int _renameProjectId = nameof(_renameProjectId).GetHashCode();
     private static readonly int _restoreFromBackupId = nameof(_restoreFromBackupId).GetHashCode();
     private static readonly int _unloadProjectId = nameof(_unloadProjectId).GetHashCode();
     private static readonly int _archiveProjectId = nameof(_archiveProjectId).GetHashCode();

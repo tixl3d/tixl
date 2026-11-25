@@ -133,6 +133,7 @@ public static partial class T3Ui
         NewProjectDialog.Draw();
         ShareProjectDialog.Draw();
         RestoreBackupDialog.Draw();
+        RenameProjectDialog.Draw();
         _couldNotLoadProjectDialog.Draw();
         _missingOperatorsDialog.Draw();
         _sendCrashReportsDialog.Draw();
