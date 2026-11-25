@@ -538,6 +538,41 @@ Iterations 2) -> [GeometryToMesh] -> [DrawMesh], and compare with Lattice 0.
 - With a Bevel, or a Lattice so small that it needs more than 40000 cells, the op warns and builds the plain caps.
 - [FillCurves] with Lattice gives the same grid as a flat surface.
 
+## Step: Inset the filled outline
+
+**Action:**
+Connect [StringToCurves] (text `TiXL\naeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] (Inset 0.02)
+-> [GeometryToMesh] -> [DrawMesh] and look at the Stats of [FillCurves].
+
+**Expected:**
+- A ring of quads runs along every outline, with the fill inside it; the outer bounds and the silhouette don't change.
+- The Stats show no non-manifold edges; boundary edges are the outline edges, plus a few where a tiny counter collapses.
+- Set Lattice 0.05: the cap inside the ring becomes a grid, but the ring stays one quad per outline edge: the cap's
+  border cells snap to the nearest inset point instead of adding points on the ring. No non-manifold edges appear.
+  Without the ring, the letters show long triangles from the outline.
+- Set Inset 0.5 on letters with a thin stem: the op warns that the inset was limited, and the rings stop before
+  opposite outlines overlap.
+- Weight still offsets the whole letter first; the ring is built inside the offset outline.
+- Add [ColorFacesFromAttribute] (Attribute `IsInset`, Colors white and blue): the ring faces become blue and the cap
+  stays white; with Inset 0 every face stays white.
+- With Lazenby Computer Liquid and text `Cc`, both letters get a complete inset ring: hairline edges in the outlines
+  are welded before insetting.
+
+## Step: Constrained Delaunay caps
+
+**Action:**
+Connect [StringToCurves] (text `aeBC`) -> [SubdivideCurves] (MaxEdgeLength 0.05) -> [FillCurves] -> [GeometryToMesh]
+-> [DrawMesh]. Toggle ConstrainedDelaunay and compare, also with Inset and Lattice on.
+
+**Expected:**
+- With ConstrainedDelaunay on, the caps show fewer and less extreme long thin triangles than the default fill; holes
+  stay open and the Stats keep the same area.
+- Turning it off restores the default fill. With Lattice and ConstrainedDelaunay on, the cap keeps the lattice's point
+  density but is triangulated into better-shaped triangles instead of quads; with Lattice alone it stays a grid of
+  quads. With Inset the cap still meets the ring without gaps or non-manifold edges. Where the inset rings cross, the
+  op warns and falls back to the regular cap (the lattice grid if it is on, otherwise the default fill).
+- On very thin stems some slivers can remain because the outline points are fixed; the op does not warn.
+
 ## Step: Polygon edges as lines
 
 **Action:**

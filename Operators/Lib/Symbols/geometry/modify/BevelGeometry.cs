@@ -477,38 +477,16 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
                 var previous = c == start ? end - 1 : c - 1;
                 var next = c + 1 == end ? start : c + 1;
                 var p = positions[cornerPoints[c]];
-                _skeleton.Add(new SkeletonVertex(p,
-                                                 _cornerVelocities[c],
-                                                 EdgeInwardNormal(positions[cornerPoints[previous]], p, faceNormal),
-                                                 EdgeInwardNormal(p, positions[cornerPoints[next]], faceNormal),
-                                                 c - start == 0 ? count - 1 : c - start - 1,
-                                                 c - start + 1 == count ? 0 : c - start + 1));
+                _skeleton.Add(new StraightSkeletonInset.Vertex(p,
+                                                               _cornerVelocities[c],
+                                                               StraightSkeletonInset.EdgeInwardNormal(positions[cornerPoints[previous]], p, faceNormal),
+                                                               StraightSkeletonInset.EdgeInwardNormal(p, positions[cornerPoints[next]], faceNormal),
+                                                               c - start == 0 ? count - 1 : c - start - 1,
+                                                               c - start + 1 == count ? 0 : c - start + 1));
                 _cornerSlots.Add(c - start);
             }
 
-            var alive = count;
-            var time = 0f;
-            var limit = width;
-            while (alive > 2)
-            {
-                var collapseSlot = FindNextEdgeCollapse(time, out var collapseTime);
-                var splitTime = FindFirstSplit(faceNormal, time);
-                if (splitTime < limit && splitTime <= collapseTime)
-                {
-                    limit = time + (splitTime - time) * SplitSafety;
-                    break;
-                }
-
-                if (collapseSlot < 0 || collapseTime >= limit)
-                    break;
-
-                MergeWithNext(collapseSlot, collapseTime);
-                time = collapseTime;
-                alive--;
-            }
-
-            if (alive <= 2)
-                limit = time; // the face shrank to a ridge or a point - moving on would cross it
+            var limit = _skeleton.Limit(width, faceNormal, token);
 
             // Corners that arrive at the same spot (a face shrunk to a point or ridge) share one point
             var weldDistanceSq = MathF.Max(limit * CollapseWeldFactor, 1e-7f);
@@ -521,7 +499,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
                     continue;
 
                 var position = vertex.Origin + vertex.Velocity * limit;
-                var previousSlot = vertex.Previous;
+                var previousSlot = _skeleton.ResolveSlot(vertex.Previous);
                 if (previousSlot < slot && _slotPointIds[previousSlot] >= 0
                     && Vector3.DistanceSquared(_outPositions[_slotPointIds[previousSlot]], position) < weldDistanceSq)
                 {
@@ -534,105 +512,8 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
             for (var local = 0; local < count; local++)
             {
-                _insetPointIds[start + local] = _slotPointIds[_cornerSlots[local]];
+                _insetPointIds[start + local] = _slotPointIds[_skeleton.ResolveSlot(_cornerSlots[local])];
             }
-        }
-    }
-
-    /// <summary>The alive slot whose outgoing edge shrinks to zero first after <paramref name="time"/>.</summary>
-    private int FindNextEdgeCollapse(float time, out float collapseTime)
-    {
-        collapseTime = float.PositiveInfinity;
-        var bestSlot = -1;
-        for (var slot = 0; slot < _skeleton.Count; slot++)
-        {
-            var vertex = _skeleton[slot];
-            if (!vertex.Alive)
-                continue;
-
-            var next = _skeleton[vertex.Next];
-            var direction = EdgeDirection(vertex.NextNormal, next.Origin - vertex.Origin);
-            var shrinkRate = Vector3.Dot(vertex.Velocity - next.Velocity, direction);
-            if (shrinkRate <= 1e-6f)
-                continue;
-
-            var t = MathF.Max(Vector3.Dot(next.Origin - vertex.Origin, direction) / shrinkRate, time);
-            if (t < collapseTime)
-            {
-                collapseTime = t;
-                bestSlot = slot;
-            }
-        }
-
-        return bestSlot;
-    }
-
-    /// <summary>The time a concave corner first reaches a non-adjacent edge (a split event), or infinity.</summary>
-    private float FindFirstSplit(Vector3 faceNormal, float time)
-    {
-        var splitTime = float.PositiveInfinity;
-        for (var slot = 0; slot < _skeleton.Count; slot++)
-        {
-            var vertex = _skeleton[slot];
-            if (!vertex.Alive || Vector3.Dot(Vector3.Cross(vertex.PreviousNormal, vertex.NextNormal), faceNormal) >= -1e-6f)
-                continue; // only concave corners can split a face
-
-            for (var edgeSlot = 0; edgeSlot < _skeleton.Count; edgeSlot++)
-            {
-                var edgeStart = _skeleton[edgeSlot];
-                if (!edgeStart.Alive || edgeSlot == slot || edgeStart.Next == slot)
-                    continue;
-
-                // Signed distance of the corner to the edge's line, which moves inward at unit speed
-                var approachRate = Vector3.Dot(vertex.Velocity - edgeStart.Velocity, edgeStart.NextNormal);
-                if (approachRate >= -1e-6f)
-                    continue;
-
-                var t = -Vector3.Dot(vertex.Origin - edgeStart.Origin, edgeStart.NextNormal) / approachRate;
-                if (t <= time || t >= splitTime)
-                    continue;
-
-                var edgeEnd = _skeleton[edgeStart.Next];
-                var a = edgeStart.Origin + edgeStart.Velocity * t;
-                var b = edgeEnd.Origin + edgeEnd.Velocity * t;
-                var hit = vertex.Origin + vertex.Velocity * t;
-                var ab = b - a;
-                var lengthSq = ab.LengthSquared();
-                if (lengthSq < 1e-20f)
-                    continue;
-
-                var along = Vector3.Dot(hit - a, ab) / lengthSq;
-                if (along >= 0 && along <= 1)
-                    splitTime = t;
-            }
-        }
-
-        return splitTime;
-    }
-
-    /** Removes the edge after <paramref name="slot"/>: both of its corners continue as one. */
-    private void MergeWithNext(int slot, float time)
-    {
-        var vertex = _skeleton[slot];
-        var nextSlot = vertex.Next;
-        var next = _skeleton[nextSlot];
-        var position = (vertex.Origin + vertex.Velocity * time + next.Origin + next.Velocity * time) * 0.5f;
-        var velocity = MiterVelocity(vertex.PreviousNormal, next.NextNormal);
-
-        _skeleton[slot] = vertex with
-                              {
-                                  Origin = position - velocity * time,
-                                  Velocity = velocity,
-                                  NextNormal = next.NextNormal,
-                                  Next = next.Next,
-                              };
-        _skeleton[next.Next] = _skeleton[next.Next] with { Previous = slot };
-        _skeleton[nextSlot] = next with { Alive = false };
-
-        for (var local = 0; local < _cornerSlots.Count; local++)
-        {
-            if (_cornerSlots[local] == nextSlot)
-                _cornerSlots[local] = slot;
         }
     }
 
@@ -1018,41 +899,10 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
                 var previous = positions[cornerPoints[c == start ? end - 1 : c - 1]];
                 var next = positions[cornerPoints[c + 1 == end ? start : c + 1]];
                 var p = positions[cornerPoints[c]];
-                _cornerVelocities[c] = MiterVelocity(EdgeInwardNormal(previous, p, faceNormal), EdgeInwardNormal(p, next, faceNormal));
+                _cornerVelocities[c] = StraightSkeletonInset.MiterVelocity(StraightSkeletonInset.EdgeInwardNormal(previous, p, faceNormal),
+                                                                          StraightSkeletonInset.EdgeInwardNormal(p, next, faceNormal));
             }
         }
-    }
-
-    /// <summary>
-    /// Velocity of a corner between two edges moving along their inward normals at unit speed. Unlike the
-    /// bisector of the edge directions it points into the face at concave corners too.
-    /// </summary>
-    private static Vector3 MiterVelocity(Vector3 inwardA, Vector3 inwardB)
-    {
-        // A near-180° spike would need an unbounded miter; its sum vanishes, so the corner stays put
-        return (inwardA + inwardB) / MathF.Max(1f + Vector3.Dot(inwardA, inwardB), MinMiterDenominator);
-    }
-
-    /** Points into a counter-clockwise face (seen from its normal), perpendicular to the edge. */
-    private static Vector3 EdgeInwardNormal(Vector3 from, Vector3 to, Vector3 faceNormal)
-    {
-        var inward = Vector3.Cross(faceNormal, to - from);
-        var length = inward.Length();
-        return length > 1e-12f ? inward / length : Vector3.Zero;
-    }
-
-    /** Recovers the direction of a skeleton edge from its inward normal; falls back to the chord for degenerate edges. */
-    private static Vector3 EdgeDirection(Vector3 inwardNormal, Vector3 chord)
-    {
-        if (inwardNormal.LengthSquared() > 0.5f)
-        {
-            var faceNormal = Vector3.Cross(chord, inwardNormal);
-            if (faceNormal.LengthSquared() > 1e-20f)
-                return Vector3.Normalize(Vector3.Cross(inwardNormal, Vector3.Normalize(faceNormal)));
-        }
-
-        var length = chord.Length();
-        return length > 1e-12f ? chord / length : Vector3.Zero;
     }
 
     private static void ComputeFaceNormals(Geometry mesh, ref Vector3[] faceNormals)
@@ -1209,21 +1059,11 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
 
     public bool TryGetProgress(out float progress) => _asyncComputation.TryGetUiProgress(out progress);
 
-    /// <summary>A corner of a face being shrunk: its position at time t is Origin + Velocity * t.</summary>
-    private readonly record struct SkeletonVertex(Vector3 Origin, Vector3 Velocity, Vector3 PreviousNormal, Vector3 NextNormal,
-                                                  int Previous, int Next, bool Alive = true);
-
     /** Fraction of an edge, or of the distance to another edge of the face, a corner may move across. */
     private const float MaxShareOfDistance = 0.45f;
 
-    /** Stops a concave face this far before a corner would touch the opposite edge. */
-    private const float SplitSafety = 0.9f;
-
     /** Skeleton corners closer than this fraction of the width after the inset are welded. */
     private const float CollapseWeldFactor = 1e-3f;
-
-    /** 1 + cos of the turn between two edge normals; caps miter length at sharp spikes. */
-    private const float MinMiterDenominator = 0.02f;
 
     private readonly Geometry _output = new();
     private readonly AsyncComputation<Geometry> _asyncComputation = new();
@@ -1232,7 +1072,7 @@ internal sealed class BevelGeometry : Instance<BevelGeometry>, IProgressProvider
     private readonly List<int> _outFaceOffsets = [];
     private readonly List<int> _outCorners = [];
     private readonly List<int> _polygon = [];
-    private readonly List<SkeletonVertex> _skeleton = [];
+    private readonly StraightSkeletonInset _skeleton = new();
     private readonly List<int> _cornerSlots = [];
     private readonly Dictionary<(int PointId, int LowInsetId, int HighInsetId), int[]> _ringsByEnds = [];
     private int[] _slotPointIds = new int[64];

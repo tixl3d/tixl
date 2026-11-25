@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "bf4daa46-ed0f-4a87-9ba1-93631b2ca29a"/*DelaunayMesh*/,
-  "Description": "Generates a flat mesh by Delaunay triangulation of a closed boundary outline on the XY plane.\n\nThe boundary points are treated as an ordered polygon; separators are ignored. The inside can be filled with evenly spaced random points (FillDensity) or with a custom point list (ExtraPoints). UVs are mapped to the bounding box of the points. Only the X and Y coordinates are used.\n\nAKA: triangulate, fill, polygon\n\nSee also: [NGonMesh], [QuadMesh]",
+  "Description": "Generates a flat mesh by constrained Delaunay triangulation of a closed boundary outline on the XY plane. The boundary points become constraint edges, so concave outlines are filled correctly.\n\nThe boundary points are treated as an ordered polygon; separators are ignored. The inside can be filled with evenly spaced random points (FillDensity) or with a custom point list (ExtraPoints). UVs are mapped to the bounding box of the points. Only the X and Y coordinates are used.\n\nAKA: triangulate, fill, polygon\n\nSee also: [NGonMesh], [QuadMesh]",
   "SymbolTags": "192",
   "InputUis": [
     {

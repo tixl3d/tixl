@@ -1,13 +1,14 @@
 using T3.Core.Rendering;
 using T3.Core.Utils;
 
-using DelaunatorSharp;
+using CDT;
 
 
 
 namespace Lib.mesh.generate;
 
 [Guid("bf4daa46-ed0f-4a87-9ba1-93631b2ca29a")]
+[ExportDependencies("CDT.Core.dll")]
 internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 {
     [Output(Guid = "6c85e367-f91c-4f3d-9d3d-e422a521e3a9")]
@@ -157,9 +158,9 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             pointArray = subdividedPoints.ToArray();
 
             // Store original boundary points before adding fill points
-            var originalBoundaryCount = pointArray.Length;
-            var boundaryPolygon = new Vector2[originalBoundaryCount];
-            for (int i = 0; i < originalBoundaryCount; i++)
+            var boundaryPointCount = pointArray.Length;
+            var boundaryPolygon = new Vector2[boundaryPointCount];
+            for (int i = 0; i < boundaryPointCount; i++)
             {
                 boundaryPolygon[i] = new Vector2(pointArray[i].Position.X, pointArray[i].Position.Y);
             }
@@ -268,19 +269,15 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 }
             }
 
-            // Use the combined point array for triangulation
-            pointArray = allPoints.ToArray();
+            // Triangulate the boundary with the fill points as free interior vertices. The boundary becomes
+            // constraint edges, so concave outlines are filled without keeping triangles outside.
+            if (!TryTriangulate(allPoints, boundaryPointCount, boundaryPolygon, out var vertices, out var triangles))
+            {
+                Log.Warning("DelaunayMesh: Triangulation produced no triangles");
+                return;
+            }
 
-
-            // Convert Point array to IPoint array for Delaunator (only x,y coordinates)
-            var delaunatorPoints = pointArray.Select(p => new DelaunatorSharp.Point(p.Position.X, p.Position.Y) as IPoint).ToArray();
-
-            // Perform Delaunay triangulation
-            var delaunay = new Delaunator(delaunatorPoints);
-       
-            // Get vertices and triangles count
-            var verticesCount = pointArray.Length;
-            var triangleCount = delaunay.Triangles.Length / 3;
+            var verticesCount = vertices.Count;
 
             // Calculate bounds for UV mapping
             var minX = float.MaxValue;
@@ -288,7 +285,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             var minY = float.MaxValue;
             var maxY = float.MinValue;
 
-            foreach (var point in pointArray)
+            foreach (var point in vertices)
             {
                 var x = point.Position.X;
                 var y = point.Position.Y;
@@ -314,7 +311,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 
             for (int i = 0; i < verticesCount; i++)
             {
-                var point = pointArray[i];
+                var point = vertices[i];
                 var pos = point.Position;
                 var color = new Vector3( point.Color.X, point.Color.Y, point.Color.Z);
 
@@ -335,43 +332,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 };
             }
 
-            // Filter triangles based on edge length and boundary
-            var validTriangles = new List<Int3>();
-           
-
-            for (int i = 0; i < triangleCount; i++)
-            {
-                var idx0 = delaunay.Triangles[i * 3];
-                var idx1 = delaunay.Triangles[i * 3 + 1];
-                var idx2 = delaunay.Triangles[i * 3 + 2];
-
-                var p0 = pointArray[idx0].Position;
-                var p1 = pointArray[idx1].Position;
-                var p2 = pointArray[idx2].Position;
-
-                bool keepTriangle = true;
-
-                // Boundary filtering - check if triangle centroid is inside boundary polygon
-                if (keepTriangle)
-                {
-                    var centroid = new Vector2(
-                        (p0.X + p1.X + p2.X) / 3f,
-                        (p0.Y + p1.Y + p2.Y) / 3f
-                    );
-
-                    if (!IsPointInPolygon(centroid, boundaryPolygon))
-                    {
-                        keepTriangle = false;
-                    }
-                }
-
-                if (keepTriangle)
-                {
-                    validTriangles.Add(new Int3(idx0, idx2, idx1)); // Reversed winding order for Tixl's back-face culling
-                }
-            }
-
-            var faceCount = validTriangles.Count;
+            var faceCount = triangles.Count;
 
             // Create index buffer
             if (_indexBufferData.Length != faceCount)
@@ -381,7 +342,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 
             for (int i = 0; i < faceCount; i++)
             {
-                _indexBufferData[i] = validTriangles[i];
+                _indexBufferData[i] = triangles[i];
             }
 
             // Update GPU buffers
@@ -406,6 +367,101 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
         {
             Log.Error("Failed to create Delaunay mesh: " + e.Message);
         }
+    }
+
+    /// <summary>
+    /// Triangulates the first <paramref name="boundaryPointCount"/> points as a closed constraint loop, with any
+    /// following points as free interior vertices. Falls back to a convex-hull triangulation filtered by the
+    /// boundary when the outline can't be constrained, for example because it intersects itself.
+    /// </summary>
+    private static bool TryTriangulate(List<Point> points, int boundaryPointCount, Vector2[] boundaryPolygon,
+                                       out List<Point> vertices, out List<Int3> triangles)
+    {
+        vertices = [];
+        triangles = [];
+        if (points.Count < boundaryPointCount || boundaryPointCount < 3)
+            return false;
+
+        // CDT requires unique vertices; this also keeps fill points from duplicating boundary points.
+        var vertexIndices = new Dictionary<Vector2, int>();
+        var boundaryIndices = new int[boundaryPointCount];
+        for (var i = 0; i < points.Count; i++)
+        {
+            var point = points[i];
+            var position = new Vector2(point.Position.X, point.Position.Y);
+            if (!vertexIndices.TryGetValue(position, out var index))
+            {
+                index = vertices.Count;
+                vertexIndices.Add(position, index);
+                vertices.Add(point);
+            }
+
+            if (i < boundaryPointCount)
+                boundaryIndices[i] = index;
+        }
+
+        var cdtVertices = new List<V2d<double>>(vertices.Count);
+        foreach (var point in vertices)
+            cdtVertices.Add(new V2d<double>(point.Position.X, point.Position.Y));
+
+        var edges = new List<Edge>(boundaryPointCount);
+        for (var i = 0; i < boundaryPointCount; i++)
+        {
+            var a = boundaryIndices[i];
+            var b = boundaryIndices[(i + 1) % boundaryPointCount];
+            if (a != b)
+                edges.Add(new Edge(a, b));
+        }
+
+        if (edges.Count < 3)
+            return false;
+
+        var constrained = true;
+        var triangulation = new Triangulation<double>();
+        try
+        {
+            triangulation.InsertVertices(cdtVertices);
+            triangulation.InsertEdges(edges);
+            triangulation.EraseOuterTriangles();
+        }
+        catch (Exception exception)
+        {
+            constrained = false;
+            Log.Warning($"DelaunayMesh: Constrained triangulation failed ({exception.Message}); using a convex hull instead.");
+            triangulation = new Triangulation<double>();
+            try
+            {
+                triangulation.InsertVertices(cdtVertices);
+                triangulation.EraseSuperTriangle();
+            }
+            catch (Exception fallbackException)
+            {
+                Log.Error("DelaunayMesh: Failed to triangulate points: " + fallbackException.Message);
+                return false;
+            }
+        }
+
+        foreach (var triangle in triangulation.Triangles.Span)
+        {
+            if (triangle.V0 < 0 || triangle.V1 < 0 || triangle.V2 < 0
+                || triangle.V0 >= vertices.Count || triangle.V1 >= vertices.Count || triangle.V2 >= vertices.Count)
+                continue;
+
+            if (!constrained)
+            {
+                var p0 = vertices[triangle.V0].Position;
+                var p1 = vertices[triangle.V1].Position;
+                var p2 = vertices[triangle.V2].Position;
+                var centroid = new Vector2((p0.X + p1.X + p2.X) / 3f, (p0.Y + p1.Y + p2.Y) / 3f);
+                if (!IsPointInPolygon(centroid, boundaryPolygon))
+                    continue;
+            }
+
+            // CDT triangulates counter-clockwise, the winding Tixl's front faces use
+            triangles.Add(new Int3(triangle.V0, triangle.V1, triangle.V2));
+        }
+
+        return triangles.Count > 0;
     }
 
     // Point-in-polygon test using ray casting algorithm

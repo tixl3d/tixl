@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "daab8738-babd-4036-8581-22e3dc55e4ba"/*FillCurves*/,
-  "Description": "Fills the closed curves of a geometry with flat polygons, holes included, for example to turn [StringToCurves] into flat letters.\n\nThe result is a regular polygon geometry: it can be subdivided, displaced, transformed or colored before [GeometryToMesh] draws it. To only render flat shapes, connect the curves to [GeometryToMesh] directly; it fills closed curves itself. For depth, walls and bevels use [ExtrudeCurves].\n\nPoint attributes of the curves carry over: outline points take the value at their place on the curve, lattice points blend between the outlines to their left and right. Part attributes are kept.\n\nAKA: fill, polyfill, triangulate curves, flat text, cap\n\nTips\n- [StringToCurves] -> FillCurves -> [SubdivideGeometry] (Smoothness 0) -> [DisplaceGeometry] gives letters with enough points to deform.",
+  "Description": "Fills the closed curves of a geometry with flat polygons, holes included, for example to turn [StringToCurves] into flat letters.\n\nThe result is a regular polygon geometry: it can be subdivided, displaced, transformed or colored before [GeometryToMesh] draws it. To only render flat shapes, connect the curves to [GeometryToMesh] directly; it fills closed curves itself. For depth, walls and bevels use [ExtrudeCurves].\n\nInset adds a ring of quads along the outline with a smaller cap inside, so the boundary has an edge loop to hold when subdividing or deforming. The ring faces are tagged with the `IsInset` primitive attribute (1), the cap with 0, so [ColorFacesFromAttribute] can tint them.\n\nPoint attributes of the curves carry over: outline points take the value at their place on the curve, lattice points blend between the outlines to their left and right. Part attributes are kept.\n\nAKA: fill, polyfill, triangulate curves, flat text, cap\n\nTips\n- [StringToCurves] -> FillCurves -> [SubdivideGeometry] (Smoothness 0) -> [DisplaceGeometry] gives letters with enough points to deform.",
   "InputUis": [
     {
       "InputId": "02b5e3a3-064e-4e1b-85b9-1d3ca685958d"/*EvenOdd*/,
@@ -37,6 +37,17 @@
       "Scale": 0.01
     },
     {
+      "InputId": "9e4961ef-ebd1-43d9-b505-bd591101551c"/*Inset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 270.0
+      },
+      "Min": 0.0,
+      "Max": 0.2,
+      "Description": "Width of a ring of quads along the outline, with the cap filled inside it (0: off). The boundary gets an edge loop to hold when subdividing or deforming. Limited so thin stems keep a cap between their sides.",
+      "Scale": 0.005
+    },
+    {
       "InputId": "d1deb9b8-6ffd-476b-b9b4-fbd32845b0f0"/*Tolerance*/,
       "Position": {
         "X": 0.0,
@@ -52,7 +63,15 @@
       },
       "Min": 0.0,
       "Max": 0.2,
-      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. Not combined with a bevel."
+      "Description": "Cell size of a grid that splits the flat caps into regular quads (0: off), so [SubdivideGeometry] and deformers don't produce long thin triangles. Where the outline crosses a grid line it gets a point, unless a corner is within a tenth of a cell. With Inset, the cap's border cells snap to the nearest inset point instead, so the inset ring keeps its quads. With ConstrainedDelaunay, the grid points become vertices of the Delaunay triangulation instead. Not combined with a bevel."
+    },
+    {
+      "InputId": "c78b348e-1e02-492e-be16-b70c5994f88d"/*ConstrainedDelaunay*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 495.0
+      },
+      "Description": "Triangulates the caps with a constrained Delaunay triangulation instead of the default fill. Its triangles have better shapes, avoiding the long thin ones that fold when the cap is subdivided or deformed. With Lattice, the lattice's grid points become additional interior vertices, so the cap keeps its point density. Falls back to a regular cap and warns where the outlines can't be constrained, such as self-intersecting inset rings."
     }
   ],
   "SymbolChildUis": [],
