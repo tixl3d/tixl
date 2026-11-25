@@ -362,6 +362,9 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal OrderedDictionary<Guid, IOutputUi> OutputUis { get; private set; }
     internal OrderedDictionary<Guid, Section> Sections { get; private set; }
 
+    /// <summary>Manual paths of connection lines in this composition.</summary>
+    internal ConnectionRoutes ConnectionRoutes { get; private set; } = new();
+
     internal void ReplaceWith(SymbolUi newSymbolUi)
     {
         _childUis = newSymbolUi._childUis;
@@ -370,6 +373,7 @@ public sealed partial class SymbolUi : ISelectionContainer
         OutputUis = newSymbolUi.OutputUis;
         Sections = newSymbolUi.Sections;
         Links = newSymbolUi.Links;
+        ConnectionRoutes = newSymbolUi.ConnectionRoutes;
         Description = newSymbolUi.Description;
     }
 

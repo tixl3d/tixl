@@ -10,6 +10,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.Selection;
@@ -161,6 +162,8 @@ internal sealed partial class MagGraphView
                 HighlightSplitInsertionPoints(drawList, _context);
 
             // Draw connections
+            _connectionRoutes = _context.CompositionInstance.Symbol.GetSymbolUi().ConnectionRoutes;
+            _context.ConnectionRouting.PrepareFrame();
             foreach (var connection in _context.Layout.MagConnections)
             {
                 DrawConnection(connection, drawList, _context);

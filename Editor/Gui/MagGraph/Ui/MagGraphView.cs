@@ -460,6 +460,8 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                     || _context.StateMachine.CurrentState == GraphStates.HoldBackground)
                 && _context.StateMachine.StateTime > 0.01f // Prevent glitches when coming from other states.
                 && !FrameStats.Last.OpenedPopupCapturedMouse
+                // Route editing takes the click; a fence already running may pass over a route point.
+                && (selectionFence.State != SelectionFence.States.Inactive || !_context.ConnectionRouting.CapturesClick)
             ;
 
         if (!shouldBeActive)
@@ -602,6 +604,9 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
     // ReSharper disable once FieldCanBeMadeReadOnly.Global
     public bool ShowDebug = false; //ImGui.GetIO().KeyAlt;
+
+    /** Alt while dragging a route point must not pan the canvas away under it. */
+    internal protected override bool PansWithAltDrag => !_context.ConnectionRouting.IsDraggingPoint;
 
     private Guid _lastHoverId;
     private double _hoverStartTime;

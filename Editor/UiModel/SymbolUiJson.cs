@@ -37,6 +37,7 @@ internal static class SymbolUiJson
             WriteSections(symbolUi, writer);
             WriteLinks(symbolUi, writer);
             WriteTourPoints(symbolUi, writer);
+            WriteConnectionRoutes(symbolUi, writer);
             WriteSettings(symbolUi, writer);
             writer.WriteEndObject();
         }
@@ -294,6 +295,145 @@ internal static class SymbolUiJson
         writer.WriteEndArray();
     }
 
+    /// <summary>
+    /// Writes only routes of connections that still exist and the points they use, so stale routes kept for undo
+    /// don't reach the file.
+    /// </summary>
+    private static void WriteConnectionRoutes(SymbolUi symbolUi, JsonTextWriter writer)
+    {
+        var connectionRoutes = symbolUi.ConnectionRoutes;
+        if (connectionRoutes.IsEmpty)
+            return;
+
+        var existingConnections = new HashSet<ConnectionRoutes.Key>();
+        foreach (var connection in symbolUi.Symbol.Connections)
+        {
+            existingConnections.Add(ConnectionRoutes.Key.From(connection));
+        }
+
+        var routesToWrite = new List<(ConnectionRoutes.Key Key, List<Guid> PointIds)>();
+        var usedPointIds = new HashSet<Guid>();
+        foreach (var (key, pointIds) in connectionRoutes.Routes)
+        {
+            if (!existingConnections.Contains(key))
+                continue;
+
+            var validPointIds = new List<Guid>(pointIds.Count);
+            foreach (var pointId in pointIds)
+            {
+                if (connectionRoutes.Points.ContainsKey(pointId))
+                    validPointIds.Add(pointId);
+            }
+
+            if (validPointIds.Count == 0)
+                continue;
+
+            routesToWrite.Add((key, validPointIds));
+            usedPointIds.UnionWith(validPointIds);
+        }
+
+        if (routesToWrite.Count == 0)
+            return;
+
+        writer.WritePropertyName(JsonKeys.ConnectionRoutes);
+        writer.WriteStartObject();
+
+        writer.WritePropertyName(JsonKeys.Points);
+        writer.WriteStartArray();
+        foreach (var pointId in usedPointIds.OrderBy(id => id))
+        {
+            writer.WriteStartObject();
+            writer.WriteObject(JsonKeys.Id, pointId);
+            writer.WritePropertyName(JsonKeys.Position);
+            _vector2ToJson(writer, connectionRoutes.Points[pointId]);
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
+
+        writer.WritePropertyName(JsonKeys.Routes);
+        writer.WriteStartArray();
+        foreach (var (key, pointIds) in routesToWrite.OrderBy(r => r.Key.TargetParentOrChildId)
+                                                     .ThenBy(r => r.Key.TargetSlotId)
+                                                     .ThenBy(r => r.Key.SourceParentOrChildId)
+                                                     .ThenBy(r => r.Key.SourceSlotId))
+        {
+            writer.WriteStartObject();
+            writer.WriteObject(JsonKeys.SourceParentOrChildId, key.SourceParentOrChildId);
+            writer.WriteObject(JsonKeys.SourceSlotId, key.SourceSlotId);
+            writer.WriteObject(JsonKeys.TargetParentOrChildId, key.TargetParentOrChildId);
+            writer.WriteObject(JsonKeys.TargetSlotId, key.TargetSlotId);
+
+            writer.WritePropertyName(JsonKeys.PointIds);
+            writer.WriteStartArray();
+            foreach (var pointId in pointIds)
+            {
+                writer.WriteValue(pointId.ToString());
+            }
+
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
+        writer.WriteEndObject();
+    }
+
+    private static void ReadConnectionRoutes(JToken mainObject, ConnectionRoutes connectionRoutes)
+    {
+        if (mainObject[JsonKeys.ConnectionRoutes] is not JObject routesObject)
+            return;
+
+        if (routesObject[JsonKeys.Points] is JArray pointsArray)
+        {
+            foreach (var pointEntry in pointsArray)
+            {
+                if (!JsonUtils.TryGetGuid(pointEntry[JsonKeys.Id], out var pointId))
+                {
+                    Log.Warning("Skipping connection route point with missing or invalid id");
+                    continue;
+                }
+
+                connectionRoutes.Points[pointId] = GetVec2OrDefault(pointEntry[JsonKeys.Position]);
+            }
+        }
+
+        if (routesObject[JsonKeys.Routes] is not JArray routesArray)
+            return;
+
+        foreach (var routeEntry in routesArray)
+        {
+            if (!JsonUtils.TryGetGuid(routeEntry[JsonKeys.SourceSlotId], out var sourceSlotId)
+                || !JsonUtils.TryGetGuid(routeEntry[JsonKeys.TargetSlotId], out var targetSlotId))
+            {
+                Log.Warning("Skipping connection route with missing or invalid slot ids");
+                continue;
+            }
+
+            // The composition's own inputs and outputs are stored as Guid.Empty, like in Symbol.Connection.
+            JsonUtils.TryGetGuid(routeEntry[JsonKeys.SourceParentOrChildId], out var sourceParentOrChildId);
+            JsonUtils.TryGetGuid(routeEntry[JsonKeys.TargetParentOrChildId], out var targetParentOrChildId);
+
+            if (routeEntry[JsonKeys.PointIds] is not JArray pointIdsArray)
+                continue;
+
+            var pointIds = new List<Guid>(pointIdsArray.Count);
+            foreach (var pointIdEntry in pointIdsArray)
+            {
+                if (JsonUtils.TryGetGuid(pointIdEntry, out var pointId) && connectionRoutes.Points.ContainsKey(pointId))
+                    pointIds.Add(pointId);
+            }
+
+            if (pointIds.Count == 0)
+                continue;
+
+            var key = new ConnectionRoutes.Key(sourceParentOrChildId, sourceSlotId, targetParentOrChildId, targetSlotId);
+            connectionRoutes.Routes[key] = pointIds;
+        }
+
+        connectionRoutes.RemoveUnusedPoints();
+    }
+
     internal static bool TryReadSymbolUiExternal(JToken mainObject, Symbol symbol, [NotNullWhen(true)] out SymbolUi? symbolUi)
     {
         symbolUi = null;
@@ -416,6 +556,7 @@ internal static class SymbolUiJson
         // collapsed sections, whose invisible bounds are excluded from derivation
         SectionTree.UpdateOwnershipFromGeometry(symbolUi);
 
+        ReadConnectionRoutes(mainObject, symbolUi.ConnectionRoutes);
         ReadSettings(mainObject, symbolUi);
 
         return true;
@@ -694,6 +835,7 @@ internal static class SymbolUiJson
         public const string Sections = nameof(Sections);
         public const string Links = nameof(Links);
         public const string TourPoints = nameof(TourPoints);
+        public const string ConnectionRoutes = nameof(ConnectionRoutes);
         // Settings is written by WriteSettings()
 
         // InputUi fields
@@ -722,6 +864,15 @@ internal static class SymbolUiJson
         public const string Label = nameof(Label);
         public const string Color = nameof(Color);
         public const string Collapsed = nameof(Collapsed);
+
+        // Connection route fields
+        public const string Points = nameof(Points);
+        public const string Routes = nameof(Routes);
+        public const string SourceParentOrChildId = nameof(SourceParentOrChildId);
+        public const string SourceSlotId = nameof(SourceSlotId);
+        public const string TargetParentOrChildId = nameof(TargetParentOrChildId);
+        public const string TargetSlotId = nameof(TargetSlotId);
+        public const string PointIds = nameof(PointIds);
 
         // Link fields
         public const string LinkType = nameof(LinkType);

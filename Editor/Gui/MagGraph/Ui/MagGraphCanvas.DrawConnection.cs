@@ -51,11 +51,30 @@ internal sealed partial class MagGraphView
             targetOnCanvas = connection.DampedTargetPos;
         }
 
+        // Routes are ignored where the cable has no visible length or ends at a collapsed section.
+        List<Guid> routePointIds = null;
+        if (!connection.IsSnapped
+            && !connection.IsTemporary
+            && !connection.SourceItem.IsCollapsedAway
+            && !connection.TargetItem.IsCollapsedAway
+            && _connectionRoutes.TryGetRoute(connection.RouteKey, out var pointIds))
+        {
+            routePointIds = pointIds;
+        }
+
         // Cull before any ImGui call: these are the costliest part of drawing connections in large graphs.
         var boundsOnCanvas = connection.SourceItem.Area;
         boundsOnCanvas.Add(connection.TargetItem.VerticalStackArea);
         boundsOnCanvas.Add(sourceOnCanvas);
         boundsOnCanvas.Add(targetOnCanvas);
+        if (routePointIds != null)
+        {
+            foreach (var pointId in routePointIds)
+            {
+                if (_connectionRoutes.Points.TryGetValue(pointId, out var pointOnCanvas))
+                    boundsOnCanvas.Add(pointOnCanvas);
+            }
+        }
         if (connection.Style is MagGraphConnection.ConnectionStyles.BottomToLeft or MagGraphConnection.ConnectionStyles.RightToTop)
         {
             // Bezier control points reach out by half the distance between the end points
@@ -157,6 +176,13 @@ internal sealed partial class MagGraphView
                 typeColor = UiColors.StatusAttention.Fade(0.3f + 0.1f * Blink);
             }
 
+            if (routePointIds != null)
+            {
+                DrawRoutedConnection(connection, routePointIds, drawList, context, sourcePosOnScreen, targetPosOnScreen, typeColor,
+                                     MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0));
+                return;
+            }
+
             switch (connection.Style)
             {
                 case MagGraphConnection.ConnectionStyles.BottomToTop:
@@ -174,6 +200,7 @@ internal sealed partial class MagGraphView
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                         {
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
+                            context.ConnectionRouting.RegisterHoveredCable(connection, hoverPositionOnLine, 0);
                         }
                         else if (context.StateMachine.CurrentState == GraphStates.DragItems)
                         {
@@ -228,6 +255,7 @@ internal sealed partial class MagGraphView
                         if (context.StateMachine.CurrentState == GraphStates.Default)
                         {
                             ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
+                            context.ConnectionRouting.RegisterHoveredCable(connection, hoverPositionOnLine, 0);
                         }
                         else if (context.StateMachine.CurrentState == GraphStates.DragItems)
                         {

@@ -54,6 +54,8 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
 | Show in Graph             | Shift + P                                            |
 | Display Image as Background | Ctrl + P                                           |
 | Clear Background Image    | Ctrl + Shift + P (focus) or use the Clear BG button  |
+| Add Route Point           | Alt + Click on a connection line, see [Routing connections](RoutingConnections.md) |
+| Remove Route Point        | Alt + Click on a route point                         |
 
 ### Playback and Timeline
 

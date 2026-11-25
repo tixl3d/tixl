@@ -216,6 +216,12 @@ namespace T3.Editor.Gui.MagGraph.States
                               if (!clickedDown)
                                   return;
 
+                              if (context.ConnectionRouting.HandleClick(context) == ConnectionRouting.ClickResults.StartedDrag)
+                              {
+                                  context.StateMachine.SetState(DragRoutePoint, context);
+                                  return;
+                              }
+
                               // Open children or parent component
                               if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) 
                                   && ProjectView.Focused != null
@@ -457,8 +463,38 @@ namespace T3.Editor.Gui.MagGraph.States
 
                               EdgeScrolling.Update(context.View);
                               context.ItemMovement.UpdateDragging(context);
+                              context.ConnectionRouting.UpdateNodeDrag(context);
                           },
                   Exit: context => { context.ItemMovement.StopDragOperation(); }
+                 );
+
+        /// <summary>
+        /// Dragging a route point of a connection line. Dropping it on a point of another cable from the same output
+        /// merges the two.
+        /// </summary>
+        internal static State<GraphUiContext> DragRoutePoint
+            = new(
+                  Enter: _ => { },
+                  Update: context =>
+                          {
+                              if (ImGui.IsKeyPressed(ImGuiKey.Escape))
+                              {
+                                  context.ConnectionRouting.CancelDrag(context);
+                                  context.StateMachine.SetState(Default, context);
+                                  return;
+                              }
+
+                              if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                              {
+                                  context.ConnectionRouting.CompleteDrag(context);
+                                  context.StateMachine.SetState(Default, context);
+                                  return;
+                              }
+
+                              EdgeScrolling.Update(context.View);
+                              context.ConnectionRouting.UpdateDrag(context);
+                          },
+                  Exit: context => { context.ConnectionRouting.CancelDrag(context); }
                  );
 
         /// <summary>

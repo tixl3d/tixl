@@ -108,6 +108,16 @@ public sealed class CopySymbolChildrenCommand : ICommand
                                         select new Symbol.Connection(newSourceId, con.SourceSlotId, newTargetId, con.TargetSlotId));
         }
         _connectionsToCopy.Reverse(); // to keep multi input order
+
+        foreach (var connection in sourceSymbol.Connections)
+        {
+            if (OldToNewChildIds.TryGetValue(connection.SourceParentOrChildId, out var newSourceId)
+                && OldToNewChildIds.TryGetValue(connection.TargetParentOrChildId, out var newTargetId))
+            {
+                _copiedConnections.Add((connection,
+                                        new Symbol.Connection(newSourceId, connection.SourceSlotId, newTargetId, connection.TargetSlotId)));
+            }
+        }
         
         _sectionsToCopy = [];
         foreach (var orgSection in selectedSections)
@@ -152,6 +162,8 @@ public sealed class CopySymbolChildrenCommand : ICommand
         {
             parentSymbolUi.Sections.Remove(section.Id);
         }
+
+        parentSymbolUi.ConnectionRoutes.RemoveRoutes(_copiedConnections);
 
         NewSymbolChildIds.Clear();
         NewSymbolSectionIds.Clear();
@@ -277,6 +289,8 @@ public sealed class CopySymbolChildrenCommand : ICommand
             targetCompositionSymbolUi.Symbol.AddConnection(connection);
         }
 
+        targetCompositionSymbolUi.ConnectionRoutes.CopyRoutesFrom(sourceCompositionSymbolUi.ConnectionRoutes, _copiedConnections, PositionOffset);
+
         // Apply bypass state now that connections exist so SetBypassed propagates to instances
         foreach (var bypassedChildId in bypassedChildIds)
         {
@@ -330,5 +344,6 @@ public sealed class CopySymbolChildrenCommand : ICommand
     private readonly List<ChildCopy> _childrenToCopy = [];
     private readonly List<Section> _sectionsToCopy = [];
     private readonly List<Symbol.Connection> _connectionsToCopy = [];
+    private readonly List<(Symbol.Connection Original, Symbol.Connection Copy)> _copiedConnections = [];
     public Vector2 PositionOffset;
 }

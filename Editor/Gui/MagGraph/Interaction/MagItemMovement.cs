@@ -66,6 +66,7 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
+            context.ConnectionRouting.CompleteNodeDrag();
             TrySpliceIntoWire(context);
             CompleteSlowGrow(context);
             GrowSectionsToFitDisplacedMembers(context);
@@ -294,6 +295,7 @@ internal sealed partial class MagItemMovement
     /// </summary>
     internal void StopDragOperation()
     {
+        _context.ConnectionRouting.ResetNodeDrag();
         _lastAppliedOffset = Vector2.Zero;
         SpliceSets.Clear();
         DraggedItems.Clear();
@@ -722,6 +724,7 @@ internal sealed partial class MagItemMovement
 
         context.MoveElementsCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, _draggedSelectables, _nodeSelection);
         macroCommand.AddExecutedCommandForUndo(context.MoveElementsCommand);
+        context.ConnectionRouting.StartNodeDrag(context, DraggedItems, macroCommand);
 
         _lastAppliedOffset = Vector2.Zero;
         _hasDragged = false;

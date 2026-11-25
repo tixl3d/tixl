@@ -14,6 +14,8 @@ Reference and how-tos for the day-to-day work: the UI, the graph, connecting inp
 
 ## Working with graphs
 
+- [Routing connections](RoutingConnections.md) — lead connection lines around operators with route points and
+  let lines from one output share a trunk.
 - [Lighting](Lighting.md) — point, spot and directional lights, aiming them, materials and which draw
   operators respond to which lights.
 - [Procedural geometry](ProceduralGeometry.md) — bevel, displace, fracture and extrude

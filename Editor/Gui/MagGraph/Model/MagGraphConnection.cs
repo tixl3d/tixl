@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.UiModel;
 
 namespace T3.Editor.Gui.MagGraph.Model;
 
@@ -79,6 +80,8 @@ internal sealed class MagGraphConnection
     /** Symbol connections use Guid.Empty for the composition's own inputs and outputs */
     public Guid TargetParentOrChildId =>
         TargetItem.Variant == MagGraphItem.Variants.Output ? Guid.Empty : TargetItem.Id;
+
+    internal ConnectionRoutes.Key RouteKey => new(SourceParentOrChildId, SourceOutput.Id, TargetParentOrChildId, TargetInput.Id);
 
     public Symbol.Connection AsSymbolConnection()
     {

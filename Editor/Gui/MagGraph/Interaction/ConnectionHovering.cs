@@ -56,6 +56,8 @@ internal sealed class ConnectionHovering
 
         var hoverDuration = time - _hoverStartTime;
         var hoverIndicatorRadius = EaseFunctions.EaseOutElastic((float)hoverDuration) * 9;
+        if (context.ConnectionRouting.WouldAddPoint)
+            hoverIndicatorRadius *= 1.5f;
         var drawList = ImGui.GetWindowDrawList();
 
         drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverIndicatorRadius, firstHover.Color, 30);
@@ -87,6 +89,7 @@ internal sealed class ConnectionHovering
         var tooLarge = bounds.GetHeight() > 2 || bounds.GetWidth() > 2;
         bool disabled = UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Disabled;
         var isConsistentTypeAndOutput = !tooLarge && typesMatch && region != LineRegions.Undefined && firstOutput != null;
+        var clickedOnCable = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !context.ConnectionRouting.CapturesClick;
         if (isConsistentTypeAndOutput)
         {
             // We only draw first indicator, because hover points fall together closely...
@@ -97,7 +100,7 @@ internal sealed class ConnectionHovering
             {
                 if (_lastConnectionHovers.Count == 1)
                 {
-                    if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                    if (clickedOnCable)
                     {
                         ConnectionHoversWhenClicked.Clear();
                         ConnectionHoversWhenClicked.AddRange(_lastConnectionHovers);
@@ -111,7 +114,7 @@ internal sealed class ConnectionHovering
             }
             else if (region == LineRegions.Beginning)
             {
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                if (clickedOnCable)
                 {
                     ConnectionHoversWhenClicked.Clear();
                     ConnectionHoversWhenClicked.AddRange(_lastConnectionHovers);
@@ -127,7 +130,11 @@ internal sealed class ConnectionHovering
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
                 ImGui.BeginTooltip();
                 ImGui.PushFont(Fonts.FontSmall);
-                ImGui.TextUnformatted("Click to insert operator or\ndrag to disconnect...");
+                ImGui.TextUnformatted("""
+                                      Click to insert operator or
+                                      drag to disconnect...
+                                      Alt+click to add a route point
+                                      """);
                 //ImGui.Spacing();
                 FormInputs.AddVerticalSpace();
                 ImGui.PopFont();
