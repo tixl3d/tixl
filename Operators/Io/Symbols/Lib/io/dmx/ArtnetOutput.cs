@@ -12,6 +12,7 @@ namespace Lib.io.dmx
     internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, ICustomDropdownHolder
     {
         private const int ArtNetPort = 6454;
+        private const int MaxUniverse = 32767;
         private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
 
         [Output(Guid = "499329d0-15e9-410e-9f61-63724dbec937")]
@@ -144,8 +145,6 @@ namespace Lib.io.dmx
                 }
             }
 
-            SetStatus("Connected and sending.", IStatusProvider.StatusLevel.Success);
-
             var inputValueLists = InputsValues.GetCollectedTypedInputs();
             int totalChannels = 0;
             for (int i = 0; i < inputValueLists.Count; i++)
@@ -154,7 +153,12 @@ namespace Lib.io.dmx
                 if (buf != null) totalChannels += buf.Count;
             }
 
-            if (totalChannels == 0) return;
+            if (totalChannels == 0)
+            {
+                _complainedOnce = false;
+                SetStatus("Connected and sending.", IStatusProvider.StatusLevel.Success);
+                return;
+            }
 
             var universeChannels = UniverseChannels.GetValue(context) ?? new List<int>();
             int nextUniverse = 1;
@@ -180,15 +184,32 @@ namespace Lib.io.dmx
             var frameData = RentFrameData(totalChannels, inputValueLists.Count);
             frameData.MappingCount = 0;
             int currentOffset = 0;
+            var hasInvalidUniverse = false;
 
             for (int i = 0; i < inputValueLists.Count; i++)
             {
                 var buf = inputValueLists[i].GetValue(context);
                 if (buf == null || buf.Count == 0) continue;
+                var startUniverse = universeChannels[i];
+                var lastUniverse = (long)startUniverse + (buf.Count - 1) / 512;
+                if (startUniverse < 0 || lastUniverse > MaxUniverse)
+                {
+                    hasInvalidUniverse = true;
+                    if (!_complainedOnce)
+                    {
+                        Log.Warning($"Art-Net input index {i}: universe range {startUniverse}–{lastUniverse} is outside 0–{MaxUniverse}.", this);
+                        _complainedOnce = true;
+                    }
+                    if (startUniverse < 0 || startUniverse > MaxUniverse)
+                        continue;
+                }
                 buf.CopyTo(frameData.Buffer, currentOffset);
-                frameData.Mappings[frameData.MappingCount++] = new InputMapping { Offset = currentOffset, Count = buf.Count, StartUniverse = universeChannels[i] };
+                frameData.Mappings[frameData.MappingCount++] = new InputMapping { Offset = currentOffset, Count = buf.Count, StartUniverse = startUniverse };
                 currentOffset += buf.Count;
             }
+            _complainedOnce = hasInvalidUniverse;
+            SetStatus(hasInvalidUniverse ? "Invalid universe addressing; some data is not sent." : "Connected and sending.",
+                      hasInvalidUniverse ? IStatusProvider.StatusLevel.Warning : IStatusProvider.StatusLevel.Success);
 
             lock (_dataLock)
             {
@@ -291,6 +312,7 @@ namespace Lib.io.dmx
                         while (remainingChannels > 0)
                         {
                             if (token.IsCancellationRequested) break;
+                            if (currentUniverse > MaxUniverse) break;
 
                             int chunkCount = Math.Min(remainingChannels, 512);
                             int sendLength = Math.Max(2, chunkCount);
@@ -602,5 +624,6 @@ namespace Lib.io.dmx
         [Input(Guid = "6F5C4B3A-2E1D-4F9C-8A7B-3D2E1F0C9B8A")] public readonly InputSlot<int> MaxFps = new(60);
         [Input(Guid = "D0E1F2A3-B4C5-4678-9012-3456789ABCDE")] public readonly InputSlot<bool> PrintToLog = new();
         #endregion
+        private bool _complainedOnce;
     }
 }
