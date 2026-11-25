@@ -11,7 +11,7 @@ using T3.Core.Utils;
 namespace Lib.io.dmx;
 
 [Guid("e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3")]
-internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICustomDropdownHolder
 {
     private const int SacnPort = 5568;
     private const string SacnDiscoveryIp = "239.255.250.214";
@@ -491,7 +491,16 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         finally { _discoveryUdpClient?.Close(); _discoveryUdpClient = null; }
     }
 
-    public void Dispose() { StopSenderThread(); StopSacnDiscovery(); CloseSocket(); }
+    protected override void Dispose(bool isDisposing)
+    {
+        if (isDisposing)
+        {
+            StopSenderThread();
+            StopSacnDiscovery();
+            CloseSocket();
+        }
+        base.Dispose(isDisposing);
+    }
 
     private void CloseSocket()
     {
