@@ -19,15 +19,19 @@ public sealed class DepthStencilState : Instance<DepthStencilState>
 
         try
         {
-            var enabled = EnableZTest.GetValue(context) || EnableZWrite.GetValue(context);
+            var enableTest = EnableZTest.GetValue(context);
+            var enableWrite = EnableZWrite.GetValue(context);
+            var comparison = Comparison.GetValue(context);
 
+            // Both D3D11 and Vulkan skip depth writes while the depth test is off, so writing without
+            // testing keeps the test on and lets every fragment pass.
             var depthStencilStateDescription = new DepthStencilStateDescription()
                                                    {
-                                                       IsDepthEnabled = enabled,
-                                                       DepthWriteMask = EnableZWrite.GetValue(context) ?  DepthWriteMask.All : DepthWriteMask.Zero,
-                                                       DepthComparison = Comparison.GetValue(context),
+                                                       IsDepthEnabled = enableTest || enableWrite,
+                                                       DepthWriteMask = enableWrite ? DepthWriteMask.All : DepthWriteMask.Zero,
+                                                       DepthComparison = enableTest ? comparison : T3.Graphics.Compat.Comparison.Always,
                                                    };
-                
+
             DepthState.Value = new T3.Graphics.Compat.DepthStencilState(ResourceManager.Device, depthStencilStateDescription);
                 
         }
