@@ -1,0 +1,37 @@
+{
+  "Id": "b6e3f8d1-4a27-4c95-9d0e-7f2c5a1b8e63",
+  "Variations": [
+    {
+      "Id": "824d6238-d70d-4420-84d5-c3c9e768260c",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "No Bevel",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48": 0
+        }
+      }
+    },
+    {
+      "Id": "809231ff-f7bb-49f6-8d05-337142fef3cb",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Small flat bevel",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72": 0.03,
+          "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48": 1,
+          "8d4b2e6f-1c93-4a57-9f0e-6b3d5c8a2e41": true
+        }
+      }
+    }
+  ]
+}

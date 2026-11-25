@@ -219,6 +219,47 @@
           }
         }
       }
+    },
+    {
+      "Id": "7c32ab81-ec34-4749-881d-81fafdfb5d25",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Invert Alpha",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 349.70822
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "c45d487b-3221-44c7-bf9e-b982a65280f6": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "c53fb83b-1d61-4350-8f3f-5872d79af056",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "d5f21abd-b0e3-425e-972f-c556ce176c23",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 0.0
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   ]
 }

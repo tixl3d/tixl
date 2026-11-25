@@ -34,8 +34,8 @@
     {
       "InputId": "35b2c723-c605-44e3-b9dd-4c853570241e"/*GroupSeparator*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -340.9204
+        "X": -322.64862,
+        "Y": -102.664734
       },
       "Description": "Splits the text into the groups that are animated together. Empty means a space. Line breaks always start a new group.",
       "Usage": "Default"
@@ -43,8 +43,8 @@
     {
       "InputId": "385917c7-7925-4f4d-b085-28e8ef6e8323"/*LineHeight*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -445.9204
+        "X": -322.64862,
+        "Y": -207.66473
       },
       "Min": 0.5,
       "Max": 2.0
@@ -53,7 +53,7 @@
       "InputId": "3aa4b67f-a502-42e0-bf30-dbd4acba6f21"/*RangeMode*/,
       "Position": {
         "X": 160.0,
-        "Y": -437.5
+        "Y": -455.0
       },
       "Description": "Index measures RangeStart and RangeEnd in units. Normalized maps 0 to before the first unit and 1 to the last unit fully built, independent of the text length."
     },
@@ -90,8 +90,8 @@
     {
       "InputId": "72e3e29b-ecc4-4b5c-9814-2b4353a5ee60"/*Text*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -585.9204
+        "X": -322.64862,
+        "Y": -347.66473
       },
       "Usage": "Multiline"
     },
@@ -119,15 +119,15 @@
     {
       "InputId": "86cf8af8-2a75-4aa5-84bc-8e99cc89fab1"/*HorizontalAlign*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -375.9204
+        "X": -322.64862,
+        "Y": -137.66473
       }
     },
     {
       "InputId": "9993e5fc-f22b-4b58-905b-7a7c13ab1ea4"/*Unit*/,
       "Position": {
         "X": 160.0,
-        "Y": -455.0
+        "Y": -490.0
       },
       "GroupTitle": "Animation",
       "Description": "Animates single characters, or the groups defined by GroupSeparator."
@@ -135,8 +135,8 @@
     {
       "InputId": "9eef0588-949a-477d-ab40-6e93020c47be"/*Position*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -410.9204
+        "X": -322.64862,
+        "Y": -172.66473
       },
       "Min": -1.0,
       "Max": 1.0
@@ -144,8 +144,8 @@
     {
       "InputId": "a0ccdc32-2948-4237-88ef-23858c6bcca5"/*Color*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -515.9204
+        "X": -322.64862,
+        "Y": -277.66473
       },
       "GroupTitle": "Text",
       "Min": 0.0,
@@ -167,8 +167,8 @@
     {
       "InputId": "c513f9cb-1cbe-493d-8fea-08c0b056b535"/*Size*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -480.9204
+        "X": -322.64862,
+        "Y": -242.66473
       },
       "Min": 0.0,
       "Max": 500.0,
@@ -209,8 +209,8 @@
     {
       "InputId": "f0434b18-08fc-4429-ae39-b426bbdf9e39"/*Font*/,
       "Position": {
-        "X": -234.12149,
-        "Y": -550.9204
+        "X": -322.64862,
+        "Y": -312.66473
       },
       "Description": "Path to a BMFont .fnt file. The MSDF .png texture with the same name is loaded from the same folder.",
       "Usage": "FilePath",
@@ -222,8 +222,8 @@
       "ChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
       "SymbolName": "Lib.render.sprite.TextSprites",
       "Position": {
-        "X": -94.12149,
-        "Y": -585.9204
+        "X": -182.64862,
+        "Y": -347.66473
       }
     },
     {
@@ -231,7 +231,7 @@
       "SymbolName": "Lib.render.sprite.TextBuildup",
       "Position": {
         "X": 300.0,
-        "Y": -525.0
+        "Y": -560.0
       }
     },
     {
@@ -251,5 +251,43 @@
         "Y": 0.0
       }
     }
-  ]
+  ],
+  "ConnectionRoutes": {
+    "Points": [
+      {
+        "Id": "6fac5aa5-2e10-4a1f-ab6e-9a6a3707e246",
+        "Position": {
+          "X": 49.441498,
+          "Y": -539.9121
+        }
+      },
+      {
+        "Id": "f993711f-0349-48e9-9288-a737f2b3b192",
+        "Position": {
+          "X": 108.406555,
+          "Y": -508.0312
+        }
+      }
+    ],
+    "Routes": [
+      {
+        "SourceParentOrChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
+        "SourceSlotId": "89685ac6-6a97-403c-8334-e685a4cccda0",
+        "TargetParentOrChildId": "902b3a99-265c-415a-af8f-c6a37e37a525",
+        "TargetSlotId": "144de0c1-93c2-4e1f-a6fa-4c632006af13",
+        "PointIds": [
+          "6fac5aa5-2e10-4a1f-ab6e-9a6a3707e246"
+        ]
+      },
+      {
+        "SourceParentOrChildId": "267685b7-3f4e-4144-ac7e-4f685a7ad181",
+        "SourceSlotId": "0bea15c8-329a-4705-bc11-12eef4f1a70a",
+        "TargetParentOrChildId": "902b3a99-265c-415a-af8f-c6a37e37a525",
+        "TargetSlotId": "30d9bb95-1577-461b-9199-5ccf754d36cd",
+        "PointIds": [
+          "f993711f-0349-48e9-9288-a737f2b3b192"
+        ]
+      }
+    ]
+  }
 }
