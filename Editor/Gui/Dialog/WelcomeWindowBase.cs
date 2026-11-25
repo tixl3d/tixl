@@ -62,6 +62,36 @@ internal abstract class WelcomeWindowBase : WindowBase
         ImGui.Separator();
     }
 
+    /// <summary>
+    /// Release notes link to help pages relatively (<c>../docs/using/Extensions.md#section</c>), which is right on the
+    /// help website they are published to. Inside the editor those links point to the website page instead.
+    /// </summary>
+    private static string ToHelpSiteUrl(string url)
+    {
+        if (Uri.TryCreate(url, UriKind.Absolute, out _))
+            return url;
+
+        var docsIndex = url.IndexOf("docs/", StringComparison.Ordinal);
+        if (docsIndex < 0)
+            return url;
+
+        var path = url[(docsIndex + "docs/".Length)..];
+        var anchor = "";
+        var hashIndex = path.IndexOf('#');
+        if (hashIndex >= 0)
+        {
+            anchor = path[hashIndex..];
+            path = path[..hashIndex];
+        }
+
+        if (path.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+            path = path[..^".md".Length] + "/";
+
+        return HelpSiteUrl + path + anchor;
+    }
+
+    private const string HelpSiteUrl = "https://help.tixl.app/";
+
     protected void LoadReleaseNotes()
     {
         _releaseNotes = ReleaseNotesLoader.TryLoadForCurrentVersion();
@@ -74,7 +104,7 @@ internal abstract class WelcomeWindowBase : WindowBase
             // Rendered as markdown so [text](url) links and [OperatorName] references are both
             // interactive — the latter open the Symbol Library on click.
             _releaseNotesMarkdown.Draw(_releaseNotes,
-                                       onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url),
+                                       onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(ToHelpSiteUrl(url)),
                                        onOperatorRef: opName => MarkdownOperatorLinks.HandleOperatorRef(opName),
                                        operatorColor: MarkdownOperatorLinks.GetOperatorColor);
         }

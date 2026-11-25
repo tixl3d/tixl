@@ -68,14 +68,15 @@ scenes. These are bugs being worked on, not missing features.
 | Network streams (RTSP) | Works | Works | Partial |
 | Hardware-accelerated video export | Works | Not yet | Not yet |
 | Webcams and capture cards | Works | Works | Works |
-| NDI input and output | Works | Partial | Not yet |
+| NDI input and output | Works | Partial | Works |
 | Spout (sharing video with other apps) | Works | — | — |
 | Syphon (sharing video with other apps) | — | — | Planned |
 | Screen capture | Works | Not yet | Not yet |
 | Timeline thumbnails of video clips | Works | Not yet | Not yet |
 
-NDI on Linux needs the NDI runtime, which TiXL can't include. [Install on Linux](InstallLinux.md#optional-ndi)
-says where to get it. Without it the NDI operators report "NDI runtime not found".
+NDI on Linux and macOS needs the NDI runtime, which TiXL can't include. [Install on Linux](InstallLinux.md#optional-ndi)
+and [Install on macOS](InstallMacOS.md#ndi) say where to get it; on macOS, NDI Tools alone doesn't bring it.
+Without it the NDI operators report "NDI runtime not found".
 
 TiXL plays and exports video with FFmpeg, which it includes on all three systems. The macOS build has no
 H.264 encoder yet, so H.264 exports fall back to MPEG-4 there.

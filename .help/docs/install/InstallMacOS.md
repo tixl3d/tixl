@@ -71,6 +71,13 @@ what to do and offers to download it.
 The app includes FFmpeg, so video playback works out of the box. Video export works too, except that there's
 no H.264 encoder on macOS yet: H.264 exports fall back to the older MPEG-4 codec for now.
 
+### NDI
+
+The NDI extension (**Settings → Extensions**) needs the NDI runtime, which TiXL can't include. **NDI Tools
+alone isn't enough**: install the runtime package
+[libNDI_for_Mac.pkg](https://downloads.ndi.tv/SDK/NDI_SDK_Mac/libNDI_for_Mac.pkg) and restart TiXL. Without it the NDI operators report "NDI runtime not
+found".
+
 ## Using TiXL on a Mac
 
 - **Cmd** takes the place of **Ctrl** in all shortcuts — `Cmd+C`, `Cmd+Z`, `Cmd+S` — and menus show the
@@ -103,7 +110,7 @@ folders above until you delete them yourself.
 ## What doesn't work on macOS yet
 
 - **H.264 and hardware-accelerated video export.** H.264 exports fall back to MPEG-4.
-- **NDI and screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
+- **Screen capture.** Syphon, the Mac's way of sharing video with other apps, is planned.
 - **Geometry shaders.** Apple's graphics chips don't have them. TiXL's own operators don't need them, but a
   custom shader with a geometry stage won't render.
 - **Recording what other programs play** (loopback). A virtual audio device like BlackHole can route system

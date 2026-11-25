@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using SDL;
+using T3.Core.Logging;
 using T3.SystemUi;
 using static SDL.SDL3;
 
@@ -21,15 +22,29 @@ public sealed class SdlCoreUi : ICoreSystemUiService
 
     public ICursor Cursor { get; } = new SdlCursor();
 
+    /// <summary>
+    /// Opens a URL or file with the system's default application. Failing to open a link is logged, never thrown:
+    /// callers are click handlers all over the UI, and a broken link must not take the editor down.
+    /// </summary>
     public void OpenWithDefaultApplication(string uri)
     {
         if (string.IsNullOrWhiteSpace(uri))
-            throw new ArgumentException("Uri is empty", nameof(uri));
+        {
+            Log.Warning("Could not open an empty link.");
+            return;
+        }
 
-        // SDL_OpenURL wants a URL; plain paths become file:// URIs.
-        var url = Uri.TryCreate(uri, UriKind.Absolute, out var parsed) ? parsed.AbsoluteUri : new Uri(Path.GetFullPath(uri)).AbsoluteUri;
-        if (!SDL_OpenURL(url))
-            throw new InvalidOperationException($"Could not open \"{uri}\": {SDL_GetError()}");
+        try
+        {
+            // SDL_OpenURL wants a URL; plain paths become file:// URIs.
+            var url = Uri.TryCreate(uri, UriKind.Absolute, out var parsed) ? parsed.AbsoluteUri : new Uri(Path.GetFullPath(uri)).AbsoluteUri;
+            if (!SDL_OpenURL(url))
+                Log.Warning($"Could not open \"{uri}\": {SDL_GetError()}");
+        }
+        catch (Exception e) when (e is UriFormatException or ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            Log.Warning($"Could not open \"{uri}\": {e.Message}");
+        }
     }
 
     public void RevealInFileBrowser(string path)
