@@ -44,7 +44,7 @@ compile differently — that is what the pin is about — so prefer the pinned l
 
 | Component | Enables | Arch | Debian / Ubuntu | Fedora | nixpkgs |
 |---|---|---|---|---|---|
-| NDI runtime (`libndi.so.6`) | Ndi operators and NDI output streams. Found via `NDI_RUNTIME_DIR_V6` or the system library path; source discovery needs `avahi-daemon` | AUR `ndi-sdk` | vendor download (ndi.video) | vendor download | `ndi` (unfree) |
+| NDI runtime (`libndi.so.6`) | Ndi operators and NDI output streams. The Ndi extension ships it; without that extension it is found via `NDI_RUNTIME_DIR_V6` or the system library path. Source discovery needs `avahi-daemon` | AUR `ndi-sdk` | [NDI runtime](http://ndi.link/NDIRedistV6) | [NDI runtime](http://ndi.link/NDIRedistV6) | `ndi` (unfree) |
 | .NET 10 SDK | Compiling projects that use NuGet packages, embedded resources or custom build steps. The editor compiles all other projects itself and names the reason when it needs the SDK | `dotnet-sdk` | `dotnet-sdk-10.0` (Ubuntu archive or `ppa:dotnet/backports`) | `dotnet-sdk-10.0` | `dotnetCorePackages.sdk_10_0` |
 | Vulkan validation layers | GPU debugging | `vulkan-validation-layers` | `vulkan-validationlayers` | `vulkan-validation-layers` | `vulkan-validation-layers` |
 
