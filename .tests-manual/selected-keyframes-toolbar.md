@@ -7,6 +7,7 @@ scope: timeline
 tags: [user]
 prerequisites:
   - A project with an operator whose float parameter has three keyframes at different values (e.g. 0, 1 and 2) is open.
+  - The same or another operator has an animated Vector3 parameter with keyframes whose X, Y and Z values differ.
   - The timeline is visible and the window is wide enough that the toolbar has room to the right of the transport buttons.
 related-help: []
 ---
@@ -82,7 +83,20 @@ Change one keyframe to **Linear** with its context menu, then select all three a
 Select only one keyframe.
 
 **Expected:**
-- The toolbar shows the parameter name and a single value without a range bar. Dragging or typing it changes that keyframe's value.
+- The toolbar shows the parameter name and a single centered value without a range bar, taking the same width as the range. Dragging or typing it changes that keyframe's value.
+- Switching between a component whose keys share one value and one with a range doesn't shift the bar.
+
+## Step: Editing one vector component
+
+**Action:**
+Select all keyframes of the animated Vector3 parameter. In the toolbar, click `X` in the segmented control between the parameter name and the values.
+
+**Expected:**
+- The segmented control shows `X Y Z XYZ`, with `XYZ` selected by default.
+- After clicking `X`, the count, the range and the interpolation icon only reflect the X keyframes.
+- Dragging the upper value scales only the X curve; Y and Z stay unchanged.
+- Clicking `XYZ` again edits all components together. A component without selected keyframes can't be chosen.
+- A color (Vector4) parameter shows `R G B A RGBA` instead. Mixing a float and a vector parameter hides the control.
 
 ## Step: Narrow toolbar
 

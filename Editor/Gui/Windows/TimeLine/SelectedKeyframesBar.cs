@@ -42,7 +42,7 @@ internal static class SelectedKeyframesBar
 
         var padding = ImGui.GetStyle().FramePadding.X;
         var spacing = 4 * T3Ui.UiScaleFactor;
-        var minValueWidth = 40 * T3Ui.UiScaleFactor;
+        var minValueWidth = ImGui.CalcTextSize(_allKeysAreIntegers ? MinWidthIntegerSample : MinWidthFloatSample).X;
         var height = TimeControls.ControlSize.Y;
         var format = _allKeysAreIntegers ? "{0:0}" : "{0:0.00}";
 
@@ -50,19 +50,31 @@ internal static class SelectedKeyframesBar
         var hasRange = _upperValue - _lowerValue > MinScalableRange
                        || _editedField is EditedFields.LowerValue or EditedFields.UpperValue
                        || _editedField == EditedFields.Offset && _editIsDelta;
-        var lowerWidth = MathF.Max(ImGui.CalcTextSize(GetLabel(ref _lowerLabel, _lowerValue, format)).X, minValueWidth) + padding * 2;
-        var upperWidth = hasRange
-                             ? MathF.Max(ImGui.CalcTextSize(GetLabel(ref _upperLabel, _upperValue, format)).X, minValueWidth) + padding * 2
-                             : 0;
-        var offsetWidth = hasRange
-                              ? MathF.Round(RangeBarWidth * T3Ui.UiScaleFactor)
-                              : 0;
+        var lowerWidth = MathF.Round(MathF.Max(ImGui.CalcTextSize(GetLabel(ref _lowerLabel, _lowerValue, format)).X, minValueWidth) + padding * 2);
+        // Equal values merge into one field spanning both value slots and the bar, so the layout doesn't jump
+        // when the range collapses or reappears.
+        var upperWidth = MathF.Round(MathF.Max(ImGui.CalcTextSize(GetLabel(ref _upperLabel, _upperValue, format)).X, minValueWidth) + padding * 2);
+
+        // Values beyond the reserved width would still resize the fields mid-drag; only let them grow until the edit ends.
+        if (_editedField != EditedFields.None)
+        {
+            lowerWidth = MathF.Max(lowerWidth, _lowerWidthDuringEdit);
+            upperWidth = MathF.Max(upperWidth, _upperWidthDuringEdit);
+        }
+
+        _lowerWidthDuringEdit = lowerWidth;
+        _upperWidthDuringEdit = upperWidth;
+        var offsetWidth = MathF.Round(RangeBarWidth * T3Ui.UiScaleFactor);
         var iconWidth = height;
         var summaryWidth = ImGui.CalcTextSize(_summaryLabel).X;
 
+        var componentsWidth = _componentCount > 0
+                                  ? MathF.Round(CustomComponents.GetSegmentedButtonWidth(_componentLabels, isCompact: true)) + spacing
+                                  : 0;
+
         // The interpolation icon leads, so "[icon] 18× Alpha" reads as 18 keyframes of that interpolation.
         var separatorGap = 8 * T3Ui.UiScaleFactor;
-        var valuesWidth = iconWidth + lowerWidth + offsetWidth + upperWidth + spacing + separatorGap + 1;
+        var valuesWidth = iconWidth + componentsWidth + lowerWidth + offsetWidth + upperWidth + spacing + separatorGap + 1;
         var showSummary = valuesWidth + summaryWidth + spacing <= maxX - minX;
         if (!showSummary && valuesWidth > maxX - minX)
         {
@@ -82,6 +94,29 @@ internal static class SelectedKeyframesBar
             var textPos = new Vector2(x, y + MathF.Floor((height - ImGui.GetFontSize()) / 2));
             ImGui.GetWindowDrawList().AddText(textPos, UiColors.TextMuted, _summaryLabel);
             x += summaryWidth;
+        }
+
+        if (_componentCount > 0)
+        {
+            var trackMin = new Vector2(x + spacing, y + MathF.Floor((height - ImGui.GetFrameHeight()) / 2));
+            var trackWidth = componentsWidth - spacing;
+
+            // The segment track is tuned for darker panels; on the lighter toolbar strip it would vanish without a backing.
+            ImGui.GetWindowDrawList().AddRectFilled(trackMin, trackMin + new Vector2(trackWidth, ImGui.GetFrameHeight()),
+                                                    UiColors.BackgroundFull.Fade(0.4f), 4 * T3Ui.UiScaleFactor);
+
+            ImGui.SetCursorScreenPos(trackMin);
+            var componentIndex = _componentFilterIndex;
+            if (CustomComponents.SegmentedButton(_componentLabels, ref componentIndex, disabledItems: _componentsWithoutKeys, isCompact: true)
+                && componentIndex != _componentFilterIndex)
+            {
+                CancelEdit();
+                _componentFilterIndex = componentIndex;
+                ApplyComponentFilter();
+                UpdateRangeAndInterpolation();
+            }
+
+            x += componentsWidth;
         }
 
         ImGui.SetCursorScreenPos(new Vector2(x + spacing, y));
@@ -113,7 +148,8 @@ internal static class SelectedKeyframesBar
         }
         else
         {
-            DrawValueField(EditedFields.Offset, _lowerValue, new Vector2(lowerWidth, height), format, horizontalAlign: 0.5f, isDelta: false,
+            DrawValueField(EditedFields.Offset, _lowerValue, new Vector2(lowerWidth + offsetWidth + upperWidth, height), format, horizontalAlign: 0.5f,
+                           isDelta: false,
                            "Value of the selected keyframes", "Drag or click to type.");
         }
 
@@ -343,48 +379,131 @@ internal static class SelectedKeyframesBar
 
         _lastSelectionChangeCounter = selection.ChangeCounter;
         _lastParametersHash = parametersHash;
-        _keys.Clear();
-        _curves.Clear();
-
-        if (selection.Count == 0)
-            return;
+        _allKeys.Clear();
+        _allKeyComponents.Clear();
+        _allCurves.Clear();
+        _allCurveComponents.Clear();
 
         TimeLineCanvas.AnimationParameter? firstParameter = null;
         var parameterCount = 0;
+        var haveSameVectorType = true;
         _allKeysAreIntegers = true;
 
-        foreach (var parameter in parameters)
+        if (selection.Count > 0)
         {
-            var parameterHasKeys = false;
-            foreach (var curve in parameter.Curves)
+            foreach (var parameter in parameters)
             {
-                var curveHasKeys = false;
-                foreach (var key in curve.GetVDefinitions())
+                var parameterHasKeys = false;
+                for (var curveIndex = 0; curveIndex < parameter.Curves.Length; curveIndex++)
                 {
-                    if (!selection.Contains(key))
+                    var curve = parameter.Curves[curveIndex];
+                    var curveHasKeys = false;
+                    foreach (var key in curve.GetVDefinitions())
+                    {
+                        if (!selection.Contains(key))
+                            continue;
+
+                        _allKeys.Add(key);
+                        _allKeyComponents.Add(curveIndex);
+                        curveHasKeys = true;
+                    }
+
+                    if (!curveHasKeys)
                         continue;
 
-                    _keys.Add(key);
-                    curveHasKeys = true;
+                    _allCurves.Add(curve);
+                    _allCurveComponents.Add(curveIndex);
+                    parameterHasKeys = true;
                 }
 
-                if (curveHasKeys)
-                    _curves.Add(curve);
+                if (!parameterHasKeys)
+                    continue;
 
-                parameterHasKeys |= curveHasKeys;
+                firstParameter ??= parameter;
+                parameterCount++;
+                haveSameVectorType &= parameter.Input.ValueType == firstParameter.Input.ValueType;
+                _allKeysAreIntegers &= parameter.Input.ValueType == typeof(int);
             }
-
-            if (!parameterHasKeys)
-                continue;
-
-            firstParameter ??= parameter;
-            parameterCount++;
-            _allKeysAreIntegers &= parameter.Input.ValueType == typeof(int);
         }
 
+        _singleParameterName = parameterCount == 1 ? firstParameter?.Input.Input.Name : null;
+
+        var componentCount = haveSameVectorType && firstParameter != null ? firstParameter.Curves.Length : 0;
+        UpdateComponentLabels(componentCount, firstParameter?.Input.ValueType == typeof(Vector4));
+        ApplyComponentFilter();
+    }
+
+    /** Rebuilt only when the vector type changes, which also resets the filter to all components. */
+    private static void UpdateComponentLabels(int componentCount, bool isColor)
+    {
+        var names = isColor ? DopeSheetArea.ColorCurveNames : DopeSheetArea.CurveNames;
+        if (componentCount < 2 || componentCount > names.Length)
+            componentCount = 0;
+
+        if (componentCount == _componentCount && isColor == _componentsAreColor)
+            return;
+
+        _componentCount = componentCount;
+        _componentsAreColor = isColor;
+        _componentFilterIndex = componentCount;
+        if (componentCount == 0)
+        {
+            _componentLabels = [];
+            _componentsWithoutKeys = [];
+            return;
+        }
+
+        _componentLabels = new string[componentCount + 1];
+        var allLabel = string.Empty;
+        for (var componentIndex = 0; componentIndex < componentCount; componentIndex++)
+        {
+            _componentLabels[componentIndex] = names[componentIndex];
+            allLabel += names[componentIndex];
+        }
+
+        _componentLabels[componentCount] = allLabel;
+        _componentsWithoutKeys = new bool[componentCount + 1];
+    }
+
+    /** Narrows the edited keys to the chosen component. The last segment, the default, keeps all of them. */
+    private static void ApplyComponentFilter()
+    {
+        if (_componentCount > 0)
+        {
+            for (var componentIndex = 0; componentIndex < _componentCount; componentIndex++)
+            {
+                _componentsWithoutKeys[componentIndex] = true;
+            }
+
+            foreach (var componentIndex in _allKeyComponents)
+            {
+                _componentsWithoutKeys[componentIndex] = false;
+            }
+
+            if (_componentFilterIndex < _componentCount && _componentsWithoutKeys[_componentFilterIndex])
+                _componentFilterIndex = _componentCount;
+        }
+
+        var includesAll = _componentFilterIndex >= _componentCount;
+
+        _keys.Clear();
+        for (var keyIndex = 0; keyIndex < _allKeys.Count; keyIndex++)
+        {
+            if (includesAll || _allKeyComponents[keyIndex] == _componentFilterIndex)
+                _keys.Add(_allKeys[keyIndex]);
+        }
+
+        _curves.Clear();
+        for (var curveIndex = 0; curveIndex < _allCurves.Count; curveIndex++)
+        {
+            if (includesAll || _allCurveComponents[curveIndex] == _componentFilterIndex)
+                _curves.Add(_allCurves[curveIndex]);
+        }
+
+        // Formatted only here, when the selection or the filter changes.
         var countPrefix = _keys.Count > 1 ? $"{_keys.Count}\u00D7" : string.Empty;
-        _summaryLabel = parameterCount == 1 && firstParameter != null
-                            ? $"{countPrefix} {firstParameter.Input.Input.Name}".TrimStart()
+        _summaryLabel = _singleParameterName != null
+                            ? $"{countPrefix} {_singleParameterName}".TrimStart()
                             : countPrefix;
     }
 
@@ -481,6 +600,22 @@ internal static class SelectedKeyframesBar
 
     private static readonly int _interpolationMenuId = nameof(_interpolationMenuId).GetHashCode();
 
+    private const string MinWidthFloatSample = "-000.000";
+    private const string MinWidthIntegerSample = "-0000";
+
+    private static readonly List<VDefinition> _allKeys = new(64);
+    private static readonly List<int> _allKeyComponents = new(64);
+    private static readonly List<Curve> _allCurves = new(16);
+    private static readonly List<int> _allCurveComponents = new(16);
+    private static string? _singleParameterName;
+
+    private static int _componentCount;
+    private static bool _componentsAreColor;
+    private static int _componentFilterIndex;
+    private static string[] _componentLabels = [];
+    private static bool[] _componentsWithoutKeys = [];
+
+    /** The keys and curves the bar edits: the selection, narrowed by the component filter. */
     private static readonly List<VDefinition> _keys = new(64);
     private static readonly List<Curve> _curves = new(16);
     private static readonly List<double> _originalValues = new(64);
@@ -495,6 +630,8 @@ internal static class SelectedKeyframesBar
     private static int _commonInterpolationIndex = -1;
     private static CachedLabel _lowerLabel;
     private static CachedLabel _upperLabel;
+    private static float _lowerWidthDuringEdit;
+    private static float _upperWidthDuringEdit;
 
     private static EditedFields _editedField;
     private static double _editStartValue;
