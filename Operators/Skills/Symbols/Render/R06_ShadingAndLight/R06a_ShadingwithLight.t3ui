@@ -2,16 +2,142 @@
   "FormatVersion": 3,
   "Id": "21eb13a7-04ad-4ba4-8911-3b254840ffd8"/*R06a_ShadingwithLight*/,
   "Description": "Shading with Light",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "7e8a927a-186e-4a36-8b5d-a50aa71b6842",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "01ec17dd-4273-4d89-8c6a-9ed0f7b639f0",
+      "SymbolName": "Lib.render.shading.SetEnvironment",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
       "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 1394.6328,
+        "Y": 2325.9019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "0baca6ad-de7e-41b2-a105-40e8d57d9647",
+      "SymbolName": "Lib.mesh.generate.IcosahedronMesh",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1196.3069,
+        "Y": 2069.794
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "10adc294-3a04-46e6-9a9b-5b91fe8533a0",
+      "SymbolName": "Lib.mesh.generate.IcosahedronMesh",
+      "Position": {
+        "X": 1207.1177,
+        "Y": 1625.0837
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "15a5bd11-4f14-4093-895b-d76f6f25cee4",
+      "SymbolName": "Lib.render.transform.Group",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1394.6328,
+        "Y": 2185.9019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "18ffd2ec-ecb4-40b3-971b-8881b6407fc7",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1196.3069,
+        "Y": 2218.6243
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "27669c3b-a7bb-48af-8e25-55746c32b312",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "Position": {
+        "X": 924.4917,
+        "Y": 1771.2881
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "36347cef-b6c5-42b4-8774-70f869674920",
+      "SymbolName": "Lib.numbers.vec3.PerlinNoise3",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 868.0856,
+        "Y": 2281.6172
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "382c6f34-fca1-428a-825e-b23fb5d96b7b",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 1405.4436,
+        "Y": 1776.1917
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "4b4e6a4b-1ebc-4f29-b8cc-0e4370cd790c",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "Position": {
+        "X": 1207.1177,
+        "Y": 1695.0837
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "500fcf06-751f-4acf-a8d2-92cd13c61b29",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1196.3069,
+        "Y": 2104.794
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5357b6d0-5678-496a-b2c5-a7ba52bde9c3",
+      "SymbolName": "Lib.render.gizmo._.DrawSphere",
+      "Position": {
+        "X": 924.4917,
+        "Y": 1903.2949
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "7bd009a3-82ae-4c2a-a069-1380909c43a9",
+      "SymbolName": "Lib.numbers.vec3.NormalizeVector3",
+      "Position": {
+        "X": 924.4917,
+        "Y": 1826.2285
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "836b0120-e964-41be-9062-8aabb3b32ec2",
+      "SymbolName": "Lib.numbers.vec3.NormalizeVector3",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1008.08545,
+        "Y": 2281.6172
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "86412cad-bd38-4b5a-a858-cca705f7c7a8",
+      "SymbolName": "Lib.render.shading.SetMaterial",
+      "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
+      "Position": {
+        "X": 1196.3069,
+        "Y": 2139.794
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "964b95f2-1190-4c2d-9d8d-23ddd55ecd78",
@@ -22,13 +148,41 @@
       }
     },
     {
-      "ChildId": "9d0ec316-3dc6-4770-a333-e2cf249977e0",
-      "SymbolName": "Lib.render.basic.Text",
+      "ChildId": "b47ed721-590d-44b6-859e-186db2edd8de",
+      "SymbolName": "Lib.render.shading.PointLight",
       "SectionId": "18da7646-20be-44b3-b6db-1295f0a5f63c",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
-      }
+        "X": 1394.6328,
+        "Y": 2255.9019
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c4531a48-2c56-4d94-bcd0-55050cfc8db9",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
+      "Position": {
+        "X": 1207.1177,
+        "Y": 1660.0837
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c6292c8d-5ff2-4631-844d-1bf9b8ba9f6c",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "Position": {
+        "X": 1405.4436,
+        "Y": 1811.1917
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e736db84-bb80-4bd6-8e69-b066b4b736ed",
+      "SymbolName": "Lib.render.shading.SetEnvironment",
+      "Position": {
+        "X": 1405.4436,
+        "Y": 1846.1917
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -52,12 +206,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 1085.0,
+        "X": 738.4126,
         "Y": 2052.5103
       },
       "Size": {
-        "X": 525.0,
-        "Y": 187.48975
+        "X": 871.5874,
+        "Y": 406.9917
       }
     }
   ],
@@ -72,11 +226,14 @@
     },
     {
       "Id": "cea938a6-373f-4795-8902-30a3f8efc9b5",
+      "ChildId": "e736db84-bb80-4bd6-8e69-b066b4b736ed",
+      "InputId": "de6b9cb3-69ce-4b23-add6-a564648ec3a8",
       "Description": "The [SetEnvironment] operator provides multiple presets.\nUse the \"black\" preset to disable image-based lighting.",
       "Style": "CallToAction"
     },
     {
       "Id": "65ddedd8-f14c-4046-a81c-50cf753c03dc",
+      "ChildId": "c6292c8d-5ff2-4631-844d-1bf9b8ba9f6c",
       "Description": "Add a [PointLight] and move it through the scene using 3D Perlin noise.\nUse the same position to draw a [Sphere] as a visual indicator for the light position.",
       "Style": "CallToAction"
     },

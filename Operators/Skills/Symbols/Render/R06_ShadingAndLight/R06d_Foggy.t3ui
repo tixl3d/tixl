@@ -2,33 +2,142 @@
   "FormatVersion": 3,
   "Id": "af21d4fd-c99f-4649-8290-b557953b1a09"/*R06d_Foggy*/,
   "Description": "Foggy",
-  "SymbolTags": "16384",
+  "SymbolTags": "32768",
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "0d93cd38-6c49-47f4-9333-9b891a5660ed",
-      "SymbolName": "Lib.flow.skillQuest.DrawQuiz",
+      "ChildId": "1dfb0e96-1162-45ba-923e-5a3815f86a5c",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1437.848,
+        "Y": 2127.1018
+      }
+    },
+    {
+      "ChildId": "2fd1dd0a-733f-4b7b-897a-9d4b773bde35",
+      "SymbolName": "Lib.render.shading.SetFog",
+      "Position": {
+        "X": 1156.4441,
+        "Y": 1771.7067
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3cdd05cb-57cd-4d40-b944-955752d61f5e",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1297.848,
+        "Y": 2057.102
+      }
+    },
+    {
+      "ChildId": "4361d379-8107-43dd-acc5-8e7f3f5d9995",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 1436.4441,
+        "Y": 1774.9154
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "65c8e609-997a-4d0a-9f90-2b78a62e378f",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
+      "Position": {
+        "X": 1436.4441,
+        "Y": 1669.9154
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "78556a70-f737-4707-bc61-214aa480d6ff",
+      "SymbolName": "Lib.mesh.draw.DrawMeshAtPoints",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1437.848,
+        "Y": 2022.102
+      }
+    },
+    {
+      "ChildId": "a7b07cc5-3098-443b-a872-88ee04dd8217",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1157.848,
+        "Y": 2022.102
+      }
+    },
+    {
+      "ChildId": "ba5dd11e-c2d3-40df-a605-51abf3efb6e1",
+      "SymbolName": "Lib.mesh.generate.TorusMesh",
+      "Position": {
+        "X": 1296.4441,
+        "Y": 1704.9154
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "c019fd4d-8fc8-44c7-a91c-05b018b03c34",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1437.848,
+        "Y": 2162.1018
+      }
+    },
+    {
+      "ChildId": "c79bbd20-7164-4032-9c19-51d78023f5f6",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1437.848,
+        "Y": 2092.1018
+      }
+    },
+    {
+      "ChildId": "ef8dbf6d-0b17-4752-bb94-8be8f39c7a62",
+      "SymbolName": "Lib.point.modify.AddNoise",
+      "Position": {
+        "X": 1296.4441,
+        "Y": 1669.9154
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f273025b-487d-4105-bd8f-3028c9e19139",
+      "SymbolName": "Lib.point.modify.AddNoise",
+      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "Position": {
+        "X": 1297.848,
+        "Y": 2022.102
+      }
+    },
+    {
+      "ChildId": "f39731c6-76a7-4fc7-ba90-cf7ec45362b1",
+      "SymbolName": "Lib.point.generate.RadialPoints",
+      "Position": {
+        "X": 1156.4441,
+        "Y": 1669.9154
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f52fd1cd-e31d-49ba-8149-6a56f59295c3",
+      "SymbolName": "Lib.flow.skillQuest.ImageQuiz",
       "Position": {
         "X": 1693.2708,
         "Y": 1786.6185
       }
     },
     {
-      "ChildId": "1e2992b1-522b-4541-b2ff-732083461bb6",
-      "SymbolName": "Lib.render.basic.Text",
-      "SectionId": "bf487ea7-2319-4f73-968f-ae2b75a615d7",
+      "ChildId": "f6a1ef55-f36f-44fd-9453-9693e00389ce",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
       "Position": {
-        "X": 1244.7633,
-        "Y": 2141.3435
-      }
-    },
-    {
-      "ChildId": "7bf26c32-2021-4734-a3f5-09d0cf011169",
-      "SymbolName": "Lib.render.basic.Text",
-      "Position": {
-        "X": 1366.8816,
-        "Y": 1568.3276
-      }
+        "X": 1436.4441,
+        "Y": 1739.9154
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -53,11 +162,11 @@
       },
       "Position": {
         "X": 1085.0,
-        "Y": 2052.5103
+        "Y": 1939.596
       },
       "Size": {
         "X": 525.0,
-        "Y": 187.48975
+        "Y": 327.48975
       }
     }
   ],

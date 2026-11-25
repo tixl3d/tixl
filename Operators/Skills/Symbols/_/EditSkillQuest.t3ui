@@ -316,7 +316,6 @@
       "ChildId": "45349194-c650-414e-9f8d-f743922ffbcd",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06a_ShadingwithLight",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
-      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 100.0
@@ -451,6 +450,14 @@
       }
     },
     {
+      "ChildId": "626218c2-2216-48aa-a60c-66f34429826f",
+      "SymbolName": "Lib.image.use.CustomPixelShader",
+      "Position": {
+        "X": 4273.87,
+        "Y": -388.53223
+      }
+    },
+    {
       "ChildId": "629c8539-4438-4ad0-85b4-d6c428e236e3",
       "SymbolName": "Skills.Image.I02_Gradients.I02b_GradientRotate",
       "SectionId": "c9924cad-90b1-4e21-8b4d-c94a4031ffda",
@@ -510,7 +517,6 @@
       "ChildId": "6cb4ad85-c60d-4685-b8da-c1d2e3a9e9ca",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05e_Alpha",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
-      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 240.0
@@ -527,9 +533,8 @@
     },
     {
       "ChildId": "6ea509e0-1e84-479b-885d-dd25bc768081",
-      "SymbolName": "Skills.Render.R06_ShadingAndLight.R06c_CameraandEnvironmentOrder",
+      "SymbolName": "Skills.Render.R06_ShadingAndLight.R06c_CameraAndEnvironmentOrder",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
-      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 170.0
@@ -684,7 +689,6 @@
       "ChildId": "8a44cfb4-9d8f-4851-a851-93465f896892",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06b_CustomEnvironments",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
-      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 135.0
@@ -821,7 +825,6 @@
       "ChildId": "b5dbae1b-9eba-4d4f-88d7-92b225859bdb",
       "SymbolName": "Skills.Render.R05_ShadingAndMaterial.R05g_NormalMapping",
       "SectionId": "483a76ee-19cd-4412-97f8-fd0eaace26b5",
-      "Comment": "Draft",
       "Position": {
         "X": 3890.0,
         "Y": 310.0
@@ -1044,7 +1047,6 @@
       "ChildId": "e38b1dd7-4b94-4eba-ba21-f5c5a74e0018",
       "SymbolName": "Skills.Render.R06_ShadingAndLight.R06d_Foggy",
       "SectionId": "b1a14686-4641-44fc-821e-f7bc42dbe7bc",
-      "Comment": "Draft",
       "Position": {
         "X": 4080.0,
         "Y": 205.0

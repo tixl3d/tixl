@@ -1,0 +1,63 @@
+{
+  "Id": "21eb13a7-04ad-4ba4-8911-3b254840ffd8",
+  "Variations": [
+    {
+      "Id": "afef6c43-6160-463c-941a-27b083398f5e",
+      "IsPreset": false,
+      "ActivationIndex": 0,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "510ac21d-a600-4edb-992c-27a5a5af2c7a": {
+          "e0f4333d-8bee-4f9e-bb29-9f76bd72e61f": 2.0
+        },
+        "b6d81b06-9e58-416b-9ce8-1b3a24f34072": {
+          "2e8c23d8-01ac-4f53-b628-91d9ab094278": 3,
+          "32a77592-eaa1-43e8-b1ab-74b989ecbccd": true,
+          "63866397-f64e-486a-8c6d-862ffd3ed42e": -0.13,
+          "bbeccca7-9e1c-4702-bbd4-1cf0c9409354": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": -1.5
+          },
+          "7438a4ca-1fa7-48cf-ad85-0e7067ae54cc": 1
+        },
+        "21e1a79c-1b13-45bb-ac1f-d6a0ec4b4e4b": {
+          "de6b9cb3-69ce-4b23-add6-a564648ec3a8": 2
+        },
+        "fb2780e0-9a86-4ca3-9aee-787e62e254af": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.17,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.09
+        },
+        "10adc294-3a04-46e6-9a9b-5b91fe8533a0": {
+          "2e8c23d8-01ac-4f53-b628-91d9ab094278": 3,
+          "32a77592-eaa1-43e8-b1ab-74b989ecbccd": true,
+          "63866397-f64e-486a-8c6d-862ffd3ed42e": -0.13,
+          "bbeccca7-9e1c-4702-bbd4-1cf0c9409354": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": -1.5
+          },
+          "7438a4ca-1fa7-48cf-ad85-0e7067ae54cc": 1
+        },
+        "5357b6d0-5678-496a-b2c5-a7ba52bde9c3": {
+          "aa1307c2-c955-461b-8d43-b81c7e85a868": 0.1,
+          "347f8abe-dbd9-4939-9e28-4f25c73dddc9": false
+        },
+        "4b4e6a4b-1ebc-4f29-b8cc-0e4370cd790c": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.17,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.09
+        },
+        "e736db84-bb80-4bd6-8e69-b066b4b736ed": {
+          "de6b9cb3-69ce-4b23-add6-a564648ec3a8": 2
+        },
+        "27669c3b-a7bb-48af-8e25-55746c32b312": {
+          "e0f4333d-8bee-4f9e-bb29-9f76bd72e61f": 2.0
+        }
+      }
+    }
+  ]
+}
