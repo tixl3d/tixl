@@ -173,8 +173,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
         _isProfiling = EnableProfiling.GetValue(context);
 
-        _textureAction?.Invoke();
-        _textureAction = null;
+        UploadPendingFrame();
         Texture.Value = _gpuTexture;
     }
 
@@ -303,6 +302,13 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         _receiveThread = null;
         _exitThread = false;
 
+        // A frame waiting for upload belongs to the receiver instance we're about to destroy.
+        if (_hasPendingVideoFrame)
+        {
+            NDIlib.recv_free_video_v2(_receiveInstancePtr, ref _pendingVideoFrame);
+            _hasPendingVideoFrame = false;
+        }
+
         NDIlib.recv_destroy(_receiveInstancePtr);
 
         _receiveInstancePtr = IntPtr.Zero;
@@ -393,89 +399,43 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
                         break;
                     }
 
-                    // get all our info so that we can free the frame
-                    _xRes = videoFrame.xres;
-                    _yRes = videoFrame.yres;
-                    _stride = videoFrame.line_stride_in_bytes;
-
-                    // Try to acquire our texture mutex for some time.
-                    // End processing if we shall quit
-                    while (!_textureMutex.WaitOne(10))
+                    // Wait for the UI thread to finish the previous upload. If we're shutting down, drop the frame.
+                    var mutexAcquired = false;
+                    while (!_exitThread)
                     {
-                        if (_exitThread)
+                        if (_textureMutex.WaitOne(10))
                         {
-                            // Always free received frame
-                            NDIlib.recv_free_video_v2(_receiveInstancePtr, ref videoFrame);
-                            Log.Warning("NDI input thread exiting.", this);
+                            mutexAcquired = true;
                             break;
                         }
                     }
 
-                    // For now, we need to be on the UI thread to fill our bitmap
-                    _textureAction = () =>
-                                     {
-                                         // If the local receiver Id is not the same as the global receiver Id,
-                                         // then that means that either the connection source has changed, or
-                                         // the window has closed, in which case the latest receiver Id
-                                         // will be 0. If either is true, we stop processing data.
-                                         if (currReceiverId != _receiverId || _receiverId == 0)
-                                         {
-                                             return;
-                                         }
+                    if (!mutexAcquired)
+                    {
+                        NDIlib.recv_free_video_v2(_receiveInstancePtr, ref videoFrame);
+                        Log.Warning("NDI input thread exiting.", this);
+                        break;
+                    }
 
-                                         if (_xRes == 0 || _yRes == 0 || _stride == 0)
-                                         {
-                                             // always free received frames
-                                             NDIlib.recv_free_video_v2(_receiveInstancePtr, ref videoFrame);
-                                             //Log.Warning("NDI input wxh = 0x0, skipping frame.", this);
-                                             return;
-                                         }
+                    // The UI thread uploads at most one frame per evaluation, and the upload is slower than the
+                    // network. Free the frame still waiting for upload instead of overwriting its pointer: NDI
+                    // owns that buffer and leaks it otherwise.
+                    if (_hasPendingVideoFrame)
+                    {
+                        NDIlib.recv_free_video_v2(_receiveInstancePtr, ref _pendingVideoFrame);
+                        _hasPendingVideoFrame = false;
+                    }
 
-                                         if (_gpuTexture == null
-                                             || _gpuTexture.Description.Width != _xRes
-                                             || _gpuTexture.Description.Height != _yRes)
-                                         {
-                                             DebugDataRecording.KeepTraceData(this, "07-_textureActionCreateNewTexture", currReceiverId,
-                                                                              ref _traceTextureAction2Channel);
-                                             DisposeTextures();
-
-                                             // Device-local and filled with UpdateSubresource, like the camera and video operators: a
-                                             // CPU-writable texture can't be sampled on Vulkan, where it is a plain upload buffer.
-                                             _gpuTexture = Texture2D.CreateTexture2D(new Texture2DDescription
-                                                                                         {
-                                                                                             BindFlags = BindFlags.ShaderResource,
-                                                                                             Format = Format.B8G8R8A8_UNorm,
-                                                                                             Width = _xRes,
-                                                                                             Height = _yRes,
-                                                                                             MipLevels = 1,
-                                                                                             SampleDescription = new SampleDescription(1, 0),
-                                                                                             Usage = ResourceUsage.Default,
-                                                                                             OptionFlags = ResourceOptionFlags.None,
-                                                                                             CpuAccessFlags = CpuAccessFlags.None,
-                                                                                             ArraySize = 1
-                                                                                         });
-                                         }
-
-                                         if (_isProfiling)
-                                             DebugDataRecording.StartRegion(this, "08-CopyTextureToGpu", currReceiverId, ref _traceTextureCopyChannel);
-
-                                         var dataBox = new DataBox(videoFrame.p_data, videoFrame.line_stride_in_bytes, 0);
-                                         ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _gpuTexture, 0);
-
-                                         if (_isProfiling)
-                                             DebugDataRecording.EndRegion(_traceTextureCopyChannel);
-
-                                         // free frames that were received after use
-                                         NDIlib.recv_free_video_v2(_receiveInstancePtr, ref videoFrame);
-                                         _lastStatusMessage = null;
-                                     };
-
+                    _pendingVideoFrame = videoFrame;
+                    _pendingFrameReceiverId = currReceiverId;
+                    _hasPendingVideoFrame = true;
                     _textureMutex.ReleaseMutex();
 
                     break;
 
-                // Ignore audio
+                // Ignore audio, but still release its buffer
                 case NDIlib.frame_type_e.frame_type_audio:
+                    NDIlib.recv_free_audio_v2(_receiveInstancePtr, ref audioFrame);
                     break;
 
                 // Metadata
@@ -490,6 +450,79 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
                     NDIlib.recv_free_metadata(_receiveInstancePtr, ref metadataFrame);
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Copies the latest received frame into the GPU texture. Must run on the UI thread because the texture is
+    /// created there and the NDI frame buffer may only be released after the upload has read it.
+    /// </summary>
+    private void UploadPendingFrame()
+    {
+        _textureMutex.WaitOne();
+        try
+        {
+            if (!_hasPendingVideoFrame)
+                return;
+
+            var videoFrame = _pendingVideoFrame;
+            var receiverId = _pendingFrameReceiverId;
+            _hasPendingVideoFrame = false;
+
+            try
+            {
+                // A frame can outlive its receiver when the source changes between receiving and uploading.
+                if (receiverId != _receiverId || _receiverId == 0)
+                    return;
+
+                if (videoFrame.xres == 0 || videoFrame.yres == 0 || videoFrame.line_stride_in_bytes == 0)
+                    return;
+
+                if (_gpuTexture == null
+                    || _gpuTexture.Description.Width != videoFrame.xres
+                    || _gpuTexture.Description.Height != videoFrame.yres)
+                {
+                    DebugDataRecording.KeepTraceData(this, "07-CreateNewTexture", receiverId,
+                                                     ref _traceCreateTextureChannel);
+                    DisposeTextures();
+
+                    // Device-local and filled with UpdateSubresource, like the camera and video operators: a
+                    // CPU-writable texture can't be sampled on Vulkan, where it is a plain upload buffer.
+                    _gpuTexture = Texture2D.CreateTexture2D(new Texture2DDescription
+                                                                {
+                                                                    BindFlags = BindFlags.ShaderResource,
+                                                                    Format = Format.B8G8R8A8_UNorm,
+                                                                    Width = videoFrame.xres,
+                                                                    Height = videoFrame.yres,
+                                                                    MipLevels = 1,
+                                                                    SampleDescription = new SampleDescription(1, 0),
+                                                                    Usage = ResourceUsage.Default,
+                                                                    OptionFlags = ResourceOptionFlags.None,
+                                                                    CpuAccessFlags = CpuAccessFlags.None,
+                                                                    ArraySize = 1
+                                                                });
+                }
+
+                if (_isProfiling)
+                    DebugDataRecording.StartRegion(this, "08-CopyTextureToGpu", receiverId, ref _traceTextureCopyChannel);
+
+                var dataBox = new DataBox(videoFrame.p_data, videoFrame.line_stride_in_bytes, 0);
+                ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _gpuTexture, 0);
+
+                if (_isProfiling)
+                    DebugDataRecording.EndRegion(_traceTextureCopyChannel);
+
+                _lastStatusMessage = null;
+            }
+            finally
+            {
+                // NDI owns the buffer until this call; dropping the frame without freeing it leaks native memory.
+                NDIlib.recv_free_video_v2(_receiveInstancePtr, ref videoFrame);
+            }
+        }
+        finally
+        {
+            _textureMutex.ReleaseMutex();
         }
     }
 
@@ -527,19 +560,8 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             Log.Warning("NDI Input Finder dispose timed out or failed: " + ex.Message);
         }
         
-        // wait for it to exit
-        if (_receiveThread != null)
-        {
-            _receiveThread.Join();
-            _receiveThread = null;
-        }
-
-        // Destroy the receiver
-        if (_receiveInstancePtr != IntPtr.Zero)
-        {
-            NDIlib.recv_destroy(_receiveInstancePtr);
-            _receiveInstancePtr = IntPtr.Zero;
-        }
+        // Wait for the receive thread, then release its receiver and any frame still waiting for upload.
+        Disconnect();
 
         DisposeTextures();
 
@@ -576,11 +598,13 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     /// </summary>
     private int _receiverId;
 
-    /** Mutex protecting changes to our images */
+    /** Mutex protecting the pending frame and the texture */
     private readonly Mutex _textureMutex = new();
 
-    /** Action for changing the textures */
-    private Action? _textureAction;
+    /** The newest received frame, waiting to be uploaded by the UI thread. */
+    private NDIlib.video_frame_v2_t _pendingVideoFrame;
+    private int _pendingFrameReceiverId;
+    private bool _hasPendingVideoFrame;
 
     /** The last received frame, uploaded on the main thread. */
     private Texture2D? _gpuTexture;
@@ -655,17 +679,13 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     }
     #endregion
 
-    private int _xRes;
-    private int _yRes;
-    private int _stride;
-    
     private bool _isProfiling;
     private bool _reconnect;
     private DataChannel? _traceTallyChannel;
     private DataChannel? _traceReceiveThreadProc;
     private DataChannel? _traceReceive2ThreadProc;
     private DataChannel? _traceTextureCopyChannel;
-    private DataChannel? _traceTextureAction2Channel;
+    private DataChannel? _traceCreateTextureChannel;
 
     [Input(Guid = "FD1FCA6B-A3BE-440B-86BA-6B7B1BBD2A8C")]
     public readonly InputSlot<string> SourceName = new();
