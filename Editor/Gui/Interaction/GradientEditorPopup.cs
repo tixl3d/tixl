@@ -29,7 +29,7 @@ internal static class GradientEditorPopup
     {
         var scale = T3Ui.UiScaleFactor;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(8, 8) * scale);
-        // NoMove: a press in the corner resizes instead of moving; the header grip moves the popup explicitly.
+        // NoMove: a press in the corner resizes instead of moving; the header moves the popup explicitly.
         var isOpen = ImGui.BeginPopup(PopupId, ImGuiWindowFlags.NoMove);
         ImGui.PopStyleVar();
         if (!isOpen)
@@ -162,6 +162,8 @@ internal static class GradientEditorPopup
 
         CustomComponents.TooltipForLastItem(_showStepList ? "Hide steps" : "Show steps",
                                             "Lists every color step with its exact position.");
+
+        CustomComponents.HandlePopupHeaderDrag(rowStart.Y + iconSize.Y, ref _isMoving);
         return editResult;
     }
 
@@ -311,6 +313,7 @@ internal static class GradientEditorPopup
     private static bool _showStepList;
     private static bool _showCurves;
     private static bool _isResizing;
+    private static bool _isMoving;
 
     private static readonly Gradient.Interpolations[] _interpolationValues = Enum.GetValues<Gradient.Interpolations>();
     private static readonly string[] _interpolationNames = Enum.GetNames<Gradient.Interpolations>();

@@ -724,6 +724,29 @@ internal static partial class CustomComponents
     }
 
     /// <summary>
+    /// Moves the current popup while its header is dragged. Call it after the header's controls, so a press on a
+    /// control stays with that control and only presses on free header space move the popup.
+    /// </summary>
+    /// <param name="headerBottom">The screen Y where the header ends; the area above it, including the window padding, is draggable.</param>
+    public static void HandlePopupHeaderDrag(float headerBottom, ref bool isMoving)
+    {
+        var windowPos = ImGui.GetWindowPos();
+        var headerMax = new Vector2(windowPos.X + ImGui.GetWindowWidth(), headerBottom);
+        var isHovered = ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() && ImGui.IsMouseHoveringRect(windowPos, headerMax);
+        if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            isMoving = true;
+
+        if (isMoving && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            isMoving = false;
+
+        if (isHovered || isMoving)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+
+        if (isMoving)
+            ImGui.SetWindowPos(windowPos + ImGui.GetIO().MouseDelta);
+    }
+
+    /// <summary>
     /// A triangle in the current popup's lower right corner that resizes it. Call it last, so it draws above the content.
     /// </summary>
     /// <param name="unscaledSize">The size the popup lays its content out with, before UI scaling.</param>

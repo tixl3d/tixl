@@ -43,7 +43,7 @@ internal static class CodeEditorPopup
 
         var scale = T3Ui.UiScaleFactor;
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(8, 8) * scale);
-        // NoMove: a press in the corner resizes instead of moving; the header grip moves the popup explicitly.
+        // NoMove: a press in the corner resizes instead of moving; the header moves the popup explicitly.
         var isOpen = ImGui.BeginPopup(PopupId, ImGuiWindowFlags.NoMove);
         ImGui.PopStyleVar();
         if (!isOpen)
@@ -106,14 +106,19 @@ internal static class CodeEditorPopup
             ImGui.PopStyleColor();
         }
 
-        if (!hasCompiledSource)
-            return;
+        if (hasCompiledSource)
+            DrawCompiledSourceToggle(rowStart, width, iconSize.Y);
 
+        CustomComponents.HandlePopupHeaderDrag(rowStart.Y + iconSize.Y, ref _isMoving);
+    }
+
+    private static void DrawCompiledSourceToggle(Vector2 rowStart, float width, float height)
+    {
         const string label = "Compiled source";
         var buttonWidth = MathF.Round(ImGui.CalcTextSize(label).X + ImGui.GetStyle().FramePadding.X * 2);
         ImGui.SameLine();
         ImGui.SetCursorScreenPos(new Vector2(rowStart.X + width - buttonWidth, rowStart.Y));
-        if (CustomComponents.ToggleButton(ref _showCompiledSource, label, new Vector2(buttonWidth, iconSize.Y)))
+        if (CustomComponents.ToggleButton(ref _showCompiledSource, label, new Vector2(buttonWidth, height)))
         {
             _pendingCursorLine = 0;
             _scrollToLine = 0;
@@ -428,6 +433,7 @@ internal static class CodeEditorPopup
 
     private static Vector2 _size = new(560, 320);
     private static bool _isResizing;
+    private static bool _isMoving;
     private static bool _showCompiledSource;
     private static Guid _instanceId;
     private static Guid _inputId;

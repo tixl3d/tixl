@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.DataTypes.Vector;
+using T3.Editor.Gui.Interaction.Camera;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 
@@ -147,6 +148,9 @@ internal sealed class PreviewSidebar
     /// <summary>Ends the sidebar region and draws the splitter.</summary>
     public void End()
     {
+        if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows))
+            CameraInteraction.ClaimMouseForPanel();
+
         ImGui.EndChild();
         if (_state.IsMaximized || _hasNoPreview)
         {
@@ -160,7 +164,10 @@ internal sealed class PreviewSidebar
         ImGui.InvisibleButton("##previewSidebarSplitter", new Vector2(SplitterWidth * scale, _size.Y));
         var isActive = ImGui.IsItemActive();
         if (isActive || ImGui.IsItemHovered())
+        {
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+            CameraInteraction.ClaimMouseForPanel();
+        }
 
         if (isActive)
             _state.Width = MathF.Max(MinWidth, _state.Width + ImGui.GetIO().MouseDelta.X / scale);
@@ -211,6 +218,9 @@ internal sealed class PreviewSidebar
             total += GetSegmentWidth(segments[index].Icon, index < counts.Length ? counts[index] : null, padding, gap);
 
         drawList.AddRectFilled(start, start + new Vector2(total, height), UiColors.BackgroundInputField, rounding);
+        if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) && ImGui.IsMouseHoveringRect(start, start + new Vector2(total, height)))
+            CameraInteraction.ClaimMouseForPanel();
+
         ImGui.PushID("##previewSidebarSegments");
         var x = start.X;
         for (var index = 0; index < segments.Length; index++)
