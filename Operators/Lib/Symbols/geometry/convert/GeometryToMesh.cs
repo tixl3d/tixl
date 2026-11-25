@@ -7,7 +7,8 @@ namespace Lib.geometry.convert;
 /// <summary>
 /// Compiles the polygons of a Geometry into GPU mesh buffers. With FillCurves, closed curve primitives are filled flat
 /// (like [FillCurves]) and drawn too, so text and shapes render without an extrusion. Parts that already have polygons
-/// (extruded text that kept its curves) aren't filled again; open curves are ignored.
+/// (extruded text that kept its curves) aren't filled again; open curves are ignored. Optionally drops the duplicate
+/// vertices that one-vertex-per-corner compilation produces.
 /// </summary>
 [Guid("4fea8c0e-cb7f-41fe-a410-df1d3886bf98")]
 [ExportDependencies("LibTessDotNet.dll")]
@@ -19,6 +20,7 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
     public GeometryToMesh()
     {
         Buffers.UpdateAction = Update;
+        _duplicateLookup = new Dictionary<int, int>(_duplicateComparer);
     }
 
     private void Update(EvaluationContext context)
@@ -42,6 +44,12 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
             Append(_compiler, _fillCompiler);
             vertices = _mergedVertices;
             triangles = _mergedTriangles;
+        }
+
+        if (MergeDuplicateVertices.GetValue(context) && WeldDuplicateVertices(vertices, triangles))
+        {
+            vertices = _weldedVertices;
+            triangles = _weldedTriangles;
         }
 
         if (triangles.Length == 0)
@@ -93,6 +101,95 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
         }
     }
 
+    /// <summary>
+    /// Drops vertices that repeat an earlier one and remaps the triangles to the survivors, e.g. the corners [FillCurves]
+    /// creates at every face. Vertices count as duplicates when position, normal, UVs, color and selection agree; the
+    /// tangent basis of the first is kept, since it is derived from those values.
+    /// </summary>
+    /// <returns>False when every vertex is unique, in which case the welded arrays are left as they were.</returns>
+    private bool WeldDuplicateVertices(PbrVertex[] vertices, Int3[] triangles)
+    {
+        _duplicateComparer.Vertices = vertices;
+        _duplicateLookup.Clear();
+        EnsureLength(ref _vertexRemap, vertices.Length);
+        EnsureLength(ref _isFirstVertex, vertices.Length);
+        Array.Clear(_isFirstVertex, 0, vertices.Length);
+
+        var keptCount = 0;
+        for (var vertex = 0; vertex < vertices.Length; vertex++)
+        {
+            if (_duplicateLookup.TryGetValue(vertex, out var first))
+            {
+                _vertexRemap[vertex] = _vertexRemap[first];
+                continue;
+            }
+
+            _duplicateLookup[vertex] = vertex;
+            _isFirstVertex[vertex] = true;
+            _vertexRemap[vertex] = keptCount++;
+        }
+
+        if (keptCount == vertices.Length)
+            return false;
+
+        if (_weldedVertices.Length != keptCount)
+            _weldedVertices = new PbrVertex[keptCount];
+
+        if (_weldedTriangles.Length != triangles.Length)
+            _weldedTriangles = new Int3[triangles.Length];
+
+        for (var vertex = 0; vertex < vertices.Length; vertex++)
+        {
+            if (_isFirstVertex[vertex])
+                _weldedVertices[_vertexRemap[vertex]] = vertices[vertex];
+        }
+
+        for (var triangleIndex = 0; triangleIndex < triangles.Length; triangleIndex++)
+        {
+            var triangle = triangles[triangleIndex];
+            _weldedTriangles[triangleIndex] = new Int3(_vertexRemap[triangle.X], _vertexRemap[triangle.Y], _vertexRemap[triangle.Z]);
+        }
+
+        return true;
+    }
+
+    /** Vertex indices of equal values resolve to the same key, so the lookup is a duplicate set of the first occurrences. */
+    private sealed class DuplicateComparer : IEqualityComparer<int>
+    {
+        public PbrVertex[] Vertices = [];
+
+        public bool Equals(int a, int b)
+        {
+            var first = Vertices[a];
+            var second = Vertices[b];
+            return first.Position == second.Position
+                   && first.Normal == second.Normal
+                   && first.Texcoord == second.Texcoord
+                   && first.Texcoord2 == second.Texcoord2
+                   && first.ColorRgb == second.ColorRgb
+                   && first.Selection == second.Selection;
+        }
+
+        public int GetHashCode(int index)
+        {
+            var vertex = Vertices[index];
+            var hash = new HashCode();
+            hash.Add(vertex.Position);
+            hash.Add(vertex.Normal);
+            hash.Add(vertex.Texcoord);
+            hash.Add(vertex.Texcoord2);
+            hash.Add(vertex.ColorRgb);
+            hash.Add(vertex.Selection);
+            return hash.ToHashCode();
+        }
+    }
+
+    private static void EnsureLength<T>(ref T[] array, int length)
+    {
+        if (array.Length < length)
+            array = new T[length];
+    }
+
     public IStatusProvider.StatusLevel GetStatusLevel()
     {
         return string.IsNullOrEmpty(_statusMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
@@ -115,9 +212,20 @@ internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
     private BufferWithViews _indexBufferWithViews;
     private readonly MeshBuffers _data = new();
 
+    /** Duplicates resolve through the values of the vertices being welded. */
+    private readonly DuplicateComparer _duplicateComparer = new();
+    private readonly Dictionary<int, int> _duplicateLookup;
+    private int[] _vertexRemap = [];
+    private bool[] _isFirstVertex = [];
+    private PbrVertex[] _weldedVertices = [];
+    private Int3[] _weldedTriangles = [];
+
     [Input(Guid = "57469ea6-f0c5-4e8d-a53c-40e8ac495bc3")]
     public readonly InputSlot<Geometry> Geometry = new();
 
     [Input(Guid = "94d5cf91-080f-44f4-9c8c-80a81ebd88f6")]
     public readonly InputSlot<bool> FillCurves = new();
+
+    [Input(Guid = "afa480eb-6d84-44e1-ae1c-28ac32d856f3")]
+    public readonly InputSlot<bool> MergeDuplicateVertices = new();
 }

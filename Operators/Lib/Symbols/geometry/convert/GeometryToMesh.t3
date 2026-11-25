@@ -9,6 +9,10 @@
     {
       "Id": "94d5cf91-080f-44f4-9c8c-80a81ebd88f6"/*FillCurves*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "afa480eb-6d84-44e1-ae1c-28ac32d856f3"/*MergeDuplicateVertices*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

@@ -1,0 +1,16 @@
+{
+  "FormatVersion": 3,
+  "Id": "12492a88-9e16-49a4-84c7-75ab11bb7bd4"/*MergeVertices*/,
+  "Inputs": [
+    {
+      "Id": "00348b5b-f0dc-40aa-a8f2-1b0c6d03be99"/*Tolerance*/,
+      "DefaultValue": 0.0001
+    },
+    {
+      "Id": "81b960fa-f826-481c-9b1e-40fb34fc6e62"/*Geometry*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
