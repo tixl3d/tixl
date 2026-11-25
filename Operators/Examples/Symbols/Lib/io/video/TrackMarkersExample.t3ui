@@ -1,0 +1,122 @@
+{
+  "FormatVersion": 3,
+  "Id": "aee0986e-1bb3-4f3a-a475-c12c7abec143"/*TrackMarkersExample*/,
+  "Description": "A simple example how to use marker tracking on Videos.",
+  "SymbolTags": "2",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "296ac801-ed35-42c2-bf7c-4002f520a691",
+      "SymbolName": "Lib.point.generate.CommonPointSets",
+      "Position": {
+        "X": 133.24518,
+        "Y": 130.03015
+      }
+    },
+    {
+      "ChildId": "35a946ff-1310-4804-ae2e-dc325d7d8c35",
+      "SymbolName": "Lib.point.modify.SetPointAttributes",
+      "Position": {
+        "X": 273.24518,
+        "Y": 60.03015
+      }
+    },
+    {
+      "ChildId": "4f9cf7a3-8b81-4901-ad2c-4f4c45a08d33",
+      "SymbolName": "Lib.render.transform.Group",
+      "Position": {
+        "X": 725.7814,
+        "Y": 4.112488
+      }
+    },
+    {
+      "ChildId": "608d5706-586c-426a-bfc0-061b40d50c5a",
+      "SymbolName": "Lib.render.gizmo._._DrawPointInfo",
+      "Position": {
+        "X": 585.7814,
+        "Y": 74.11249
+      }
+    },
+    {
+      "ChildId": "7036b81f-c173-4dc6-ab78-8fa8fcb9e46e",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 585.7814,
+        "Y": 144.11249
+      }
+    },
+    {
+      "ChildId": "7e1c50f3-7dfe-422f-b5e3-8368fb8c9955",
+      "SymbolName": "Lib.point.generate.RepeatAtPoints",
+      "Position": {
+        "X": 273.24518,
+        "Y": 95.03021
+      }
+    },
+    {
+      "ChildId": "83366faa-1533-4f0d-ac24-595fd7a8a5dd",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 585.7814,
+        "Y": 109.11249
+      }
+    },
+    {
+      "ChildId": "9ab6550a-eab3-4388-a998-7926ca8a31ca",
+      "SymbolName": "Lib.render.basic.Layer2d",
+      "Position": {
+        "X": 585.7814,
+        "Y": 4.112488
+      }
+    },
+    {
+      "ChildId": "9ff79a2b-6b92-472a-855f-ab72b13f6c2c",
+      "SymbolName": "Lib.image.generate.basic.RenderTarget",
+      "Position": {
+        "X": 725.7814,
+        "Y": 179.11249
+      }
+    },
+    {
+      "ChildId": "a8cbbc5b-546f-448b-ab09-e480e542fa1f",
+      "SymbolName": "Lib.io.video.PlayVideo",
+      "Position": {
+        "X": 106.80763,
+        "Y": -89.28247
+      }
+    },
+    {
+      "ChildId": "c3c95fb2-c69b-45f1-ba53-323fab5d4279",
+      "SymbolName": "Lib.point.draw.DrawLines",
+      "Position": {
+        "X": 585.7814,
+        "Y": 39.112488
+      }
+    },
+    {
+      "ChildId": "e2b56067-581a-437f-871e-5260cd3d6240",
+      "SymbolName": "Lib.point.generate.PointInfoLines",
+      "Position": {
+        "X": 445.78137,
+        "Y": 144.11249
+      }
+    },
+    {
+      "ChildId": "f9f089cd-953d-4a59-b9ea-0ddac285ca4f",
+      "SymbolName": "Lib.point.track.TrackMarkers",
+      "Position": {
+        "X": 273.24518,
+        "Y": -9.969849
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ab37d762-df46-46ed-ad26-146cd1611720"/*ColorBuffer*/,
+      "Position": {
+        "X": 1193.3564,
+        "Y": 121.22513
+      }
+    }
+  ]
+}
