@@ -1,0 +1,25 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e43e19f-8fcd-40e7-8e02-928dd1d0df73"/*CombineGeometry*/,
+  "Description": "Appends several geometries into one, keeping their curves, polygons and attributes.\n\nEach input keeps its parts; an input without parts becomes a single part. Part ids and seed indices are renumbered in order. Attributes that only some inputs have are zero on the others. Overlapping shapes are not merged: use [MergeCurves] for that.\n\nAKA: merge, append, join, combine, group\n\nTips\n- [NGonCurves] (triangle) + [NGonCurves] (stretched square) -> CombineGeometry -> [MergeCurves] -> [FillCurves] gives a flat arrow.",
+  "InputUis": [
+    {
+      "InputId": "c0340fa2-bf70-4cd2-9779-32db528c6ef3"/*Geometries*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b8b6b0ff-7d5c-4daa-ba8e-8642e000b882"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
