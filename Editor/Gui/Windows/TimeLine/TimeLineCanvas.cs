@@ -818,6 +818,9 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     // (and in the SRI / SelectionArea aggregators).
     internal readonly VersionedKeyframeSet SharedSelectedKeyframes = new();
 
+    /** Animated parameters of the selected and pinned operators, as shown in the dope sheet and curve editor. */
+    internal IReadOnlyList<AnimationParameter> SelectedAnimationParameters => _selectedAnimationParameters;
+
     private int ComputeSelectionHash()
     {
         var hash = _selectedAnimationParameters.Count;
