@@ -1,6 +1,7 @@
 # Signing the Windows Installer
 
-**Status:** Draft — 2026-10-09. Nothing implemented yet.
+**Status:** CI side implemented 2026-11-25 in `.github/workflows/windows-build.yml`; waiting for the Azure account,
+identity validation and the `windows-signing` environment (steps 1 and 2).
 **Scope:** Authenticode-sign the Windows installer and TiXL's own executables, in CI for release tags, so
 Microsoft Defender SmartScreen stops showing "Windows protected your PC" for TiXL downloads.
 **Related:** the macOS release is already signed and notarized (`Installer/macOS/build-dmg.sh`,
@@ -54,21 +55,30 @@ installer, which Microsoft signs.
 ### 1. Account (done by the account owner, ~1 hour plus validation time)
 
 1. Create an Azure subscription for Framefield GmbH (pay-as-you-go).
-2. Create an **Artifact Signing account** (resource type "Trusted Signing Account"), region West Europe, tier
-   Basic.
+   A free-trial subscription doesn't work: account creation fails with `BadResourceOperation` "not available for
+   free, trial or sponsored subscriptions". The plan name ("Microsoft Azure Plan") is the same for trial and paid,
+   so it doesn't tell them apart. Upgrade to pay-as-you-go first. The subscription overview showed no upgrade
+   button (2026-11-25); the upgrade page is under **Subscriptions → + Add**, support plan *Basic* (free).
+2. Create an **Artifact Signing account** (resource type "Trusted Signing Account"), tier Basic. West Europe
+   refused new customers on 2026-11-25 (`RequestDisallowedByAzure`); North Europe (`neu`) is the other EU region.
+   The region only selects the endpoint, not the certificate.
 3. Create an **identity validation** for Framefield GmbH (organization, public trust). Microsoft checks the
    company's registration; this can take from a day to a few weeks. It may ask for documents.
 4. Create a **certificate profile**, type *Public Trust*, using that identity validation.
 5. Create an **app registration** (service principal) for GitHub Actions and assign it the role
-   *Trusted Signing Certificate Profile Signer* on the signing account. Note tenant ID, client ID and a client
-   secret (or set up OIDC federation for the repository instead of a secret).
+   *Artifact Signing Certificate Profile Signer* (formerly *Trusted Signing Certificate Profile Signer*) on the
+   signing account. Note tenant ID and client ID. No client secret: under *Certificates & secrets → Federated
+   credentials* add a GitHub Actions credential for organization `tixl3d`, repository `tixl`, entity type
+   *Environment*, environment `windows-signing` (subject `repo:tixl3d/tixl:environment:windows-signing`).
 
 ### 2. GitHub
 
-1. Environment `windows-signing`, deployment rule: tags `v*` only (as `macos-signing`).
-2. Environment secrets: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` (omit with OIDC), plus the
-   non-secret values `ARTIFACT_SIGNING_ENDPOINT` (e.g. `https://weu.codesigning.azure.net/`),
-   `ARTIFACT_SIGNING_ACCOUNT` and `ARTIFACT_SIGNING_PROFILE`.
+1. Environment `windows-signing`, deployment rule: tags `v*` only (as `macos-signing`). Create it before the
+   first tag: GitHub otherwise creates it on first use, without the rule.
+2. Environment **variables** (not secrets; with OIDC none of them is secret): `AZURE_TENANT_ID`,
+   `AZURE_CLIENT_ID`, `ARTIFACT_SIGNING_ENDPOINT` (the account's region endpoint, e.g.
+   `https://weu.codesigning.azure.net/`), `ARTIFACT_SIGNING_ACCOUNT` and `ARTIFACT_SIGNING_PROFILE`.
+   Until all five exist, tag builds stay unsigned with a warning.
 
 ### 3. Release workflow
 
@@ -115,14 +125,31 @@ SignedUninstaller=yes
 
 ## Exported players
 
-Players exported from TiXL are built on the user's machine and stay unsigned; their recipients still see
-SmartScreen. Signing them would need a certificate on the exporting machine, which only makes sense for users
-with their own. Out of scope; worth a sentence in the export documentation.
+The export copies `<app>/Player` and only renames `Player.exe`, which keeps its signature. So players exported from
+a signed installation carry the Framefield signature on their executable and profit from its reputation. Their
+DLLs (the user's project and operators) are unsigned, which SmartScreen doesn't check. A project whose recipients
+need its own publisher name has to re-sign with the user's certificate; out of scope.
 
 ## Open questions
 
 1. Does Framefield GmbH meet Azure's eligibility (organization age, region)? If not, fall back to an OV
    certificate with the CA's cloud signing service and adapt step 3.
-2. Client secret or OIDC federation for the GitHub app registration? OIDC avoids a long-lived secret.
+2. ~~Client secret or OIDC federation?~~ OIDC (2026-11-25): `azure/login` with the federated credential, then
+   the signing action uses the Azure CLI login. No secret to rotate.
 3. Should the release workflow replace the manual installer build described in `Installer/Windows/README.md`,
    or should maintainers also be able to sign locally (requires Azure CLI login on their machine)?
+
+## Implementation (2026-11-25)
+
+`windows-build.yml` on `v*` tags enters `windows-signing`, checks the five variables, logs in with `azure/login`
+(OIDC, `allow-no-subscriptions`), and signs with `azure/artifact-signing-action` (the renamed
+`trusted-signing-action`, v2.0.0):
+
+1. `TiXL.exe` and `Player\Player.exe` in `Editor\bin\Release\net10.0`, after the tests and before `iscc`.
+2. The installer in `Installer\Windows\Output`, after `iscc`. The uninstaller stays unsigned (step 3.5 fallback):
+   the action can't serve as Inno Setup's `SignTool`, and wiring signtool plus the Azure dlib into `iscc` isn't worth
+   it for a file SmartScreen doesn't check. `installer.iss` is unchanged.
+3. `Get-AuthenticodeSignature` fails the job if any of the three is not `Valid` or lacks a timestamp.
+
+Not yet exercised against a real account. The first signed tag is the test: check the *Verify Signatures* step
+output, then step 5's clean-machine download.

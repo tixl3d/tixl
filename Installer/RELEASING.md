@@ -41,12 +41,15 @@ On the tag, `windows-build`, `linux-build` and `macos-build` run (about 15–20 
 
 | Workflow | Attaches |
 |---|---|
-| Windows | `Tixl-v<version>.exe`, `extensions.json` and `TiXL.<Name>.<version>.nupkg` for each optional package |
+| Windows | the signed `Tixl-v<version>.exe`, `extensions.json` and `TiXL.<Name>.<version>.nupkg` for each optional package |
 | Linux | the tarball and the Flatpak bundle |
 | macOS | the signed and notarized DMG |
 
 Each also runs `check-licences.py`, which fails if a bundled package or dependency has a licence outside the
 allowlist.
+
+Signing needs the `windows-signing` and `macos-signing` environments. If one lacks its values, that workflow still
+builds but leaves the result unsigned and says so as a warning in the run summary. Check for it before publishing.
 
 ## 5. After CI
 

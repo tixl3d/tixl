@@ -18,7 +18,7 @@ Checked against the code on 2026-11-20. Embedding is further along than it feels
 | .NET 10 SDK | installer runs the SDK installer | user installs it (startup check says how) | user installs it (`install-dependencies.sh`) | SDK extension | distro package |
 | Vulkan loader / driver | system | loader + MoltenVK in the bundle | system | runtime | system |
 | Audio | `tixlaudio` (miniaudio, MIT-0) everywhere; BASS is gone | | | | |
-| Signing | **unsigned** | Developer ID + notarized on `v*` tags | n/a | Flathub signs | n/a |
+| Signing | Artifact Signing on `v*` tags, once `windows-signing` is filled in (workflow ready 2026-11-25) | Developer ID + notarized on `v*` tags | n/a | Flathub signs | n/a |
 
 `SlangShaderCompiler.FindCompiler` already looks in `TIXL_SLANGC`, then `<app>/slang/bin`, then the pinned home
 install, then `PATH`, so bundling on Linux needs no code change. Exported players carry a seeded shader cache,

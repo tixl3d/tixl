@@ -3,6 +3,10 @@ name: Windows Build
 # Preview installer for the Vulkan-based cross-platform branch. A version tag (v4.4.0.0) or a manual run builds
 # it. It is always kept as a workflow artifact, and a tag also attaches it to that tag's release as a
 # pre-release, so it never replaces the stable Windows release GitHub shows as "Latest".
+#
+# Tag builds are Authenticode-signed with Azure Artifact Signing. The IDs for that live as variables in the
+# windows-signing environment, which only v* tags may use; the job signs in through OIDC, so there is no secret.
+# Every other run, or a tag without the variables, builds unsigned.
 on:
   workflow_dispatch:
   push:
@@ -16,8 +20,11 @@ concurrency:
 jobs:
   build:
     runs-on: windows-latest
+    # Only tag runs enter the environment, so a manual run on a branch builds unsigned instead of being refused.
+    environment: ${{ github.ref_type == 'tag' && 'windows-signing' || '' }}
     permissions:
       contents: write
+      id-token: write
     defaults:
       run:
         shell: pwsh
@@ -73,6 +80,48 @@ jobs:
           dotnet test VideoServices.Tests/VideoServices.Tests.csproj -c Release --no-build
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      - name: Check Signing Setup
+        id: signing
+        if: github.ref_type == 'tag'
+        env:
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          SIGNING_ENDPOINT: ${{ vars.ARTIFACT_SIGNING_ENDPOINT }}
+          SIGNING_ACCOUNT: ${{ vars.ARTIFACT_SIGNING_ACCOUNT }}
+          SIGNING_PROFILE: ${{ vars.ARTIFACT_SIGNING_PROFILE }}
+        run: |
+          $missing = @("AZURE_TENANT_ID", "AZURE_CLIENT_ID", "SIGNING_ENDPOINT", "SIGNING_ACCOUNT", "SIGNING_PROFILE") |
+              Where-Object { -not [Environment]::GetEnvironmentVariable($_) }
+          if ($missing) {
+              Write-Output "::warning::Windows signing is not configured ($($missing -join ', ') missing); the installer is unsigned."
+              "enabled=false" >> $env:GITHUB_OUTPUT
+          } else {
+              "enabled=true" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Azure Login
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      # Before packaging, so the installed executables name the publisher in UAC and SmartScreen too. Exports copy
+      # Player.exe and only rename it, which keeps the signature, so exported players are signed as well.
+      - name: Sign Executables
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          endpoint: ${{ vars.ARTIFACT_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.ARTIFACT_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.ARTIFACT_SIGNING_PROFILE }}
+          files: |
+            ${{ github.workspace }}\Editor\bin\Release\net10.0\TiXL.exe
+            ${{ github.workspace }}\Editor\bin\Release\net10.0\Player\Player.exe
+          description: TiXL
+          description-url: https://tixl.app
+
       - name: Package Installer
         run: |
           $isccArgs = @("Installer\Windows\installer.iss", "/DSkipBuild")
@@ -82,6 +131,38 @@ jobs:
           }
           iscc @isccArgs
           if ($LASTEXITCODE -ne 0) { throw "iscc failed" }
+
+      # Signed after packaging, so the uninstaller Inno Setup writes stays unsigned; SmartScreen doesn't check it.
+      - name: Sign Installer
+        if: steps.signing.outputs.enabled == 'true'
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
+        with:
+          endpoint: ${{ vars.ARTIFACT_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ vars.ARTIFACT_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.ARTIFACT_SIGNING_PROFILE }}
+          files-folder: ${{ github.workspace }}\Installer\Windows\Output
+          files-folder-filter: exe
+          description: TiXL
+          description-url: https://tixl.app
+
+      # A signature without a timestamp stops being valid when the short-lived certificate expires (days).
+      - name: Verify Signatures
+        if: steps.signing.outputs.enabled == 'true'
+        run: |
+          $files = @(
+              "Editor\bin\Release\net10.0\TiXL.exe",
+              "Editor\bin\Release\net10.0\Player\Player.exe"
+          ) + (Get-ChildItem "Installer\Windows\Output\*.exe").FullName
+          $failed = $false
+          foreach ($file in $files) {
+              $signature = Get-AuthenticodeSignature $file
+              Write-Output "$($signature.Status)  $($signature.SignerCertificate.Subject)  $file"
+              if ($signature.Status -ne "Valid" -or -not $signature.TimeStamperCertificate) {
+                  Write-Output "::error file=$file::Not validly signed and timestamped: $($signature.StatusMessage)"
+                  $failed = $true
+              }
+          }
+          if ($failed) { exit 1 }
 
       - name: Upload Installer
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
