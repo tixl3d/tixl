@@ -99,6 +99,9 @@ Many operators produce geometry with several parts: one per glyph, OBJ group or 
 - [FilterGeoPartsByIndex] and [FilterGeoPartsInBox] keep only some parts — the quickest way to inspect a single chunk.
 - [ColorFacesFromAttribute] picks a color per part or per face from a color list.
 
+Disable **FillInterior** on [VoronoiFracture] to omit cells lying entirely inside a solid.
+Open input surfaces keep their original openings with either setting.
+
 To animate parts on the GPU instead of rebuilding geometry every frame, compile them with [GeometryToMeshChunks]. It outputs one mesh with a chunk per part plus a point per pivot; move those points with any point operator and draw the result with [DrawMeshChunksAtPoints].
 
 ## Copying geometry to points
