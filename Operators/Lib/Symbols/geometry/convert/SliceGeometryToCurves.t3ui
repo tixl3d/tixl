@@ -1,0 +1,66 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e9be31f-406a-4f2d-97e9-7c647f8e9e16"/*SliceGeometryToCurves*/,
+  "Description": "Cuts geometry with one or more parallel planes and returns the outlines of the cuts as curves.\n\nEvery polygon crossing a plane contributes a line segment; the segments are joined into curves, closed where the surface is closed. Each slice becomes one part with an int SliceIndex attribute (0 for the slice furthest against the normal), so [FilterGeoPartsByIndex] can pick single slices and later operators can tell the slices apart. The curves consist of straight segments and lie in their planes. Seen from the side the normal points to, the outlines of an outward-facing surface run counter-clockwise and the outlines of its holes clockwise. Curves in the input are ignored.\n\nSplit vertices (e.g. from [LoadObjGeometry]) are joined at the cut, so a mesh does not need [MergeVertices] first.\n\nAKA: section, cross-section, contour, contour lines, intersect, plane cut, isolines, slicer\n\nTips\n- With the default normal along Z, the slices lie parallel to XY and can be filled with [FillCurves] or extruded with [ExtrudeCurves].\n- Increase Slice Count and reduce Spacing for topographic contour lines.\n- The operator's status shows how many curves were found and how many of them are closed.",
+  "InputUis": [
+    {
+      "InputId": "2ac84842-b7db-410e-b5b8-a2b2412f6a3e"/*Geometry*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Polygons to slice."
+    },
+    {
+      "InputId": "4e2ffa2a-2425-4c7b-94cb-78c4cd4305c6"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "A point on the middle slice plane."
+    },
+    {
+      "InputId": "6663a6c6-3cca-483a-a631-05fd0a551082"/*Spacing*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Distance between neighbouring slice planes along the normal. The slices are centered on Center.",
+      "Min": 0.0,
+      "Max": 0.5
+    },
+    {
+      "InputId": "76f02e33-9a8c-4af8-a608-b0ff8112d3b6"/*SliceCount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "GroupTitle": "Slices",
+      "Description": "Number of parallel slice planes, at least 1.",
+      "Min": 1,
+      "Max": 50,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b537a326-e52a-4e14-8a61-81a371f12ed5"/*Normal*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Direction perpendicular to the slice planes. Its length is ignored.",
+      "Min": -1.0,
+      "Max": 1.0
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "511351b4-55cc-4201-9565-078ccde9af28"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}
