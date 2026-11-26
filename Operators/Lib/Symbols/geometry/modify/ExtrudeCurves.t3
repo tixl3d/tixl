@@ -8,7 +8,7 @@
     },
     {
       "Id": "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48"/*BevelSegments*/,
-      "DefaultValue": 3
+      "DefaultValue": 0
     },
     {
       "Id": "3f9c6e2b-d485-4a10-8b7e-5d2a1c8f4e63"/*Back*/,
@@ -40,7 +40,7 @@
     },
     {
       "Id": "8d4b2e6f-1c93-4a57-9f0e-6b3d5c8a2e41"/*FlatShading*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "9bf01fa0-e722-4caa-9130-18578a0db485"/*Lattice*/,

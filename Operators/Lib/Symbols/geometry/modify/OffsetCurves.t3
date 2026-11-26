@@ -19,6 +19,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "8c1d1e2c-77cf-4e63-8215-f70bcee8230c"/*Selection*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "b7803f2e-b869-4181-aa44-1b4bbc3935a9"/*Offset*/,
       "DefaultValue": 0.02
     }
