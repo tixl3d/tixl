@@ -65,7 +65,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs."
+      "Description": "Defines the starting universe number for each input (0-32767). If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs."
     },
     {
       "InputId": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
