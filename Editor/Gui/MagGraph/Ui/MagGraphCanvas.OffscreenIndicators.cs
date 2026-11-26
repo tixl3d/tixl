@@ -5,6 +5,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
@@ -81,6 +82,7 @@ internal sealed partial class MagGraphView
         // The marker is a screen-space HUD element pinned to the window edge, so every size is in
         // scaled UI pixels (UiScaleFactor) — independent of canvas zoom (CanvasScale).
         var windowRect = ImRect.RectWithSize(WindowPos, WindowSize);
+        windowRect.Max.Y -= TimelineToolbar.GraphOverlayHeight;
         var box = TransformRect(boundsOnCanvas);
 
         // Fade in over the first pixels past the edge so the marker doesn't pop the instant the box
