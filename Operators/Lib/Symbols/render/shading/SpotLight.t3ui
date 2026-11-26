@@ -4,6 +4,18 @@
   "Description": "Adds a spot light with a cone gizmo to the connected subgraph.\n\nThe light shines from Position toward Target in a cone of ConeAngle degrees. Distance falloff uses Range and Decay like [PointLight]. With the operator selected, the move gizmo moves the light and the rotate gizmo swings Target around it, so the cone keeps its aim while you move it. Spot, point and directional lights share the limit of 8 lights.\n\nOperators with their own lighting (cel shading, hatching, tubes, ribbons) treat it as a point light for now.\n\nAKA: spotlight, cone light, stage light, lamp\n\nSee also: [SetSpotLight], [PointLight], [DirectionalLight], [SetShadow]",
   "InputUis": [
     {
+      "InputId": "06fb1952-13e5-474c-99c6-dc95ab2b3fb4"/*Softness*/,
+      "Position": {
+        "X": 735.94586,
+        "Y": -28.27655
+      },
+      "Description": "Part of the cone, from its edge inwards, over which the light fades out. 0 gives a hard edge.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "0d4c855d-4122-4f68-8cd4-a8c30cfa850f"/*ConeAngle*/,
       "Position": {
         "X": 78.02582,
@@ -45,7 +57,7 @@
       "InputId": "6889c5f5-3431-4800-ac75-8128b23ce57f"/*Range*/,
       "Position": {
         "X": 735.94586,
-        "Y": -28.27655
+        "Y": 6.7234497
       },
       "Description": "Distance at which the light intensity has dropped to half. The intensity falls off as Intensity / ((distance / Range) ^ Decay + 1).",
       "Min": 0.01,
@@ -57,7 +69,7 @@
       "InputId": "86c6c87c-5e8d-4e59-b047-2eec0a55059a"/*Decay*/,
       "Position": {
         "X": 735.94586,
-        "Y": 6.7234497
+        "Y": 41.72345
       },
       "GroupTitle": "Decay",
       "Description": "Exponent of the falloff beyond Range. Higher values make the light fade faster with distance.",

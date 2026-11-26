@@ -3,14 +3,18 @@
   "Id": "9dc0b2de-1f79-4d8b-8d87-6f3764875220"/*SpotLight*/,
   "Inputs": [
     {
+      "Id": "06fb1952-13e5-474c-99c6-dc95ab2b3fb4"/*Softness*/,
+      "DefaultValue": 0.1
+    },
+    {
       "Id": "0d4c855d-4122-4f68-8cd4-a8c30cfa850f"/*ConeAngle*/,
       "DefaultValue": 51.0
     },
     {
       "Id": "1acd0b18-378a-4337-8089-4e07ddc79989"/*Target*/,
       "DefaultValue": {
-        "X": -0.5,
-        "Y": 0.55,
+        "X": 0.0,
+        "Y": 0.0,
         "Z": 0.0
       }
     },
@@ -408,6 +412,12 @@
       "SourceSlotId": "49e9bdd3-6930-41a1-8c25-f94a24dcd61a",
       "TargetParentOrChildId": "e3b397c2-06ba-406d-ae2b-c2fdb551899c",
       "TargetSlotId": "482d4b4e-403f-4f7d-beb1-36165acb620b"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "06fb1952-13e5-474c-99c6-dc95ab2b3fb4",
+      "TargetParentOrChildId": "e3b397c2-06ba-406d-ae2b-c2fdb551899c",
+      "TargetSlotId": "84cb4172-56c2-4b91-86b0-951b3656be2a"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

@@ -24,7 +24,7 @@
     },
     {
       "Id": "aecf0016-95a8-43bb-9cee-d5f75356ae72"/*BevelFlatness*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 1.0
     },
     {
       "Id": "ba355fc0-0f1c-41d9-842e-d8ae9bee162a"/*Margin2*/,

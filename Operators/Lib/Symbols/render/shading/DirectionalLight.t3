@@ -8,7 +8,7 @@
     },
     {
       "Id": "314cf0cf-3804-4a48-83b1-1e065aa1006f"/*Intensity*/,
-      "DefaultValue": 2.0
+      "DefaultValue": 0.5
     },
     {
       "Id": "343cf9ba-aad6-423a-a341-0fb95bd458da"/*Color*/,
