@@ -74,26 +74,44 @@ internal static class FileImport
         }
 
         Log.Debug($"Imported {fileName} to {destFolder}");
+        return TryRegisterImportedFile(destFilepath, package, out asset);
+    }
 
-        FileInfo? destFileInfo;
+    /// <summary>
+    /// Saves encoded image data, e.g. a screenshot from the clipboard, as a timestamped PNG into
+    /// the package's <c>images/pasted</c> folder and registers it as asset.
+    /// </summary>
+    public static bool TryImportImageData(byte[] data, string mimeType, IResourcePackage package, [NotNullWhen(true)] out Asset? asset)
+    {
+        asset = null;
+
+        var pngData = data;
+        if (mimeType != "image/png")
+        {
+            if (!TryConvertToPng(data, out var convertedData))
+            {
+                Log.Warning($"Can't decode the {mimeType} image from the clipboard.");
+                return false;
+            }
+
+            pngData = convertedData;
+        }
+
+        var folder = Path.Combine(package.AssetsFolder, "images", "pasted");
+        var filePath = GetUnusedPastedImagePath(folder);
         try
         {
-            destFileInfo = new FileInfo(destFilepath);
+            Directory.CreateDirectory(folder);
+            File.WriteAllBytes(filePath, pngData);
         }
         catch (Exception e)
         {
-            Log.Warning($"Failed to get fileinfo after dropping to {destFilepath} " + e.Message);
+            Log.Warning($"Failed to save pasted image to {filePath}: {e.Message}");
             return false;
         }
 
-        asset = AssetRegistry.RegisterNewFile(destFileInfo, package);
-
-        // Force the asset library window (and any other UI that polls this counter) to refresh
-        // immediately. The file system watcher would also bump it eventually, but its debounce
-        // delays the UI update for ~400ms after the drop.
-        ResourceFileWatcher.FileStateChangeCounter++;
-
-        return true;
+        Log.Debug($"Saved pasted image to {filePath}");
+        return TryRegisterImportedFile(filePath, package, out asset);
     }
 
     /// <summary>
@@ -116,6 +134,61 @@ internal static class FileImport
         }
 
         return foundAny;
+    }
+
+    private static bool TryRegisterImportedFile(string filePath, IResourcePackage package, [NotNullWhen(true)] out Asset? asset)
+    {
+        asset = null;
+
+        FileInfo fileInfo;
+        try
+        {
+            fileInfo = new FileInfo(filePath);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to get fileinfo after importing to {filePath} " + e.Message);
+            return false;
+        }
+
+        asset = AssetRegistry.RegisterNewFile(fileInfo, package);
+
+        // Force the asset library window (and any other UI that polls this counter) to refresh
+        // immediately. The file system watcher would also bump it eventually, but its debounce
+        // delays the UI update for ~400ms after the import.
+        ResourceFileWatcher.FileStateChangeCounter++;
+
+        return true;
+    }
+
+    private static bool TryConvertToPng(byte[] data, [NotNullWhen(true)] out byte[]? pngData)
+    {
+        pngData = null;
+        try
+        {
+            var image = StbImageSharp.ImageResult.FromMemory(data, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+            using var stream = new MemoryStream();
+            new StbImageWriteSharp.ImageWriter().WritePng(image.Data, image.Width, image.Height,
+                                                          StbImageWriteSharp.ColorComponents.RedGreenBlueAlpha, stream);
+            pngData = stream.ToArray();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Image conversion failed: {e.Message}");
+            return false;
+        }
+    }
+
+    /** A timestamp keeps pasted images in paste order and readable in the asset library. */
+    private static string GetUnusedPastedImagePath(string folder)
+    {
+        var baseName = $"pasted_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
+        var filePath = Path.Combine(folder, baseName + ".png");
+        for (var index = 2; File.Exists(filePath); index++)
+            filePath = Path.Combine(folder, $"{baseName}_{index}.png");
+
+        return filePath;
     }
 
     private static bool TryGetExistingAutoSortedAsset(IResourcePackage package, AssetType assetType, string fileName, [NotNullWhen(true)] out Asset? asset)

@@ -8,6 +8,12 @@ Dropping a **single folder** from your file manager onto the TiXL window opens t
 
 Dropping individual files copies them into the project, and they can be dropped straight onto the graph or timeline. The one exception is files that already sit inside a linked folder — see below.
 
+## Pasting images
+
+Press <kbd>Ctrl</kbd>+<kbd>V</kbd> in the graph while the clipboard holds an image, for example a screenshot. TiXL saves it as a PNG into `Assets/images/pasted/`, named after the time of pasting (`pasted_2026-11-26_14-03-12.png`), and adds a [LoadImage] operator for it at the mouse position. **Paste** in the graph's context menu and the Edit menu works the same way.
+
+Pasting operators is not affected: copied operators are text, and TiXL only takes the image path when the clipboard holds an image.
+
 ## Linked folders
 
 Linking is meant for large media collections — for example a folder of video footage that would be wasteful to duplicate into every project. Instead of copying, TiXL writes a small `<FolderName>.tixlLink` file into the project's `Assets/` folder that points at the real location. The linked folder appears in the Assets window marked with a link icon, and its files can be used like any other asset.

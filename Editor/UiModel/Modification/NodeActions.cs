@@ -240,6 +240,13 @@ internal static class NodeActions
     {
         try
         {
+            // Copied operators are text only, so an image on the clipboard can't be a pending operator paste.
+            if (EditorUi.Instance.TryGetClipboardImage(out var imageData, out var imageMimeType))
+            {
+                PasteImage(imageData, imageMimeType, nodeSelection, canvas, compositionOp, screenPosition);
+                return;
+            }
+
             var text = EditorUi.Instance.GetClipboardText();
             if (string.IsNullOrEmpty(text))
             {
@@ -308,6 +315,21 @@ internal static class NodeActions
         }
     }
     
+    /** Saves a clipboard image, e.g. a screenshot, into the project's assets and adds an operator loading it. */
+    private static void PasteImage(byte[] data, string mimeType, NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp,
+                                   Vector2? screenPosition)
+    {
+        if (!FileImport.TryImportImageData(data, mimeType, compositionOp.Symbol.SymbolPackage, out var asset))
+            return;
+
+        var targetPosition = canvas.InverseTransformPositionFloat(screenPosition ?? ImGui.GetMousePos());
+        if (!GraphOperations.TryAddAssetOperator(compositionOp, asset, targetPosition, out var childUi, out var newInstance))
+            return;
+
+        nodeSelection.SetSelection(childUi, newInstance);
+        ActionToast.Show("{Pasted image}   saved as " + asset.Address);
+    }
+
     /// <summary>
     /// Pasting values and other properties onto selected nodes works under the following situation:
     /// - For a single op Symbol (e.g. Remap)

@@ -1,3 +1,5 @@
+#nullable enable
+using System.Diagnostics.CodeAnalysis;
 using T3.Editor.App;
 using T3.SdlPlatform;
 using T3.SystemUi;
@@ -56,7 +58,42 @@ internal sealed class SdlEditorUi : IEditorSystemUiService
 
     public string GetClipboardText() => SDL_GetClipboardText() ?? string.Empty;
 
+    public unsafe bool TryGetClipboardImage([NotNullWhen(true)] out byte[]? data, [NotNullWhen(true)] out string? mimeType)
+    {
+        foreach (var candidate in _clipboardImageMimeTypes)
+        {
+            if (!SDL_HasClipboardData(candidate))
+                continue;
+
+            UIntPtr size;
+            var buffer = SDL_GetClipboardData(candidate, &size);
+            if (buffer == IntPtr.Zero)
+                continue;
+
+            try
+            {
+                if (size == 0)
+                    continue;
+
+                data = new ReadOnlySpan<byte>((void*)buffer, checked((int)size)).ToArray();
+                mimeType = candidate;
+                return true;
+            }
+            finally
+            {
+                SDL_free(buffer);
+            }
+        }
+
+        data = null;
+        mimeType = null;
+        return false;
+    }
+
     public IFilePicker CreateFilePicker() => new SdlFilePicker();
+
+    /** PNG first because it needs no conversion; Windows offers screenshots as BMP. */
+    private static readonly string[] _clipboardImageMimeTypes = ["image/png", "image/bmp", "image/jpeg"];
 
     private readonly SdlCoreUi _core = new();
     private readonly int _mainThreadId = Environment.CurrentManagedThreadId;

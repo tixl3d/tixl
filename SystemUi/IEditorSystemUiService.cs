@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 namespace T3.SystemUi;
@@ -7,6 +8,11 @@ public interface IEditorSystemUiService : ICoreSystemUiService
     public void EnableDpiAwareScaling();
     public void SetClipboardText(string text);
     public string GetClipboardText();
+
+    /// <summary>
+    /// The image on the system clipboard as encoded file bytes (e.g. PNG or BMP), for pasting screenshots.
+    /// </summary>
+    public bool TryGetClipboardImage([NotNullWhen(true)] out byte[]? data, [NotNullWhen(true)] out string? mimeType);
     public IFilePicker CreateFilePicker();
     public IReadOnlyList<IScreen> AllScreens { get; }
 }

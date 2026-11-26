@@ -3,14 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Model;
 using T3.Core.Operator;
-using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
-using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 
@@ -192,40 +190,12 @@ internal static class DropHandling
                                                    Asset asset,
                                                    Vector2 dropOffset)
     {
-        if (asset.AssetType.PrimaryOperators.Count == 0)
-        {
-            Log.Warning($"{asset.Address} of type {asset.AssetType} has no matching operator symbols");
+        var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos() + dropOffset);
+        if (!GraphOperations.TryAddAssetOperator(context.CompositionInstance, asset, posOnCanvas, out var childUi, out var newInstance))
             return false;
-        }
 
-        if (!TryCreateSymbolInstanceOnGraph(context, asset.AssetType.PrimaryOperators[0], dropOffset, out var newInstance))
-        {
-            Log.Warning("Failed to create operator instance");
-            return false;
-        }
-
-        if (!SymbolAnalysis.TryGetFileInputFromInstance(newInstance, out var stringInput, out _))
-        {
-            Log.Warning("Failed to get file path parameter from op");
-            return false;
-        }
-
-        Log.Debug($"Created {newInstance} with {asset.Address}", newInstance);
-
-        stringInput.TypedInputValue.Assign(new InputValue<string>(asset.Address));
-        stringInput.DirtyFlag.ForceInvalidate();
-        stringInput.Parent.Parent?.Symbol.InvalidateInputInAllChildInstances(stringInput);
-        stringInput.Input.IsDefault = false;
-
-        var parent = stringInput.Parent.Parent;
-        if (parent == null)
-            return false;
-        
-        AssetRegistry.AddAssetReference(asset,
-                                        symbolId: parent.Symbol.Id,
-                                        stringInput.Parent.SymbolChildId,
-                                        stringInput.Id);
-
+        context.Selector.SetSelection(childUi, newInstance);
+        context.Layout.FlagStructureAsChanged();
         return true;
     }
 
