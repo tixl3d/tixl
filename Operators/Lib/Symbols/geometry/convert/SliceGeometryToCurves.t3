@@ -1,0 +1,36 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e9be31f-406a-4f2d-97e9-7c647f8e9e16"/*SliceGeometryToCurves*/,
+  "Inputs": [
+    {
+      "Id": "2ac84842-b7db-410e-b5b8-a2b2412f6a3e"/*Geometry*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "4e2ffa2a-2425-4c7b-94cb-78c4cd4305c6"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "6663a6c6-3cca-483a-a631-05fd0a551082"/*Spacing*/,
+      "DefaultValue": 0.1
+    },
+    {
+      "Id": "76f02e33-9a8c-4af8-a608-b0ff8112d3b6"/*SliceCount*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "b537a326-e52a-4e14-8a61-81a371f12ed5"/*Normal*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
