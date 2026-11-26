@@ -37,7 +37,11 @@ internal static unsafe class SlangLibrary
 
             foreach (var candidate in LibraryCandidates(compiler))
             {
-                if (!File.Exists(candidate) || !NativeLibrary.TryLoad(candidate, out var library))
+                if (!File.Exists(candidate))
+                    continue;
+
+                PreloadDownstreamLibraries(candidate);
+                if (!NativeLibrary.TryLoad(candidate, out var library))
                     continue;
 
                 if (!TryBind(library))
@@ -103,6 +107,31 @@ internal static unsafe class SlangLibrary
             }
         }
     }
+
+    /// <summary>
+    /// Windows looks up a library loaded by name in the executable's folder, not the folder of the library asking
+    /// for it, so inside TiXL Slang can't find its SPIR-V optimizer and GLSL support ("failed to load downstream
+    /// compiler 'spirv-opt'"). Loaded by full path first, they are found among the modules already in the process.
+    /// Elsewhere the libraries find their siblings through their own search path.
+    /// </summary>
+    private static void PreloadDownstreamLibraries(string library)
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var folder = Path.GetDirectoryName(library);
+        if (folder == null)
+            return;
+
+        foreach (var name in _windowsDownstreamLibraries)
+        {
+            var path = Path.Combine(folder, name);
+            if (File.Exists(path) && !NativeLibrary.TryLoad(path, out _))
+                Log.Warning($"Could not load {path}; shaders may fail to compile.");
+        }
+    }
+
+    private static readonly string[] _windowsDownstreamLibraries = ["slang-glslang.dll", "slang-glsl-module.dll"];
 
     /// <summary>
     /// Where a Slang release keeps the library relative to slangc: beside it on Windows, in <c>../lib</c>
