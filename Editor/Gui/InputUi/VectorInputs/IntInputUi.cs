@@ -5,11 +5,14 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
+using T3.Editor.Gui.Graph.Dialogs;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Enums;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.Modification;
 
 namespace T3.Editor.Gui.InputUi.VectorInputs;
 
@@ -67,11 +70,99 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
     public override bool DrawSettings()
     {
         var modified = base.DrawSettings();
-        if (MappedType == null || EnumCache.Instance.GetEnumEntry(MappedType).IsFlagEnum)
-            return modified;
+        var symbol = Parent?.Symbol;
+        var isEditable = symbol != null && !symbol.SymbolPackage.IsReadOnly;
+        var mappedEnum = symbol != null ? GetMappedEnumOfSymbol(symbol) : MappedType;
+        var isFlagEnum = mappedEnum != null && EnumCache.Instance.GetEnumEntry(mappedEnum).IsFlagEnum;
 
-        modified |= EnumDisplayModeUi.DrawSettings(ref _displayMode);
+        if (!isFlagEnum && (mappedEnum != null || isEditable))
+            modified |= DrawDisplayAsSwitch(symbol, mappedEnum, isEditable);
+
+        if (isEditable && mappedEnum != null)
+            DrawEditEntriesButton(symbol!, mappedEnum);
+
+        _editEnumEntriesDialog.Draw();
+        _showAsValueDialog.Draw();
         return modified;
+    }
+
+    internal void SetDisplayMode(EnumDisplayMode displayMode)
+    {
+        _displayMode = displayMode;
+    }
+
+    /// <summary>
+    /// Value, Dropdown or Switch. Leaving Value creates an enum in the operator and going back removes it, both after
+    /// a dialog, so only Dropdown and Switch change directly. Read-only operators only switch between those two.
+    /// </summary>
+    private bool DrawDisplayAsSwitch(Symbol? symbol, Type? mappedEnum, bool isEditable)
+    {
+        FormInputs.AddVerticalSpace();
+        FormInputs.DrawFieldSetHeader("Display as");
+        FormInputs.SetCursorToParameterEdit();
+
+        if (!isEditable)
+        {
+            var modeIndex = (int)_displayMode;
+            if (!CustomComponents.SegmentedButton(_enumDisplayModeLabels, ref modeIndex, tooltips: _enumDisplayModeTooltips))
+                return false;
+
+            _displayMode = (EnumDisplayMode)modeIndex;
+            return true;
+        }
+
+        var selectedIndex = mappedEnum == null ? 0 : 1 + (int)_displayMode;
+        if (!CustomComponents.SegmentedButton(_displayAsLabels, ref selectedIndex, tooltips: _displayAsTooltips))
+            return false;
+
+        if (selectedIndex == 0)
+        {
+            if (mappedEnum != null)
+                _showAsValueDialog.ShowNextFrame(symbol!, Id, InputDefinition.Name, mappedEnum);
+
+            return false;
+        }
+
+        var displayMode = (EnumDisplayMode)(selectedIndex - 1);
+        if (mappedEnum == null)
+        {
+            _editEnumEntriesDialog.ShowNextFrameForNewEnum(symbol!, Id, InputDefinition.Name, Min, Max, displayMode);
+            return false;
+        }
+
+        _displayMode = displayMode;
+        return true;
+    }
+
+    /** Only an enum declared inside the operator's own class can be edited. */
+    private void DrawEditEntriesButton(Symbol symbol, Type mappedEnum)
+    {
+        FormInputs.SetCursorToParameterEdit();
+        if (ImGui.Button("Edit Entries..."))
+        {
+            if (mappedEnum.DeclaringType != symbol.InstanceType)
+            {
+                Log.Warning($"Can't edit enum {mappedEnum.FullName}: only enums declared inside {symbol.Name} can be edited.");
+            }
+            else
+            {
+                _editEnumEntriesDialog.ShowNextFrame(symbol, mappedEnum);
+            }
+        }
+
+        CustomComponents.TooltipForLastItem($"Edit the entries of {mappedEnum.Name}, the enum this parameter is shown with.");
+    }
+
+    /** The slot's mapped type is only known once the parameter was drawn, so it's read from the operator type. */
+    private Type? GetMappedEnumOfSymbol(Symbol symbol)
+    {
+        if (!ReferenceEquals(symbol.InstanceType, _mappedEnumLookupType))
+        {
+            _mappedEnumLookupType = symbol.InstanceType;
+            InputsAndOutputs.TryGetMappedEnumType(symbol, Id, out _mappedEnumOfSymbol);
+        }
+
+        return _mappedEnumOfSymbol;
     }
 
     public override void Write(JsonTextWriter writer)
@@ -225,8 +316,10 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
                     if (wheel == 0)
                         return InputEditStateFlags.Nothing;
 
+                    // Step through the entries, whose values need not be consecutive.
                     var delta = wheel > 0 ? -1 : 1;
-                    value= (value + delta).Clamp(0, enumInfo.ValueNames.Length-1);
+                    var steppedIndex = (Array.IndexOf(enumInfo.ValuesAsInt, value) + delta).Clamp(0, enumInfo.ValuesAsInt.Length - 1);
+                    value = enumInfo.ValuesAsInt[steppedIndex];
                     
                     return InputEditStateFlags.Modified;
                 }
@@ -244,4 +337,17 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
 
     private static int _lastHoveredComboItem = -1;
     private static int _originalValue = -1;
+    private Type? _mappedEnumLookupType;
+    private Type? _mappedEnumOfSymbol;
+    private static readonly EditEnumEntriesDialog _editEnumEntriesDialog = new();
+    private static readonly ShowAsValueDialog _showAsValueDialog = new();
+    private static readonly string[] _displayAsLabels = ["Value", "Dropdown", "Switch"];
+    private static readonly string?[] _displayAsTooltips =
+        [
+            "A plain number. Leaving a dropdown removes its enum from the operator.",
+            "The entries of an enum declared in the operator, in a dropdown.",
+            "The entries side by side. Falls back to a dropdown if they don't fit.",
+        ];
+    private static readonly string[] _enumDisplayModeLabels = ["Dropdown", "Switch"];
+    private static readonly string?[] _enumDisplayModeTooltips = [_displayAsTooltips[1], _displayAsTooltips[2]];
 }

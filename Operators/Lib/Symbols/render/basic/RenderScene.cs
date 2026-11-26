@@ -5,6 +5,13 @@ namespace Lib.render.basic;
 [Guid("b60072db-a16e-45f5-9425-bb80f5f9122c")]
 internal sealed class RenderScene : Instance<RenderScene>
 {
+
+    private enum Environments
+    {
+        Studio = 0,
+        StPeters = 1,
+        Black = 2,
+    }
     [Output(Guid = "45777ce5-6408-4302-8a5a-a73b403b07c1")]
     public readonly Slot<Texture2D> Output = new();
 
@@ -29,7 +36,7 @@ internal sealed class RenderScene : Instance<RenderScene>
     [Input(Guid = "679fa6c5-7b78-4846-b462-4de672cd63b0", MappedType = typeof(RenderTarget.Samples))]
     public readonly InputSlot<int> Multisampling = new();
 
-        [Input(Guid = "e67e7052-1f2f-4ad0-909f-f97190128c34")]
+        [Input(Guid = "e67e7052-1f2f-4ad0-909f-f97190128c34", MappedType = typeof(Environments))]
         public readonly InputSlot<int> Environment = new InputSlot<int>();
 
     [Input(Guid = "bcb6064d-e137-4cd7-b743-cc84058a0d23")]

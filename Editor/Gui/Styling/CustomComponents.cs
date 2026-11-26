@@ -583,8 +583,13 @@ internal static partial class CustomComponents
     /// The selected label uses the current text color, so parameter inputs show it muted, changed or animated like other values.
     /// </summary>
     /// <param name="isCompact">Small font and tight padding, for dense rows such as toolbars.</param>
+    /// <param name="isParameterInput">
+    /// For a parameter value in the parameter window, whose rows are as dark as the default input field track, so the
+    /// track is lifted with the button color.
+    /// </param>
     public static bool SegmentedButton(string[] labels, ref int selectedIndex, float width = 0,
-                                       bool[]? disabledItems = null, string?[]? tooltips = null, bool isCompact = false)
+                                       bool[]? disabledItems = null, string?[]? tooltips = null, bool isCompact = false,
+                                       bool isParameterInput = false)
     {
         var h = ImGui.GetFrameHeight();
         var naturalWidth = GetSegmentedButtonWidth(labels, isCompact);
@@ -594,7 +599,7 @@ internal static partial class CustomComponents
 
         var dl = ImGui.GetWindowDrawList();
         var start = ImGui.GetCursorScreenPos();
-        DrawSegmentTrack(dl, start, totalWidth, h);
+        DrawSegmentTrack(dl, start, totalWidth, h, isParameterInput);
 
         var selectedTextColor = ImGui.GetColorU32(ImGuiCol.Text);
         var modified = false;
@@ -652,10 +657,16 @@ internal static partial class CustomComponents
     }
 
     /** The input field tint is faded over a button fill, so the track recedes behind the selected segment. */
-    private static void DrawSegmentTrack(ImDrawListPtr dl, Vector2 start, float width, float height)
+    private static void DrawSegmentTrack(ImDrawListPtr dl, Vector2 start, float width, float height, bool isParameterInput = false)
     {
         var max = start + new Vector2(width, height);
         var rounding = SegmentRounding * T3Ui.UiScaleFactor;
+        if (!isParameterInput)
+        {
+            dl.AddRectFilled(start, max, UiColors.BackgroundInputField, rounding);
+            return;
+        }
+
         dl.AddRectFilled(start, max, UiColors.BackgroundButton, rounding);
         dl.AddRectFilled(start, max, UiColors.BackgroundInputField.Fade(SegmentTrackInputFieldOpacity), rounding);
     }

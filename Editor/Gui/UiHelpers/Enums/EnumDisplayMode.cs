@@ -60,7 +60,8 @@ internal static class EnumDisplayModeUi
         if (CustomComponents.GetSegmentedButtonWidth(enumInfo.DisplayNames) > width)
             return false;
 
-        if (CustomComponents.SegmentedButton(enumInfo.DisplayNames, ref index, width, enumInfo.IsUnavailable, enumInfo.Tooltips))
+        if (CustomComponents.SegmentedButton(enumInfo.DisplayNames, ref index, width, enumInfo.IsUnavailable, enumInfo.Tooltips,
+                                             isParameterInput: true))
             editStateFlags = InputEditStateFlags.ModifiedAndFinished;
 
         return true;

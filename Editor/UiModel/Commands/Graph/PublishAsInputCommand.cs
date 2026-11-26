@@ -1,10 +1,8 @@
 #nullable enable
 using System.IO;
-using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Slots;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
@@ -47,9 +45,9 @@ internal sealed class PublishAsInputCommand : ICommand
             return;
         }
 
-        var mappedEnumType = compositionUi.Symbol.Children.TryGetValue(_childId, out var child)
-                                 ? FindMappedEnumType(child.Symbol, _targetInputId)
-                                 : null;
+        Type? mappedEnumType = null;
+        if (compositionUi.Symbol.Children.TryGetValue(_childId, out var child))
+            InputsAndOutputs.TryGetMappedEnumType(child.Symbol, _targetInputId, out mappedEnumType);
 
         if (!InputsAndOutputs.AddInputToSymbol(_newInputId, _inputName, false, _inputType, compositionUi.Symbol, mappedEnumType, out _copiedEnumName))
             return;
@@ -102,19 +100,6 @@ internal sealed class PublishAsInputCommand : ICommand
         // Recompiling without the input also prunes its connection to the child.
         InputsAndOutputs.RemoveInputsAndOutputsFromSymbol([_newInputId], [], compositionUi.Symbol, _copiedEnumName);
         _copiedEnumName = null;
-    }
-
-    private static Type? FindMappedEnumType(Symbol symbol, Guid inputId)
-    {
-        const BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-        foreach (var field in symbol.InstanceType.GetFields(fieldFlags))
-        {
-            var attribute = field.GetCustomAttribute<InputAttribute>();
-            if (attribute != null && attribute.Id == inputId)
-                return attribute.MappedType is { IsEnum: true } mappedType ? mappedType : null;
-        }
-
-        return null;
     }
 
     private static string FindUniqueInputName(string baseName, Symbol symbol)

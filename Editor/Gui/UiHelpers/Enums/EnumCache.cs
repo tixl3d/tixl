@@ -33,11 +33,10 @@ public sealed class EnumCache
     {
         public TypedEntry() : base(typeof(T))
         {
-            var values = Enum.GetValues(EnumType);
             Values = new T[ValueNames.Length];
-            for (int i = 0; i < values.Length; i++)
+            for (int i = 0; i < Values.Length; i++)
             {
-                Values[i] = (T)values.GetValue(i);
+                Values[i] = (T)DeclaredValues[i];
             }
         }
 
@@ -50,13 +49,20 @@ public sealed class EnumCache
         public Entry(Type enumType)
         {
             EnumType = enumType;
-            ValueNames = Enum.GetNames(enumType);
-            var values = Enum.GetValues(enumType);
-            ValuesAsInt = new int[values.Length];
-            for (int i = 0; i < values.Length; i++)
+
+            // Declaration order, not Enum.GetValues' value order, so an enum's author decides the order of its options.
+            var fields = enumType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            ValueNames = new string[fields.Length];
+            DeclaredValues = new object[fields.Length];
+            ValuesAsInt = new int[fields.Length];
+            for (int i = 0; i < fields.Length; i++)
             {
-                ValuesAsInt[i] = (int)values.GetValue(i);
+                ValueNames[i] = fields[i].Name;
+                DeclaredValues[i] = fields[i].GetValue(null)!;
+                ValuesAsInt[i] = (int)DeclaredValues[i];
             }
+
+            var values = DeclaredValues;
 
             IsFlagEnum = enumType.GetCustomAttributes<FlagsAttribute>().Any();
             if (IsFlagEnum)
@@ -76,7 +82,7 @@ public sealed class EnumCache
             ImportantGroupTitle = provider?.ImportantGroupTitle;
             for (var i = 0; i < values.Length; i++)
             {
-                var hint = provider?.GetHint(ValueNames[i], values.GetValue(i)) ?? default;
+                var hint = provider?.GetHint(ValueNames[i], values[i]) ?? default;
                 Hints[i] = hint;
                 DisplayNames[i] = hint.Label ?? ValueNames[i];
                 IsUnavailable[i] = hint.Relevance == OptionRelevance.Unavailable;
@@ -102,6 +108,9 @@ public sealed class EnumCache
         }
 
         protected Type EnumType { get; }
+
+        /** Boxed enum values in declaration order, matching <see cref="ValueNames"/>. */
+        protected object[] DeclaredValues { get; }
         public string[] ValueNames { get; }
         public int[] ValuesAsInt { get; }
         public bool IsFlagEnum { get; }
