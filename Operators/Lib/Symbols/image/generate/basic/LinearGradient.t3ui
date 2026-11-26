@@ -127,7 +127,8 @@
         "X": 59.731995,
         "Y": 232.69351
       },
-      "Description": "Defines whether Width and Center are measured relative to the image height or width."
+      "Description": "Defines whether Width and Center are measured relative to the image height or width.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57"/*Gradient*/,

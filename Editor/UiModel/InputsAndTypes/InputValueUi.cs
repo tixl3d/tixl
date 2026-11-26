@@ -312,7 +312,7 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.SameLine();
 
                 ImGui.PushItemWidth(200.0f);
-                ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
+                InputArea.SetValueEditWidth();
 
                 var connectedName = "???";
                 if (typedInputSlot.TryGetFirstConnection(out var connectedSlot) && connectedSlot?.Parent != null)
@@ -475,7 +475,7 @@ public abstract class InputValueUi<T> : IInputUi
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAnimated.Rgba);
             ImGui.PushStyleColor(ImGuiCol.FrameBgActive, UiColors.BackgroundFull.Rgba);
 
-            ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
+            InputArea.SetValueEditWidth();
 
             editState |= DrawAnimatedValue(name, typedInputSlot, animator);
 
@@ -619,7 +619,7 @@ public abstract class InputValueUi<T> : IInputUi
             ImGui.PopStyleVar();
 
             // Draw parameter value
-            ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
+            InputArea.SetValueEditWidth();
             ImGui.PushStyleColor(ImGuiCol.Text, showDimmed ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
             if (input.IsDefault)
             {
@@ -778,6 +778,20 @@ internal static class InputArea
     /// view's per-row revert button. Set around DrawParameterEdit and reset to 0 afterwards.
     /// </summary>
     internal static float ValueEditRightMargin;
+
+    /// <summary>
+    /// Right-aligns the next value edit on whole pixels. A negative width lets ImGui truncate
+    /// against a fractional cursor, so right-edge-pinned widgets (combo arrows) jitter while the
+    /// window is resized.
+    /// </summary>
+    internal static void SetValueEditWidth()
+    {
+        var cursor = ImGui.GetCursorScreenPos();
+        var rightEdge = MathF.Floor(cursor.X + ImGui.GetContentRegionAvail().X) - 1 - ValueEditRightMargin;
+        var leftEdge = MathF.Floor(cursor.X);
+        ImGui.SetCursorScreenPos(new Vector2(leftEdge, cursor.Y));
+        ImGui.SetNextItemWidth(MathF.Max(1, rightEdge - leftEdge));
+    }
 
     /// <summary>
     /// Context-menu toggle for per-parameter snapshot control. Hidden for parameters the

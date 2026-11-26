@@ -292,38 +292,43 @@ internal sealed class ParameterWindow : Window
             // Tags, settings, help and the optional snapshot toggle; all but the first nudge themselves +2px right
             var iconCount = withSnapshotToggle ? 4 : 3;
             var iconBlockWidth = iconCount * iconSize + (iconCount - 1) * (ImGui.GetStyle().ItemSpacing.X + 2);
+            var nameSpaceFieldWidth = ImGui.GetContentRegionAvail().X - iconBlockWidth - ImGui.GetStyle().ItemSpacing.X;
 
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - iconBlockWidth - ImGui.GetStyle().ItemSpacing.X);
-
-            var symbol = op.Symbol;
-            var package = symbol.SymbolPackage;
-            if (!package.IsReadOnly)
+            if (nameSpaceFieldWidth > 0)
             {
-                var namespaceModified = InputWithTypeAheadSearch.Draw("##namespace", 
-                                                                      EditorSymbolPackage.AllSymbols
-                                                                                                .Select(i => i.Namespace)
-                                                                                                .Distinct()
-                                                                                                .OrderBy(i => i),
-                                                                      false,
-                                                                      ref namespaceForEdit, 
-                                                                      out _, 
-                                                                      out _);
-                if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
+                ImGui.SetNextItemWidth(nameSpaceFieldWidth);
+
+                var symbol = op.Symbol;
+                var package = symbol.SymbolPackage;
+                if (!package.IsReadOnly)
                 {
-                    if (!EditableSymbolProject.ChangeSymbolNamespace(symbol, namespaceForEdit, out var reason))
+                    var namespaceModified = InputWithTypeAheadSearch.Draw("##namespace", 
+                                                                          EditorSymbolPackage.AllSymbols
+                                                                                             .Select(i => i.Namespace)
+                                                                                             .Distinct()
+                                                                                             .OrderBy(i => i),
+                                                                          false,
+                                                                          ref namespaceForEdit, 
+                                                                          out _, 
+                                                                          out _);
+                    if (namespaceModified && !string.IsNullOrEmpty(namespaceForEdit) && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
                     {
-                        BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename namespace");
-                    }
-                    else
-                    {
-                        modified = true;
+                        if (!EditableSymbolProject.ChangeSymbolNamespace(symbol, namespaceForEdit, out var reason))
+                        {
+                            BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename namespace");
+                        }
+                        else
+                        {
+                            modified = true;
+                        }
                     }
                 }
+                else
+                {
+                    ImGui.Text(op.Symbol.Namespace);
+                }
             }
-            else
-            {
-                ImGui.Text(op.Symbol.Namespace);
-            }
+            
 
             // Tags...
             {
@@ -578,6 +583,7 @@ internal sealed class ParameterWindow : Window
         FormInputs.AddVerticalSpace(3);
         ImGui.Indent(5);
 
+        var rowStart = ImGui.GetCursorScreenPos();
         var scale = T3Ui.UiScaleFactor;
         var frameHeight = ImGui.GetFrameHeight();
         var spacing = ImGui.GetStyle().ItemSpacing.X;
@@ -593,21 +599,30 @@ internal sealed class ParameterWindow : Window
                           && presetInstance.SymbolChildId == op.SymbolChildId
                           && presetInstance.Symbol.Id == op.Symbol.Id;
 
-        // Reserve exact widths so the icon group ends flush right, aligned with the
-        // symbol header above (whose child has 5px window padding).
+        // Anchor the row's right-hand end to the content edge: ImGui truncates item widths, so
+        // laying the icons and preset controls out from the left lets them drift while the
+        // window is resized. End flush right like the symbol header above (5px child padding).
         var availWidth = ImGui.GetContentRegionAvail().X - 5 * scale;
+        var iconsLeft = MathF.Floor(rowStart.X + availWidth - iconGroupWidth);
         float nameWidth;
         var dropdownWidth = 0f;
+        var dropdownLeft = 0f;
+        var newPresetLeft = 0f;
         if (showPresets)
         {
             // name | dropdown | new-preset | gap | icons
-            var flexibleWidth = availWidth - (frameHeight + iconGroupWidth + 3 * spacing + groupGap);
+            newPresetLeft = MathF.Floor(iconsLeft - (spacing + groupGap) - frameHeight);
+            var dropdownRight = newPresetLeft - spacing;
+            var flexibleWidth = dropdownRight - spacing - rowStart.X;
             nameWidth = MathF.Max(60 * scale, flexibleWidth * 0.5f);
             dropdownWidth = MathF.Max(60 * scale, flexibleWidth - nameWidth);
+            dropdownLeft = MathF.Floor(dropdownRight - dropdownWidth);
+            dropdownWidth = dropdownRight - dropdownLeft;
+            nameWidth = MathF.Max(60 * scale, dropdownLeft - spacing - rowStart.X);
         }
         else
         {
-            nameWidth = MathF.Max(60 * scale, availWidth - (iconGroupWidth + spacing + groupGap));
+            nameWidth = MathF.Max(60 * scale, iconsLeft - (spacing + groupGap) - rowStart.X);
         }
 
         // SymbolChild Name
@@ -691,6 +706,7 @@ internal sealed class ParameterWindow : Window
             }
 
             ImGui.SameLine();
+            ImGui.SetCursorScreenPos(new Vector2(dropdownLeft, ImGui.GetCursorScreenPos().Y));
 
             var renamingPreset = TryGetPresetById(_renamingPresetId);
             if (renamingPreset != null)
@@ -743,6 +759,7 @@ internal sealed class ParameterWindow : Window
             var suggestSaving = hasNonDefaults && matchingPreset == null;
 
             ImGui.SameLine();
+            ImGui.SetCursorScreenPos(new Vector2(newPresetLeft, ImGui.GetCursorScreenPos().Y));
             if (CustomComponents.IconButton(Icon.Presets, Vector2.Zero,
                                             suggestSaving
                                                 ? CustomComponents.ButtonStates.Emphasized
@@ -762,7 +779,9 @@ internal sealed class ParameterWindow : Window
         }
 
         // Bypass / disable / pin-to-output icons
-        ImGui.SameLine(0, spacing + groupGap);
+        ImGui.SameLine();
+        var iconRowStart = ImGui.GetCursorScreenPos();
+        ImGui.SetCursorScreenPos(new Vector2(MathF.Max(iconsLeft, iconRowStart.X + groupGap), iconRowStart.Y));
         {
             var bypassable = symbolChildUi.SymbolChild.IsBypassable();
             var isBypassed = symbolChildUi.SymbolChild.IsBypassed;
