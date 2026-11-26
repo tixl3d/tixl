@@ -4,7 +4,7 @@
   "Inputs": [
     {
       "Id": "4c8f2d90-a7e5-4361-9b0c-e82d6f1a5347"/*Path*/,
-      "DefaultValue": ""
+      "DefaultValue": "Examples:meshes/marblePlayer.obj"
     },
     {
       "Id": "a1d75e39-08c4-4f82-b5d1-c69e0b3f8724"/*Scale*/,

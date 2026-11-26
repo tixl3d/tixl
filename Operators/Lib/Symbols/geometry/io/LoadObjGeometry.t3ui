@@ -5,7 +5,6 @@
   "InputUis": [
     {
       "InputId": "4c8f2d90-a7e5-4361-9b0c-e82d6f1a5347"/*Path*/,
-      "Relevancy": "Required",
       "Position": {
         "X": 0.0,
         "Y": 0.0
