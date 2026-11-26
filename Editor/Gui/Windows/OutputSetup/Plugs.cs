@@ -35,6 +35,16 @@ internal static class Plugs
         return stream == null ? "missing stream" : $"{stream.Kind}: {stream.Name}";
     }
 
+    /// <summary>Whether the stream bound to this output carries alpha, so its previews should show the transparency it sends.</summary>
+    public static bool StreamsAlpha(MachineConfig machineConfig, Guid outputId)
+    {
+        var binding = machineConfig.FindBinding(outputId);
+        if (binding is not { IsStream: true })
+            return false;
+
+        return machineConfig.FindStreamPlug(binding.PlugId)?.EnableAlpha == true;
+    }
+
     /// <summary>The plug's own name — the display's label, or the stream sender's name.</summary>
     public static string PlugName(MachineConfig machineConfig, Guid plugId)
     {

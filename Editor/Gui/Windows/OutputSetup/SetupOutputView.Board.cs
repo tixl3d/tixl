@@ -225,7 +225,7 @@ internal sealed partial class SetupOutputView
             if (!TryGetBoardBounds(setup, SetupEntityKinds.Output, output.Id, out var min, out var max))
                 continue;
 
-            var composite = OutputCompositor.RenderPreview(output.Id);
+            var composite = OutputCompositor.RenderPreview(output.Id, Plugs.StreamsAlpha(machineConfig, output.Id));
             var srv = composite is { IsDisposed: false } ? SrvManager.GetSrvForTexture(composite) : null;
             DrawBoardCard(setup, selection, dl, SetupEntityKinds.Output, output.Id, min, max,
                           SetupLabels.OutputLabel(output), BoardMeta(output.Id), srv, true);
