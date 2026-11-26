@@ -165,6 +165,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
             _maxLayerIndex = Math.Max(clip.LayerIndex, _maxLayerIndex);
         }
 
+        OpClips.IncludeLaneRangeOfDrag(ref _minLayerIndex, ref _maxLayerIndex);
+
         var min = ImGui.GetCursorScreenPos() + new Vector2(0, LayerHeight * 0.5f);
         var max = min + new Vector2(ImGui.GetContentRegionAvail().X,
                                     LayerHeight * (_maxLayerIndex - _minLayerIndex + 1) + 1);
