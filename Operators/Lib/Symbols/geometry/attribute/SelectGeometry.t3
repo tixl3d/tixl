@@ -47,7 +47,7 @@
     },
     {
       "Id": "7bac9932-a892-4d15-909d-ded6f6c90564"/*Count*/,
-      "DefaultValue": 0
+      "DefaultValue": -1
     },
     {
       "Id": "952ea8f6-51f4-46b8-94af-83dda89159b0"/*Invert*/,

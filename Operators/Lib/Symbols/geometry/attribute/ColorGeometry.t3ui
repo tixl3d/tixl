@@ -117,7 +117,8 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "Which elements get the color: points, vertices, primitives (polygons and curves) or parts, e.g. one color per letter of [StringToCurves]. Auto uses the domain of the Attribute."
+      "Description": "Which elements get the color: points, vertices, primitives (polygons and curves) or parts, e.g. one color per letter of [StringToCurves]. Auto uses the domain of the Attribute.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "f68e29c5-a751-49d0-b1a5-7e8d51adb70e"/*Field*/,
