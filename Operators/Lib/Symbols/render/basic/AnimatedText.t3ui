@@ -45,7 +45,7 @@
         "X": -322.64862,
         "Y": -32.664734
       },
-      "Description": "Splits the text into the groups that are animated together. Empty means a space. Line breaks always start a new group.",
+      "Description": "Splits the text into the groups that are animated together. Empty means a space, \\n means a line break. Line breaks start a new group only for whitespace separators.",
       "Usage": "Default"
     },
     {

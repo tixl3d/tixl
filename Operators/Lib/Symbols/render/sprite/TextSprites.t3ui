@@ -63,6 +63,7 @@
         "X": -200.0,
         "Y": 480.0
       },
+      "Description": "Splits the text into groups for animation. Empty means a space, \\n means a line break. Line breaks start a new group only for whitespace separators.",
       "Usage": "Default"
     },
     {
