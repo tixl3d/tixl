@@ -1,0 +1,92 @@
+{
+  "FormatVersion": 3,
+  "Id": "7dc0e3a4-cc8a-4034-95a6-3ea2ae5e620d"/*ClxWaveform*/,
+  "Description": "Draws the waveform of the track on a deck into a texture: the whole track left to right, in the DJ software's colours.\n\nThe receiver asks the sender for the waveform when a track loads. Combine with [ClxDeck]'s NormalizedPosition for a playhead.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxCues], [ClxBeatgrid]",
+  "InputUis": [
+    {
+      "InputId": "b41fd5d6-3b33-427d-bde9-b6672ff3c994"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Deck number, starting at 1 as on the wire."
+    },
+    {
+      "InputId": "ccd0acfd-0c15-4518-8f77-24e5cb7ae260"/*Width*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Texture width in pixels; each column covers an equal part of the track."
+    },
+    {
+      "InputId": "61acac5d-4db3-4091-9688-0e098e75d483"/*Height*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Texture height in pixels."
+    },
+    {
+      "InputId": "29895470-e52c-42ac-b864-2e7476b64ac5"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Colour for waveforms without colour data. Its alpha applies to every waveform."
+    },
+    {
+      "InputId": "883a3a8d-c4d2-4a17-8bd2-7164a75bee6a"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "379d6e7c-fc43-4f2d-a826-5f0b21b47ab2"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "08e0f347-7f74-4bb5-831d-82dfe7f3513a"/*Texture*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "The waveform on a transparent background, RGBA8."
+    },
+    {
+      "OutputId": "111beb7b-9c28-4425-9da5-a028defc01ff"/*Duration*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Track length the waveform covers, in seconds."
+    },
+    {
+      "OutputId": "d012161e-5d69-458f-84c2-ce1beb2d74c9"/*HasWaveform*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "True once the deck's waveform has arrived."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "ae1bda05-3748-5e57-872b-24d24207ab8d",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

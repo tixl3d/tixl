@@ -1,0 +1,92 @@
+{
+  "FormatVersion": 3,
+  "Id": "96de6e3f-3c39-405e-8928-bffb4c2880fd"/*ClxCues*/,
+  "Description": "Hot cues and memory cues of the track on a deck, as the DJ software holds them, sorted by time.\n\nThey arrive after the track loads; the receiver asks the sender for them.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxBeatgrid], [ClxWaveform]",
+  "InputUis": [
+    {
+      "InputId": "ccddf67c-1174-4851-b069-0e347c1a17a0"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Deck number, starting at 1 as on the wire."
+    },
+    {
+      "InputId": "22077b6f-8374-434b-b514-5ab3017ad42f"/*HotcuesOnly*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Leave out memory cues."
+    },
+    {
+      "InputId": "f61cf529-3248-4fb9-971d-103068c8e023"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "9c4925a3-3e23-4f86-a73d-7987d76d90e7"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "eb9b81fa-7529-4b56-8385-cd47ca7b7717"/*Times*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "Cue positions in seconds."
+    },
+    {
+      "OutputId": "eeb12d11-fece-45e0-9c3e-2f8529421ea5"/*NormalizedTimes*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Cue positions from 0 to 1 of the track, for drawing them over [ClxWaveform]. 0 while the length is unknown."
+    },
+    {
+      "OutputId": "2e059940-a279-4b19-bed1-4048c4cf76b4"/*Names*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "Cue labels; empty for unnamed cues."
+    },
+    {
+      "OutputId": "e77334cc-caf9-4419-bb56-b143f5211ccf"/*IsHotcue*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "1 for a hot cue, 0 for a memory cue."
+    },
+    {
+      "OutputId": "6968c325-7a0c-4130-b32a-541ed37542af"/*Count*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Number of cues."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "c9bdead7-f278-5d44-9894-b01139b93906",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

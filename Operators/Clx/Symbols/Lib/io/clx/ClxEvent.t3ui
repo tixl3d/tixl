@@ -1,0 +1,92 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d72dc80-3173-4c48-a790-82e98bd3ce7f"/*ClxEvent*/,
+  "Description": "Fires when a CLX Event packet arrives: deck changes such as loop_enter and loop_exit, and commands from controllers (sent with deck 0).\n\nloop_enter carries loop in and out in seconds (Serato) or the loop length in beats (Traktor), so check Values' length.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxDeck]",
+  "InputUis": [
+    {
+      "InputId": "e3c30ec6-802e-4adf-93ad-084e71178530"/*EventName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Only fire for this event name, for example loop_enter. Empty fires for every event."
+    },
+    {
+      "InputId": "17a6685b-f3e3-4d85-8af8-9f919b91689f"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Only fire for this deck. 0 fires for every deck and for commands."
+    },
+    {
+      "InputId": "a0538523-1ded-4c7d-a7b1-174289cf1d35"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "8132a4b9-9d3c-48fe-8620-04441b845e49"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "afc0616f-384c-4b4f-9b8f-cffd43801724"/*WasTriggered*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "True for one frame when a matching event arrives."
+    },
+    {
+      "OutputId": "5535ef66-3221-477b-9ef5-5a6362f770bf"/*LastEventName*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Name of the last matching event."
+    },
+    {
+      "OutputId": "19571a23-656e-4e9a-b2f5-19c38627bd6e"/*LastDeck*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "Deck of the last matching event, 0 when it isn't deck-specific."
+    },
+    {
+      "OutputId": "4d9c9670-9364-4527-8484-e9b937ebe19d"/*Values*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "Arguments of the last matching event. Values that aren't numbers are NaN."
+    },
+    {
+      "OutputId": "3dd2074f-b4ad-4880-b7b4-77bc6d5de1c6"/*Count*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Matching events since this operator started."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "f5da89bc-7b93-5a5c-a5e9-d21d63dc97c1",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

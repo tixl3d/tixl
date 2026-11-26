@@ -1,0 +1,84 @@
+{
+  "FormatVersion": 3,
+  "Id": "f821b479-6db6-4bbf-8f95-82649b0680b7"/*ClxLeader*/,
+  "Description": "The show clock of a CLX leader: which deck is live, where it is, and which project is loaded. Only senders that act as clock leader send it.\n\nWhen both machines share a clock (PTP, or NTP where it's accurate enough), the packet's send time gives the network delay, and PositionNow adds it.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxDeck], [SetPlaybackTime]",
+  "InputUis": [
+    {
+      "InputId": "0adcb8f4-6dba-48b5-a3d6-cc86c889ea00"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "2ecf216f-5507-4286-af6c-efb891267e21"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "506fcc41-965e-4fdc-82b4-6928e0be705d"/*Position*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "Main clock position in seconds, as sent."
+    },
+    {
+      "OutputId": "5f57b612-988d-4678-b18b-c2ed9aa93e70"/*PositionNow*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Position plus the network delay when it's known; otherwise the same as Position. Assumes the clock is running."
+    },
+    {
+      "OutputId": "3cda46cc-04ec-4b3f-9f0b-08a45fa85e66"/*Delay*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "One-way delay in seconds, or -1 when the sender has no timestamp or the clocks aren't synchronised."
+    },
+    {
+      "OutputId": "aec3384c-a399-432e-925b-b88e2e4b0ae5"/*LiveDeck*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "Deck that is live on the leader, 1 to 6, or 0 when none is."
+    },
+    {
+      "OutputId": "e477f574-e4af-49b2-8a33-6eefeaa9544f"/*Project*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Name of the project loaded on the leader."
+    },
+    {
+      "OutputId": "04cb902e-235f-4108-a23a-fc3051e55873"/*HasData*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 538.0
+      },
+      "Description": "True once a leader packet has arrived."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "65bf8e02-c03d-5461-80fc-32ae4661b1ad",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}
