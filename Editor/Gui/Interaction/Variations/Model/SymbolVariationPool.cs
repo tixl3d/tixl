@@ -1006,6 +1006,8 @@ internal sealed class SymbolVariationPool
                 }
             }
 
+            var childUi = instance.GetChildUi();
+
             foreach (var inputSlot in instance.Inputs)
             {
                 if (!ValueUtils.WeightedBlendMethods.TryGetValue(inputSlot.Input.DefaultValue.ValueType, out var blendFunction))
@@ -1033,6 +1035,13 @@ internal sealed class SymbolVariationPool
                     var mixed2 = blendFunction(values.ToArray(), weightsArray);
                     var newCommand = new ChangeInputValueCommand(parentSymbol, instance.SymbolChildId, inputSlot.Input, mixed2);
                     commands.Add(newCommand);
+                }
+                else if (!definedForSome
+                         && !inputSlot.Input.IsDefault
+                         && (childUi == null || childUi.IsInputIncludedForVariation(inputSlot.Id)))
+                {
+                    // Applying a snapshot resets the parameters it doesn't store, so a full blend has to as well.
+                    commands.Add(new ResetInputToDefault(parentSymbol, instance.SymbolChildId, inputSlot.Input));
                 }
             }
         }
@@ -1237,6 +1246,11 @@ internal sealed class SymbolVariationPool
                     var mixed2 = blendFunction(values.ToArray(), weightsArray);
                     var newCommand = new ChangeInputValueCommand(parentSymbol, instance.SymbolChildId, inputSlot.Input, mixed2);
                     commands.Add(newCommand);
+                }
+                else if (!definedForSome && !inputSlot.Input.IsDefault)
+                {
+                    // Applying a preset resets the parameters it doesn't store, so a full blend has to as well.
+                    commands.Add(new ResetInputToDefault(parentSymbol, instance.SymbolChildId, inputSlot.Input));
                 }
             }
         }
