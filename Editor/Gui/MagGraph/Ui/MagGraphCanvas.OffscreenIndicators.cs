@@ -1,6 +1,8 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 
@@ -9,7 +11,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView
 {
     /// <summary>
-    /// When the selection — or an operator highlighted from another panel — lies outside the visible
+    /// When the selection, an operator with a warning or error, or an operator highlighted from another panel lies outside the visible
     /// graph area, draws a thin marker that rides the rounded window border at the off-screen box's
     /// projected position, so the user can find it without changing zoom or pan.
     /// </summary>
@@ -38,6 +40,19 @@ internal sealed partial class MagGraphView
             var area = ImRect.RectWithSize(missingItem.PosOnCanvas, missingItem.Size);
             if (!IsRectVisible(area))
                 DrawEdgeMarker(drawList, area, UiColors.StatusAttention);
+        }
+
+        // Problems: one marker each in the status color, so a failing op can be found without searching the graph.
+        foreach (var item in _context.Layout.Items.Values)
+        {
+            if (item.Variant != MagGraphItem.Variants.Operator
+                || IsRectVisible(item.Area)
+                || !TryGetNodeStatus(item.Instance, out var statusLevel, out _, out var badgeAlpha, out var isProblemInside)
+                || statusLevel < IStatusProvider.StatusLevel.Warning)
+                continue;
+
+            var markerAlpha = (isProblemInside ? ProblemInsideMarkerAlpha : 1f) * badgeAlpha;
+            DrawEdgeMarker(drawList, item.Area, GetStatusColor(statusLevel).Fade(markerAlpha));
         }
 
         // Hover: blinking marker for an operator highlighted from another panel. Mirrors the on-node

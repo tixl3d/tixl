@@ -217,7 +217,7 @@ internal static class AppMenuBar
                 {
                     if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                     {
-                        OperatorDiagnostics.StatusUpdates.Clear();
+                        OperatorDiagnostics.ClearAll();
                     }
 
                     CustomComponents.HelpText("Recent Operators problems. Click to clear...");

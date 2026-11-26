@@ -1,5 +1,6 @@
 using ImGuiNET;
 using System.Diagnostics;
+using System.Text;
 using T3.Graphics.Compat;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
@@ -7,6 +8,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.Stats;
 using T3.Core.Utils;
 using T3.Editor.Gui.Help;
 using T3.Editor.Gui.MagGraph.Interaction;
@@ -1125,44 +1127,27 @@ internal sealed partial class MagGraphView
         {
             var instance = item.Instance;
 
-            // SkillQuest feedback takes precedence over the op's own IStatusProvider so
-            // training hints can override status from operators that already self-report.
-            var statusLevel = IStatusProvider.StatusLevel.Undefined;
-            string? statusMessage = null;
-            var badgeAlpha = 1f;
-            var feedback = SkillTraining.ActiveLevelFeedback;
-            if (feedback != null && feedback.TryGetOpStatus(instance.SymbolChildId, out var feedbackLevel, out var feedbackMessage))
-            {
-                statusLevel = feedbackLevel;
-                statusMessage = feedbackMessage;
-                badgeAlpha = feedback.GetOpHintAlpha(instance.SymbolChildId, feedbackLevel);
-            }
-            else if (instance is IStatusProvider statusProvider)
-            {
-                statusLevel = statusProvider.GetStatusLevel();
-                statusMessage = statusProvider.GetStatusMessage();
-            }
-
-            if (statusLevel != IStatusProvider.StatusLevel.Success
-                && statusLevel != IStatusProvider.StatusLevel.Undefined
-                && badgeAlpha > 0f)
+            if (TryGetNodeStatus(instance, out var statusLevel, out var statusMessage, out var badgeAlpha, out var isProblemInside))
             {
                 ImGui.PushID(item.Id.GetHashCode());
                 ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7) * T3Ui.UiScaleFactor);
                 ImGui.InvisibleButton("#warning", new Vector2(Icons.FontSize));
-                var color = (statusLevel switch
-                                {
-                                    IStatusProvider.StatusLevel.Tip     => UiColors.StatusActivated,
-                                    IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
-                                    IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
-                                    IStatusProvider.StatusLevel.Error   => UiColors.StatusError,
-                                    _                                   => UiColors.StatusError
-                                }).Fade(badgeAlpha);
+                var color = GetStatusColor(statusLevel);
                 var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
-                Icons.DrawIconOnLastItem(icon, color);
+                Icons.DrawIconOnLastItem(icon, color.Fade(badgeAlpha));
                 if (ImGui.IsItemHovered() && !_context.HideHoverTooltips)
                 {
-                    CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
+                    // Status colors are too dark to read on the default tooltip background
+                    ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
+                    if (isProblemInside)
+                    {
+                        CustomComponents.TooltipForLastItem(color, $"{statusLevel} inside", DescribeProblemInside(instance), false);
+                    }
+                    else
+                    {
+                        CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
+                    }
+                    ImGui.PopStyleColor();
                 }
                 ImGui.PopID();
                 
@@ -1496,6 +1481,98 @@ internal sealed partial class MagGraphView
 
         return true;
     }
+
+    /// <summary>
+    /// What the node's status badge shows: Skill Quest feedback first, then the op's own <see cref="IStatusProvider"/>,
+    /// then problems pushed through <see cref="OperatorDiagnostics"/> by the op itself or by any op nested inside it.
+    /// </summary>
+    private static bool TryGetNodeStatus(Instance instance, out IStatusProvider.StatusLevel statusLevel, out string? statusMessage,
+                                         out float badgeAlpha, out bool isProblemInside)
+    {
+        statusLevel = IStatusProvider.StatusLevel.Undefined;
+        statusMessage = null;
+        badgeAlpha = 1f;
+        isProblemInside = false;
+
+        var feedback = SkillTraining.ActiveLevelFeedback;
+        if (feedback != null && feedback.TryGetOpStatus(instance.SymbolChildId, out var feedbackLevel, out var feedbackMessage))
+        {
+            statusLevel = feedbackLevel;
+            statusMessage = feedbackMessage;
+            badgeAlpha = feedback.GetOpHintAlpha(instance.SymbolChildId, feedbackLevel);
+        }
+        else
+        {
+            if (instance is IStatusProvider statusProvider)
+            {
+                statusLevel = statusProvider.GetStatusLevel();
+                statusMessage = statusProvider.GetStatusMessage();
+            }
+
+            if (statusLevel is IStatusProvider.StatusLevel.Undefined or IStatusProvider.StatusLevel.Success)
+            {
+                if (OperatorDiagnostics.TryGetOwnProblem(instance, out var ownProblem))
+                {
+                    statusLevel = ToStatusLevel(ownProblem!.Statuses);
+                    statusMessage = ownProblem.Message;
+                }
+                else if (OperatorDiagnostics.GetStatusInside(instance) is var statusInside
+                         && statusInside >= OperatorDiagnostics.Statuses.HasWarning)
+                {
+                    statusLevel = ToStatusLevel(statusInside);
+                    isProblemInside = true;
+                }
+            }
+        }
+
+        return statusLevel is not (IStatusProvider.StatusLevel.Undefined or IStatusProvider.StatusLevel.Success)
+               && badgeAlpha > 0f;
+    }
+
+    private static Color GetStatusColor(IStatusProvider.StatusLevel statusLevel)
+    {
+        return statusLevel switch
+                   {
+                       IStatusProvider.StatusLevel.Tip     => UiColors.StatusActivated,
+                       IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
+                       IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
+                       _                                   => UiColors.StatusError
+                   };
+    }
+
+    private static IStatusProvider.StatusLevel ToStatusLevel(OperatorDiagnostics.Statuses status)
+    {
+        return status == OperatorDiagnostics.Statuses.HasError
+                   ? IStatusProvider.StatusLevel.Error
+                   : IStatusProvider.StatusLevel.Warning;
+    }
+
+    /** The nested op names leading to the most severe problem inside, followed by its message. */
+    private static string? DescribeProblemInside(Instance instance)
+    {
+        if (!OperatorDiagnostics.TryGetProblemInside(instance, out var problem))
+            return null;
+
+        var description = new StringBuilder();
+        var current = instance;
+        for (var depth = instance.InstancePath.Count; depth < problem!.IdPath.Count; depth++)
+        {
+            if (!current.Children.TryGetChildInstance(problem.IdPath[depth], out var child, allowCreate: false))
+                break;
+
+            if (description.Length > 0)
+                description.Append(" / ");
+
+            description.Append(child.Symbol.Name);
+            current = child;
+        }
+
+        description.Append(":\n").Append(problem.Message);
+        return description.ToString();
+    }
+
+    /** An op's own problem gets the full marker; one inside only hints that the cause is further down. */
+    private const float ProblemInsideMarkerAlpha = 0.5f;
 
     /** Gap an input value needs beside its parameter name; below it the value moves to a second line. */
     private const float MinLabelValueGap = 4;
