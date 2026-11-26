@@ -4,15 +4,38 @@ using Lib.Utils;
 namespace Lib.geometry.generate;
 
 /// <summary>
-/// Extrudes the closed curves of a Geometry straight along Z into a solid: front and back caps stay N-gons, one polygon
-/// per contour, and the walls stay quads. In contrast to [ExtrudeCurves] it does not fill, resolve overlaps, bevel or
-/// triangulate, so the outline of a cap remains a single polygon and the walls remain quads for further modelling.
-/// Contours are oriented by nesting (outlines counter-clockwise, holes clockwise); overlapping contours are not
-/// resolved. Only closed curves form the outline; open curves and polygons are ignored.
+/// Extrudes the closed curves of a Geometry straight along Z into a solid: front and back caps stay N-gons and the
+/// walls stay quads. In contrast to [ExtrudeCurves] it does not fill, resolve overlaps, bevel or triangulate, so the
+/// outline of a cap remains a single polygon and the walls remain quads for further modelling. Nested contours become
+/// holes by splicing each one into its parent at the closest pair of points, like a keyhole: the cap is one N-gon with
+/// a zero-width slit, and the two bridge edges carry the IsBridge attribute and get no wall. Contours are oriented by
+/// nesting (outlines counter-clockwise, holes clockwise); overlapping contours are not resolved. Only closed curves
+/// form the outline; open curves and polygons are ignored.
 /// </summary>
 [Guid("29b77355-3eb3-4d56-a75d-6d129c2e684e")]
 internal sealed class Extrude : Instance<Extrude>, IStatusProvider
 {
+    /// <summary>A closed outline and whether each edge of it is an artificial bridge rather than contour.</summary>
+    private sealed class Contour
+    {
+        public readonly List<Vector3> Points = [];
+        public readonly List<bool> IsBridgeEdge = [];
+
+        public void Clear()
+        {
+            Points.Clear();
+            IsBridgeEdge.Clear();
+        }
+
+        public void SetFrom(List<Vector3> loop)
+        {
+            Points.AddRange(loop);
+            IsBridgeEdge.EnsureCapacity(loop.Count);
+            for (var index = 0; index < loop.Count; index++)
+                IsBridgeEdge.Add(false);
+        }
+    }
+
     [Output(Guid = "2cadce4a-3e9d-4764-9d12-f078fe8f46d1")]
     public readonly Slot<Geometry?> Result = new();
 
@@ -58,6 +81,7 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
         _isSide.Clear();
         _parts.Clear();
         _partAttributes.Clear();
+        _bridgeEdgePointPairs.Clear();
 
         var hasWalls = sides && depth > WallDepthEpsilon;
         var curveViews = source.Curves;
@@ -71,9 +95,17 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
                 continue;
 
             OrientLoops();
+            FindParents();
             var partStart = _faceOffsets.Count - 1;
-            foreach (var loop in _loops)
-                AddLoop(loop, depth, front, back, hasWalls);
+            for (var loopIndex = 0; loopIndex < _loops.Count; loopIndex++)
+            {
+                if (_parents[loopIndex] >= 0)
+                    continue;
+
+                var contour = BuildContour(loopIndex);
+                AddContour(contour, depth, front, back, hasWalls);
+                ReturnContour(contour);
+            }
 
             if (_faceOffsets.Count - 1 == partStart)
                 continue;
@@ -146,49 +178,195 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
         }
     }
 
-    private void AddLoop(List<Vector3> loop, float depth, bool front, bool back, bool hasWalls)
+    /// <summary>Immediate containing contour per loop; -1 for the outermost ones.</summary>
+    private void FindParents()
     {
-        var count = loop.Count;
+        if (_parents.Length < _loops.Count)
+            _parents = new int[_loops.Count];
+
+        for (var loopIndex = 0; loopIndex < _loops.Count; loopIndex++)
+        {
+            var probe = To2D(_loops[loopIndex][0]);
+            var parent = -1;
+            var smallestArea = float.MaxValue;
+            for (var candidate = 0; candidate < _loops.Count; candidate++)
+            {
+                if (candidate == loopIndex || !Contains(_loops[candidate], probe))
+                    continue;
+
+                var area = MathF.Abs(SignedArea(_loops[candidate]));
+                if (area >= smallestArea)
+                    continue;
+
+                smallestArea = area;
+                parent = candidate;
+            }
+
+            _parents[loopIndex] = parent;
+        }
+    }
+
+    private Contour BuildContour(int loopIndex)
+    {
+        var contour = RentContour();
+        contour.SetFrom(_loops[loopIndex]);
+        for (var child = 0; child < _loops.Count; child++)
+        {
+            if (_parents[child] != loopIndex)
+                continue;
+
+            var childContour = BuildContour(child);
+            Splice(contour, childContour);
+            ReturnContour(childContour);
+        }
+
+        return contour;
+    }
+
+    /// <summary>
+    /// Splices a nested contour into its parent at the closest pair of points, so the hole becomes a zero-width slit
+    /// of the parent outline. The two bridge edges are marked to keep them free of walls.
+    /// </summary>
+    private void Splice(Contour parent, Contour child)
+    {
+        FindClosestPair(parent.Points, child.Points, out var parentIndex, out var childIndex);
+
+        _splicePoints.Clear();
+        _spliceBridgeEdges.Clear();
+
+        for (var index = 0; index <= parentIndex; index++)
+            _splicePoints.Add(parent.Points[index]);
+        for (var edge = 0; edge < parentIndex; edge++)
+            _spliceBridgeEdges.Add(parent.IsBridgeEdge[edge]);
+
+        _spliceBridgeEdges.Add(true);
+        for (var step = 0; step < child.Points.Count; step++)
+            _splicePoints.Add(child.Points[(childIndex + step) % child.Points.Count]);
+        _splicePoints.Add(child.Points[childIndex]);
+
+        for (var step = 0; step < child.Points.Count; step++)
+            _spliceBridgeEdges.Add(child.IsBridgeEdge[(childIndex + step) % child.Points.Count]);
+        _spliceBridgeEdges.Add(true);
+
+        for (var index = parentIndex; index < parent.Points.Count; index++)
+            _splicePoints.Add(parent.Points[index]);
+        for (var edge = parentIndex; edge < parent.Points.Count; edge++)
+            _spliceBridgeEdges.Add(parent.IsBridgeEdge[edge]);
+
+        parent.Points.Clear();
+        parent.Points.AddRange(_splicePoints);
+        parent.IsBridgeEdge.Clear();
+        parent.IsBridgeEdge.AddRange(_spliceBridgeEdges);
+    }
+
+    private static void FindClosestPair(List<Vector3> parent, List<Vector3> child, out int parentIndex, out int childIndex)
+    {
+        parentIndex = 0;
+        childIndex = 0;
+        var closest = float.MaxValue;
+        for (var i = 0; i < parent.Count; i++)
+        {
+            for (var j = 0; j < child.Count; j++)
+            {
+                var distance = Vector3.DistanceSquared(parent[i], child[j]);
+                if (distance >= closest)
+                    continue;
+
+                closest = distance;
+                parentIndex = i;
+                childIndex = j;
+            }
+        }
+    }
+
+    private Contour RentContour() => _contourPool.Count > 0 ? _contourPool.Pop() : new Contour();
+
+    private void ReturnContour(Contour contour)
+    {
+        contour.Clear();
+        _contourPool.Push(contour);
+    }
+
+    private void AddContour(Contour contour, float depth, bool front, bool back, bool hasWalls)
+    {
+        var count = contour.Points.Count;
         var addFrontRing = front || hasWalls;
         var addBackRing = depth > WallDepthEpsilon && (back || hasWalls);
         if (!addFrontRing && !addBackRing)
             return;
 
-        var frontStart = -1;
+        // Bridge endpoints appear twice in a contour; both copies must reference one point so the slit stays closed
         if (addFrontRing)
         {
-            frontStart = _positions.Count;
-            _positions.AddRange(loop);
+            _frontLookup.Clear();
+            _frontIds.Clear();
+            foreach (var position in contour.Points)
+            {
+                if (!_frontLookup.TryGetValue(position, out var point))
+                {
+                    point = _positions.Count;
+                    _positions.Add(position);
+                    _frontLookup[position] = point;
+                }
+
+                _frontIds.Add(point);
+            }
         }
 
-        var backStart = -1;
         if (addBackRing)
         {
-            backStart = _positions.Count;
-            for (var index = 0; index < count; index++)
-                _positions.Add(loop[index] - new Vector3(0, 0, depth));
+            _backLookup.Clear();
+            _backIds.Clear();
+            var backOffset = new Vector3(0, 0, depth);
+            foreach (var position in contour.Points)
+            {
+                var shifted = position - backOffset;
+                if (!_backLookup.TryGetValue(shifted, out var point))
+                {
+                    point = _positions.Count;
+                    _positions.Add(shifted);
+                    _backLookup[shifted] = point;
+                }
+
+                _backIds.Add(point);
+            }
         }
 
         // The cap follows the contour's winding, so its normal points away from the solid
-        var frontNormal = SignedArea(loop) > 0 ? Vector3.UnitZ : -Vector3.UnitZ;
+        var frontNormal = SignedArea(contour.Points) > 0 ? Vector3.UnitZ : -Vector3.UnitZ;
         if (front)
-            AddPolygon(frontStart, count, reversed: false, frontNormal);
+            AddPolygon(_frontIds, reversed: false, frontNormal);
 
         if (back && addBackRing)
-            AddPolygon(backStart, count, reversed: true, -frontNormal);
+            AddPolygon(_backIds, reversed: true, -frontNormal);
+
+        for (var edge = 0; edge < count; edge++)
+        {
+            if (!contour.IsBridgeEdge[edge])
+                continue;
+
+            var next = (edge + 1) % count;
+            if (front)
+                _bridgeEdgePointPairs.Add((_frontIds[edge], _frontIds[next]));
+            if (back && addBackRing)
+                _bridgeEdgePointPairs.Add((_backIds[edge], _backIds[next]));
+        }
 
         if (!hasWalls)
             return;
 
         // The solid lies to the left of the contour direction and Z decreases towards the back ring,
         // so a -> d -> c -> b faces outwards for outlines and holes alike
-        for (var index = 0; index < count; index++)
+        for (var edge = 0; edge < count; edge++)
         {
-            var next = (index + 1) % count;
-            var a = frontStart + index;
-            var b = frontStart + next;
-            var d = backStart + index;
-            var c = backStart + next;
+            if (contour.IsBridgeEdge[edge])
+                continue;
+
+            var next = (edge + 1) % count;
+            var a = _frontIds[edge];
+            var b = _frontIds[next];
+            var d = _backIds[edge];
+            var c = _backIds[next];
             var pa = _positions[a];
             var pb = _positions[b];
             var pd = _positions[d];
@@ -206,10 +384,10 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
         }
     }
 
-    private void AddPolygon(int firstPoint, int count, bool reversed, Vector3 normal)
+    private void AddPolygon(List<int> points, bool reversed, Vector3 normal)
     {
-        for (var step = 0; step < count; step++)
-            AddCorner(firstPoint + (reversed ? count - 1 - step : step), normal);
+        for (var step = 0; step < points.Count; step++)
+            AddCorner(points[reversed ? points.Count - 1 - step : step], normal);
 
         _faceOffsets.Add(_corners.Count);
         _isSide.Add(0);
@@ -250,6 +428,32 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
             _partAttributes.Apply(source.Attributes, _output.Attributes, AttributeDomain.Part);
 
         _output.InvalidateTopologyCaches();
+        if (_bridgeEdgePointPairs.Count > 0)
+            WriteBridgeEdges();
+    }
+
+    /// <summary>Marks the artificial bridge edges, so downstream ops can tell them from the contour.</summary>
+    private void WriteBridgeEdges()
+    {
+        var edges = _output.Edges.Edges;
+        if (edges.Length == 0)
+            return;
+
+        var isBridge = _output.Attributes.GetOrCreate<float>(GeometryAttributeNames.IsBridge, AttributeDomain.Edge, edges.Length);
+        foreach (var (a, b) in _bridgeEdgePointPairs)
+        {
+            var low = Math.Min(a, b);
+            var high = Math.Max(a, b);
+            for (var edgeIndex = 0; edgeIndex < edges.Length; edgeIndex++)
+            {
+                var edge = edges[edgeIndex];
+                if (edge.PointA != low || edge.PointB != high)
+                    continue;
+
+                isBridge.Values[edgeIndex] = 1;
+                break;
+            }
+        }
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
@@ -271,6 +475,15 @@ internal sealed class Extrude : Instance<Extrude>, IStatusProvider
     private readonly List<List<Vector3>> _loops = [];
     private readonly List<List<Vector3>> _loopPool = [];
     private readonly List<Vector3> _scratch = [];
+    private readonly List<int> _frontIds = [];
+    private readonly List<int> _backIds = [];
+    private readonly Dictionary<Vector3, int> _frontLookup = [];
+    private readonly Dictionary<Vector3, int> _backLookup = [];
+    private readonly Stack<Contour> _contourPool = new();
+    private readonly List<Vector3> _splicePoints = [];
+    private readonly List<bool> _spliceBridgeEdges = [];
+    private readonly List<(int A, int B)> _bridgeEdgePointPairs = [];
+    private int[] _parents = [];
     private readonly GeometryAttributeStencil _partAttributes = new();
     private readonly Geometry _output = new();
     private string _statusMessage = string.Empty;

@@ -530,8 +530,12 @@ and set `Depth` to 0.
   edges.
 - `Front`, `Back` and `Sides` off remove the respective faces; `Depth` 0 gives the flat caps only; a `[CubeGeometry]`
   as input reports “No closed curves to extrude.”
-- A glyph with a hole (`o`) stays closed (Boundary edges 0, Volume of the ring), but each cap is still one polygon, so
-  the hole renders filled — unlike `[ExtrudeCurves]`.
+- A glyph with a hole (`o`) renders with a real through-hole: the hole contour is spliced into the outline, so the cap
+  stays one N-gon. The stats stay watertight (0 boundary and 0 non-manifold edges) and Volume is that of the ring; the
+  two bridge slits show as thin seams on the caps. An `8` has two holes. `[ExtrudeCurves]` gives the same holes without
+  the slits.
+- The two bridge edges per hole carry the `IsBridge` edge attribute and no walls are built there; a shape without
+  holes has no `IsBridge` attribute and 0 boundary edges.
 - A concave outline renders without folds: `[GeometryToMesh]` triangulates concave N-gons with a constrained Delaunay
   triangulation instead of a fan, so a cap like the merged outline keeps its notch. Compare with `[TriangulateGeometry]`
   on the same geometry, which still fans and folds there.
