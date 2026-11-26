@@ -31,7 +31,9 @@
       },
       "Description": "Rotates the geometry in degrees.\nX: around the ring.\nY: around the tube.",
       "AddPadding": "True",
-      "Scale": 0.1
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "99f5d952-8490-4930-b8ab-9d8e968183c6"/*Segments*/,
@@ -41,6 +43,13 @@
       },
       "GroupTitle": "Tesselation",
       "Description": "X: subdivisions around the ring.\nY: subdivisions around the tube."
+    },
+    {
+      "InputId": "a4cff570-6d8a-478b-bbd2-c072ea7e169f"/*Axis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
     },
     {
       "InputId": "f3e7341c-0c81-42af-ba48-b43d345188c1"/*Fill*/,

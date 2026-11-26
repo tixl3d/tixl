@@ -6,6 +6,13 @@ namespace Lib.mesh.generate;
 [Guid("a835ab86-29c1-438e-a7f7-2e297108bfd5")]
 internal sealed class TorusMesh : Instance<TorusMesh>
 {
+    private enum AxisTypes
+    {
+        X,
+        Y,
+        Z,
+    }
+
     [Output(Guid = "f8f17f87-56f2-4411-b9bf-b9193b9aa90d")]
     public readonly Slot<MeshBuffers> Data = new();
 
@@ -28,6 +35,7 @@ internal sealed class TorusMesh : Instance<TorusMesh>
             var spin = Spin.GetValue(context);
             var fill = Fill.GetValue(context);
             var smoothAngle = SmoothAngle.GetValue(context);
+            var axis = Axis.GetEnumValue<AxisTypes>(context);
 
             // The angle between the normals of two neighbouring faces equals the angle step of one segment,
             // so each direction can be tested on its own: a coarse ring gets hard edges while the tube stays round.
@@ -47,6 +55,7 @@ internal sealed class TorusMesh : Instance<TorusMesh>
                                    RingSegmentCount = ringSegmentCount,
                                    TubeSegmentCount = tubeSegmentCount,
                                    NormalSign = tubeRadius < 0 ? -1f : 1f,
+                                   Axis = axis,
                                };
 
             if (flatAlongRing || flatAlongTube)
@@ -158,10 +167,10 @@ internal sealed class TorusMesh : Instance<TorusMesh>
 
         return new PbrVertex
                    {
-                       Position = position,
-                       Normal = normal,
-                       Tangent = tangent,
-                       Bitangent = bitangent,
+                       Position = g.OrientToAxis(position),
+                       Normal = g.OrientToAxis(normal),
+                       Tangent = g.OrientToAxis(tangent),
+                       Bitangent = g.OrientToAxis(bitangent),
                        Texcoord = uv,
                        Selection = 1,
                        ColorRgb = Vector3.One,
@@ -199,6 +208,7 @@ internal sealed class TorusMesh : Instance<TorusMesh>
         public int RingSegmentCount;
         public int TubeSegmentCount;
         public float NormalSign;
+        public AxisTypes Axis;
 
         public readonly Vector3 Position(float ringAngle, float tubeAngle)
         {
@@ -206,6 +216,20 @@ internal sealed class TorusMesh : Instance<TorusMesh>
             return new Vector3(MathF.Sin(ringAngle) * distanceFromAxis,
                                MathF.Cos(ringAngle) * distanceFromAxis,
                                MathF.Cos(tubeAngle) * TubeRadius);
+        }
+
+        /// <summary>
+        /// Maps a vector built around the z axis onto the chosen axis. The cyclic permutation is a rotation,
+        /// so it keeps the triangle winding that a mirroring swizzle would flip.
+        /// </summary>
+        public readonly Vector3 OrientToAxis(Vector3 v)
+        {
+            return Axis switch
+                       {
+                           AxisTypes.X => new Vector3(v.Z, v.X, v.Y),
+                           AxisTypes.Y => new Vector3(v.Y, v.Z, v.X),
+                           _           => v,
+                       };
         }
 
         // V is offset by one row to keep the texture placement of existing projects.
@@ -223,6 +247,9 @@ internal sealed class TorusMesh : Instance<TorusMesh>
     private BufferWithViews _indexBufferWithViews;
 
     private readonly MeshBuffers _data = new();
+
+    [Input(Guid = "a4cff570-6d8a-478b-bbd2-c072ea7e169f", MappedType = typeof(AxisTypes))]
+    public readonly InputSlot<int> Axis = new();
 
     [Input(Guid = "608DE038-6C7A-43FC-BA89-374C7B1A318E")]
     public readonly InputSlot<float> Radius = new();
