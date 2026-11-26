@@ -37,7 +37,7 @@
     },
     {
       "Id": "96e63ffb-bd62-4b24-8357-b27326f22898"/*FlatCaps*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "bd54e934-b714-4ae8-b423-06387e977a65"/*MaxSegmentLength*/,
