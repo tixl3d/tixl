@@ -143,48 +143,48 @@ internal sealed class ExtrudeCurves : Instance<ExtrudeCurves>, IStatusProvider, 
     private readonly CurveSolidBuilder _builder = new();
     private readonly Geometry _output = new();
 
-    [Input(Guid = "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27")]
-    public readonly InputSlot<Geometry> Curves = new();
+        [Input(Guid = "4a7e2c9f-6d15-4b83-a0e6-9c3f8b1d5e27")]
+        public readonly InputSlot<T3.Core.DataTypes.Geometry> Curves = new InputSlot<T3.Core.DataTypes.Geometry>();
 
-    [Input(Guid = "c1f5b8e3-2a94-4d67-8e0b-7d3a9f6c2b14")]
-    public readonly InputSlot<float> Depth = new();
+        [Input(Guid = "c1f5b8e3-2a94-4d67-8e0b-7d3a9f6c2b14")]
+        public readonly InputSlot<float> Depth = new InputSlot<float>();
 
-    [Input(Guid = "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72")]
-    public readonly InputSlot<float> Bevel = new();
+        [Input(Guid = "5c7feaba-714e-4134-bc65-e8438ef6839d")]
+        public readonly InputSlot<string> DepthAttribute = new InputSlot<string>();
 
-    [Input(Guid = "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48")]
-    public readonly InputSlot<int> BevelSegments = new();
+        [Input(Guid = "9e3a7d1c-5b48-4f26-b9c0-1a6e4d8f3c72")]
+        public readonly InputSlot<float> Bevel = new InputSlot<float>();
 
-    [Input(Guid = "5c0e9b3d-7a41-4f28-b6d3-2e8f1a4c7d95")]
-    public readonly InputSlot<float> Weight = new();
+        [Input(Guid = "2b8d5f7a-e319-4c60-a5d8-6f0c3e9a1b48")]
+        public readonly InputSlot<int> BevelSegments = new InputSlot<int>();
 
-    [Input(Guid = "8d4b2e6f-1c93-4a57-9f0e-6b3d5c8a2e41")]
-    public readonly InputSlot<bool> FlatShading = new();
+        [Input(Guid = "5c0e9b3d-7a41-4f28-b6d3-2e8f1a4c7d95")]
+        public readonly InputSlot<float> Weight = new InputSlot<float>();
 
-    [Input(Guid = "1f7a3c5e-9b62-4d18-a4c7-3e0f8b6d2a59")]
-    public readonly InputSlot<float> SmoothAngle = new();
+        [Input(Guid = "8d4b2e6f-1c93-4a57-9f0e-6b3d5c8a2e41")]
+        public readonly InputSlot<bool> FlatShading = new InputSlot<bool>();
 
-    [Input(Guid = "7d4c1a9e-8f52-4b37-9e6a-3c1b5d7f2a80")]
-    public readonly InputSlot<float> Tolerance = new();
+        [Input(Guid = "1f7a3c5e-9b62-4d18-a4c7-3e0f8b6d2a59")]
+        public readonly InputSlot<float> SmoothAngle = new InputSlot<float>();
 
-    [Input(Guid = "e5b2d8c4-1a76-4f93-b0d5-8c4e7a2f9b16")]
-    public readonly InputSlot<bool> Front = new();
+        [Input(Guid = "7d4c1a9e-8f52-4b37-9e6a-3c1b5d7f2a80")]
+        public readonly InputSlot<float> Tolerance = new InputSlot<float>();
 
-    [Input(Guid = "3f9c6e2b-d485-4a10-8b7e-5d2a1c8f4e63")]
-    public readonly InputSlot<bool> Back = new();
+        [Input(Guid = "e5b2d8c4-1a76-4f93-b0d5-8c4e7a2f9b16")]
+        public readonly InputSlot<bool> Front = new InputSlot<bool>();
 
-    [Input(Guid = "a8e1c4f7-2b93-4d58-9a6c-0e5d3b7f1c29")]
-    public readonly InputSlot<bool> Sides = new();
+        [Input(Guid = "3f9c6e2b-d485-4a10-8b7e-5d2a1c8f4e63")]
+        public readonly InputSlot<bool> Back = new InputSlot<bool>();
 
-    [Input(Guid = "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75")]
-    public readonly InputSlot<bool> EvenOdd = new();
+        [Input(Guid = "a8e1c4f7-2b93-4d58-9a6c-0e5d3b7f1c29")]
+        public readonly InputSlot<bool> Sides = new InputSlot<bool>();
 
-    [Input(Guid = "532a6559-788f-44f4-ba03-7ce2b3e7561d")]
-    public readonly InputSlot<bool> KeepCurves = new();
+        [Input(Guid = "6c2f9b5e-7d31-4a84-b1e0-4f8c2a6d9e75")]
+        public readonly InputSlot<bool> EvenOdd = new InputSlot<bool>();
 
-    [Input(Guid = "5c7feaba-714e-4134-bc65-e8438ef6839d")]
-    public readonly InputSlot<string> DepthAttribute = new();
+        [Input(Guid = "532a6559-788f-44f4-ba03-7ce2b3e7561d")]
+        public readonly InputSlot<bool> KeepCurves = new InputSlot<bool>();
 
-    [Input(Guid = "9bf01fa0-e722-4caa-9130-18578a0db485")]
-    public readonly InputSlot<float> Lattice = new();
+        [Input(Guid = "9bf01fa0-e722-4caa-9130-18578a0db485")]
+        public readonly InputSlot<float> Lattice = new InputSlot<float>();
 }

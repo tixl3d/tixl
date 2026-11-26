@@ -37,7 +37,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         var hasAttribute = !string.IsNullOrWhiteSpace(attributeName);
         var iterations = Iterations.GetValue(context).Clamp(0, MaxIterations);
         var normalMode = (NormalModes)Normals.GetValue(context).Clamp(0, 3);
-        var levelName = LevelAttribute.GetValue(context);
+        var iterationsAttributeName = IterationsAttribute.GetValue(context);
         var maxEdgeLength = MaxEdgeLength.GetValue(context);
         var smooths = smoothness != 0;
         if (normalMode == NormalModes.Auto)
@@ -54,7 +54,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
         var current = source;
         for (var iteration = 0; iteration < iterations; iteration++)
         {
-            if (!CollectSplits(current, iteration, iterations, string.IsNullOrWhiteSpace(levelName) ? null : levelName, maxEdgeLength))
+            if (!CollectSplits(current, iteration, iterations, string.IsNullOrWhiteSpace(iterationsAttributeName) ? null : iterationsAttributeName, maxEdgeLength))
                 break;
 
             if (GetSubdividedVertexCount(current) > MaxVertexCount)
@@ -97,23 +97,23 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     }
 
     /// <summary>
-    /// Which polygons split in this iteration. With LevelAttribute, a face splits while its value times Iterations
+    /// Which polygons split in this iteration. With IterationsAttribute, a face splits while its value times Iterations
     /// exceeds the iteration (values flow to the child faces, so a face with 0.5 of 4 iterations splits twice). With
     /// MaxEdgeLength, only faces with a longer edge split. Without either, every polygon splits.
     /// </summary>
     /// <returns>False when no face splits, so further iterations would change nothing.</returns>
-    private bool CollectSplits(Geometry geometry, int iteration, int iterations, string? levelName, float maxEdgeLength)
+    private bool CollectSplits(Geometry geometry, int iteration, int iterations, string? iterationsAttributeName, float maxEdgeLength)
     {
         var primitiveCount = geometry.PrimitiveCount;
         EnsureLength(ref _splits, primitiveCount);
-        var hasLevels = false;
-        if (levelName != null)
+        var hasIterationWeights = false;
+        if (iterationsAttributeName != null)
         {
-            EnsureLength(ref _levels, primitiveCount);
+            EnsureLength(ref _iterationWeights, primitiveCount);
             EnsureLength(ref _attributeScratch, geometry.PointCount);
-            hasLevels = GeometryElements.TryGetWeights(geometry, AttributeDomain.Primitive, levelName, _levels, _attributeScratch);
-            if (!hasLevels)
-                _statusMessage = $"No float attribute '{levelName}'; every face is subdivided.";
+            hasIterationWeights = GeometryElements.TryGetWeights(geometry, AttributeDomain.Primitive, iterationsAttributeName, _iterationWeights, _attributeScratch);
+            if (!hasIterationWeights)
+                _statusMessage = $"No float attribute '{iterationsAttributeName}'; every face is subdivided.";
         }
 
         var maxEdgeLengthSquared = maxEdgeLength * maxEdgeLength;
@@ -123,8 +123,8 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
             var start = geometry.PrimitiveVertexOffsets[primitive];
             var vertexCount = geometry.PrimitiveVertexOffsets[primitive + 1] - start;
             var splits = geometry.PrimitiveKind[primitive] == PrimitiveKinds.Polygon && vertexCount >= 3;
-            if (splits && hasLevels)
-                splits = _levels[primitive] * iterations > iteration;
+            if (splits && hasIterationWeights)
+                splits = _iterationWeights[primitive] * iterations > iteration;
 
             if (splits && maxEdgeLength > 0)
                 splits = GetLongestEdgeSquared(geometry, start, vertexCount) > maxEdgeLengthSquared;
@@ -670,7 +670,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     }
 
     #region ICustomDropdownHolder - float attributes of the last input
-    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => inputId == LevelAttribute.Input.InputDefinition.Id ? LevelAttribute.Value : SmoothnessAttribute.Value;
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => inputId == IterationsAttribute.Input.InputDefinition.Id ? IterationsAttribute.Value : SmoothnessAttribute.Value;
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => GeometryAttributeChoices.GetAttributeNames(_lastSource, null, floatsOnly: true);
 
@@ -681,8 +681,8 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
 
         if (inputId == SmoothnessAttribute.Input.InputDefinition.Id)
             SmoothnessAttribute.SetTypedInputValue(selected);
-        else if (inputId == LevelAttribute.Input.InputDefinition.Id)
-            LevelAttribute.SetTypedInputValue(selected);
+        else if (inputId == IterationsAttribute.Input.InputDefinition.Id)
+            IterationsAttribute.SetTypedInputValue(selected);
     }
     #endregion
 
@@ -717,7 +717,7 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     private int[] _facePoints = [];
     private int[] _edgePoints = [];
     private bool[] _splits = [];
-    private float[] _levels = [];
+    private float[] _iterationWeights = [];
     private int[] _primitiveStarts = [];
     private int[] _edgeUse = [];
     private Vector3[] _faceSums = [];
@@ -733,27 +733,27 @@ internal sealed class SubdivideGeometry : Instance<SubdivideGeometry>, IStatusPr
     private int[] _pointFaces = [];
     private string _statusMessage = string.Empty;
 
-    [Input(Guid = "bef4d855-bedd-45ea-9d28-0f45b9fc3b7a")]
-    public readonly InputSlot<Geometry> Geometry = new();
+        [Input(Guid = "bef4d855-bedd-45ea-9d28-0f45b9fc3b7a")]
+        public readonly InputSlot<T3.Core.DataTypes.Geometry> Geometry = new InputSlot<T3.Core.DataTypes.Geometry>();
 
-    [Input(Guid = "070c122c-2fea-425d-bf5c-62910f393676")]
-    public readonly InputSlot<float> Smoothness = new();
+        [Input(Guid = "070c122c-2fea-425d-bf5c-62910f393676")]
+        public readonly InputSlot<float> Smoothness = new InputSlot<float>();
 
-    [Input(Guid = "951c95ee-c446-41be-ba9e-7211dc78ff2b")]
-    public readonly InputSlot<string> SmoothnessAttribute = new();
+        [Input(Guid = "951c95ee-c446-41be-ba9e-7211dc78ff2b")]
+        public readonly InputSlot<string> SmoothnessAttribute = new InputSlot<string>();
 
-    [Input(Guid = "26a66856-a38f-4dab-a274-3ef133ed43df")]
-    public readonly InputSlot<string> LevelAttribute = new();
+        [Input(Guid = "6ff3ad95-376e-4de3-ba02-875a3f620bee")]
+        public readonly InputSlot<float> MaxEdgeLength = new InputSlot<float>();
 
-    [Input(Guid = "6ff3ad95-376e-4de3-ba02-875a3f620bee")]
-    public readonly InputSlot<float> MaxEdgeLength = new();
+        [Input(Guid = "f361912f-b190-4e4f-a192-ef77e8ce5eac")]
+        public readonly InputSlot<int> Iterations = new InputSlot<int>();
 
-    [Input(Guid = "09b5442d-9eff-43e1-b6e8-79eaed455b74")]
-    public readonly InputSlot<float> SmoothAngle = new();
+        [Input(Guid = "26a66856-a38f-4dab-a274-3ef133ed43df")]
+        public readonly InputSlot<string> IterationsAttribute = new InputSlot<string>();
 
-    [Input(Guid = "f361912f-b190-4e4f-a192-ef77e8ce5eac")]
-    public readonly InputSlot<int> Iterations = new();
+        [Input(Guid = "07a29562-d391-47cc-a344-fc447dbcd4da", MappedType = typeof(NormalModes))]
+        public readonly InputSlot<int> Normals = new InputSlot<int>();
 
-    [Input(Guid = "07a29562-d391-47cc-a344-fc447dbcd4da", MappedType = typeof(NormalModes))]
-    public readonly InputSlot<int> Normals = new();
+        [Input(Guid = "09b5442d-9eff-43e1-b6e8-79eaed455b74")]
+        public readonly InputSlot<float> SmoothAngle = new InputSlot<float>();
 }

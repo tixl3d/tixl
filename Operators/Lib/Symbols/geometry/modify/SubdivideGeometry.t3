@@ -15,7 +15,7 @@
       "DefaultValue": 60.0
     },
     {
-      "Id": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
+      "Id": "26a66856-a38f-4dab-a274-3ef133ed43df"/*IterationsAttribute*/,
       "DefaultValue": ""
     },
     {

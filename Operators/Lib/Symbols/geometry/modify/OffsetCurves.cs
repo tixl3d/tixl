@@ -12,9 +12,11 @@ namespace Lib.geometry.modify;
 /// are joined on the outside (miter, round or bevel) and trimmed to the intersection on the
 /// inside, so closed contours stay closed and sharp corners stay sharp. Polygons pass through; primitive and part
 /// attributes are kept, and the points of an offset curve take the point and vertex attributes of its first point.
+/// A float selection (by default the flowing Selection, if any) scales the offset per curve; curves weighted 0 pass
+/// through unchanged.
 /// </summary>
 [Guid("89ddc35c-ba3b-49a1-b766-a7356a12fe40")]
-internal sealed class OffsetCurves : Instance<OffsetCurves>
+internal sealed class OffsetCurves : Instance<OffsetCurves>, IStatusProvider, ICustomDropdownHolder
 {
     [Output(Guid = "eb51b623-b0bc-4686-986b-0148262ced85")]
     public readonly Slot<Geometry?> Result = new();
@@ -31,6 +33,9 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
         var join = (Joins)Join.GetValue(context).Clamp(0, 2);
         var miterLimit = MathF.Max(MiterLimit.GetValue(context), 1f);
         var tolerance = MathF.Max(Tolerance.GetValue(context), 1e-6f);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
+        _lastSource = curves;
+        _statusMessage = string.Empty;
 
         if (curves == null || curves.PointCount == 0 || offset == 0)
         {
@@ -38,9 +43,47 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
             return;
         }
 
-        _builder.Build(curves, offset, join, miterLimit, tolerance, _output);
+        // Without a name the flowing Selection applies when there is one; <All> ignores any selection
+        var ignoresSelection = GeometryAttributeChoices.IsAll(selectionName);
+        var isNamed = !ignoresSelection && !string.IsNullOrWhiteSpace(selectionName);
+        var hasSelection = !ignoresSelection && TryCollectCurveWeights(curves, isNamed ? selectionName : GeometryAttributeNames.Selection);
+        if (isNamed && !hasSelection)
+        {
+            _statusMessage = $"No float attribute '{selectionName}'; nothing is offset.";
+            Result.Value = curves;
+            return;
+        }
+
+        _builder.Build(curves, offset, hasSelection ? _curveWeights : null, join, miterLimit, tolerance, _output);
         Result.Value = _output;
     }
+
+    private bool TryCollectCurveWeights(Geometry curves, string name)
+    {
+        if (_curveWeights.Length < curves.PrimitiveCount)
+            _curveWeights = new float[curves.PrimitiveCount];
+
+        if (_pointWeights.Length < curves.PointCount)
+            _pointWeights = new float[curves.PointCount];
+
+        return GeometryElements.TryGetWeights(curves, AttributeDomain.Primitive, name, _curveWeights, _pointWeights);
+    }
+
+    public IStatusProvider.StatusLevel GetStatusLevel() => string.IsNullOrEmpty(_statusMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+
+    public string GetStatusMessage() => _statusMessage;
+
+    #region ICustomDropdownHolder - the float attributes of the last input as selections
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource);
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionOptions(_lastSource);
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (inputId == Selection.Input.InputDefinition.Id && selected != null)
+            Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
+    }
+    #endregion
 
     private enum Joins
     {
@@ -57,7 +100,8 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
 
     private sealed class OffsetBuilder
     {
-        public void Build(Geometry source, float offset, Joins join, float miterLimit, float tolerance, Geometry target)
+        /// <param name="curveWeights">Per primitive: scales the offset; null offsets every curve fully.</param>
+        public void Build(Geometry source, float offset, float[]? curveWeights, Joins join, float miterLimit, float tolerance, Geometry target)
         {
             _positions.Clear();
             _handlesIn.Clear();
@@ -91,7 +135,16 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
                 {
                     var firstPoint = _positions.Count;
                     var curve = curves[primitive];
-                    OffsetContour(curve, offset * _contourSides[primitive]);
+                    var distance = offset * _contourSides[primitive] * (curveWeights?[primitive] ?? 1f);
+                    if (distance == 0)
+                    {
+                        CopyContour(curve);
+                    }
+                    else
+                    {
+                        OffsetContour(curve, distance);
+                    }
+
                     var sourcePoint = curve.VertexCount > 0 ? curve.GetPointIndex(0) : 0;
                     for (var point = firstPoint; point < _positions.Count; point++)
                     {
@@ -182,18 +235,15 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
                 _segments.Add(new SegmentInfo(pieceStart, _pieces.Count - pieceStart, tangentStart, tangentEnd, cubic.P3));
             }
 
-            _contourStart = _positions.Count;
-            var contourStart = _contourStart;
             if (_segments.Count == 0)
             {
                 // Nothing with a direction to offset; keep the anchors so contour and part ranges stay valid
-                for (var i = 0; i < pointCount; i++)
-                {
-                    AddAnchor(curve.GetPosition(i), curve.GetHandleInPosition(i), curve.GetHandleOutPosition(i));
-                }
-
+                CopyContour(curve);
                 return;
             }
+
+            _contourStart = _positions.Count;
+            var contourStart = _contourStart;
 
             Vector3? trimmedStart = null;
             for (var segmentIndex = 0; segmentIndex < _segments.Count; segmentIndex++)
@@ -236,6 +286,13 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
                 _handlesIn[contourStart] = _handlesIn[last] + (_positions[contourStart] - _positions[last]);
                 RemoveLastAnchor();
             }
+        }
+
+        private void CopyContour(CurveView curve)
+        {
+            _contourStart = _positions.Count;
+            for (var i = 0; i < curve.VertexCount; i++)
+                AddAnchor(curve.GetPosition(i), curve.GetHandleInPosition(i), curve.GetHandleOutPosition(i));
         }
 
         /// <summary>
@@ -521,22 +578,34 @@ internal sealed class OffsetCurves : Instance<OffsetCurves>
         private readonly List<SegmentInfo> _segments = [];
     }
 
+    private Geometry? _lastSource;
+    private string _statusMessage = string.Empty;
+
+    /** Per primitive: its selection weight, read only when a selection applies. */
+    private float[] _curveWeights = [];
+
+    /** Scratch for point weights while deriving the curve weights. */
+    private float[] _pointWeights = [];
+
     private readonly OffsetBuilder _builder = new();
     private static readonly string[] HandleNames = [GeometryAttributeNames.HandleIn, GeometryAttributeNames.HandleOut];
     private readonly Geometry _output = new();
 
-    [Input(Guid = "83e19891-6ac2-41c2-bf59-800811d28d79")]
-    public readonly InputSlot<Geometry> Curves = new();
+        [Input(Guid = "83e19891-6ac2-41c2-bf59-800811d28d79")]
+        public readonly InputSlot<T3.Core.DataTypes.Geometry> Curves = new InputSlot<T3.Core.DataTypes.Geometry>();
 
-    [Input(Guid = "b7803f2e-b869-4181-aa44-1b4bbc3935a9")]
-    public readonly InputSlot<float> Offset = new();
+        [Input(Guid = "b7803f2e-b869-4181-aa44-1b4bbc3935a9")]
+        public readonly InputSlot<float> Offset = new InputSlot<float>();
 
-    [Input(Guid = "1aa775f1-56e3-4ff3-9f1b-756ea64f9120", MappedType = typeof(Joins))]
-    public readonly InputSlot<int> Join = new();
+        [Input(Guid = "8c1d1e2c-77cf-4e63-8215-f70bcee8230c")]
+        public readonly InputSlot<string> Selection = new InputSlot<string>();
 
-    [Input(Guid = "832f326f-c1d6-47b7-a543-680e40d5ffba")]
-    public readonly InputSlot<float> MiterLimit = new();
+        [Input(Guid = "1aa775f1-56e3-4ff3-9f1b-756ea64f9120", MappedType = typeof(Joins))]
+        public readonly InputSlot<int> Join = new InputSlot<int>();
 
-    [Input(Guid = "1d3a918c-cdb2-4fa5-a74d-57c7743e5140")]
-    public readonly InputSlot<float> Tolerance = new();
+        [Input(Guid = "832f326f-c1d6-47b7-a543-680e40d5ffba")]
+        public readonly InputSlot<float> MiterLimit = new InputSlot<float>();
+
+        [Input(Guid = "1d3a918c-cdb2-4fa5-a74d-57c7743e5140")]
+        public readonly InputSlot<float> Tolerance = new InputSlot<float>();
 }

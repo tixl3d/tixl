@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "89ddc35c-ba3b-49a1-b766-a7356a12fe40"/*OffsetCurves*/,
-  "Description": "Grows or shrinks curve outlines by moving every contour sideways by a fixed distance.\n\nA positive Offset expands the filled area of each part (for example a glyph from [StringToCurves]): outlines move outward and holes shrink, whatever winding the source uses. Open contours move to their left. Curved segments stay bezier curves and are split only where needed to stay within Tolerance. Sharp corners stay closed: on the outside they are joined with a miter, a round arc or a bevel, on the inside the two offset edges are trimmed to where they meet. The offset happens in the XY plane. Very large inward offsets can produce self-intersecting loops, which are not removed.\n\nAKA: inset, outset, grow, shrink, expand, contour offset, parallel curve",
+  "Description": "Grows or shrinks curve outlines by moving every contour sideways by a fixed distance.\n\nA positive Offset expands the filled area of each part (for example a glyph from [StringToCurves]): outlines move outward and holes shrink, whatever winding the source uses. Open contours move to their left. Curved segments stay bezier curves and are split only where needed to stay within Tolerance. Sharp corners stay closed: on the outside they are joined with a miter, a round arc or a bevel, on the inside the two offset edges are trimmed to where they meet. The offset happens in the XY plane. Very large inward offsets can produce self-intersecting loops, which are not removed.\n\nA selection scales the offset per curve, so a [SelectGeometry] upstream can grow only some outlines, or grow them by different amounts.\n\nAKA: inset, outset, grow, shrink, expand, contour offset, parallel curve",
   "InputUis": [
     {
       "InputId": "1aa775f1-56e3-4ff3-9f1b-756ea64f9120"/*Join*/,
@@ -9,6 +9,7 @@
         "X": 0.0,
         "Y": 90.0
       },
+      "GroupTitle": "Options",
       "Description": "How outer corners are filled: Miter keeps them sharp, Round rounds them with the offset as radius, Bevel cuts them flat.",
       "DisplayAs": "SegmentedSwitch"
     },
@@ -45,12 +46,22 @@
       }
     },
     {
+      "InputId": "8c1d1e2c-77cf-4e63-8215-f70bcee8230c"/*Selection*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 60.0
+      },
+      "Description": "Name of a float selection attribute that scales Offset per curve: a curve takes the largest weight of its points, or its primitive or part value, and curves weighted 0 stay unchanged. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise offsets every curve fully. <All> ignores any selection.",
+      "Usage": "CustomDropdown"
+    },
+    {
       "InputId": "b7803f2e-b869-4181-aa44-1b4bbc3935a9"/*Offset*/,
       "Position": {
         "X": 0.0,
         "Y": 45.0
       },
       "Description": "Distance in scene units. Positive values grow shapes, negative values shrink them.",
+      "AddPadding": "True",
       "Min": -0.1,
       "Max": 0.1,
       "Scale": 0.001

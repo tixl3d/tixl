@@ -105,7 +105,11 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "Size of the bevel at the front and back edges. Keep it below half of the thinnest stroke."
+      "GroupTitle": "Bevel",
+      "Description": "Size of the bevel at the front and back edges. Keep it below half of the thinnest stroke.",
+      "Min": 0.0,
+      "Max": 0.1,
+      "ClampMin": true
     },
     {
       "InputId": "a8e1c4f7-2b93-4d58-9a6c-0e5d3b7f1c29"/*Sides*/,
@@ -121,6 +125,7 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "GroupTitle": "Depth",
       "Description": "Extrusion depth. 0 gives a flat fill."
     },
     {
@@ -129,6 +134,7 @@
         "X": 0.0,
         "Y": 225.0
       },
+      "GroupTitle": "Geometry",
       "Description": "Generates the front cap."
     }
   ],
