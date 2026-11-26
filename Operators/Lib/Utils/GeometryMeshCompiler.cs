@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Numerics;
+using CDT;
 using T3.Core.DataTypes;
 using T3.Core.Rendering;
 using T3.Core.Utils.Math3d;
@@ -9,10 +10,11 @@ namespace Lib.Utils;
 
 /// <summary>
 /// Compiles the polygons of a <see cref="Geometry"/> into packed PbrVertex/triangle
-/// arrays: N-gons are fan triangulated, per-vertex attributes resolved, tangent bases computed. One output vertex per
-/// polygon vertex, written in primitive order, so a part's contiguous primitive range maps to contiguous vertex and
-/// triangle ranges - that is what makes the per-part chunk table possible. Curves and polygons with fewer than three
-/// vertices produce nothing. Buffers are kept between calls; use one compiler per op.
+/// arrays: N-gons are triangulated (convex faces as a fan, concave ones with a constrained Delaunay
+/// triangulation of their projected outline), per-vertex attributes resolved, tangent bases computed. One output
+/// vertex per polygon vertex, written in primitive order, so a part's contiguous primitive range maps to contiguous
+/// vertex and triangle ranges - that is what makes the per-part chunk table possible. Curves and polygons with fewer
+/// than three vertices produce nothing. Buffers are kept between calls; use one compiler per op.
 /// </summary>
 internal sealed class GeometryMeshCompiler
 {
@@ -60,23 +62,25 @@ internal sealed class GeometryMeshCompiler
             _primitiveTriangleStart = new int[primitiveCount + 1];
         }
 
-        // Output layout first: compacted ranges per primitive
+        // Triangulate first: a concave N-gon can produce a different triangle count than the fan
+        _trianglesScratch.Clear();
         var vertexCount = 0;
-        var triangleCount = 0;
         for (var primitive = 0; primitive < primitiveCount; primitive++)
         {
             _primitiveVertexStart[primitive] = vertexCount;
-            _primitiveTriangleStart[primitive] = triangleCount;
+            _primitiveTriangleStart[primitive] = _trianglesScratch.Count;
             if (!source.IsDrawn(primitive))
                 continue;
 
-            var corners = source.Offsets[primitive + 1] - source.Offsets[primitive];
-            vertexCount += corners;
-            triangleCount += corners - 2;
+            var start = source.Offsets[primitive];
+            var end = source.Offsets[primitive + 1];
+            vertexCount += end - start;
+            TriangulateFace(source, start, end);
         }
 
         _primitiveVertexStart[primitiveCount] = vertexCount;
-        _primitiveTriangleStart[primitiveCount] = triangleCount;
+        _primitiveTriangleStart[primitiveCount] = _trianglesScratch.Count;
+        var triangleCount = _trianglesScratch.Count;
 
         if (Vertices.Length != vertexCount)
             Vertices = new PbrVertex[vertexCount];
@@ -118,17 +122,7 @@ internal sealed class GeometryMeshCompiler
             var outStart = _primitiveVertexStart[primitive];
 
             // Face normal as fallback for meshes without a normal attribute (Newell's method handles N-gons)
-            var faceNormal = Vector3.Zero;
-            for (var c = start; c < end; c++)
-            {
-                var next = c + 1 == end ? start : c + 1;
-                var p0 = positions[vertexPoints[c]];
-                var p1 = positions[vertexPoints[next]];
-                faceNormal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
-                                          (p0.Z - p1.Z) * (p0.X + p1.X),
-                                          (p0.X - p1.X) * (p0.Y + p1.Y));
-            }
-
+            var faceNormal = GetFaceNormal(source, start, end);
             faceNormal = faceNormal.LengthSquared() > 1e-10f ? Vector3.Normalize(faceNormal) : Vector3.UnitY;
 
             var faceColor = Vector4.One;
@@ -179,13 +173,187 @@ internal sealed class GeometryMeshCompiler
                 }
             }
 
-            // Fan triangulation (assumes convex faces - sufficient until a real triangulator lands)
-            var triangleIndex = _primitiveTriangleStart[primitive];
-            for (var i = 1; i < cornerCount - 1; i++)
-                triangles[triangleIndex++] = new Int3(outStart, outStart + i, outStart + i + 1);
+            // The scratch triangles are face-local; offset them into this primitive's compact vertex range
+            for (var triangleIndex = _primitiveTriangleStart[primitive]; triangleIndex < _primitiveTriangleStart[primitive + 1]; triangleIndex++)
+            {
+                var triangle = _trianglesScratch[triangleIndex];
+                triangles[triangleIndex] = new Int3(outStart + triangle.X, outStart + triangle.Y, outStart + triangle.Z);
+            }
         }
 
         BuildChunks(primitiveCount, relativeToPartPivots);
+    }
+
+    /// <summary>
+    /// Triangulates one polygon into face-local corner indices. Convex faces keep the fan; concave faces use a
+    /// constrained Delaunay triangulation of their projected outline, so their triangles stay inside the face.
+    /// </summary>
+    private void TriangulateFace(in Source source, int start, int end)
+    {
+        var cornerCount = end - start;
+        if (cornerCount < 3)
+            return;
+
+        if (cornerCount > 3 && !IsConvexFace(source, start, end) && TryTriangulateDelaunay(source, start, end))
+            return;
+
+        for (var corner = 1; corner < cornerCount - 1; corner++)
+            _trianglesScratch.Add(new Int3(0, corner, corner + 1));
+    }
+
+    private static bool IsConvexFace(in Source source, int start, int end)
+    {
+        var axis = DominantAxis(GetFaceNormal(source, start, end));
+        var cornerCount = end - start;
+        var sign = 0;
+        for (var corner = 0; corner < cornerCount; corner++)
+        {
+            var p0 = Project(source, start + corner, axis);
+            var p1 = Project(source, start + (corner + 1) % cornerCount, axis);
+            var p2 = Project(source, start + (corner + 2) % cornerCount, axis);
+            var cross = (p1.X - p0.X) * (p2.Y - p1.Y) - (p1.Y - p0.Y) * (p2.X - p1.X);
+            if (MathF.Abs(cross) <= 1e-12f)
+                continue;
+
+            var currentSign = cross > 0 ? 1 : -1;
+            if (sign == 0)
+            {
+                sign = currentSign;
+            }
+            else if (sign != currentSign)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Triangulates the polygon with CDT.NET, the constrained Delaunay triangulation [FillCurves] uses for its caps.
+    /// Degenerate or self-intersecting outlines can't be constrained, so they keep the fan.
+    /// </summary>
+    private bool TryTriangulateDelaunay(in Source source, int start, int end)
+    {
+        var faceNormal = GetFaceNormal(source, start, end);
+        if (faceNormal.LengthSquared() < 1e-20f)
+            return false;
+
+        var axis = DominantAxis(faceNormal);
+        _delaunayVertices.Clear();
+        _delaunayEdges.Clear();
+        _delaunayCornerOffsets.Clear();
+        _pointToDelaunay.Clear();
+
+        var cornerCount = end - start;
+        var first = -1;
+        var previous = -1;
+        for (var corner = 0; corner < cornerCount; corner++)
+        {
+            var point = source.VertexPoints[start + corner];
+            if (!_pointToDelaunay.TryGetValue(point, out var vertex))
+            {
+                vertex = _delaunayVertices.Count;
+                _pointToDelaunay[point] = vertex;
+                _delaunayCornerOffsets.Add(corner);
+                var projected = Project(source, start + corner, axis);
+                _delaunayVertices.Add(new V2d<double>(projected.X, projected.Y));
+            }
+
+            if (first < 0)
+                first = vertex;
+            if (previous >= 0 && previous != vertex)
+                _delaunayEdges.Add(new Edge(previous, vertex));
+
+            previous = vertex;
+        }
+
+        if (first >= 0 && previous >= 0 && previous != first)
+            _delaunayEdges.Add(new Edge(previous, first));
+
+        if (_delaunayVertices.Count < 3 || _delaunayEdges.Count < 3)
+            return false;
+
+        var triangleStart = _trianglesScratch.Count;
+        try
+        {
+            var triangulation = new Triangulation<double>();
+            triangulation.InsertVertices(_delaunayVertices);
+            triangulation.InsertEdges(_delaunayEdges);
+            triangulation.EraseOuterTrianglesAndHoles();
+
+            foreach (var triangle in triangulation.Triangles.Span)
+            {
+                if (triangle.V0 >= _delaunayCornerOffsets.Count
+                    || triangle.V1 >= _delaunayCornerOffsets.Count
+                    || triangle.V2 >= _delaunayCornerOffsets.Count)
+                    continue;
+
+                var a = _delaunayCornerOffsets[triangle.V0];
+                var b = _delaunayCornerOffsets[triangle.V1];
+                var c = _delaunayCornerOffsets[triangle.V2];
+                if (!FacesNormal(source, start, a, b, c, faceNormal))
+                    (b, c) = (c, b);
+
+                _trianglesScratch.Add(new Int3(a, b, c));
+            }
+        }
+        catch (Exception)
+        {
+            // CDT refuses degenerate or self-intersecting constraints; the fan at least stays drawable
+            _trianglesScratch.RemoveRange(triangleStart, _trianglesScratch.Count - triangleStart);
+            return false;
+        }
+
+        return _trianglesScratch.Count > triangleStart;
+    }
+
+    private static bool FacesNormal(in Source source, int start, int a, int b, int c, Vector3 normal)
+    {
+        var p0 = source.Positions[source.VertexPoints[start + a]];
+        var p1 = source.Positions[source.VertexPoints[start + b]];
+        var p2 = source.Positions[source.VertexPoints[start + c]];
+        return Vector3.Dot(Vector3.Cross(p1 - p0, p2 - p0), normal) >= 0;
+    }
+
+    /// <summary>Newell's method: robust for non-planar N-gons and for faces without a normal attribute.</summary>
+    private static Vector3 GetFaceNormal(in Source source, int start, int end)
+    {
+        var normal = Vector3.Zero;
+        for (var corner = start; corner < end; corner++)
+        {
+            var next = corner + 1 == end ? start : corner + 1;
+            var p0 = source.Positions[source.VertexPoints[corner]];
+            var p1 = source.Positions[source.VertexPoints[next]];
+            normal += new Vector3((p0.Y - p1.Y) * (p0.Z + p1.Z),
+                                  (p0.Z - p1.Z) * (p0.X + p1.X),
+                                  (p0.X - p1.X) * (p0.Y + p1.Y));
+        }
+
+        return normal;
+    }
+
+    /** The axis the face normal points along most, so projecting away from it keeps the outline's area. */
+    private static int DominantAxis(Vector3 normal)
+    {
+        var x = MathF.Abs(normal.X);
+        var y = MathF.Abs(normal.Y);
+        var z = MathF.Abs(normal.Z);
+        if (x >= y && x >= z)
+            return 0;
+
+        return y >= z ? 1 : 2;
+    }
+
+    private static Vector2 Project(in Source source, int corner, int axis)
+    {
+        var position = source.Positions[source.VertexPoints[corner]];
+        return axis switch
+                   {
+                       0 => new Vector2(position.Y, position.Z),
+                       1 => new Vector2(position.X, position.Z),
+                       _ => new Vector2(position.X, position.Y),
+                   };
     }
 
     private void BuildChunks(int primitiveCount, bool relativeToPartPivots)
@@ -265,6 +433,11 @@ internal sealed class GeometryMeshCompiler
         _partPivots[index] = pivot;
     }
 
+    private readonly List<Int3> _trianglesScratch = [];
+    private readonly List<V2d<double>> _delaunayVertices = [];
+    private readonly List<Edge> _delaunayEdges = [];
+    private readonly List<int> _delaunayCornerOffsets = [];
+    private readonly Dictionary<int, int> _pointToDelaunay = [];
     private int[] _primitiveVertexStart = [];
     private int[] _primitiveTriangleStart = [];
     private int[] _primitiveToPart = [];
