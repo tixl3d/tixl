@@ -110,19 +110,59 @@ internal sealed class HelpWindow : Window
     }
 
     #region header
+    private bool _headerIconsExpanded;
+    private float _titleRightEdge;
     private void DrawHeaderIcons()
     {
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
         var buttonCount = _shownSymbolUi != null ? 5 : 4;
         var iconAreaWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
-
-        // sameLine: false — the cursor was already placed at the window top; the default SameLine would
-        // snap it back onto the previously drawn item's line (the resource footer at the bottom).
-        // The icons float above the doc child, so they also have to clear that child's vertical scrollbar,
-        // which eats the rightmost ScrollbarSize px of the window's content region.
+        
+        // sameLine: false — see comment above (cursor already at window top; clear the doc child's scrollbar).
         CustomComponents.RightAlign(iconAreaWidth + _docScrollbarWidth, sameLine: false);
+
+        var fullMin = ImGui.GetCursorScreenPos();
+        var fullMax = fullMin + new Vector2(iconAreaWidth, buttonSize.Y);
+
+        // Collapse as soon as the full row would cover the title (with a little breathing room).
+        var gap = spacing * 2;
+        var isNarrow = _titleRightEdge > 0 && _titleRightEdge + gap > fullMin.X;
+
+        if (isNarrow)
+        {
+            // Full row rect (right edge is shared with the collapsed square).
+
+            var squareMin = new Vector2(fullMax.X - buttonSize.X, fullMin.Y);
+
+            // While collapsed only the square triggers; once expanded the whole row keeps it open,
+            // so the mouse can travel from the square to any icon without the row closing.
+            _headerIconsExpanded = _headerIconsExpanded
+                                       ? ImGui.IsMouseHoveringRect(fullMin, fullMax)
+                                       : ImGui.IsMouseHoveringRect(squareMin, fullMax);
+
+            if (!_headerIconsExpanded)
+            {
+                ImGui.SetCursorScreenPos(squareMin);
+                CustomComponents.IconButton(Icon.Settings2, buttonSize);
+                return;
+            }
+        }
+        else
+        {
+            _headerIconsExpanded = false;
+        }
+
+        // The expanded row floats over the title, so it needs its own opaque background.
         ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
+
+        if (isNarrow)
+        {
+            var min = ImGui.GetWindowPos();
+            var max = min + ImGui.GetWindowSize();
+            ImGui.GetWindowDrawList().AddRectFilled(min, max, UiColors.BackgroundPopup.AsUInt(), 3f * T3Ui.UiScaleFactor);
+        }
+        
 
         if (_shownSymbolUi != null)
         {
@@ -173,8 +213,6 @@ internal sealed class HelpWindow : Window
                                             "Hovering an operator or a documentation link shows its doc here instantly.");
         
         ImGui.EndChild();
-        
-        //ImGui.SetCursorPos(keepCursorPos);
     }
 
     /// <summary>
@@ -288,6 +326,7 @@ internal sealed class HelpWindow : Window
     #region help mode
     private void DrawHelpBody()
     {
+        _titleRightEdge = 0;
         var topic = GetTopicToShow();
         var topicChanged = topic != _lastShownTopic;
         if (topicChanged)
@@ -369,7 +408,7 @@ internal sealed class HelpWindow : Window
     /// Title block with the symbol's thumbnail right-aligned beside it, so the image doesn't push the
     /// description down. Omitted while the thumbnail is missing, still loading, or the panel is too narrow.
     /// </summary>
-    private static void DrawHeaderWithThumbnail(SymbolUi symbolUi)
+    private void DrawHeaderWithThumbnail(SymbolUi symbolUi)
     {
         var symbol = symbolUi.Symbol;
         var thumbnail = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
@@ -377,6 +416,7 @@ internal sealed class HelpWindow : Window
         ImGui.BeginGroup();
         OperatorHelp.DrawHeader(symbolUi);
         ImGui.EndGroup();
+        _titleRightEdge = ImGui.GetItemRectMax().X;
 
         if (!thumbnail.IsReady)
             return;
@@ -394,6 +434,7 @@ internal sealed class HelpWindow : Window
         }
 
         ImGui.SetCursorPosX(MathF.Floor(ImGui.GetCursorPosX() + spaceRight - width - padding));
+        ImGui.SetCursorPosY(30 * T3Ui.UiScaleFactor);
         thumbnail.AsImguiImage(height);
     }
 
@@ -401,8 +442,11 @@ internal sealed class HelpWindow : Window
     {
         ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
         FormInputs.AddVerticalSpace(10);
+        ImGui.BeginGroup();
         CustomComponents.StylizedText(title, Fonts.FontLarge, UiColors.Text);
         CustomComponents.StylizedText("UI topic", Fonts.FontSmall, UiColors.TextMuted);
+        ImGui.EndGroup();
+        _titleRightEdge = ImGui.GetItemRectMax().X;
         FormInputs.AddVerticalSpace(10);
 
         if (!string.IsNullOrWhiteSpace(doc))
