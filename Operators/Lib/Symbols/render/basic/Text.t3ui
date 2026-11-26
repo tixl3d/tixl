@@ -29,6 +29,13 @@
       "Description": "Defines whether / which surface is rendered invisible"
     },
     {
+      "InputId": "30cd6a4e-cb90-489e-bb83-84804c9baf3b"/*EnableZWrite*/,
+      "Position": {
+        "X": 615.275,
+        "Y": 642.82385
+      }
+    },
+    {
       "InputId": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
       "Position": {
         "X": 252.9892,
@@ -191,7 +198,7 @@
       "SymbolName": "Lib.render._dx11.fxsetup.PickBlendMode",
       "Position": {
         "X": 755.275,
-        "Y": 642.824
+        "Y": 572.824
       }
     },
     {

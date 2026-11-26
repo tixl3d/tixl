@@ -20,6 +20,10 @@
       "DefaultValue": "Back"
     },
     {
+      "Id": "30cd6a4e-cb90-489e-bb83-84804c9baf3b"/*EnableZWrite*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
       "DefaultValue": "Examples:fonts/Roboto-Black.fnt"
     },
@@ -594,6 +598,12 @@
       "SourceSlotId": "e0c4fedd-5c2f-46c8-b67d-5667435fb037",
       "TargetParentOrChildId": "7609847c-ece5-4e9e-8bc4-f6a26689d4a3",
       "TargetSlotId": "d5afa102-2f88-431e-9cd4-af91e41f88f6"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "30cd6a4e-cb90-489e-bb83-84804c9baf3b",
+      "TargetParentOrChildId": "7ac21b66-d617-460a-af7b-f109b830e639",
+      "TargetSlotId": "2342df71-a162-4db7-afc3-514916239897"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

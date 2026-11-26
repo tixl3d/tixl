@@ -149,6 +149,9 @@ internal sealed class TextSprites : Instance<TextSprites>
         if (string.IsNullOrEmpty(groupSeparator))
             groupSeparator = " ";
 
+        // A line break also ends a word, but a custom separator defines groups that may span several lines.
+        var lineBreakStartsGroup = string.IsNullOrWhiteSpace(groupSeparator);
+
         var hideSeparator = HideSeparator.GetValue(context);
 
         var color = Color.GetValue(context);
@@ -219,7 +222,9 @@ internal sealed class TextSprites : Instance<TextSprites>
                 currentLineCharacterCount = 0;
                 lastCharId = 0;
                 lineNumber++;
-                startNewGroup = true;
+                if (lineBreakStartsGroup)
+                    startNewGroup = true;
+
                 continue;
             }
 
@@ -443,7 +448,7 @@ internal sealed class TextSprites : Instance<TextSprites>
     public readonly InputSlot<float> OffsetBaseLine = new();
 
     /// <summary>
-    /// Splits the text into groups for animation. Empty means a space. Line breaks always start a new group.
+    /// Splits the text into groups for animation. Empty means a space. Line breaks start a new group only for whitespace separators.
     /// </summary>
     [Input(Guid = "cf0701ff-b73e-4630-8a2f-380c7c2ec6af")]
     public readonly InputSlot<string> GroupSeparator = new();

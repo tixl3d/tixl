@@ -706,7 +706,7 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     }
     
 
-    private enum Samples
+    internal enum Samples
     {
         No_MSAA = 1,
         MSAA_2Samples =2,

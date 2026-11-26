@@ -28,7 +28,7 @@
     },
     {
       "Id": "2d098fe1-9c9e-5e3f-a910-5494b7138083"/*ColorBleeding*/,
-      "DefaultValue": 0.5
+      "DefaultValue": 0.0
     },
     {
       "Id": "385129ec-175f-5821-ac8b-ca4bb2d0b287"/*OcclusionRadius*/,

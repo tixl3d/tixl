@@ -72,4 +72,7 @@ internal sealed class Text : Instance<Text>, ITransformable
 
         [Input(Guid = "065b6437-64ed-4ebc-bee0-578677421efb")]
         public readonly InputSlot<bool> BillboardMode = new InputSlot<bool>();
+
+        [Input(Guid = "30cd6a4e-cb90-489e-bb83-84804c9baf3b")]
+        public readonly InputSlot<bool> EnableZWrite = new InputSlot<bool>();
 }

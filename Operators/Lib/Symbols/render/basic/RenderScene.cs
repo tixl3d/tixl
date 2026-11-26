@@ -1,3 +1,5 @@
+using Lib.image.generate.basic;
+
 namespace Lib.render.basic;
 
 [Guid("b60072db-a16e-45f5-9425-bb80f5f9122c")]
@@ -24,7 +26,7 @@ internal sealed class RenderScene : Instance<RenderScene>
     [Input(Guid = "3db94583-6694-47e5-b775-23eb351e9f11")]
     public readonly InputSlot<Vector4> ClearColor = new();
 
-    [Input(Guid = "679fa6c5-7b78-4846-b462-4de672cd63b0")]
+    [Input(Guid = "679fa6c5-7b78-4846-b462-4de672cd63b0", MappedType = typeof(RenderTarget.Samples))]
     public readonly InputSlot<int> Multisampling = new();
 
         [Input(Guid = "e67e7052-1f2f-4ad0-909f-f97190128c34")]

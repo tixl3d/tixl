@@ -26,7 +26,7 @@ internal sealed class AnimatedText : Instance<AnimatedText>
         [Input(Guid = "9eef0588-949a-477d-ab40-6e93020c47be")]
         public readonly InputSlot<System.Numerics.Vector3> Position = new InputSlot<System.Numerics.Vector3>();
 
-        [Input(Guid = "00a16561-cfc6-4644-a62d-d6d6ad07be58")]
+        [Input(Guid = "00a16561-cfc6-4644-a62d-d6d6ad07be58", MappedType = typeof(BmFontDescription.VerticalAligns))]
         public readonly InputSlot<int> VerticalAlign = new InputSlot<int>();
 
         [Input(Guid = "86cf8af8-2a75-4aa5-84bc-8e99cc89fab1", MappedType = typeof(BmFontDescription.HorizontalAligns))]
