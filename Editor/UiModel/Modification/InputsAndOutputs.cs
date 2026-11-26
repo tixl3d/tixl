@@ -1,6 +1,9 @@
 ﻿#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,9 +16,10 @@ namespace T3.Editor.UiModel.Modification;
 
 internal static class InputsAndOutputs
 {
-    public static bool RemoveInputsAndOutputsFromSymbol(Guid[] inputIdsToRemove, Guid[] outputIdsToRemove, Symbol symbol)
+    /// <param name="nestedEnumToRemove">An enum copied into the class by <see cref="AddInputToSymbol(Guid,string,bool,Type,Symbol,Type?,out string?)"/>.</param>
+    public static bool RemoveInputsAndOutputsFromSymbol(Guid[] inputIdsToRemove, Guid[] outputIdsToRemove, Symbol symbol, string? nestedEnumToRemove = null)
     {
-        if (inputIdsToRemove.Length == 0 && outputIdsToRemove.Length == 0)
+        if (inputIdsToRemove.Length == 0 && outputIdsToRemove.Length == 0 && nestedEnumToRemove == null)
             return true;
         
         var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
@@ -38,6 +42,9 @@ internal static class InputsAndOutputs
             if (!TryRemoveNodesByIdFromTree(outputIdsToRemove, root, out root))
                 return false;
         }
+
+        if (nestedEnumToRemove != null)
+            root = RemoveNestedEnum(root, symbol.Name, nestedEnumToRemove);
 
         var newSource = root.GetText().ToString();
         Log.Debug(newSource);
@@ -176,6 +183,21 @@ internal static class InputsAndOutputs
 
     public static bool AddInputToSymbol(Guid inputId, string inputName, bool multiInput, Type inputType, Symbol symbol)
     {
+        return AddInputToSymbol(inputId, inputName, multiInput, inputType, symbol, null, out _);
+    }
+
+    /// <summary>
+    /// Adds an input to the symbol's source and recompiles it.
+    /// </summary>
+    /// <param name="mappedEnumType">
+    /// Shows an int input as an enum dropdown. The attribute references the enum if the symbol's source can reach it,
+    /// otherwise a copy is added to the class. If that doesn't compile, the input is added without it.
+    /// </param>
+    /// <param name="copiedEnumName">The enum added to the class, so undo can remove it again.</param>
+    public static bool AddInputToSymbol(Guid inputId, string inputName, bool multiInput, Type inputType, Symbol symbol,
+                                        Type? mappedEnumType, out string? copiedEnumName)
+    {
+        copiedEnumName = null;
         var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
         if (syntaxTree == null)
         {
@@ -184,7 +206,31 @@ internal static class InputsAndOutputs
         }
 
         var root = syntaxTree.GetRoot();
+        if (!TryBuildSourceWithInput(root, inputId, inputName, multiInput, inputType, symbol, null, null, out var plainSource))
+            return false;
 
+        if (mappedEnumType is { IsEnum: true } && inputType == typeof(int) && !multiInput
+            && TryGetMappedTypeReference(mappedEnumType, symbol, inputName, root.ToFullString(), out var typeReference, out var enumCopy)
+            && TryBuildSourceWithInput(root, inputId, inputName, multiInput, inputType, symbol, typeReference, enumCopy, out var mappedSource)
+            && !HasSyntaxErrors(mappedSource))
+        {
+            if (EditableSymbolProject.RecompileSymbol(symbol, mappedSource, false, out var reason, showFailureDialog: false))
+            {
+                copiedEnumName = enumCopy != null ? typeReference : null;
+                return true;
+            }
+
+            Log.Warning($"Adding '{inputName}' without enum {mappedEnumType.Name}, because the source didn't compile: {reason}");
+        }
+
+        return EditableSymbolProject.RecompileSymbol(symbol, plainSource, false, out _);
+    }
+
+    private static bool TryBuildSourceWithInput(SyntaxNode root, Guid inputId, string inputName, bool multiInput, Type inputType, Symbol symbol,
+                                                string? mappedTypeReference, MemberDeclarationSyntax? enumCopy,
+                                                [NotNullWhen(true)] out string? newSource)
+    {
+        newSource = null;
         var inputNodeFinder = new InputNodeByTypeFinder();
         root = inputNodeFinder.Visit(root);
 
@@ -204,7 +250,8 @@ internal static class InputsAndOutputs
             @namespace = String.Empty;
         else
             @namespace += ".";
-        var attributeString = "\n        [Input(Guid = \"" + inputId + "\")]\n";
+        var mappedTypeArgument = mappedTypeReference == null ? string.Empty : $", MappedType = typeof({mappedTypeReference})";
+        var attributeString = "\n        [Input(Guid = \"" + inputId + "\"" + mappedTypeArgument + ")]\n";
         var typeName = TypeNameRegistry.Entries[inputType];
         var slotString = (multiInput ? "MultiInputSlot<" : "InputSlot<") + @namespace + typeName + ">";
         var inputString = "        public readonly " + slotString + " " + inputName + " = new " + slotString + "();\n";
@@ -234,10 +281,187 @@ internal static class InputsAndOutputs
             return false;
         }
 
-        var newSource = root.GetText().ToString();
-        Log.Debug(newSource);
+        if (enumCopy != null)
+        {
+            var classFinder = new ClassDeclarationFinder(symbol.Name);
+            classFinder.Visit(root);
+            if (classFinder.ClassDeclarationNode == null)
+                return false;
 
-        return EditableSymbolProject.RecompileSymbol(symbol, newSource, false, out _);
+            var classNode = classFinder.ClassDeclarationNode;
+            root = root.ReplaceNode(classNode, classNode.WithMembers(classNode.Members.Insert(0, enumCopy)));
+        }
+
+        newSource = root.GetText().ToString();
+        Log.Debug(newSource);
+        return true;
+    }
+
+    /// <summary>
+    /// Returns how the symbol's source can name the enum: directly if it is reachable from the symbol's assembly,
+    /// or as a copy nested in the symbol's class, reusing an identical copy from an earlier publish.
+    /// </summary>
+    private static bool TryGetMappedTypeReference(Type enumType, Symbol symbol, string inputName, string source,
+                                                  [NotNullWhen(true)] out string? typeReference, out MemberDeclarationSyntax? enumCopy)
+    {
+        enumCopy = null;
+        if (IsTypeReachableFrom(enumType, symbol))
+        {
+            typeReference = "global::" + enumType.FullName!.Replace('+', '.');
+            return true;
+        }
+
+        const BindingFlags nestedTypeFlags = BindingFlags.Public | BindingFlags.NonPublic;
+        var baseName = enumType.Name;
+        var name = baseName;
+        for (var suffix = 2;; suffix++)
+        {
+            var existingType = symbol.InstanceType.GetNestedType(name, nestedTypeFlags);
+            if (existingType != null && HaveSameMembers(existingType, enumType))
+            {
+                typeReference = name;
+                return true;
+            }
+
+            // A nested type shadows any outer type of that name the class might already use, so avoid every name in the source.
+            var isNameFree = existingType == null
+                             && name != symbol.Name
+                             && name != inputName
+                             && GraphUtils.IsNewFieldNameValid(name, symbol, out _)
+                             && !Regex.IsMatch(source, $@"\b{Regex.Escape(name)}\b");
+            if (isNameFree)
+                break;
+
+            name = baseName + suffix;
+        }
+
+        enumCopy = SyntaxFactory.ParseMemberDeclaration(BuildEnumCopySource(enumType, name));
+        typeReference = name;
+        return enumCopy != null;
+    }
+
+    private static bool IsTypeReachableFrom(Type type, Symbol symbol)
+    {
+        if (type.FullName == null)
+            return false;
+
+        var symbolAssembly = symbol.InstanceType.Assembly;
+        var typeAssemblyName = type.Assembly.GetName().Name;
+        var isSameAssembly = typeAssemblyName == symbolAssembly.GetName().Name;
+        if (!isSameAssembly && !IsAssemblyReferenced(symbolAssembly, typeAssemblyName))
+            return false;
+
+        for (var t = type; t != null; t = t.DeclaringType)
+        {
+            if (t.IsGenericType)
+                return false;
+
+            var isPublic = t.IsPublic || t.IsNestedPublic;
+            var isInternal = t.IsNotPublic || t.IsNestedAssembly || t.IsNestedFamORAssem;
+            if (!isPublic && !(isSameAssembly && isInternal))
+                return false;
+        }
+
+        return true;
+
+        static bool IsAssemblyReferenced(Assembly assembly, string? assemblyName)
+        {
+            foreach (var reference in assembly.GetReferencedAssemblies())
+            {
+                if (reference.Name == assemblyName)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
+    private static bool HaveSameMembers(Type a, Type b)
+    {
+        if (!a.IsEnum
+            || Enum.GetUnderlyingType(a) != Enum.GetUnderlyingType(b)
+            || a.IsDefined(typeof(FlagsAttribute), false) != b.IsDefined(typeof(FlagsAttribute), false))
+            return false;
+
+        var namesA = Enum.GetNames(a);
+        var namesB = Enum.GetNames(b);
+        var valuesA = Enum.GetValuesAsUnderlyingType(a);
+        var valuesB = Enum.GetValuesAsUnderlyingType(b);
+        if (namesA.Length != namesB.Length)
+            return false;
+
+        for (var index = 0; index < namesA.Length; index++)
+        {
+            if (namesA[index] != namesB[index] || !Equals(valuesA.GetValue(index), valuesB.GetValue(index)))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static string BuildEnumCopySource(Type enumType, string name)
+    {
+        var underlyingType = Enum.GetUnderlyingType(enumType);
+        var baseType = Type.GetTypeCode(underlyingType) switch
+                           {
+                               TypeCode.Byte   => " : byte",
+                               TypeCode.SByte  => " : sbyte",
+                               TypeCode.Int16  => " : short",
+                               TypeCode.UInt16 => " : ushort",
+                               TypeCode.UInt32 => " : uint",
+                               TypeCode.Int64  => " : long",
+                               TypeCode.UInt64 => " : ulong",
+                               _               => string.Empty,
+                           };
+
+        var sb = new StringBuilder();
+        sb.Append('\n');
+        if (enumType.IsDefined(typeof(FlagsAttribute), false))
+            sb.Append("    [System.Flags]\n");
+
+        sb.Append("    private enum ").Append(name).Append(baseType).Append("\n    {\n");
+
+        var memberNames = Enum.GetNames(enumType);
+        var values = Enum.GetValuesAsUnderlyingType(enumType);
+        for (var index = 0; index < memberNames.Length; index++)
+        {
+            var memberName = memberNames[index];
+            if (SyntaxFacts.GetKeywordKind(memberName) != SyntaxKind.None)
+                memberName = "@" + memberName;
+
+            var value = Convert.ToString(values.GetValue(index), CultureInfo.InvariantCulture);
+            sb.Append("        ").Append(memberName).Append(" = ").Append(value).Append(",\n");
+        }
+
+        sb.Append("    }\n\n");
+        return sb.ToString();
+    }
+
+    private static bool HasSyntaxErrors(string source)
+    {
+        foreach (var diagnostic in CSharpSyntaxTree.ParseText(source).GetDiagnostics())
+        {
+            if (diagnostic.Severity == DiagnosticSeverity.Error)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static SyntaxNode RemoveNestedEnum(SyntaxNode root, string className, string enumName)
+    {
+        var classFinder = new ClassDeclarationFinder(className);
+        classFinder.Visit(root);
+        if (classFinder.ClassDeclarationNode == null)
+            return root;
+
+        foreach (var member in classFinder.ClassDeclarationNode.Members)
+        {
+            if (member is EnumDeclarationSyntax enumDeclaration && enumDeclaration.Identifier.ValueText == enumName)
+                return root.RemoveNode(enumDeclaration, SyntaxRemoveOptions.KeepNoTrivia) ?? root;
+        }
+
+        return root;
     }
 
     // todo - factor out common code between AddInputToSymbol and AddOutputToSymbol

@@ -394,13 +394,18 @@ internal partial class EditableSymbolProject
 
     private readonly CodeFileWatcher _csFileWatcher;
 
-    public static bool RecompileSymbol(Symbol symbol, string newSource, bool flagDependentOpsAsModified, out string? reason)
+    /// <param name="showFailureDialog">False for speculative edits the caller retries in a safer form if they fail.</param>
+    public static bool RecompileSymbol(Symbol symbol, string newSource, bool flagDependentOpsAsModified, out string? reason, bool showFailureDialog = true)
     {
         if (!UpdateSymbolWithNewSource(symbol, newSource, out reason))
         {
-            Log.Error(reason);
             var title = $"Could not update symbol '{symbol.Name}'";
-            BlockingWindow.Instance.ShowMessageBox(reason, title);
+            if (showFailureDialog)
+            {
+                Log.Error(reason);
+                BlockingWindow.Instance.ShowMessageBox(reason, title);
+            }
+
             reason = title + ": " + reason;
             return false;
         }

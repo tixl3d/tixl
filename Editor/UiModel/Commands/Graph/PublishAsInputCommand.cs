@@ -1,8 +1,10 @@
 #nullable enable
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
+using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Slots;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
@@ -13,6 +15,7 @@ namespace T3.Editor.UiModel.Commands.Graph;
 /// <summary>
 /// Adds a new input to the composition and connects it to a child's parameter. The parameter's current
 /// value becomes the new input's default and its input settings (relevancy, range, scale, format...) are carried over.
+/// An enum the parameter maps its int value to is carried over too, copied into the composition if its source can't reach it.
 /// </summary>
 /// <remarks>
 /// Adding the input recompiles the composition synchronously. The <see cref="Symbol"/> survives, but instances
@@ -44,7 +47,11 @@ internal sealed class PublishAsInputCommand : ICommand
             return;
         }
 
-        if (!InputsAndOutputs.AddInputToSymbol(_newInputId, _inputName, false, _inputType, compositionUi.Symbol))
+        var mappedEnumType = compositionUi.Symbol.Children.TryGetValue(_childId, out var child)
+                                 ? FindMappedEnumType(child.Symbol, _targetInputId)
+                                 : null;
+
+        if (!InputsAndOutputs.AddInputToSymbol(_newInputId, _inputName, false, _inputType, compositionUi.Symbol, mappedEnumType, out _copiedEnumName))
             return;
 
         if (!SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out compositionUi))
@@ -93,7 +100,21 @@ internal sealed class PublishAsInputCommand : ICommand
         }
 
         // Recompiling without the input also prunes its connection to the child.
-        InputsAndOutputs.RemoveInputsAndOutputsFromSymbol([_newInputId], [], compositionUi.Symbol);
+        InputsAndOutputs.RemoveInputsAndOutputsFromSymbol([_newInputId], [], compositionUi.Symbol, _copiedEnumName);
+        _copiedEnumName = null;
+    }
+
+    private static Type? FindMappedEnumType(Symbol symbol, Guid inputId)
+    {
+        const BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        foreach (var field in symbol.InstanceType.GetFields(fieldFlags))
+        {
+            var attribute = field.GetCustomAttribute<InputAttribute>();
+            if (attribute != null && attribute.Id == inputId)
+                return attribute.MappedType is { IsEnum: true } mappedType ? mappedType : null;
+        }
+
+        return null;
     }
 
     private static string FindUniqueInputName(string baseName, Symbol symbol)
@@ -132,4 +153,5 @@ internal sealed class PublishAsInputCommand : ICommand
     private readonly InputValue _value;
     private readonly JToken _inputUiSettings;
     private readonly Vector2 _posOnCanvas;
+    private string? _copiedEnumName;
 }
