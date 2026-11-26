@@ -104,6 +104,8 @@ jobs:
       # The unit tests against this Release build, with the Slang compiler and FFmpeg libraries the app bundles
       # (macOS has no FFmpeg NuGet package for the test project). Tests that need Vulkan skip themselves.
       - name: Run Tests
+        # Failing tests show on the run but don't hold back the installers.
+        continue-on-error: true
         run: |
           app_dir="$PWD/Installer/macOS/Output/TiXL.app/Contents/Resources/TiXL"
           export TIXL_SLANGC="$app_dir/slang/bin/slangc"

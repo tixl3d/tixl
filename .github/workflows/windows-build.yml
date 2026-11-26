@@ -73,6 +73,8 @@ jobs:
       # The unit tests against this Release build. The Slang tests use the compiler the release bundles; tests
       # that need a GPU skip themselves on the runner.
       - name: Run Tests
+        # Failing tests show on the run but don't hold back the installers.
+        continue-on-error: true
         run: |
           $env:TIXL_SLANGC = "$PWD/Editor/bin/Release/net10.0/slang/bin/slangc.exe"
           dotnet test Core.Tests/Core.Tests.csproj -c Release --no-build

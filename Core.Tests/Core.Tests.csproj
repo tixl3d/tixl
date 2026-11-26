@@ -21,6 +21,9 @@
     <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <Content Include="../Dependencies/linux-x64/libtixlaudio.so" Visible="false" Link="libtixlaudio.so" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <Content Include="../Dependencies/osx/libtixlaudio.dylib" Visible="false" Link="libtixlaudio.dylib" CopyToOutputDirectory="PreserveNewest" Condition="Exists('../Dependencies/osx/libtixlaudio.dylib')" />
+    </ItemGroup>
     <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <Content Include="../Dependencies/tixlaudio.dll" Visible="false" Link="tixlaudio.dll" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>

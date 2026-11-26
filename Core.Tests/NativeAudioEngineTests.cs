@@ -581,6 +581,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -605,6 +606,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -630,6 +632,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -650,6 +653,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -678,6 +682,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -708,6 +713,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -746,6 +752,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -783,6 +790,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -809,6 +817,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -840,6 +849,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
@@ -869,6 +879,7 @@ public class NativeAudioEngineTests
             }
             finally
             {
+                engine.Dispose(); // Windows can't delete a file the engine still has open
                 File.Delete(path);
             }
         }
