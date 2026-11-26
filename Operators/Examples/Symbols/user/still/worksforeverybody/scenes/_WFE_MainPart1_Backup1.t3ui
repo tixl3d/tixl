@@ -2363,7 +2363,7 @@
     },
     {
       "ChildId": "b68d0b0a-6716-4241-b231-a53c6858aeb7",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "7e94ddc6-8855-4018-ad0e-93dbc99219d2",
       "Position": {
         "X": 3780.7637,
@@ -2856,7 +2856,7 @@
     },
     {
       "ChildId": "d8fe782f-ad03-4a88-a923-b3da5a33e8d0",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "7e94ddc6-8855-4018-ad0e-93dbc99219d2",
       "Position": {
         "X": 3780.7637,

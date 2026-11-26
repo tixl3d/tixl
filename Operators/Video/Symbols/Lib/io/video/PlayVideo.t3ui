@@ -91,17 +91,17 @@
       }
     },
     {
-      "OutputId": "732fc715-a8b5-438f-a607-ee1b8b080c04"/*UpdateCount*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 300.0
-      }
-    },
-    {
       "OutputId": "12473a41-5839-4b9b-9c79-2541fe8b630b"/*AudioReference*/,
       "Position": {
         "X": 0.0,
         "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "1796c70e-f5d6-49d8-9453-c0581c64a874"/*FrameIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 500.0
       }
     }
   ]

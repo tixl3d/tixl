@@ -227,6 +227,8 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         OpClips.ClearSelection();
     }
 
+    bool ITimeObjectManipulation.ParticipatesInKeyframeDrag => false;
+
     public ICommand StartDragCommand(in Guid compositionSymbolId) => OpClips.StartDragCommand();
 
     void ITimeObjectManipulation.UpdateDragCommand(double dt, double dy) => OpClips.UpdateDragCommand(dt, dy);

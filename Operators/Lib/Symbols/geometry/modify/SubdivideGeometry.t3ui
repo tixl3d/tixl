@@ -9,9 +9,9 @@
         "X": 0.0,
         "Y": 45.0
       },
+      "Description": "Blends the new points from linear (0, the shape is kept, e.g. to add points for [DisplaceGeometry]) to Catmull-Clark (1, a cube becomes a rounded blob). Values beyond 0 to 1 over- or undershoot.",
       "Min": 0.0,
-      "Max": 1.0,
-      "Description": "Blends the new points from linear (0, the shape is kept, e.g. to add points for [DisplaceGeometry]) to Catmull-Clark (1, a cube becomes a rounded blob). Values beyond 0 to 1 over- or undershoot."
+      "Max": 1.0
     },
     {
       "InputId": "07a29562-d391-47cc-a344-fc447dbcd4da"/*Normals*/,
@@ -27,9 +27,9 @@
         "X": 0.0,
         "Y": 315.0
       },
+      "Description": "For smooth normals: edges between faces more than this many degrees apart stay hard, like the corners of a cube next to a rounded region. 180 smooths everything.",
       "Min": 0.0,
-      "Max": 180.0,
-      "Description": "For smooth normals: edges between faces more than this many degrees apart stay hard, like the corners of a cube next to a rounded region. 180 smooths everything."
+      "Max": 180.0
     },
     {
       "InputId": "26a66856-a38f-4dab-a274-3ef133ed43df"/*LevelAttribute*/,
@@ -46,9 +46,9 @@
         "X": 0.0,
         "Y": 270.0
       },
+      "Description": "When above 0, only faces with an edge longer than this are subdivided, up to Iterations times, so big faces get dense and small ones stay as they are, e.g. before [DisplaceGeometry] on an uneven mesh. 0 subdivides every face.",
       "Min": 0.0,
-      "Max": 1.0,
-      "Description": "When above 0, only faces with an edge longer than this are subdivided, up to Iterations times, so big faces get dense and small ones stay as they are, e.g. before [DisplaceGeometry] on an uneven mesh. 0 subdivides every face."
+      "Max": 1.0
     },
     {
       "InputId": "951c95ee-c446-41be-ba9e-7211dc78ff2b"/*SmoothnessAttribute*/,
@@ -73,9 +73,9 @@
         "X": 0.0,
         "Y": 135.0
       },
+      "Description": "How often to subdivide. Each iteration turns every quad into four; the op stops early before 4 million vertices.",
       "Min": 0,
-      "Max": 4,
-      "Description": "How often to subdivide. Each iteration turns every quad into four; the op stops early before 4 million vertices."
+      "Max": 4
     }
   ],
   "SymbolChildUis": [],

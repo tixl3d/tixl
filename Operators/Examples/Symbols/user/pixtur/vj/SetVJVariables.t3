@@ -72,7 +72,7 @@
       "Outputs": []
     },
     {
-      "Id": "0f6d7d3f-f1cf-4cae-8817-0e6a0e5c03fd"/*AbletonLinkSync*/,
+      "Id": "0f6d7d3f-f1cf-4cae-8817-0e6a0e5c03fd",
       "SymbolId": "31ab98ec-5e79-4667-9a85-2fb168f41fa1",
       "SymbolName": "Lib.numbers.anim.time.AbletonLinkSync",
       "InputValues": [],
@@ -793,7 +793,7 @@
       "Outputs": []
     },
     {
-      "Id": "b86b972a-d47b-4b46-8835-71b5b40306d5"/*AbletonLinkSync*/,
+      "Id": "b86b972a-d47b-4b46-8835-71b5b40306d5",
       "SymbolId": "31ab98ec-5e79-4667-9a85-2fb168f41fa1",
       "SymbolName": "Lib.numbers.anim.time.AbletonLinkSync",
       "InputValues": [],

@@ -1,6 +1,6 @@
 #nullable enable
 using Lib.Utils;
-using LibTessDotNet;
+using LibTessDotNet.Double;
 
 namespace Lib.geometry.modify;
 
@@ -11,7 +11,7 @@ namespace Lib.geometry.modify;
 /// letters join while an untouched letter keeps all its pieces. Open curves and polygons pass through.
 /// </summary>
 [Guid("edfa6c74-9efb-4209-b099-2c8d20cb3e37")]
-[ExportDependencies("LibTessDotNet.dll")]
+[ExportDependencies("LibTessDotNet.Double.dll")]
 internal sealed class MergeCurves : Instance<MergeCurves>, IStatusProvider
 {
     private enum Modes
@@ -113,7 +113,10 @@ internal sealed class MergeCurves : Instance<MergeCurves>, IStatusProvider
         return -1;
     }
 
-    /** The tessellator resolves the overlaps with the fill rule and returns the boundary loops. */
+    /// <summary>
+    /// The tessellator resolves the overlaps with the fill rule and returns the boundary loops. The double build is used
+    /// because the float one misplaces intersections with nearly vertical edges, e.g. the sides of a rotated square.
+    /// </summary>
     private void Merge(WindingRule windingRule)
     {
         var tess = new Tess();
@@ -136,7 +139,7 @@ internal sealed class MergeCurves : Instance<MergeCurves>, IStatusProvider
             for (var i = 0; i < count; i++)
             {
                 var v = tess.Vertices[start + i].Position;
-                var point = new Vector2(v.X, v.Y);
+                var point = new Vector2((float)v.X, (float)v.Y);
                 if (loop.Count == 0 || Vector2.DistanceSquared(loop[^1], point) > 1e-12f)
                     loop.Add(point);
             }

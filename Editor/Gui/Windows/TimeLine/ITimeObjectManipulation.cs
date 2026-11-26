@@ -25,6 +25,12 @@ public interface ITimeObjectManipulation
     void UpdateSelectionForArea(ImRect area, SelectionFence.SelectModes selectMode);
     void DeleteSelectedElements(Instance compositionOp);
 
+    /// <summary>
+    /// Whether a drag started by grabbing a keyframe also moves this manipulator's selection.
+    /// The clip lanes opt out: dragging a key should not shift time clips that happen to be selected too.
+    /// </summary>
+    bool ParticipatesInKeyframeDrag => true;
+
     ICommand StartDragCommand(in Guid symbolId);
     void UpdateDragCommand(double dt, double dv);
     void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV);

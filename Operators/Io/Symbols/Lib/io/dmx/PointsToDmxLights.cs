@@ -1360,7 +1360,7 @@ namespace Lib.io.dmx
                 return;
             if (index >= _pointChannelValues.Count)
             {
-                Log.Warning($"DMX channel list index {index + 1} out of range (list size {_pointChannelValues.Count}). " +
+                Log.Warning($"DMX channel list index {index} out of range (list size {_pointChannelValues.Count}). " +
                             $"Increase 'Fixture Channel Size' if you are using high channel numbers or 16-bit channels for multiple pixels.", this);
                 return;
             }

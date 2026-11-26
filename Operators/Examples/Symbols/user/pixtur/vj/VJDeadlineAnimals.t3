@@ -1897,9 +1897,9 @@
       "Outputs": []
     },
     {
-      "Id": "5d904cb2-87bb-434e-bab7-770accb98080"/*ListToBuffer*/,
+      "Id": "5d904cb2-87bb-434e-bab7-770accb98080"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },

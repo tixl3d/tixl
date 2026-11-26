@@ -807,7 +807,7 @@
     },
     {
       "ChildId": "f2cbfa53-d71a-412e-bd17-54e83703cecf",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "aa50be31-ac57-4994-b957-de79ecdfdc6e",
       "Comment": "This converts the point into a GPU buffer.",
       "Position": {

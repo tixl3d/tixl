@@ -4,9 +4,9 @@
   "Inputs": [],
   "Children": [
     {
-      "Id": "0276ba50-2ef9-4cc0-b416-d2f5eb2d1dfd"/*ListToBuffer*/,
+      "Id": "0276ba50-2ef9-4cc0-b416-d2f5eb2d1dfd"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },

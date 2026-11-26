@@ -459,7 +459,7 @@
     },
     {
       "ChildId": "247e6cf7-3e32-446c-813f-12c0db981aa2",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -722.0124,
@@ -646,7 +646,7 @@
     },
     {
       "ChildId": "34e76135-d897-4ff0-a782-9972e4d04e30",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -1617.0458,
@@ -655,7 +655,7 @@
     },
     {
       "ChildId": "356e748d-9964-4527-b7df-2e0c3e1fc54e",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -1627.4995,
@@ -709,7 +709,7 @@
     },
     {
       "ChildId": "3d5f1d22-72e8-43e3-a5a2-fd6571adce55",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -872.0124,
@@ -781,7 +781,7 @@
     },
     {
       "ChildId": "4c8540b6-ab21-4008-9ce3-b588808375fe",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -1621.3867,
@@ -1159,7 +1159,7 @@
     },
     {
       "ChildId": "78f9cf5f-8ef0-455c-9f0f-ea6f9e4929db",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "21da3e90-e12c-4c4c-a8fa-2db0f16a4159",
       "Position": {
         "X": -1616.9005,
@@ -2031,7 +2031,7 @@
     },
     {
       "ChildId": "d100b0e4-9ab2-4cdf-b491-c26e0d537f1f",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "SectionId": "1722af35-c7e7-44d4-ae69-34e4409caa0f",
       "Position": {
         "X": -1152.6444,

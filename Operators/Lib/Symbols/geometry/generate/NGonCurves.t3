@@ -1,0 +1,35 @@
+{
+  "FormatVersion": 3,
+  "Id": "6dbc0a61-951c-4df1-b145-04df58aebca2"/*NGonCurves*/,
+  "Inputs": [
+    {
+      "Id": "13e778b9-95b6-424a-8bdf-e794caf8f7b7"/*Rotation*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2596fff1-f31a-45ad-9798-fcbcb097a493"/*Sides*/,
+      "DefaultValue": 6
+    },
+    {
+      "Id": "a3105845-b595-423a-99bd-745bfdba0630"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "ba25033e-5e27-462b-9d76-b3f917a66032"/*Radius*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "bce96ea9-fa9c-4e23-91ae-30202e0b7e07"/*Stretch*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

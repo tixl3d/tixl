@@ -1,0 +1,21 @@
+{
+  "Id": "6dbc0a61-951c-4df1-b145-04df58aebca2",
+  "Variations": [
+    {
+      "Id": "fbd00be7-d058-4c4e-96ed-a1cd9aaecf3d",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Triangle down",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2596fff1-f31a-45ad-9798-fcbcb097a493": 3,
+          "13e778b9-95b6-424a-8bdf-e794caf8f7b7": 30.0
+        }
+      }
+    }
+  ]
+}

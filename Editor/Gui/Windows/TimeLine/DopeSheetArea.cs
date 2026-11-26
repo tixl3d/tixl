@@ -78,16 +78,23 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             if (UserActions.InsertKeyframeWithIncrement.Triggered())
             {
-                symbolUi.FlagAsModified();
-                SelectedKeyframes.Clear();
+                // Increment-tapping (step markers) targets only the parameters the user picked by selecting
+                // one of their keys; spraying +1 keys onto every visible parameter wrecks unrelated animations.
+                var parametersWithSelectedKeys = new List<TimeLineCanvas.AnimationParameter>();
                 foreach (var p in AnimationParameters)
                 {
-                    // Increment-tapping (step markers) only makes sense on scalar parameters — spraying
-                    // +1 keys onto every visible vector (e.g. a Color fade) wrecks their animation.
-                    if (p.Curves.Length != 1)
-                        continue;
+                    if (HasSelectedKeyframe(p))
+                        parametersWithSelectedKeys.Add(p);
+                }
 
-                    InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), increment: 1);
+                if (parametersWithSelectedKeys.Count > 0)
+                {
+                    symbolUi.FlagAsModified();
+                    SelectedKeyframes.Clear();
+                    foreach (var p in parametersWithSelectedKeys)
+                    {
+                        InsertNewKeyframe(p, (float)Animator.GetLocalAnimationTime(p.Instance, TimeLineCanvas.Playback.TimeInBars), increment: 1);
+                    }
                 }
             }
 
@@ -516,6 +523,20 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             SelectedKeyframes.Add(k);
         }
+    }
+
+    private bool HasSelectedKeyframe(TimeLineCanvas.AnimationParameter parameter)
+    {
+        foreach (var curve in parameter.Curves)
+        {
+            foreach (var key in curve.GetVDefinitions())
+            {
+                if (SelectedKeyframes.Contains(key))
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -958,7 +979,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
         if (_changeKeyframesCommand == null)
         {
-            TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
+            TimeLineCanvas.Current.StartKeyframeDragCommand(compositionSymbolId);
         }
 
         TimeLineCanvas.Current.RequestEdgeScrolling();

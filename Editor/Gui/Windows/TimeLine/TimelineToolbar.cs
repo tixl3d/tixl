@@ -9,6 +9,7 @@ using T3.IoServices;
 using T3.Core.Logging;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Core.Audio.Input;
 using T3.Core.Operator;
@@ -18,12 +19,18 @@ using T3.Editor.Gui.Interaction.Timing;
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// The timeline's transport row: playback controls, audio mute, keyframe pinning and the record toggle.
+/// The timeline's transport row: playback controls, audio mute, keyframe pinning, the record toggle and
+/// the <see cref="SelectedKeyframesBar"/>.
 /// Shown as a strip along the bottom of the graph window while the timeline is attached, or as the
 /// top row of the <see cref="TimelineWindow"/> while it is detached. Both use the same layout.
 /// </summary>
 internal static class TimelineToolbar
 {
+    /** Vertical space the strip covers at the bottom of the graph window, so other overlays can stay clear of it. */
+    internal static float GraphOverlayHeight => UserSettings.Config.ShowToolbar && !WindowManager.TimelineWindow.IsDetached
+                                                    ? MathF.Round(TimeControls.ControlSize.Y) + 1
+                                                    : 0;
+
     /// <summary>Draws the strip along the bottom of the graph window, with the timeline-fold toggle on the left.</summary>
     public static void DrawAsGraphOverlay(ProjectView projectView)
     {
@@ -123,6 +130,8 @@ internal static class TimelineToolbar
             var centerGroupEnd = ImGui.GetItemRectMax().X;
 
             var rightX = MathF.Max(max.X - _lastRightGroupWidths[layoutIndex], centerGroupEnd + groupGap);
+            SelectedKeyframesBar.Draw(projectView.TimeLineCanvas, composition, centerGroupEnd + groupGap, rightX - groupGap, min.Y);
+
             ImGui.SetCursorScreenPos(new Vector2(rightX, min.Y));
             ImGui.BeginGroup();
             if (!settings.Playback.UsesBeatTapping)

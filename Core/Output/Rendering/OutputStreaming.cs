@@ -63,8 +63,12 @@ public static class OutputStreaming
                 _senders[stream.Id] = slot;
             }
 
-            slot.Sender.Configure(stream.ToSettings());
-            var composite = OutputCompositor.RenderOutput(output.Id);
+            var settings = stream.ToSettings();
+            slot.Sender.Configure(settings);
+
+            // An alpha-carrying stream needs the output's coverage, which the opaque preview composite doesn't
+            // keep. Both are memoised per frame, so the content is pulled once either way.
+            var composite = OutputCompositor.RenderOutput(output.Id, settings.EnableAlpha);
             if (composite == null)
                 return;
 

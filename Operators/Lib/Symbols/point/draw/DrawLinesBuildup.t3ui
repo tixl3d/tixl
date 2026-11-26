@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "66f5a6af-b4a5-46ef-b1e5-4cdd035b6539"/*DrawLinesBuildup*/,
-  "Description": "Draws a point buffer as lines that are only visible within a moving window, to animate strokes being drawn.\n\nThe F1 attribute of each point defines its progress along the stroke. Only the parts with F1 between TransitionProgress - VisibleRange and TransitionProgress are drawn, and the texture is stretched across this visible range. Use a texture that is transparent at both ends, e.g. from a [LinearGradient], for soft stroke tips.\n\nTips:\n- [PrepareSvgLineTransition] writes suitable F1 values, e.g. [LoadSvg] -> [PrepareSvgLineTransition] -> [ListToBuffer] -> [DrawLinesBuildup].\n\nSee also: [DrawLines]",
+  "Description": "Draws a point buffer as lines that are only visible within a moving window, to animate strokes being drawn.\n\nThe F1 attribute of each point defines its progress along the stroke. Only the parts with F1 between TransitionProgress - VisibleRange and TransitionProgress are drawn, and the texture is stretched across this visible range. Use a texture that is transparent at both ends, e.g. from a [LinearGradient], for soft stroke tips.\n\nTips:\n- [PrepareSvgLineTransition] writes suitable F1 values, e.g. [LoadSvg] -> [PrepareSvgLineTransition] -> [UploadToGpu] -> [DrawLinesBuildup].\n\nSee also: [DrawLines]",
   "SymbolTags": "8",
   "InputUis": [
     {

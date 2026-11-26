@@ -55,9 +55,9 @@
       "Outputs": []
     },
     {
-      "Id": "0946d3fe-648c-4201-8ec0-8675911f6cb7"/*ListToBuffer*/,
+      "Id": "0946d3fe-648c-4201-8ec0-8675911f6cb7"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -755,9 +755,9 @@
       "Outputs": []
     },
     {
-      "Id": "671f8baa-7c32-47b6-9dcf-f4d5c8cf8c89"/*ListToBuffer*/,
+      "Id": "671f8baa-7c32-47b6-9dcf-f4d5c8cf8c89"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -810,9 +810,9 @@
       "Outputs": []
     },
     {
-      "Id": "68bfb10d-89a7-451a-9ab9-c9babd1edc11"/*ListToBuffer*/,
+      "Id": "68bfb10d-89a7-451a-9ab9-c9babd1edc11"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -1019,9 +1019,9 @@
       "Outputs": []
     },
     {
-      "Id": "785f54b0-e011-494a-aa67-19846c42c116"/*ListToBuffer*/,
+      "Id": "785f54b0-e011-494a-aa67-19846c42c116"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -1872,9 +1872,9 @@
       "Outputs": []
     },
     {
-      "Id": "e262a940-6214-4956-b033-0fee904b4515"/*ListToBuffer*/,
+      "Id": "e262a940-6214-4956-b033-0fee904b4515"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -2067,9 +2067,9 @@
       "Outputs": []
     },
     {
-      "Id": "f5a99363-4c5c-449c-9e47-0f787b100cb2"/*ListToBuffer*/,
+      "Id": "f5a99363-4c5c-449c-9e47-0f787b100cb2"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },

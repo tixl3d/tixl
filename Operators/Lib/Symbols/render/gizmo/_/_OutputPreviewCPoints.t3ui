@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "0c3eb144-a156-4d72-bc7e-afdf13ba61f7"/*_OutputPreviewCPoints*/,
-  "Description": "Internal helper. Renders a CPU point list in the output window, like [ListToBuffer] into [VisualizePoints].\n\nIts only input is connected by the editor while it renders. For content, use [VisualizePoints] instead.",
+  "Description": "Internal helper. Renders a CPU point list in the output window, like [UploadToGpu] into [VisualizePoints].\n\nIts only input is connected by the editor while it renders. For content, use [VisualizePoints] instead.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -22,14 +22,6 @@
       }
     },
     {
-      "ChildId": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
-      "Position": {
-        "X": 190.0,
-        "Y": -70.0
-      }
-    },
-    {
       "ChildId": "1a834906-bbf4-4f06-b7ef-2b9e07054a52",
       "SymbolName": "Lib.flow.context.GetPreviewState",
       "Position": {
@@ -38,11 +30,19 @@
       }
     },
     {
-      "ChildId": "f0a8590d-1e82-45ad-90d0-90c50020c6b8",
-      "SymbolName": "Lib.render.transform.Group",
+      "ChildId": "31cb3d01-83ab-4c6a-b60e-238aac2b0bb0",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Position": {
-        "X": 450.0,
-        "Y": 0.0
+        "X": 190.0,
+        "Y": -70.0
+      }
+    },
+    {
+      "ChildId": "55eb0b8b-c0a3-4a80-ac2d-fdc4f819e83b",
+      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "Position": {
+        "X": 150.0,
+        "Y": 120.0
       }
     },
     {
@@ -54,11 +54,11 @@
       }
     },
     {
-      "ChildId": "55eb0b8b-c0a3-4a80-ac2d-fdc4f819e83b",
-      "SymbolName": "Lib.render.gizmo._._DrawGeometryHighlight",
+      "ChildId": "f0a8590d-1e82-45ad-90d0-90c50020c6b8",
+      "SymbolName": "Lib.render.transform.Group",
       "Position": {
-        "X": 150.0,
-        "Y": 120.0
+        "X": 450.0,
+        "Y": 0.0
       }
     }
   ],

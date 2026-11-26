@@ -1,0 +1,12 @@
+{
+  "FormatVersion": 3,
+  "Id": "1e43e19f-8fcd-40e7-8e02-928dd1d0df73"/*CombineGeometry*/,
+  "Inputs": [
+    {
+      "Id": "c0340fa2-bf70-4cd2-9779-32db528c6ef3"/*Geometries*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,15 +1,18 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
     /// <summary>
-    /// When the selection — or an operator highlighted from another panel — lies outside the visible
+    /// When the selection, an operator with a warning or error, or an operator highlighted from another panel lies outside the visible
     /// graph area, draws a thin marker that rides the rounded window border at the off-screen box's
     /// projected position, so the user can find it without changing zoom or pan.
     /// </summary>
@@ -40,6 +43,19 @@ internal sealed partial class MagGraphView
                 DrawEdgeMarker(drawList, area, UiColors.StatusAttention);
         }
 
+        // Problems: one marker each in the status color, so a failing op can be found without searching the graph.
+        foreach (var item in _context.Layout.Items.Values)
+        {
+            if (item.Variant != MagGraphItem.Variants.Operator
+                || IsRectVisible(item.Area)
+                || !TryGetNodeStatus(item.Instance, out var statusLevel, out _, out var badgeAlpha, out var isProblemInside)
+                || statusLevel < IStatusProvider.StatusLevel.Warning)
+                continue;
+
+            var markerAlpha = (isProblemInside ? ProblemInsideMarkerAlpha : 1f) * badgeAlpha;
+            DrawEdgeMarker(drawList, item.Area, GetStatusColor(statusLevel).Fade(markerAlpha));
+        }
+
         // Hover: blinking marker for an operator highlighted from another panel. Mirrors the on-node
         // highlight condition (FrameStats hover + graph window not hovered) so it reads the same.
         if (!IsHovered)
@@ -66,6 +82,7 @@ internal sealed partial class MagGraphView
         // The marker is a screen-space HUD element pinned to the window edge, so every size is in
         // scaled UI pixels (UiScaleFactor) — independent of canvas zoom (CanvasScale).
         var windowRect = ImRect.RectWithSize(WindowPos, WindowSize);
+        windowRect.Max.Y -= TimelineToolbar.GraphOverlayHeight;
         var box = TransformRect(boundsOnCanvas);
 
         // Fade in over the first pixels past the edge so the marker doesn't pop the instant the box

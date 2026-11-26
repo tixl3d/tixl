@@ -229,28 +229,6 @@ internal static class TimeClipItem
             }
         }
 
-        // Remap source curves into the ruler — hidden for media clips (too distracting next to their content).
-        if (!isMediaClip && isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
-        {
-            var estimatedRulerHeight = 40;
-            var verticalOffset = ImGui.GetWindowPos().Y  + estimatedRulerHeight - position.Y - ClipArea.LayerHeight;
-            var horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.Start - timeClip.TimeRange.Start, 0)).X;
-            var startPosition = position;
-            attr.DrawList.AddBezierCubic(startPosition,
-                                         startPosition + new Vector2(0, verticalOffset),
-                                         startPosition + new Vector2(horizontalOffset, 0),
-                                         startPosition + new Vector2(horizontalOffset, verticalOffset),
-                                         _timeRemappingColor, 1);
-
-            horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.End - timeClip.TimeRange.End, 0)).X;
-            var endPosition = position + new Vector2(clipSize.X, 0);
-            attr.DrawList.AddBezierCubic(endPosition,
-                                         endPosition + new Vector2(0, verticalOffset),
-                                         endPosition + new Vector2(horizontalOffset, 0),
-                                         endPosition + new Vector2(horizontalOffset, verticalOffset),
-                                         _timeRemappingColor, 1);
-        }
-
         // Interaction and dragging
         ImGui.SetCursorScreenPos(showSizeHandles ? (position + new Vector2(HandleWidth, 0)) : position);
 
@@ -822,7 +800,6 @@ internal static class TimeClipItem
     private static double _dragStartMouseTime;
     private static double _originalDraggedClipStart;
     private static double _lastAppliedDeltaTime;
-    private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
     private static float _posPosYOnDragStart;
     private static float _posXOnDragStart;
     private static bool _isDragAxisDecided;

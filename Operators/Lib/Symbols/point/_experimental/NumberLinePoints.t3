@@ -204,9 +204,9 @@
       "Outputs": []
     },
     {
-      "Id": "7587fc09-f433-4ba7-a2ec-25a61617cd88"/*ListToBuffer*/,
+      "Id": "7587fc09-f433-4ba7-a2ec-25a61617cd88"/*UploadToGpu*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "InputValues": [],
       "Outputs": []
     },
@@ -263,7 +263,7 @@
     {
       "Id": "a42b7ff1-09af-453a-b337-333ca617d1b5"/*DigitCharLinePoints*/,
       "SymbolId": "7e28c796-85e7-47ee-99bb-9599284dbeeb",
-      "SymbolName": "Lib.render._dx11.buffer.ListToBuffer",
+      "SymbolName": "Lib.render._dx11.buffer.UploadToGpu",
       "Name": "DigitCharLinePoints",
       "InputValues": [],
       "Outputs": []

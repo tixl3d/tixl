@@ -171,7 +171,6 @@ internal static class ProjectsPanel
 
         var min = ImGui.GetItemRectMin();
         var max = ImGui.GetItemRectMax();
-        var cursorAfterRow = ImGui.GetCursorScreenPos();
         dl.AddRectFilled(min, max, backgroundColor, 6);
 
         var padding = 3f * T3Ui.UiScaleFactor;
@@ -254,7 +253,11 @@ internal static class ProjectsPanel
             ImGui.OpenPopup(ProjectContextMenuId);
 
         CustomComponents.TooltipForLastItem("Project options");
-        ImGui.SetCursorScreenPos(cursorAfterRow);
+
+        // Back to the row's bottom edge, and submit an item there: the native ImGui build aborts when a
+        // window ends right after SetCursorScreenPos without one. The empty Dummy adds only the usual spacing.
+        ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y));
+        ImGui.Dummy(Vector2.Zero);
 
         var wasOpened = false;
         if (clicked && hasCorruptFiles)

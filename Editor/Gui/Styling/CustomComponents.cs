@@ -582,14 +582,15 @@ internal static partial class CustomComponents
     /// allocating. The segments share the extra space when <paramref name="width"/> is wider than their labels need.
     /// The selected label uses the current text color, so parameter inputs show it muted, changed or animated like other values.
     /// </summary>
+    /// <param name="isCompact">Small font and tight padding, for dense rows such as toolbars.</param>
     public static bool SegmentedButton(string[] labels, ref int selectedIndex, float width = 0,
-                                       bool[]? disabledItems = null, string?[]? tooltips = null)
+                                       bool[]? disabledItems = null, string?[]? tooltips = null, bool isCompact = false)
     {
         var h = ImGui.GetFrameHeight();
-        var naturalWidth = GetSegmentedButtonWidth(labels);
+        var naturalWidth = GetSegmentedButtonWidth(labels, isCompact);
         var totalWidth = MathF.Round(MathF.Max(width, naturalWidth));
         var extraPerSegment = labels.Length > 0 ? (totalWidth - naturalWidth) / labels.Length : 0;
-        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+        var segPadding = GetSegmentPadding(isCompact);
 
         var dl = ImGui.GetWindowDrawList();
         var start = ImGui.GetCursorScreenPos();
@@ -602,7 +603,7 @@ internal static partial class CustomComponents
         for (var index = 0; index < labels.Length; index++)
         {
             // Accumulate unrounded and round each edge, so segments sit on whole pixels and still add up to the track.
-            unroundedX += ImGui.CalcTextSize(labels[index]).X + segPadding * 2 + extraPerSegment;
+            unroundedX += MeasureSegmentLabel(labels[index], isCompact) + segPadding * 2 + extraPerSegment;
             var nextX = index == labels.Length - 1 ? start.X + totalWidth : MathF.Round(unroundedX);
 
             if (index > 0)
@@ -611,7 +612,7 @@ internal static partial class CustomComponents
             ImGui.PushID(index);
             var isDisabled = disabledItems != null && disabledItems[index];
             if (DrawSegment(dl, labels[index], new Vector2(x, start.Y), nextX - x, index == selectedIndex, isDisabled, tooltips?[index],
-                            selectedTextColor))
+                            selectedTextColor, isCompact))
             {
                 selectedIndex = index;
                 modified = true;
@@ -624,16 +625,29 @@ internal static partial class CustomComponents
         return modified;
     }
 
-    /** The width <see cref="SegmentedButton(string[], ref int, float, bool[], string[])"/> needs to fit all labels. */
-    public static float GetSegmentedButtonWidth(string[] labels)
+    /** The width <see cref="SegmentedButton(string[], ref int, float, bool[], string[], bool)"/> needs to fit all labels. */
+    public static float GetSegmentedButtonWidth(string[] labels, bool isCompact = false)
     {
         var width = 0f;
-        var segPadding = SegmentPadding * T3Ui.UiScaleFactor;
+        var segPadding = GetSegmentPadding(isCompact);
         foreach (var label in labels)
         {
-            width += ImGui.CalcTextSize(label).X + segPadding * 2;
+            width += MeasureSegmentLabel(label, isCompact) + segPadding * 2;
         }
 
+        return width;
+    }
+
+    private static float GetSegmentPadding(bool isCompact) => (isCompact ? CompactSegmentPadding : SegmentPadding) * T3Ui.UiScaleFactor;
+
+    private static float MeasureSegmentLabel(string label, bool isCompact)
+    {
+        if (!isCompact)
+            return ImGui.CalcTextSize(label).X;
+
+        ImGui.PushFont(Fonts.FontSmall);
+        var width = ImGui.CalcTextSize(label).X;
+        ImGui.PopFont();
         return width;
     }
 
@@ -648,7 +662,7 @@ internal static partial class CustomComponents
 
     /** One option of a segmented track. Returns true when an enabled segment was clicked. */
     private static bool DrawSegment(ImDrawListPtr dl, string label, Vector2 segMin, float segWidth, bool isSelected, bool isDisabled,
-                                    string? tooltip, uint selectedTextColor)
+                                    string? tooltip, uint selectedTextColor, bool isCompact = false)
     {
         var h = ImGui.GetFrameHeight();
         var rounding = SegmentRounding * T3Ui.UiScaleFactor;
@@ -675,7 +689,8 @@ internal static partial class CustomComponents
                             : isSelected
                                 ? selectedTextColor
                                 : ImGui.GetColorU32((isHovered ? UiColors.Text : UiColors.TextMuted).Rgba);
-        ImGui.PushFont(isSelected ? Fonts.FontBold : Fonts.FontNormal);
+        // There is no small bold font, so compact segments mark the selection by color and fill only.
+        ImGui.PushFont(isCompact ? Fonts.FontSmall : isSelected ? Fonts.FontBold : Fonts.FontNormal);
         var textSize = ImGui.CalcTextSize(label);
         var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
         dl.AddText(textPos, textColor, label);
@@ -685,6 +700,7 @@ internal static partial class CustomComponents
     }
 
     private const float SegmentPadding = 14;
+    private const float CompactSegmentPadding = 6;
     private const float SegmentRounding = 4;
     private const float SegmentInset = 2;
     private const float SegmentTrackInputFieldOpacity = 0.5f;

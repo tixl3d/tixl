@@ -13,6 +13,8 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Migrations.AudioClips;
@@ -477,24 +479,29 @@ internal sealed class TimeClipInteractions
     /// just cover the next one. Pushes move in whole MagGraph grid rows, so snapped stacks (e.g. clips
     /// feeding a multi-input) keep their alignment and stay magnetically connected.
     /// </summary>
-    private void PushDownOpsOverlappedBy(SymbolUi compositionUi, SymbolUi.Child insertedChildUi, List<ICommand> commands)
+    private void PushDownOpsOverlappedBy(Instance compositionOp, SymbolUi compositionUi, SymbolUi.Child insertedChildUi,
+                                         GraphUiContext? graphContext, List<ICommand> commands)
     {
         var moved = new List<(SymbolUi.Child ChildUi, Vector2 OriginalPos)>();
         var handled = new HashSet<Guid> { insertedChildUi.Id };
         var movers = new Queue<SymbolUi.Child>();
         movers.Enqueue(insertedChildUi);
 
+        var sizes = new Dictionary<Guid, Vector2>(compositionUi.ChildUis.Count);
+        foreach (var childUi in compositionUi.ChildUis.Values)
+            sizes[childUi.Id] = GetSizeOnCanvas(compositionOp, childUi, graphContext);
+
         while (movers.Count > 0)
         {
             var mover = movers.Dequeue();
-            var moverRect = ImRect.RectWithSize(mover.PosOnCanvas, mover.Size);
+            var moverRect = ImRect.RectWithSize(mover.PosOnCanvas, sizes[mover.Id]);
 
             foreach (var other in compositionUi.ChildUis.Values)
             {
                 if (handled.Contains(other.Id))
                     continue;
 
-                var otherRect = ImRect.RectWithSize(other.PosOnCanvas, other.Size);
+                var otherRect = ImRect.RectWithSize(other.PosOnCanvas, sizes[other.Id]);
                 if (!moverRect.Overlaps(otherRect))
                     continue;
 
@@ -527,6 +534,29 @@ internal sealed class TimeClipInteractions
 
         moveCommand.StoreCurrentValues();
         commands.Add(moveCommand);
+    }
+
+    /** The stored child size is a legacy default; with a graph showing the composition, use the size it draws the op at. */
+    private static Vector2 GetSizeOnCanvas(Instance compositionOp, SymbolUi.Child childUi, GraphUiContext? graphContext)
+    {
+        if (graphContext == null)
+            return childUi.Size;
+
+        if (graphContext.Layout.Items.TryGetValue(childUi.Id, out var item) && item.Variant == MagGraphItem.Variants.Operator)
+            return item.Size;
+
+        // Not laid out yet, e.g. an op copied earlier in this action.
+        return compositionOp.Children.TryGetChildInstance(childUi.Id, out var instance)
+                   ? MagGraphLayout.ComputeOperatorSize(graphContext, childUi, instance)
+                   : childUi.Size;
+    }
+
+    private static GraphUiContext? GetGraphContextShowing(Instance compositionOp)
+    {
+        return ProjectView.Focused?.GraphView is MagGraphView { Context: { } context }
+               && context.CompositionInstance.Symbol.Id == compositionOp.Symbol.Id
+                   ? context
+                   : null;
     }
 
     /// <summary>
@@ -581,8 +611,10 @@ internal sealed class TimeClipInteractions
         if (!compositionSymbolUi.ChildUis.TryGetValue(clip.Id, out var symbolChildUi))
             return false;
 
+        // Directly below the original's full height: one fixed row down would cover ops with several input rows.
+        var graphContext = GetGraphContextShowing(compositionOp);
         var newPos = symbolChildUi.PosOnCanvas;
-        newPos.Y += MagGraphItem.GridSize.Y;
+        newPos.Y += Math.Max(MagGraphItem.GridSize.Y, GetSizeOnCanvas(compositionOp, symbolChildUi, graphContext).Y);
 
         // Pass an empty section list (not null) so the command does not fall back
         // to cloning every section in the composition.
@@ -613,8 +645,6 @@ internal sealed class TimeClipInteractions
             commands.Add(renameCommand);
         }
 
-        PushDownOpsOverlappedBy(compositionSymbolUi, newSymbolChildUi, commands);
-
         // Repeat the original clip's connections into multi-inputs, so the copy stays wired the same way —
         // regardless of which output carried the connection (an [AudioClip]'s AudioReference into a bus
         // just as much as a TimeClip command into a group).
@@ -640,6 +670,8 @@ internal sealed class TimeClipInteractions
             commands.Add(addConnectionCommand);
         }
 
+        // After the connections: a connected secondary output adds a row to the copy.
+        PushDownOpsOverlappedBy(compositionOp, compositionSymbolUi, newSymbolChildUi, graphContext, commands);
         return true;
     }
 

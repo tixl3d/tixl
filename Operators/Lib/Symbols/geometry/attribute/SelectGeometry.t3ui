@@ -36,9 +36,9 @@
         "X": 0.0,
         "Y": 180.0
       },
-      "Min": 0.0,
-      "Max": 10.0,
-      "Description": "Index of the first selected element in the pattern."
+      "Description": "Index of the first selected element in the pattern.",
+      "Min": 0,
+      "Max": 10
     },
     {
       "InputId": "6355884b-d2a9-4892-9698-944c8ab3a0de"/*Name*/,
@@ -46,7 +46,8 @@
         "X": 0.0,
         "Y": 450.0
       },
-      "Description": "Name of the float attribute to write. Downstream ops pick their selection by this name."
+      "Description": "Name of the float attribute to write. Downstream ops pick their selection by this name.",
+      "Usage": "Default"
     },
     {
       "InputId": "738d7eae-2dfa-4c56-a85d-a25c00143f6e"/*B*/,
@@ -62,10 +63,10 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Min": 1.0,
-      "Max": 10.0,
-      "ClampMin": true,
-      "Description": "Selects every Nth element: 2 selects every second one."
+      "Description": "Selects every Nth element: 2 selects every second one.",
+      "Min": 1,
+      "Max": 10,
+      "ClampMin": true
     },
     {
       "InputId": "7bac9932-a892-4d15-909d-ded6f6c90564"/*Count*/,
@@ -73,9 +74,9 @@
         "X": 0.0,
         "Y": 0.0
       },
+      "Description": "How many elements the pattern selects, starting at Offset and wrapping past the end; animate Offset to move them. 0 selects every match.",
       "Min": 0,
-      "Max": 20,
-      "Description": "How many elements the pattern selects, starting at Offset and wrapping past the end; animate Offset to move them. 0 selects every match."
+      "Max": 20
     },
     {
       "InputId": "952ea8f6-51f4-46b8-94af-83dda89159b0"/*Invert*/,

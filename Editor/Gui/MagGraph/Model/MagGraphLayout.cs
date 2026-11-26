@@ -623,6 +623,32 @@ internal sealed class MagGraphLayout
     }
 
     /// <summary>
+    /// The size an operator occupies on the canvas, with all its visible input and output rows. Unlike
+    /// <see cref="Items"/>, which updates on the next frame, this also measures children added in the current one.
+    /// </summary>
+    internal static Vector2 ComputeOperatorSize(GraphUiContext context, SymbolUi.Child childUi, Instance instance)
+    {
+        var item = new MagGraphItem
+                       {
+                           Variant = MagGraphItem.Variants.Operator,
+                           Selectable = childUi,
+                           SymbolUi = instance.Symbol.GetSymbolUi(),
+                           SymbolChild = childUi.SymbolChild,
+                           InstancePath = instance.InstancePath,
+                       };
+
+        var connectedOutputs = new HashSet<int>();
+        foreach (var c in context.CompositionInstance.Symbol.Connections)
+        {
+            if (c.SourceParentOrChildId == childUi.Id && !c.IsConnectedToSymbolInput)
+                connectedOutputs.Add(GetConnectionSourceHash(c));
+        }
+
+        var lineCount = CollectVisibleLines(context, item, [], [], connectedOutputs);
+        return new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * Math.Max(1, lineCount));
+    }
+
+    /// <summary>
     /// Aggregate visible inputs and outputs into a consistent stack
     /// </summary>
     /// <remarks>

@@ -7,8 +7,8 @@
     {
       "InputId": "022f1959-a62b-49de-817a-3930bc8ec32b"/*EnableDepthWrite*/,
       "Position": {
-        "X": 510.461,
-        "Y": 916.3779
+        "X": -99.338776,
+        "Y": 970.3248
       },
       "Description": "This defines whether the mesh / plane covers itself or is covered by or covers other meshes."
     },

@@ -1,33 +1,33 @@
 {
   "FormatVersion": 3,
-  "Id": "6bf2c69e-0ab5-40b2-8ea1-b469333f4247",
+  "Id": "6bf2c69e-0ab5-40b2-8ea1-b469333f4247"/*_OutputPreviewPoints*/,
   "Description": "Internal helper. Renders a point buffer in the output window like [VisualizePoints], with the overlays the output window asks for through [GetPreviewState] (point indices, the hovered table row).\n\nIts only input is connected by the editor while it renders.",
   "SymbolTags": "16",
   "InputUis": [
     {
-      "InputId": "89d49547-bbf2-4acf-80b8-aba4175acade",
+      "InputId": "89d49547-bbf2-4acf-80b8-aba4175acade"/*Points*/,
+      "Relevancy": "Required",
       "Position": {
         "X": -300.0,
         "Y": 0.0
-      },
-      "Relevancy": "Required"
+      }
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "1e88d20a-120a-408e-9793-734204cc54e2",
+      "SymbolName": "Lib.flow.Execute",
+      "Position": {
+        "X": 300.0,
+        "Y": 120.0
+      }
+    },
     {
       "ChildId": "36d78d37-dee9-4dd5-8faf-11ad9f62e15f",
       "SymbolName": "Lib.flow.context.GetPreviewState",
       "Position": {
         "X": -150.0,
         "Y": 80.0
-      }
-    },
-    {
-      "ChildId": "907781af-4383-4a63-9bbd-455e06e765b0",
-      "SymbolName": "Lib.point.draw.VisualizePoints",
-      "Position": {
-        "X": 150.0,
-        "Y": 0.0
       }
     },
     {
@@ -39,11 +39,11 @@
       }
     },
     {
-      "ChildId": "1e88d20a-120a-408e-9793-734204cc54e2",
-      "SymbolName": "Lib.flow.Execute",
+      "ChildId": "907781af-4383-4a63-9bbd-455e06e765b0",
+      "SymbolName": "Lib.point.draw.VisualizePoints",
       "Position": {
-        "X": 300.0,
-        "Y": 120.0
+        "X": 150.0,
+        "Y": 0.0
       }
     },
     {
@@ -57,7 +57,7 @@
   ],
   "OutputUis": [
     {
-      "OutputId": "fbe0ea36-924f-485e-8606-4457e666a955",
+      "OutputId": "fbe0ea36-924f-485e-8606-4457e666a955"/*Output*/,
       "Position": {
         "X": 900.0,
         "Y": 0.0

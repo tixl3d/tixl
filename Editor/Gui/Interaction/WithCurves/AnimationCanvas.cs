@@ -165,11 +165,36 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     private MacroCommand _macro;
     private readonly List<ICommand> _commands = new();
         
+    /// <summary>
+    /// Set while a drag that started on a keyframe is running: manipulators that opt out of
+    /// <see cref="ITimeObjectManipulation.ParticipatesInKeyframeDrag"/> (the clip lanes) are left alone.
+    /// </summary>
+    private bool _isKeyframeDrag;
+
+    private bool IsPartOfDrag(ITimeObjectManipulation manipulator)
+    {
+        return !_isKeyframeDrag || manipulator.ParticipatesInKeyframeDrag;
+    }
+
     public ICommand StartDragCommand(in Guid compositionSymbolId)
     {
+        return StartDragCommand(compositionSymbolId, isKeyframeDrag: false);
+    }
+
+    public void StartKeyframeDragCommand(in Guid compositionSymbolId)
+    {
+        StartDragCommand(compositionSymbolId, isKeyframeDrag: true);
+    }
+
+    private ICommand StartDragCommand(in Guid compositionSymbolId, bool isKeyframeDrag)
+    {
+        _isKeyframeDrag = isKeyframeDrag;
         _commands.Clear();
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             _commands.Add(manipulators.StartDragCommand(compositionSymbolId));
         }
         _macro = new MacroCommand("Move Timeline Items", _commands);
@@ -180,6 +205,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     {
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             manipulators.UpdateDragCommand(dt, dv);
         }
     }
@@ -188,6 +216,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     {
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             manipulators.UpdateDragAtStartPointCommand(dt, dv);
         }
     }
@@ -196,6 +227,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     {
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             manipulators.UpdateDragAtEndPointCommand(dt, dv);
         }
     }
@@ -204,6 +238,9 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     {
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             manipulators.UpdateDragStretchCommand(scaleU, scaleV, originU, originV);
         }
     }
@@ -224,8 +261,13 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     {
         foreach (var manipulators in TimeObjectManipulators)
         {
+            if (!IsPartOfDrag(manipulators))
+                continue;
+
             manipulators.CompleteDragCommand();
         }
+
+        _isKeyframeDrag = false;
 
         if (_macro == null)
         {

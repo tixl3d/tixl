@@ -1115,6 +1115,14 @@ internal static class DebugServer
                 childJson["statusMessage"] = statusProvider.GetStatusMessage();
             }
 
+            if (compositionInstance != null
+                && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var diagnosedInstance)
+                && T3.Core.Stats.OperatorDiagnostics.GetStatusInside(diagnosedInstance) is var statusInside
+                && statusInside >= T3.Core.Stats.OperatorDiagnostics.Statuses.HasWarning)
+            {
+                childJson["statusInside"] = statusInside.ToString();
+            }
+
             // What the parameter window shows below Code inputs
             if (compositionInstance != null
                 && ((IReadOnlyDictionary<Guid, Instance>)compositionInstance.Children).TryGetValue(childId, out var codeInstance))

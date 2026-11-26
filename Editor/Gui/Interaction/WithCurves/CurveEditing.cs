@@ -411,71 +411,50 @@ internal abstract class CurveEditing
         UndoRedoStack.Add(cmd);
     }
 
-    private void OnSmooth()
-    {
-        ForSelectedOrAllPointsDo((vDef) =>
-                                 {
-                                     vDef.BrokenTangents = false;
-                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Smooth;
-                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Smooth;
-                                     vDef.TensionIn = 1.0f;
-                                     vDef.TensionOut = 1.0f;
-                                     vDef.Weighted = false;
-                                 });
-        
-    }
+    private void OnSmooth() => ForSelectedOrAllPointsDo(static vDef => SetInterpolation(vDef, VDefinition.KeyInterpolation.Smooth));
+    private void OnCubic() => ForSelectedOrAllPointsDo(static vDef => SetInterpolation(vDef, VDefinition.KeyInterpolation.Cubic));
+    private void OnHorizontal() => ForSelectedOrAllPointsDo(static vDef => SetInterpolation(vDef, VDefinition.KeyInterpolation.Horizontal));
+    private void OnConstant() => ForSelectedOrAllPointsDo(static vDef => SetInterpolation(vDef, VDefinition.KeyInterpolation.Constant));
+    private void OnLinear() => ForSelectedOrAllPointsDo(static vDef => SetInterpolation(vDef, VDefinition.KeyInterpolation.Linear));
 
-    private void OnCubic()
+    /// <summary>
+    /// Sets both sides of a keyframe to an interpolation and resets its tangent tweaks. Callers update the
+    /// curve's tangents afterwards.
+    /// </summary>
+    internal static void SetInterpolation(VDefinition vDef, VDefinition.KeyInterpolation interpolation)
     {
-        ForSelectedOrAllPointsDo((vDef) =>
-                                 {
-                                     vDef.BrokenTangents = false;
-                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Cubic;
-                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Cubic;
-                                     vDef.TensionIn = 1.0f;
-                                     vDef.TensionOut = 1.0f;
-                                     vDef.Weighted = false;
-                                 });
-    }
+        vDef.TensionIn = 1.0f;
+        vDef.TensionOut = 1.0f;
+        vDef.Weighted = false;
 
-    private void OnHorizontal()
-    {
-        ForSelectedOrAllPointsDo((vDef) =>
-                                 {
-                                     vDef.BrokenTangents = false;
-                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Horizontal;
-                                     vDef.InTangentAngle = 0;
-                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Horizontal;
-                                     vDef.OutTangentAngle = Math.PI;
-                                     vDef.TensionIn = 1.0f;
-                                     vDef.TensionOut = 1.0f;
-                                     vDef.Weighted = false;
-                                 });
-    }
+        switch (interpolation)
+        {
+            case VDefinition.KeyInterpolation.Constant:
+                // The in side stays as it is, so the curve still arrives smoothly at a constant key.
+                vDef.BrokenTangents = true;
+                vDef.OutInterpolation = VDefinition.KeyInterpolation.Constant;
+                break;
 
-    private void OnConstant()
-    {
-        ForSelectedOrAllPointsDo((vDef) =>
-                                 {
-                                     vDef.BrokenTangents = true;
-                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Constant;
-                                     vDef.TensionIn = 1.0f;
-                                     vDef.TensionOut = 1.0f;
-                                     vDef.Weighted = false;
-                                 });
-    }
+            case VDefinition.KeyInterpolation.Linear:
+                vDef.BrokenTangents = true;
+                vDef.InInterpolation = interpolation;
+                vDef.OutInterpolation = interpolation;
+                break;
 
-    private void OnLinear()
-    {
-        ForSelectedOrAllPointsDo((vDef) =>
-                                 {
-                                     vDef.BrokenTangents = true;
-                                     vDef.InInterpolation = VDefinition.KeyInterpolation.Linear;
-                                     vDef.OutInterpolation = VDefinition.KeyInterpolation.Linear;
-                                     vDef.TensionIn = 1.0f;
-                                     vDef.TensionOut = 1.0f;
-                                     vDef.Weighted = false;
-                                 });
+            case VDefinition.KeyInterpolation.Horizontal:
+                vDef.BrokenTangents = false;
+                vDef.InInterpolation = interpolation;
+                vDef.InTangentAngle = 0;
+                vDef.OutInterpolation = interpolation;
+                vDef.OutTangentAngle = Math.PI;
+                break;
+
+            default:
+                vDef.BrokenTangents = false;
+                vDef.InInterpolation = interpolation;
+                vDef.OutInterpolation = interpolation;
+                break;
+        }
     }
 
     private void ApplyPostCurveMapping(CurveUtils.OutsideCurveBehavior mapping)

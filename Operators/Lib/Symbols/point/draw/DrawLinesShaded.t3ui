@@ -80,7 +80,6 @@
       "Description": "Breaks lines where two points are further apart than this, like a separator, for example where a trail wraps around. 0 keeps all segments.",
       "Min": 0.0,
       "Max": 1.0,
-      "Scale": 0.0,
       "ClampMin": true
     },
     {

@@ -1,0 +1,66 @@
+{
+  "FormatVersion": 3,
+  "Id": "6dbc0a61-951c-4df1-b145-04df58aebca2"/*NGonCurves*/,
+  "Description": "Generates a regular polygon (triangle, square, hexagon, ...) as one closed curve in the XY plane.\n\nThe first corner points along +X before rotation, so 3 sides give a triangle pointing right. Stretch scales the shape after the rotation: 4 sides rotated by 45° and stretched become a rectangle. The curve consists of straight segments.\n\nAKA: polygon, regular polygon, triangle, rectangle, hexagon, shape\n\nTips\n- Build a flat arrow from a triangle (Sides 3) and a stretched square (Sides 4, Rotation 45): combine them with [CombineGeometry], merge the outlines with [MergeCurves] and fill them with [FillCurves], or extrude them with [ExtrudeCurves].",
+  "InputUis": [
+    {
+      "InputId": "13e778b9-95b6-424a-8bdf-e794caf8f7b7"/*Rotation*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Counter-clockwise rotation around Z in degrees, applied before Stretch.",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "2596fff1-f31a-45ad-9798-fcbcb097a493"/*Sides*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "Number of corners, at least 3.",
+      "Min": 3,
+      "Max": 12,
+      "ClampMin": true
+    },
+    {
+      "InputId": "a3105845-b595-423a-99bd-745bfdba0630"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "ba25033e-5e27-462b-9d76-b3f917a66032"/*Radius*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Distance from the center to the corners.",
+      "Min": 0.0,
+      "Max": 2.0
+    },
+    {
+      "InputId": "bce96ea9-fa9c-4e23-91ae-30202e0b7e07"/*Stretch*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Scales the rotated shape along X and Y.",
+      "Min": 0.0,
+      "Max": 4.0
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7989acc2-66f4-4e55-84f2-326daa44182b"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

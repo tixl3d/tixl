@@ -9,6 +9,7 @@ using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Settings;
+using T3.Core.Stats;
 
 namespace T3.Core.Operator;
 
@@ -217,6 +218,9 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         }
         
         _status |= InstanceStatus.Disposed;
+        
+        // Otherwise a deleted op's problem would keep marking its parents forever.
+        this.ClearErrorState();
         
         try
         {
