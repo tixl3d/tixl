@@ -124,6 +124,7 @@
         "X": 0.0,
         "Y": 465.0
       },
+      "GroupTitle": "Result",
       "Description": "Saturates the weights to 0..1 before Gain And Bias. Off lets a Custom snippet write weights outside that range."
     },
     {

@@ -34,7 +34,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
         var mode = (Modes)Mode.GetValue(context).Clamp(0, 1);
         var every = Math.Max(1, Every.GetValue(context));
         var offset = Offset.GetValue(context);
-        var limit = Math.Max(0, Count.GetValue(context));
+        var limit = Count.GetValue(context);
         var code = Code.GetValue(context) ?? string.Empty;
         var a = A.GetValue(context);
         var b = B.GetValue(context);
@@ -90,7 +90,7 @@ internal sealed class SelectGeometry : Instance<SelectGeometry>, IStatusProvider
             float weight;
             if (mode == Modes.IndexPattern)
             {
-                if (limit == 0)
+                if (limit < 0)
                 {
                     weight = ((i - offset) % every + every) % every == 0 ? 1 : 0;
                 }
