@@ -50,6 +50,10 @@ internal sealed class TimeClipInteractions
 
     public void DrawClips(Instance compositionOp, ImRect layerRect, int minLayerIndex, ImDrawListPtr drawList)
     {
+        // A dragged clip that stops being drawn (deleted, composition changed) never reports its deactivation.
+        if (_moveClipsCommand != null && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            _context.TimeCanvas.CompleteDragCommand();
+
         var clips = _context.ClipSelection.CompositionTimeClips.Values;
         if (clips.Count == 0)
             return;

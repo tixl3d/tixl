@@ -275,6 +275,7 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
             return;
         }
         UndoRedoStack.AddAndExecute(_macro);
+        _macro = null;
     }
 
     public void DeleteSelectedElements(Instance composition)

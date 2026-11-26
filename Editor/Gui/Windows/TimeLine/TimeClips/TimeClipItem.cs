@@ -301,13 +301,6 @@ internal static class TimeClipItem
             FrameStats.AddHoveredId(symbolChildUi.Id);
         }
 
-        var notClickingOrDragging = !ImGui.IsItemActive() && !ImGui.IsMouseDragging(ImGuiMouseButton.Left);
-        if (notClickingOrDragging && attr.MoveClipsCommand != null)
-        {
-            // Store values and nullify command
-            attr.LayerContext.TimeCanvas.CompleteDragCommand();
-        }
-
         if (wasClickedDown)
         {
             FitViewToSelectionHandling.FitViewToSelection();
@@ -360,17 +353,7 @@ internal static class TimeClipItem
         }
 
         if (aHandleClicked)
-        {
             TrimEdgePreview.End(attr.LayerContext.TimeCanvas.Playback);
-            attr.LayerContext.TimeCanvas.CompleteDragCommand();
-
-            if (attr.MoveClipsCommand != null)
-            {
-                attr.MoveClipsCommand.StoreCurrentValues();
-                UndoRedoStack.Add(attr.MoveClipsCommand);
-                attr.MoveClipsCommand = null;
-            }
-        }
 
         ImGui.PopID();
     }
@@ -412,7 +395,15 @@ internal static class TimeClipItem
         }
         if (!isActive && !isDeactivated )
             return;
-        
+
+        // The drag is committed as a single undo step on release, never while the mouse is still held.
+        if (isDeactivated && TimeClipInteractions.IsDraggingClips)
+        {
+            TrimEdgePreview.End(attr.LayerContext.TimeCanvas.Playback);
+            attr.LayerContext.TimeCanvas.CompleteDragCommand();
+            return;
+        }
+
         var wasClickRelease = isDeactivated && ImGui.GetMouseDragDelta().Length() < UserSettings.Config.ClickThreshold;
         if (wasClickRelease)
         {
@@ -442,7 +433,7 @@ internal static class TimeClipItem
         var mousePos = ImGui.GetIO().MousePos;
         var currentDragTime = attr.LayerContext.TimeCanvas.InverseTransformX(mousePos.X);
         
-        if (attr.MoveClipsCommand == null)
+        if (ImGui.IsItemActivated())
         {
             if (!isSelected)
             {
@@ -468,11 +459,14 @@ internal static class TimeClipItem
             _dragStartMouseTime = currentDragTime;
             _originalDraggedClipStart = timeClip.TimeRange.Start;
             _lastAppliedDeltaTime = 0;
-            attr.LayerContext.TimeCanvas.StartDragCommand(attr.CompositionOp.Symbol.Id);
         }
         
         if (!ImGui.IsMouseDragging(0, UserSettings.Config.ClickThreshold))
             return;
+
+        // Started only once the mouse has moved, so a plain click leaves no undo entry.
+        if (!TimeClipInteractions.IsDraggingClips)
+            attr.LayerContext.TimeCanvas.StartDragCommand(attr.CompositionOp.Symbol.Id);
 
         // A drag locked to moving between layers keeps its time, so scrolling would carry the clip out of view.
         if (mode != HandleDragMode.Body || !_isTimeLockedByVerticalDrag)
