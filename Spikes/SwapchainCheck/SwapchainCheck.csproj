@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+        <PackageReference Include="ppy.SDL3-CS" Version="2026.1002.1" />
     </ItemGroup>
 
     <ItemGroup>
