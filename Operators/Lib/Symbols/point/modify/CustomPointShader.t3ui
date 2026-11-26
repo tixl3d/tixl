@@ -29,8 +29,8 @@
     {
       "InputId": "2a0cf45c-bcf5-4802-b32b-84cef0f1c129"/*Count*/,
       "Position": {
-        "X": -411.28558,
-        "Y": 339.5722
+        "X": -415.86252,
+        "Y": 420.35483
       }
     },
     {
@@ -65,8 +65,8 @@
     {
       "InputId": "776b96c2-ec0d-4668-9112-39badbf5b619"/*Image*/,
       "Position": {
-        "X": 118.36337,
-        "Y": 604.1445
+        "X": 115.56601,
+        "Y": 715.8652
       },
       "GroupTitle": "Additional Resource"
     },
@@ -105,8 +105,8 @@
     {
       "InputId": "c75e3d1b-f46a-4daf-a6fd-0ddcda60b9f9"/*UseSimBuffer*/,
       "Position": {
-        "X": 3.0124817,
-        "Y": 473.9469
+        "X": 4.1374817,
+        "Y": 541.448
       },
       "Description": "Applies changes directly on the incoming buffer. This can be useful in combination with [PointSimulation].\nCheck out the Flash Simulation preset example."
     },
@@ -128,8 +128,8 @@
       "InputId": "e77660e2-0fd0-45ea-8e0b-c607a757bb49"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -321.79858,
-        "Y": 234.67242
+        "X": -320.67358,
+        "Y": 302.17355
       }
     },
     {
@@ -164,8 +164,8 @@
       "ChildId": "003166dc-cb45-437e-bd3b-96e97c87a6e4",
       "SymbolName": "Lib.numbers.int.logic.CompareInt",
       "Position": {
-        "X": -271.28558,
-        "Y": 374.5722
+        "X": -275.86252,
+        "Y": 455.35483
       }
     },
     {
@@ -180,8 +180,8 @@
       "ChildId": "0314f24e-6c17-4923-b9f1-9a21686aa99b",
       "SymbolName": "Lib.numbers.int2.process.Int2Components",
       "Position": {
-        "X": 398.36337,
-        "Y": 639.1445
+        "X": 395.566,
+        "Y": 750.8652
       }
     },
     {
@@ -189,7 +189,7 @@
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
         "X": 535.56604,
-        "Y": 502.20804
+        "Y": 572.5217
       }
     },
     {
@@ -220,8 +220,8 @@
       "ChildId": "2940aafb-91ed-4bd0-ab99-664855d19deb",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": 118.36337,
-        "Y": 709.14453
+        "X": 115.56601,
+        "Y": 820.86523
       }
     },
     {
@@ -236,16 +236,16 @@
       "ChildId": "48e9096c-1e87-41ee-894b-408a47766bfb",
       "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "Position": {
-        "X": 538.3634,
-        "Y": 604.1445
+        "X": 535.56604,
+        "Y": 715.8652
       }
     },
     {
       "ChildId": "4dfd1a3c-74db-4963-9892-f4c2242826e9",
       "SymbolName": "Types.Values.IntValue",
       "Position": {
-        "X": -271.28558,
-        "Y": 339.5722
+        "X": -275.86252,
+        "Y": 420.35483
       }
     },
     {
@@ -269,8 +269,8 @@
       "ChildId": "80aa8d51-03a2-4125-a1d9-2d98c6903255",
       "SymbolName": "Lib.render._dx11.api.GetSRVProperties",
       "Position": {
-        "X": -131.28558,
-        "Y": 304.57233
+        "X": -135.86252,
+        "Y": 385.35495
       }
     },
     {
@@ -293,8 +293,8 @@
       "ChildId": "975c933e-64a8-4737-9b70-6b9311c10f40",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
-        "X": 143.01248,
-        "Y": 473.9469
+        "X": 144.13748,
+        "Y": 541.448
       }
     },
     {
@@ -317,40 +317,40 @@
       "ChildId": "ace0a08f-72e2-421e-82dc-657c61470dac",
       "SymbolName": "Lib.point.combine.PickPointList",
       "Position": {
-        "X": 283.01248,
-        "Y": 403.9469
+        "X": 284.13748,
+        "Y": 471.44803
       }
     },
     {
       "ChildId": "b5559c27-5af6-441a-8a8f-3718670d779e",
       "SymbolName": "Lib.render._dx11.api.GetTextureSize",
       "Position": {
-        "X": 258.36337,
-        "Y": 639.1445
+        "X": 255.56601,
+        "Y": 750.8652
       }
     },
     {
       "ChildId": "b9c402df-567e-4b3e-be14-d79991ebabef",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": -131.28558,
-        "Y": 269.57233
+        "X": -135.86252,
+        "Y": 350.35495
       }
     },
     {
       "ChildId": "bec21040-6f05-4470-8e03-1e410a7c1f29",
       "SymbolName": "Types.Gfx.StructuredBufferWithViews",
       "Position": {
-        "X": 8.7144165,
-        "Y": 409.57233
+        "X": 4.1374817,
+        "Y": 490.35495
       }
     },
     {
       "ChildId": "c81d4e04-ea21-4fb9-944b-7469b0a94fbe",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
-        "X": -131.28558,
-        "Y": 374.5722
+        "X": -135.86252,
+        "Y": 455.35483
       }
     },
     {
@@ -389,16 +389,16 @@
       "ChildId": "eb2f6c2f-4696-431f-9a69-6b686ebead63",
       "SymbolName": "Lib.image.use.UseFallbackTexture",
       "Position": {
-        "X": 118.36337,
-        "Y": 639.1445
+        "X": 115.56601,
+        "Y": 750.8652
       }
     },
     {
       "ChildId": "ede596ec-9f4a-451c-b69c-46e160b8e1fc",
       "SymbolName": "Lib.image.generate.load.LoadImage",
       "Position": {
-        "X": -21.636505,
-        "Y": 674.14453
+        "X": -24.433868,
+        "Y": 785.86523
       }
     },
     {
@@ -421,8 +421,8 @@
       "ChildId": "ffe24378-78ae-44f8-a284-02ce9a444bfe",
       "SymbolName": "Lib.numbers.int.logic.PickInt",
       "Position": {
-        "X": 8.7144165,
-        "Y": 304.57233
+        "X": 4.1374817,
+        "Y": 385.35495
       }
     }
   ],
