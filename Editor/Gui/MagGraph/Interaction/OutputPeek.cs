@@ -9,6 +9,7 @@ using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.SystemUi;
 
 namespace T3.Editor.Gui.MagGraph.Interaction;
 
@@ -27,7 +28,7 @@ internal static class OutputPeek
             return;
         }
 
-        if (!_isKeyDown || IsPinKeyDown())
+        if (!_isKeyDown || IsPinKeyDown(out var releasedKey))
             return;
 
         _isKeyDown = false;
@@ -36,7 +37,11 @@ internal static class OutputPeek
         if (_shownName == null)
             return;
 
-        var wasHeld = ImGui.GetTime() - _pressTime > TapMaxSec;
+        // Frame time would count a slow frame after the press (e.g. compiling the shown op) as holding
+        if (!SdlImGuiInput.TryGetLastHoldDurationSec((int)releasedKey, out var heldSec))
+            heldSec = ImGui.GetTime() - _pressTime;
+
+        var wasHeld = heldSec > TapMaxSec;
         if (wasHeld)
         {
             End(context);
@@ -131,11 +136,16 @@ internal static class OutputPeek
     }
 
     /** Checks the key alone, so pressing a modifier while holding P doesn't end the peek */
-    private static bool IsPinKeyDown()
+    private static bool IsPinKeyDown(out Key pinKey)
     {
+        pinKey = Key.Undefined;
         foreach (var binding in KeyMapSwitching.CurrentKeymap.Bindings)
         {
-            if (binding.Action == UserActions.PinToOutputWindow && ImGui.IsKeyDown(binding.KeyCombination.Key.ToImGuiKey()))
+            if (binding.Action != UserActions.PinToOutputWindow)
+                continue;
+
+            pinKey = binding.KeyCombination.Key;
+            if (ImGui.IsKeyDown(pinKey.ToImGuiKey()))
                 return true;
         }
 

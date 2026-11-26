@@ -98,6 +98,8 @@ internal static unsafe class SdlImGuiInput
                 if (virtualKey == 0)
                     break;
 
+                RecordKeyTimestamp(virtualKey, down, sdlEvent.key.repeat, sdlEvent.key.timestamp);
+
                 // TiXL's own shortcuts read KeyHandler, which is indexed by virtual key as WinForms' Keys were.
                 if (down)
                 {
@@ -196,6 +198,26 @@ internal static unsafe class SdlImGuiInput
         SDL_ShowCursor();
     }
 
+    /// <summary>
+    /// How long a key was held on its last press, measured from SDL's event timestamps. Unlike frame time this
+    /// stays correct when a slow frame (e.g. a shader compile) delays handling the release.
+    /// Returns false while the key is down or if it hasn't been pressed yet.
+    /// </summary>
+    public static bool TryGetLastHoldDurationSec(int virtualKey, out double durationSec)
+    {
+        durationSec = 0;
+        if (virtualKey < 0 || virtualKey >= KeyTimestampCount)
+            return false;
+
+        var downNs = _keyDownTimestampsNs[virtualKey];
+        var upNs = _keyUpTimestampsNs[virtualKey];
+        if (downNs == 0 || upNs < downNs)
+            return false;
+
+        durationSec = (upNs - downNs) * 1e-9;
+        return true;
+    }
+
     /// <summary>Tells the gesture layer which source feeds it, so the editor can log what a machine ended up with.</summary>
     public static void InstallGestures() => Gestures.PointerGestures.SetSource(_gestures);
 
@@ -241,6 +263,21 @@ internal static unsafe class SdlImGuiInput
         var imguiKey = ((Key)virtualKey).ToImGuiKey();
         if (imguiKey != ImGuiKey.None)
             io.AddKeyEvent(imguiKey, down);
+    }
+
+    private static void RecordKeyTimestamp(int virtualKey, bool down, bool isRepeat, ulong timestampNs)
+    {
+        if (virtualKey < 0 || virtualKey >= KeyTimestampCount)
+            return;
+
+        if (!down)
+        {
+            _keyUpTimestampsNs[virtualKey] = timestampNs;
+        }
+        else if (!isRepeat)
+        {
+            _keyDownTimestampsNs[virtualKey] = timestampNs;
+        }
     }
 
     /// <summary>
@@ -350,9 +387,12 @@ internal static unsafe class SdlImGuiInput
     private const int VirtualKeyAlt = 0x12;
     private const int VirtualKeyLeftWindows = 0x5B;
     private const int VirtualKeyRightWindows = 0x5C;
+    private const int KeyTimestampCount = 512;
 
     private static readonly Gestures.SdlPointerGestureSource _gestures = new();
     private static ImGuiMouseCursor _lastRequestedCursor = ImGuiMouseCursor.Arrow;
     private static readonly Dictionary<SDL_SystemCursor, IntPtr> _cursors = [];
     private static readonly List<string> _droppedFiles = [];
+    private static readonly ulong[] _keyDownTimestampsNs = new ulong[KeyTimestampCount];
+    private static readonly ulong[] _keyUpTimestampsNs = new ulong[KeyTimestampCount];
 }
