@@ -11,12 +11,27 @@
       "DefaultValue": "return i % 2 == 0;"
     },
     {
+      "Id": "3adc4760-5ba6-46ec-b8c1-2ad4ec3d25cc"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
       "Id": "427919c7-6b02-4009-a9cc-938986ad1053"/*Domain*/,
       "DefaultValue": 0
     },
     {
       "Id": "4dba7742-653a-4ad5-9e21-0ea557865bcd"/*Offset*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "53192fa7-eeec-462f-9ed8-c56d90d4fd82"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
     },
     {
       "Id": "6355884b-d2a9-4892-9698-944c8ab3a0de"/*Name*/,
@@ -41,6 +56,10 @@
     {
       "Id": "959c2660-ea9c-4c3a-8f00-d4b571d777a6"/*A*/,
       "DefaultValue": 0.0
+    },
+    {
+      "Id": "b481e8e6-3730-4253-88ee-c04ea20184bd"/*ClampResult*/,
+      "DefaultValue": false
     },
     {
       "Id": "d82c7cd6-f36b-4ca9-97a7-db120670e5c1"/*Mode*/,

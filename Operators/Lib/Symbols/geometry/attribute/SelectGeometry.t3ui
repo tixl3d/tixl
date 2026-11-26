@@ -17,9 +17,17 @@
         "X": 0.0,
         "Y": 225.0
       },
+      "GroupTitle": "Custom",
       "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes of other domains are converted: a primitive averages its vertices or points, a vertex takes its point or primitive, a point averages the vertices around it; ints take the first value, and averaged normals need Normalize(). @P is the position.",
       "Usage": "Code",
       "CodeLanguage": "CSharp"
+    },
+    {
+      "InputId": "3adc4760-5ba6-46ec-b8c1-2ad4ec3d25cc"/*Center*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 390.0
+      }
     },
     {
       "InputId": "427919c7-6b02-4009-a9cc-938986ad1053"/*Domain*/,
@@ -39,6 +47,19 @@
       "Description": "Index of the first selected element in the pattern.",
       "Min": 0,
       "Max": 10
+    },
+    {
+      "InputId": "53192fa7-eeec-462f-9ed8-c56d90d4fd82"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 540.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "GainAndBias"
     },
     {
       "InputId": "6355884b-d2a9-4892-9698-944c8ab3a0de"/*Name*/,
@@ -63,6 +84,7 @@
         "X": 0.0,
         "Y": 135.0
       },
+      "GroupTitle": "Pattern",
       "Description": "Selects every Nth element: 2 selects every second one.",
       "Min": 1,
       "Max": 10,
@@ -95,6 +117,13 @@
       "Description": "Free parameter for the Custom snippet."
     },
     {
+      "InputId": "b481e8e6-3730-4253-88ee-c04ea20184bd"/*ClampResult*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 465.0
+      }
+    },
+    {
       "InputId": "d82c7cd6-f36b-4ca9-97a7-db120670e5c1"/*Mode*/,
       "Position": {
         "X": 0.0,
@@ -109,7 +138,8 @@
         "X": 0.0,
         "Y": 360.0
       },
-      "Description": "How the new selection combines with an existing one of the same name: Replace, Add (maximum), Remove or Intersect (minimum)."
+      "Description": "How the new selection combines with an existing one of the same name: Replace, Add (maximum), Remove or Intersect (minimum).",
+      "AddPadding": "True"
     }
   ],
   "SymbolChildUis": [],

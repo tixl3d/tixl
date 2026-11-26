@@ -1,0 +1,23 @@
+{
+  "Id": "55b64ede-9730-457c-8d3c-981a9fe6120e",
+  "Variations": [
+    {
+      "Id": "ca51ed84-5939-43f6-9dd9-ed22452421a5",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Falloff from Center",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d82c7cd6-f36b-4ca9-97a7-db120670e5c1": 1,
+          "2f24c52a-0a48-4c4e-a359-0b6012016270": "return 1-Min(1,(p - Center).Length() /A );",
+          "959c2660-ea9c-4c3a-8f00-d4b571d777a6": 1.0,
+          "b481e8e6-3730-4253-88ee-c04ea20184bd": true
+        }
+      }
+    }
+  ]
+}
