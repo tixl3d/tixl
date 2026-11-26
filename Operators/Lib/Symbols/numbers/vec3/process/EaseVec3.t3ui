@@ -41,9 +41,9 @@
       },
       "Description": "Transition time in seconds.",
       "Min": 0.001,
-      "Max": 999.0,
-      "ClampMin": true,
-      "ClampMax": true
+      "Max": 10.0,
+      "Scale": 0.1,
+      "ClampMin": true
     }
   ],
   "SymbolChildUis": [],
