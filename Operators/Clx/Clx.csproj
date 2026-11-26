@@ -111,7 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Apache-2.0, https://github.com/ClockworksTech/CLX-Unity (Tools~/NuGet) -->
-    <PackageReference Include="Clockworks.CLX.Protocol" Version="0.1.0" />
+    <PackageReference Include="Clockworks.CLX.Protocol" Version="0.1.1" />
   </ItemGroup>
   <!-- Native dependencies -->
   <ItemGroup>
