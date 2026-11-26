@@ -8,13 +8,15 @@ namespace Lib.geometry.modify;
 /// join the duplicated positions of an imported mesh. The merged point keeps the position and the attribute values of the
 /// first point of its group, so welding curve points with different handles changes the curves; points that end up without
 /// a vertex are dropped. Primitive topology, parts and the vertex, primitive and part attributes are left unchanged.
+/// A float selection (by default the flowing Selection, if any) scales the tolerance: two points merge within the tolerance
+/// times the smaller of their weights, and points weighted 0 or less are kept as they are.
 ///
 /// The position-level counterpart of Blender's merge by distance. [GeometryToMesh] emits one vertex per face corner, so a
 /// compiled mesh can still contain duplicate vertices even when its points are welded; its Merge Duplicate Vertices option
 /// removes those.
 /// </summary>
 [Guid("12492a88-9e16-49a4-84c7-75ab11bb7bd4")]
-internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
+internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider, ICustomDropdownHolder
 {
     [Output(Guid = "0fe84b04-eacd-4e51-8932-bc673e86d07e")]
     public readonly Slot<Geometry?> Result = new();
@@ -28,6 +30,9 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
     {
         var source = Geometry.GetValue(context);
         var tolerance = MathF.Max(Tolerance.GetValue(context), 0);
+        var selectionName = GeometryAttributeChoices.ToSelectionValue(Selection.GetValue(context) ?? string.Empty);
+        _lastSource = source;
+        _statusLevel = IStatusProvider.StatusLevel.Success;
         if (source == null || source.PointCount < 2)
         {
             _statusMessage = string.Empty;
@@ -35,10 +40,22 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
             return;
         }
 
-        var removedPoints = Weld(source, tolerance);
+        // Without a name the flowing Selection applies when there is one; <All> ignores any selection
+        var ignoresSelection = GeometryAttributeChoices.IsAll(selectionName);
+        var isNamed = !ignoresSelection && !string.IsNullOrWhiteSpace(selectionName);
+        var hasSelection = !ignoresSelection && TryCollectPointWeights(source, isNamed ? selectionName : GeometryAttributeNames.Selection);
+        if (isNamed && !hasSelection)
+        {
+            _statusLevel = IStatusProvider.StatusLevel.Warning;
+            _statusMessage = $"No float attribute '{selectionName}' on points, vertices, primitives or parts; nothing is merged.";
+            Result.Value = source;
+            return;
+        }
+
+        var removedPoints = Weld(source, tolerance, hasSelection);
         if (removedPoints == 0)
         {
-            _statusMessage = "No points to merge within the tolerance.";
+            _statusMessage = hasSelection ? "No selected points to merge within the tolerance." : "No points to merge within the tolerance.";
             Result.Value = source;
             return;
         }
@@ -49,7 +66,7 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
 
     /// <summary>Groups the points within the tolerance and writes the welded geometry into <see cref="_output"/>.</summary>
     /// <returns>How many points were removed.</returns>
-    private int Weld(Geometry source, float tolerance)
+    private int Weld(Geometry source, float tolerance, bool hasSelection)
     {
         var positions = source.Positions;
         var pointCount = positions.Length;
@@ -58,22 +75,42 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
         EnsureLength(ref _hasVertices, pointCount);
         EnsureLength(ref _outputIndex, pointCount);
 
+        // Cells must span the largest pair radius; weights above 1 widen the tolerance rather than being clamped
+        var maxWeight = 1f;
+        if (hasSelection)
+        {
+            maxWeight = 0;
+            for (var point = 0; point < pointCount; point++)
+                maxWeight = MathF.Max(maxWeight, _pointWeights[point]);
+
+            if (maxWeight <= 0)
+                return 0;
+        }
+
         // A point joins the nearest already kept point within reach; the grid looks one cell further in each direction
-        var cellSize = MathF.Max(tolerance, 1e-6f);
+        var cellSize = MathF.Max(tolerance * maxWeight, 1e-6f);
         var inverseCellSize = 1f / cellSize;
-        var toleranceSq = tolerance * tolerance;
         _cellHeads.Clear();
 
         var removedPoints = 0;
         for (var point = 0; point < pointCount; point++)
         {
+            var weight = hasSelection ? _pointWeights[point] : 1f;
+
+            // Unselected points stay out of the grid, so they neither merge nor attract selected neighbours
+            if (weight <= 0)
+            {
+                _representative[point] = point;
+                continue;
+            }
+
             var position = positions[point];
             var cellX = (long)MathF.Floor(position.X * inverseCellSize);
             var cellY = (long)MathF.Floor(position.Y * inverseCellSize);
             var cellZ = (long)MathF.Floor(position.Z * inverseCellSize);
 
             var nearest = -1;
-            var nearestDistanceSq = toleranceSq;
+            var nearestDistanceSq = float.MaxValue;
             for (var offsetX = -1; offsetX <= 1; offsetX++)
             {
                 for (var offsetY = -1; offsetY <= 1; offsetY++)
@@ -86,7 +123,8 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
                         while (candidate >= 0)
                         {
                             var distanceSq = Vector3.DistanceSquared(positions[candidate], position);
-                            if (distanceSq <= nearestDistanceSq)
+                            var reach = tolerance * (hasSelection ? MathF.Min(weight, _pointWeights[candidate]) : 1f);
+                            if (distanceSq <= reach * reach && distanceSq <= nearestDistanceSq)
                             {
                                 nearestDistanceSq = distanceSq;
                                 nearest = candidate;
@@ -177,11 +215,34 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
             array = new T[length];
     }
 
-    public IStatusProvider.StatusLevel GetStatusLevel() => IStatusProvider.StatusLevel.Success;
+    private bool TryCollectPointWeights(Geometry geometry, string name)
+    {
+        EnsureLength(ref _pointWeights, geometry.PointCount);
+        return geometry.TryGetPointWeights(name, _pointWeights);
+    }
+
+    public IStatusProvider.StatusLevel GetStatusLevel() => _statusLevel;
 
     public string GetStatusMessage() => _statusMessage;
 
+    #region ICustomDropdownHolder - the float attributes of the last input as selections
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionDisplayValue(Selection.Value, _lastSource);
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => GeometryAttributeChoices.GetSelectionOptions(_lastSource);
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (inputId == Selection.Input.InputDefinition.Id && selected != null)
+            Selection.SetTypedInputValue(GeometryAttributeChoices.ToSelectionValue(selected));
+    }
+    #endregion
+
+    private Geometry? _lastSource;
     private string _statusMessage = string.Empty;
+    private IStatusProvider.StatusLevel _statusLevel = IStatusProvider.StatusLevel.Success;
+
+    /** Per point: its selection weight, read only when a selection applies. */
+    private float[] _pointWeights = [];
 
     /** Per point: the point it was merged into, or itself. */
     private int[] _representative = [];
@@ -204,4 +265,7 @@ internal sealed class MergeVertices : Instance<MergeVertices>, IStatusProvider
 
     [Input(Guid = "00348b5b-f0dc-40aa-a8f2-1b0c6d03be99")]
     public readonly InputSlot<float> Tolerance = new();
+
+    [Input(Guid = "acac7f65-8ef8-447c-8176-777c6f43011f")]
+    public readonly InputSlot<string> Selection = new();
 }

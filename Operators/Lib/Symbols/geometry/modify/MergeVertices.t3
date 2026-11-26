@@ -9,6 +9,10 @@
     {
       "Id": "81b960fa-f826-481c-9b1e-40fb34fc6e62"/*Geometry*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "acac7f65-8ef8-447c-8176-777c6f43011f"/*Selection*/,
+      "DefaultValue": ""
     }
   ],
   "Children": [],

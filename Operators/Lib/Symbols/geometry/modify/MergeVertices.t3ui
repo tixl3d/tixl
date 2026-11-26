@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "12492a88-9e16-49a4-84c7-75ab11bb7bd4"/*MergeVertices*/,
-  "Description": "Welds points that lie closer than a tolerance into one point.\n\nThe position-level counterpart of Blender's merge by distance: duplicated points, e.g. in geometry read with [LoadObjGeometry] or produced per face, become a shared point, so the surface joins up and stays connected through subdivision, beveling and export. Each merged point keeps the position and the attribute values of the first point of its group; points that end up without a vertex are removed. Primitive topology, parts and the vertex, primitive and part attributes stay unchanged; only the point attributes are rebuilt.\n\nCurve control points are welded too: the merged point keeps the handles of the first point, so welding control points that carry different handles changes the curve.\n\n[GeometryToMesh] writes one vertex per face corner, so its mesh can contain duplicate vertices even when the points are already welded. Its Merge Duplicate Vertices option removes those as well.\n\nAKA: weld, merge by distance, remove doubles, fuse, stitch\n\nTips\n- Keep the tolerance small (0.0001) to weld exact duplicates; larger values also snap nearly coincident points and can collapse thin faces.\n- The operator's status shows how many points were merged.",
+  "Description": "Welds points that lie closer than a tolerance into one point.\n\nThe position-level counterpart of Blender's merge by distance: duplicated points, e.g. in geometry read with [LoadObjGeometry] or produced per face, become a shared point, so the surface joins up and stays connected through subdivision, beveling and export. Each merged point keeps the position and the attribute values of the first point of its group; points that end up without a vertex are removed. Primitive topology, parts and the vertex, primitive and part attributes stay unchanged; only the point attributes are rebuilt.\n\nA selection scales the tolerance per point, so a soft selection welds tightly in one area and loosely in another; unselected points are kept unchanged and never absorb a selected neighbour.\n\nCurve control points are welded too: the merged point keeps the handles of the first point, so welding control points that carry different handles changes the curve.\n\n[GeometryToMesh] writes one vertex per face corner, so its mesh can contain duplicate vertices even when the points are already welded. Its Merge Duplicate Vertices option removes those as well.\n\nAKA: weld, merge by distance, remove doubles, fuse, stitch\n\nTips\n- Keep the tolerance small (0.0001) to weld exact duplicates; larger values also snap nearly coincident points and can collapse thin faces.\n- The operator's status shows how many points were merged.",
   "InputUis": [
     {
       "InputId": "00348b5b-f0dc-40aa-a8f2-1b0c6d03be99"/*Tolerance*/,
@@ -23,6 +23,15 @@
         "X": 0.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "acac7f65-8ef8-447c-8176-777c6f43011f"/*Selection*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 120.0
+      },
+      "Description": "Name of a float selection attribute that scales the tolerance per point: two points merge within Tolerance times the smaller of their weights, and points weighted 0 are never merged. Vertex, primitive and part selections apply to their points. Empty uses the Selection from an upstream [SelectGeometry] if there is one, and otherwise welds everything with the full tolerance. <All> ignores any selection.",
+      "Usage": "CustomDropdown"
     }
   ],
   "SymbolChildUis": [],
