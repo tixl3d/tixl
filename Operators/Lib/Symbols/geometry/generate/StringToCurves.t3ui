@@ -12,6 +12,13 @@
       "Usage": "Multiline"
     },
     {
+      "InputId": "21d385ee-db1c-4145-97e3-86ce3cc45bb0"/*VerticalAlign*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 255.0
+      }
+    },
+    {
       "InputId": "2e7b4f9c-a1d6-4c38-8b5e-d9f0a3c7e614"/*AxisValue*/,
       "Position": {
         "X": 0.0,
@@ -68,14 +75,6 @@
       "Usage": "Default"
     },
     {
-      "InputId": "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95"/*Size*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 90.0
-      },
-      "GroupTitle": "Layout"
-    },
-    {
       "InputId": "b3e81c4d-6f27-4a95-9d0e-1c5a7f3b8e62"/*Position*/,
       "Position": {
         "X": 0.0,
@@ -95,7 +94,14 @@
       "Scale": 0.01
     },
     {
-      "InputId": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*Alignment*/,
+      "InputId": "d078479e-5722-4e1d-b425-3643b5294226"/*Size*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "InputId": "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67"/*HorizontalAlign*/,
       "Position": {
         "X": 0.0,
         "Y": 180.0

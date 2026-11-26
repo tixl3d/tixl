@@ -41,9 +41,10 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
     private void Update(EvaluationContext context)
     {
         var text = Text.GetValue(context) ?? string.Empty;
-        var size = MathF.Max(Size.GetValue(context), 1e-4f);
+        var size = MathF.Max(Size.GetValue(context) * SizeToSceneUnits, 1e-6f);
         var lineSpacing = LineSpacing.GetValue(context);
-        var alignment = (Alignments)Alignment.GetValue(context).Clamp(0, 2);
+        var alignment = (HorizontalAligns)HorizontalAlign.GetValue(context).Clamp(0, 2);
+        var verticalAlign = (VerticalAligns)VerticalAlign.GetValue(context).Clamp(0, 2);
         var kerning = Kerning.GetValue(context);
         var weight = Weight.GetValue(context);
         var axisTag = Axis.GetValue(context)?.Trim() ?? string.Empty;
@@ -68,7 +69,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
             return;
         }
 
-        // Dpi 72 makes one point one unit, so Size is the em height in scene units.
+        // Dpi 72 makes one point one unit, so the scaled size is the em height in scene units.
 #if SIXLABORS_FONTS_V3
         // Variation axes only apply when the font has them; static fonts ignore the values.
         _variations.Clear();
@@ -93,15 +94,21 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
             KerningMode = kerning ? KerningMode.Standard : KerningMode.None,
             HorizontalAlignment = alignment switch
             {
-                Alignments.Center => HorizontalAlignment.Center,
-                Alignments.Right  => HorizontalAlignment.Right,
-                _                 => HorizontalAlignment.Left,
+                HorizontalAligns.Center => HorizontalAlignment.Center,
+                HorizontalAligns.Right  => HorizontalAlignment.Right,
+                _                       => HorizontalAlignment.Left,
             },
             TextAlignment = alignment switch
             {
-                Alignments.Center => TextAlignment.Center,
-                Alignments.Right  => TextAlignment.End,
-                _                 => TextAlignment.Start,
+                HorizontalAligns.Center => TextAlignment.Center,
+                HorizontalAligns.Right  => TextAlignment.End,
+                _                       => TextAlignment.Start,
+            },
+            VerticalAlignment = verticalAlign switch
+            {
+                VerticalAligns.Middle => VerticalAlignment.Center,
+                VerticalAligns.Bottom => VerticalAlignment.Bottom,
+                _                     => VerticalAlignment.Top,
             },
         };
 
@@ -168,12 +175,22 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
 #endif
     }
 
-    private enum Alignments
+    private enum HorizontalAligns
     {
         Left,
         Center,
         Right,
     }
+
+    private enum VerticalAligns
+    {
+        Top,
+        Middle,
+        Bottom,
+    }
+
+    /** Same scale [Text] applies to its Size, so both ops render text of equal height for equal sizes. */
+    private const float SizeToSceneUnits = 0.00185f;
 
     /// <summary>
     /// Receives the glyph outlines from the layout engine and turns them into contours
@@ -186,7 +203,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
     /// </summary>
     private sealed class OutlineCollector : IGlyphRenderer
     {
-        public void Begin(string text, Vector2 pivot, Vector3 position, float letterSpacing, Alignments alignment)
+        public void Begin(string text, Vector2 pivot, Vector3 position, float letterSpacing, HorizontalAligns alignment)
         {
             _text = text;
             _pivot = pivot;
@@ -194,9 +211,9 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
             _letterSpacing = letterSpacing;
             _alignmentFactor = alignment switch
             {
-                Alignments.Center => 0.5f,
-                Alignments.Right  => 1f,
-                _                 => 0f,
+                HorizontalAligns.Center => 0.5f,
+                HorizontalAligns.Right  => 1f,
+                _                       => 0f,
             };
             CountColumns(text);
             _textCursor = 0;
@@ -560,7 +577,7 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
     [Input(Guid = "7c2e9a4b-5f61-4d38-b8a0-e3d5c1f9b724")]
     public readonly InputSlot<string> Path = new();
 
-    [Input(Guid = "a5d1f7c3-8b24-4e69-9c0d-2f4a6e8b1d95")]
+    [Input(Guid = "d078479e-5722-4e1d-b425-3643b5294226")]
     public readonly InputSlot<float> Size = new();
 
     [Input(Guid = "3e6b8d2a-c4f9-4a17-b5e3-8d0c7a2f6e41")]
@@ -569,8 +586,11 @@ internal sealed class StringToCurves : Instance<StringToCurves>, IDescriptiveFil
     [Input(Guid = "c9d47a2e-3b51-4f86-a1e7-8d2f6b0c4a19")]
     public readonly InputSlot<float> LetterSpacing = new();
 
-    [Input(Guid = "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67", MappedType = typeof(Alignments))]
-    public readonly InputSlot<int> Alignment = new();
+    [Input(Guid = "d9c4a6e2-1b83-4f50-a7e9-5c2d8b3f1a67", MappedType = typeof(HorizontalAligns))]
+    public readonly InputSlot<int> HorizontalAlign = new();
+
+    [Input(Guid = "21d385ee-db1c-4145-97e3-86ce3cc45bb0", MappedType = typeof(VerticalAligns))]
+    public readonly InputSlot<int> VerticalAlign = new();
 
     [Input(Guid = "6b3f1e9d-a2c5-4d84-8e7b-0f9a4c6d2e13")]
     public readonly InputSlot<bool> Kerning = new();
