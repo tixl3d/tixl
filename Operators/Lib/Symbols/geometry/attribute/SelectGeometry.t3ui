@@ -18,7 +18,7 @@
         "Y": 225.0
       },
       "GroupTitle": "Custom",
-      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes of other domains are converted: a primitive averages its vertices or points, a vertex takes its point or primitive, a point averages the vertices around it; ints take the first value, and averaged normals need Normalize(). @P is the position.",
+      "Description": "Body of a C# method that returns a bool (selected or not) or a float weight from 0 to 1. In scope: index i, element count, position p (a primitive's center, a part's pivot) and the parameters Center, A and B. System.MathF is imported, e.g. `return p.Y > A;`. Attributes of the input geometry are read as @Name, e.g. `@Normal.Y` or `@Selection` after an upstream [SelectGeometry]; the Table tab of the input lists them. Attributes of other domains are converted: a primitive averages its vertices or points, a vertex takes its point or primitive, a point averages the vertices around it; ints take the first value, and averaged normals need Normalize(). @P is the position.",
       "Usage": "Code",
       "CodeLanguage": "CSharp"
     },
@@ -27,7 +27,8 @@
       "Position": {
         "X": 0.0,
         "Y": 390.0
-      }
+      },
+      "Description": "A point for the Custom snippet, movable with the transform gizmo, e.g. `return (p - Center).Length() < A;` selects a sphere around it."
     },
     {
       "InputId": "427919c7-6b02-4009-a9cc-938986ad1053"/*Domain*/,
@@ -54,6 +55,7 @@
         "X": 0.0,
         "Y": 540.0
       },
+      "Description": "Applies gain (X) and bias (Y) to the weights, after Clamp Result. 0.5 leaves them unchanged; weights outside 0..1 pass through.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -121,7 +123,8 @@
       "Position": {
         "X": 0.0,
         "Y": 465.0
-      }
+      },
+      "Description": "Saturates the weights to 0..1 before Gain And Bias. Off lets a Custom snippet write weights outside that range."
     },
     {
       "InputId": "d82c7cd6-f36b-4ca9-97a7-db120670e5c1"/*Mode*/,
