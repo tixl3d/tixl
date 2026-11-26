@@ -27,6 +27,9 @@ ALLOWED = {
     "Unlicense", "MS-PL",
     # Only dynamically linked, which keeps TiXL itself under its own licence
     "LGPL-2.1-only", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later",
+    # File-level copyleft: only changes to the library's own files would have to be published, and TiXL uses
+    # them unmodified from NuGet. THIRD-PARTY-NOTICES.txt names the licence and the source, as it requires.
+    "MPL-2.0",
 }
 
 # NuGet packages whose .nuspec names a licence file or URL instead of an SPDX expression; checked by hand.
