@@ -149,6 +149,10 @@ internal sealed class TextSprites : Instance<TextSprites>
         if (string.IsNullOrEmpty(groupSeparator))
             groupSeparator = " ";
 
+        // Parameter text fields can't hold a line break, so "\n" is typed as an escape.
+        groupSeparator = groupSeparator.Replace("\\n", "\n");
+        var separatorHasLineBreak = groupSeparator.Contains('\n');
+
         // A line break also ends a word, but a custom separator defines groups that may span several lines.
         var lineBreakStartsGroup = string.IsNullOrWhiteSpace(groupSeparator);
 
@@ -188,6 +192,7 @@ internal sealed class TextSprites : Instance<TextSprites>
         var groupHasGlyphs = false;
         var startNewGroup = false;
         var remainingSeparatorChars = 0;
+        var hideSeparatorChars = false;
 
         for (var textIndex = 0; textIndex < text.Length; textIndex++)
         {
@@ -196,7 +201,7 @@ internal sealed class TextSprites : Instance<TextSprites>
             if (remainingSeparatorChars == 0 && text.AsSpan(textIndex).StartsWith(groupSeparator))
             {
                 startNewGroup = true;
-                if (hideSeparator)
+                if (hideSeparator && !separatorHasLineBreak)
                 {
                     // Drawn as a space so neighbouring groups don't touch
                     textIndex += groupSeparator.Length - 1;
@@ -204,7 +209,9 @@ internal sealed class TextSprites : Instance<TextSprites>
                 }
                 else
                 {
+                    // A hidden separator with a line break still has to move the cursor to the next line.
                     remainingSeparatorChars = groupSeparator.Length;
+                    hideSeparatorChars = hideSeparator;
                 }
             }
 
@@ -227,6 +234,9 @@ internal sealed class TextSprites : Instance<TextSprites>
 
                 continue;
             }
+
+            if (isSeparatorChar && hideSeparatorChars)
+                continue;
 
             if (!bmFont.InfoForCharacter.TryGetValue(c, out var charInfo))
             {
@@ -448,7 +458,7 @@ internal sealed class TextSprites : Instance<TextSprites>
     public readonly InputSlot<float> OffsetBaseLine = new();
 
     /// <summary>
-    /// Splits the text into groups for animation. Empty means a space. Line breaks start a new group only for whitespace separators.
+    /// Splits the text into groups for animation. Empty means a space, "\n" means a line break. Line breaks start a new group only for whitespace separators.
     /// </summary>
     [Input(Guid = "cf0701ff-b73e-4630-8a2f-380c7c2ec6af")]
     public readonly InputSlot<string> GroupSeparator = new();
