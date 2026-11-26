@@ -8,7 +8,7 @@ namespace Lib.geometry.convert;
 /// [CurvesToCPoints] followed by the upload of [UploadToGpu].
 /// </summary>
 [Guid("d955fd1d-af90-480b-b4e6-9142a1daf0a9")]
-internal sealed class CurvesToPoints : Instance<CurvesToPoints>
+internal sealed class CurvesToPoints : Instance<CurvesToPoints>, IStatusProvider, ICustomDropdownHolder
 {
     [Output(Guid = "8c437c4a-72a2-4f86-a7e0-ef8003851bd2")]
     public readonly Slot<BufferWithViews?> OutBuffer = new();
@@ -20,12 +20,15 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
 
     private void Update(EvaluationContext context)
     {
-        var points = _sampler.Sample(Curves.GetValue(context),
+        _lastSource = Curves.GetValue(context);
+        var points = _sampler.Sample(_lastSource,
                                      Tolerance.GetValue(context),
                                      CloseLoops.GetValue(context),
                                      (CurvePointSampler.Samplings)Math.Clamp(Sampling.GetValue(context), 0, 2),
                                      (CurvePointSampler.PolygonEdgeModes)Math.Clamp(PolygonEdges.GetValue(context), 0, 2),
-                                     SharpAngle.GetValue(context));
+                                     SharpAngle.GetValue(context),
+                                     CurvePointSampler.FieldSource.Parse(SetF1To.GetValue(context)),
+                                     CurvePointSampler.FieldSource.Parse(SetF2To.GetValue(context)));
         _lists.Clear();
         if (points != null)
             _lists.Add(points);
@@ -33,6 +36,32 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
         OutBuffer.Value = _uploader.Upload(_lists, this);
     }
 
+    public IStatusProvider.StatusLevel GetStatusLevel() => _sampler.MissingAttributeName == null ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+
+    public string GetStatusMessage() => _sampler.MissingAttributeName == null ? string.Empty : $"No float or int attribute '{_sampler.MissingAttributeName}'; its field keeps the default.";
+
+    #region ICustomDropdownHolder - keywords and the float and int attributes of the last input
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId) => CurvePointSampler.FieldSource.GetDisplayValue(inputId == SetF1To.Input.InputDefinition.Id ? SetF1To.Value : SetF2To.Value);
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => CurvePointSampler.FieldSource.GetOptions(_lastSource);
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (selected == null)
+            return;
+
+        if (inputId == SetF1To.Input.InputDefinition.Id)
+        {
+            SetF1To.SetTypedInputValue(CurvePointSampler.FieldSource.ToStoredValue(selected));
+        }
+        else if (inputId == SetF2To.Input.InputDefinition.Id)
+        {
+            SetF2To.SetTypedInputValue(CurvePointSampler.FieldSource.ToStoredValue(selected));
+        }
+    }
+    #endregion
+
+    private Geometry? _lastSource;
     private readonly CurvePointSampler _sampler = new();
     private readonly StructuredListUploader _uploader = new();
     private readonly List<StructuredList> _lists = new(1);
@@ -54,4 +83,10 @@ internal sealed class CurvesToPoints : Instance<CurvesToPoints>
 
     [Input(Guid = "f48316ce-a09a-4599-8d60-3fe0fcf24bfe")]
     public readonly InputSlot<float> SharpAngle = new();
+
+    [Input(Guid = "b4c7768e-07c8-412f-8b7a-6ecee84ce3f5")]
+    public readonly InputSlot<string> SetF1To = new();
+
+    [Input(Guid = "06186624-8191-4526-aad0-5daefb0818ab")]
+    public readonly InputSlot<string> SetF2To = new();
 }

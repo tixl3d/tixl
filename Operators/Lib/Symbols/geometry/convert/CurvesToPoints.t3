@@ -3,12 +3,20 @@
   "Id": "d955fd1d-af90-480b-b4e6-9142a1daf0a9"/*CurvesToPoints*/,
   "Inputs": [
     {
+      "Id": "06186624-8191-4526-aad0-5daefb0818ab"/*SetF2To*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "126f23f9-158b-468f-ba25-dd55c665a63c"/*Curves*/,
       "DefaultValue": null
     },
     {
       "Id": "682bab73-6b13-4f0d-9162-a464b1889b56"/*Tolerance*/,
       "DefaultValue": 0.002
+    },
+    {
+      "Id": "b4c7768e-07c8-412f-8b7a-6ecee84ce3f5"/*SetF1To*/,
+      "DefaultValue": ""
     },
     {
       "Id": "b766fe96-2b4b-4a9e-b8e8-f3ba646970fe"/*CloseLoops*/,

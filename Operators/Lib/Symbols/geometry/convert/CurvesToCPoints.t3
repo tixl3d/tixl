@@ -7,6 +7,10 @@
       "DefaultValue": 30.0
     },
     {
+      "Id": "3562289a-5c5f-4229-8e2d-46304b460017"/*SetF2To*/,
+      "DefaultValue": ""
+    },
+    {
       "Id": "4e9a6c1b-d872-4f35-b0e8-7a2d5f9c3e61"/*Tolerance*/,
       "DefaultValue": 0.002
     },
@@ -17,6 +21,10 @@
     {
       "Id": "b7f2d9c4-5a13-4e86-9d0b-3c6e8a1f5d27"/*Curves*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "c03fec01-bbc9-4d95-a5d4-9f1a0d7abe1f"/*SetF1To*/,
+      "DefaultValue": ""
     },
     {
       "Id": "d2c8e5a3-1f64-4b97-8e3a-c5b0d7f4a916"/*CloseLoops*/,
