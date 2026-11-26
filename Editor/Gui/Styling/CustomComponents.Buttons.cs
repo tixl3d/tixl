@@ -519,4 +519,20 @@ internal static partial class CustomComponents
         var thickness = MathF.Max(1, MathF.Round(T3Ui.UiScaleFactor));
         ImGui.GetWindowDrawList().AddLine(min.Floor(), (min + new Vector2(sizeMatch.X, 0)).Floor(), UiColors.BackgroundActive, thickness);
     }
+    
+    /// <summary>
+    /// Fills the current window or child with an opaque backdrop. Call it right after <c>BeginChild</c>
+    /// (with <c>NoBackground</c> set) and before the content, so it sits under the child's own items but
+    /// over whatever was drawn earlier in the parent, e.g. a title the child floats above.
+    /// </summary>
+    /// <param name="color">Fill color; defaults to the style's window background. Alpha is forced to 1.</param>
+    public static void DrawOpaqueChildBackground(Vector4? color = null)
+    {
+        var bg = color ?? ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+        bg.W = 1f;
+        var min = ImGui.GetWindowPos();
+        var max = ImGui.GetWindowPos() + ImGui.GetWindowSize();
+
+        ImGui.GetWindowDrawList().AddRectFilled(min, max, ImGui.ColorConvertFloat4ToU32(bg));
+    }
 }

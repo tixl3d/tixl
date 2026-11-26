@@ -144,7 +144,10 @@ internal sealed class HelpWindow : Window
             if (!_headerIconsExpanded)
             {
                 ImGui.SetCursorScreenPos(squareMin);
+                ImGui.BeginChild("collapsed",buttonSize, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
+                CustomComponents.DrawOpaqueChildBackground(UiColors.BackgroundPopup.Rgba);
                 CustomComponents.IconButton(Icon.Settings2, buttonSize);
+                ImGui.EndChild();
                 return;
             }
         }
@@ -155,14 +158,7 @@ internal sealed class HelpWindow : Window
 
         // The expanded row floats over the title, so it needs its own opaque background.
         ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
-
-        if (isNarrow)
-        {
-            var min = ImGui.GetWindowPos();
-            var max = min + ImGui.GetWindowSize();
-            ImGui.GetWindowDrawList().AddRectFilled(min, max, UiColors.BackgroundPopup.AsUInt(), 3f * T3Ui.UiScaleFactor);
-        }
-        
+        CustomComponents.DrawOpaqueChildBackground(UiColors.BackgroundPopup.Rgba);
 
         if (_shownSymbolUi != null)
         {

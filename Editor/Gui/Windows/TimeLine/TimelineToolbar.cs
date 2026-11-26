@@ -81,7 +81,7 @@ internal static class TimelineToolbar
         var drawList = ImGui.GetWindowDrawList();
         drawList.AddRectFilled(min, max, UiColors.BackgroundGaps);
         drawList.AddRectFilled(min, max, UiColors.EditorBackground);
-        drawList.AddRectFilled(min, max, ImGui.GetColorU32(ImGuiCol.ChildBg));
+        drawList.AddRectFilled(min, max, UiColors.BackgroundPopup);
         if (!isGraphOverlay)
             drawList.AddRectFilled(new Vector2(min.X, max.Y), new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull.Fade(0.5f));
 

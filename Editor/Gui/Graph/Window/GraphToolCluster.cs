@@ -30,6 +30,7 @@ internal static class GraphToolCluster
         ImGui.SetCursorPos(new Vector2(ImGui.GetWindowWidth() - width - Margin, Margin));
         ImGui.BeginChild("##graphTools", new Vector2(width, IconSize.Y), ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        CustomComponents.DrawOpaqueChildBackground(UiColors.BackgroundPopup.Rgba);
         ImGui.BeginGroup();
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5) * T3Ui.UiScaleFactor);
