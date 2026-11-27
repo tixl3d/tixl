@@ -361,9 +361,17 @@ internal static class SymbolAnalysis
         var lacksParameterGrouping = symbolUi.InputUis.Count > 4 &&
                                      !inputUis.Any(i => i.AddPadding || !string.IsNullOrEmpty(i.GroupTitle));
 
-        var dependsOnObsolete = requiredSymbols
-                               .Select(s => s.GetSymbolUi())
-                               .Any(ui => ui != null && ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete));
+        // A required symbol can lack its UI while its package is being moved or failed to compile
+        var dependsOnObsolete = false;
+        foreach (var requiredSymbol in requiredSymbols)
+        {
+            if (!SymbolUiRegistry.TryGetSymbolUi(requiredSymbol.Id, out var requiredSymbolUi)
+                || !requiredSymbolUi.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete))
+                continue;
+
+            dependsOnObsolete = true;
+            break;
+        }
 
         TryGetOperatorType(symbol, out var opType);
 
