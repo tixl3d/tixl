@@ -264,75 +264,6 @@ internal static partial class ProjectSetup
         }
     }
     
-    public static void SetProjectArchived(CsProjectFile projectFile, bool archive)
-    {
-        projectFile.IsArchived = archive;
-
-        if (archive)
-        {
-            // 1. Find and Unload the active package if it exists
-            var package = _activePackages.FirstOrDefault(p => p is EditableSymbolProject ep && ep.CsProjectFile == projectFile);
-            if (package != null)
-            {
-                RemoveSymbolPackage(package, needsDispose: true); // Stops watchers and cleans up
-            }
-            
-            if (ArchivedProjects.All(p => p.ProjectFile != projectFile))
-            {
-                ArchivedProjects.Add(new ArchivedProjectInfo(projectFile));
-            }
-        }
-        else
-        {
-            // 1. Remove from archived list
-            ArchivedProjects.RemoveAll(p => p.ProjectFile == projectFile);
-
-            // 2. Initialize the project - archived projects may still use the legacy file layout
-            Migrations.ProjectFormatMigration.MigrateIfNeeded(projectFile);
-            var newProject = new EditableSymbolProject(projectFile);
-    
-            // 3. Register Assets (Missing from your current implementation)
-            // This mirrors the 'Initial Startup Migration' phase in LoadAll
-            AssetRegistry.RegisterAssetsFromPackage(newProject);
-
-            // 4. Register the package so it's visible globally
-            AddToLoadedPackages(newProject);
-
-            // 5. Critical: Generate the assembly context for type resolution
-            newProject.AssemblyInformation.GenerateLoadContext();
-
-            // 6. Load symbols and UIs
-            UpdateSymbolPackages(newProject);
-
-            // 7. Initialize shader linting and package resources
-            InitializePackageResources(newProject);
-    
-            // 8. Force re-evaluation of instances
-            // This helps fix the "Failed to create child instances" by poking the registry
-            foreach (var symbol in newProject.Symbols.Values)
-            {
-                SymbolPackage.UpdateSymbolInstances(symbol);
-            }            
-
-        }
-        EditorSymbolPackage.NotifySymbolStructureChange();
-    }
-
-    internal sealed record ArchivedProjectInfo(CsProjectFile ProjectFile) : IResourcePackage
-    {
-        public string DisplayName => ProjectFile.Name;
-        public string Name => ProjectFile.Name;
-        public Guid Id  => ProjectFile.PackageId;
-        public string Folder => ProjectFile.Directory;
-        public string AssetsFolder => Path.Combine(Folder, FileLocations.AssetsSubfolder);
-        public string? RootNamespace => ProjectFile.RootNamespace;
-    
-        // Archived projects don't actively watch files or track live dependencies
-        public ResourceFileWatcher? FileWatcher => null;
-        public bool IsReadOnly => true;
-        public IReadOnlyCollection<DependencyCounter> Dependencies => Array.Empty<DependencyCounter>();
-    }
-
     /// <summary>
     /// A project that failed to load at startup (could not be read or compiled). Kept so the Hub can
     /// surface it and offer recovery instead of the project silently disappearing. Not persisted —
@@ -348,7 +279,6 @@ internal static partial class ProjectSetup
     }
 
     private static readonly HashSet<EditorSymbolPackage> _activePackages = [];
-    internal static readonly List<ArchivedProjectInfo> ArchivedProjects = [];
     internal static readonly List<BrokenProjectInfo> BrokenProjects = [];
     internal static readonly IEnumerable<SymbolPackage> AllPackages = _activePackages;
 

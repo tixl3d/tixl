@@ -352,12 +352,6 @@ internal static class ProjectRenaming
                 return true;
         }
 
-        foreach (var archived in ProjectSetup.ArchivedProjects)
-        {
-            if (archived.RootNamespace != null && IsLastSegment(name, archived.RootNamespace))
-                return true;
-        }
-
         foreach (var rename in Pending)
         {
             if (renamedProjectFolder != null && IsSameFolder(rename.ProjectFolder, renamedProjectFolder))

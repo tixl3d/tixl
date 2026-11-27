@@ -41,20 +41,7 @@ internal static class ProjectsPanel
                 DrawProjectItem(window, package);
             }
             
-            // 2. Draw Archived Projects (Lightweight)
-            if (ProjectSetup.ArchivedProjects.Count > 0)
-            {
-                ImGui.Separator();
-                FormInputs.AddSectionHeader("Archived");
-                ImGui.TextDisabled("Note: Loading reactivated projects might require a restart.");
-                for (var index = 0; index < ProjectSetup.ArchivedProjects.Count; index++)
-                {
-                    var archived = ProjectSetup.ArchivedProjects[index];
-                    DrawArchivedItem(archived);
-                }
-            }
-
-            // 3. Draw Broken Projects (failed to load — offer recovery)
+            // Broken Projects (failed to load — offer recovery)
             if (ProjectSetup.BrokenProjects.Count > 0)
             {
                 ImGui.Separator();
@@ -319,17 +306,6 @@ internal static class ProjectsPanel
                 }
             }
 
-            if(CustomComponents.DrawMenuItem(_archiveProjectId, "Archive Project", reserveIconColumn: false))
-            {
-                if (package is EditableSymbolProject editableProject)
-                {
-                    if (isOpened)
-                        OpenedProject.TryUnload(package);
-                    
-                    ProjectSetup.SetProjectArchived(editableProject.CsProjectFile, true);
-                }
-            }
-
             ImGui.EndPopup();
         }
 
@@ -337,74 +313,6 @@ internal static class ProjectsPanel
 
         ImGui.PopID();
         return wasOpened;
-    }
-
-    private static void DrawArchivedItem(ProjectSetup.ArchivedProjectInfo archivedProject)
-    {
-        var dl = ImGui.GetWindowDrawList();
-
-        ImGui.PushID(archivedProject.ProjectFile.Directory);
-        var name = archivedProject.Name;
-        var clicked = ImGui.InvisibleButton(name, ProjectItemSize);
-        var isHovered = ImGui.IsItemHovered();
-        var backgroundColor = isHovered
-                                  ? UiColors.ForegroundFull.Fade(0.1f)
-                                  : UiColors.ForegroundFull.Fade(0.05f);
-
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
-        dl.AddRectFilled(min, max, backgroundColor, 6);
-
-        var padding = 3f * T3Ui.UiScaleFactor;
-        
-        var rootName = archivedProject.RootNamespace?.Split(".")[^1];
-
-        var y = padding;
-        var x = 20f;
-        dl.AddText(Fonts.FontBold,
-                   Fonts.FontBold.FontSize,
-                   min + new Vector2(x, y),
-                   UiColors.Text, rootName);
-
-        y += Fonts.FontNormal.FontSize + 5;
-
-        dl.AddText(Fonts.FontSmall,
-                   Fonts.FontSmall.FontSize,
-                   min + new Vector2(x, y),
-                   UiColors.TextMuted, archivedProject.Folder);
-
-        y += Fonts.FontSmall.FontSize + 5;
-
-        dl.AddText(Fonts.FontSmall,
-                   Fonts.FontSmall.FontSize,
-                   min + new Vector2(x, y),
-                   UiColors.TextMuted, archivedProject.Folder);
-
-        var thumbnail = ThumbnailManager.GetThumbnail(archivedProject.Id, archivedProject, ThumbnailManager.Categories.PackageMeta);
-        if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
-        {
-            var height = ProjectItemSize.Y - padding * 2;
-            var size = new Vector2(height * 4 / 3f, height);
-            var pos = new Vector2(max.X - size.X - padding, min.Y + padding);
-            dl.AddImage((IntPtr)ThumbnailManager.AtlasSrv.ImGuiTextureId,
-                        pos,
-                        pos + size,
-                        thumbnail.UvMin, thumbnail.UvMax);
-        }
-        
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-        if (ImGui.BeginPopupContextItem("windows_context_menu"))
-        {
-            if(CustomComponents.DrawMenuItem(_reactivateProjectId, "Reactivate Project", reserveIconColumn: false))
-            {
-                ProjectSetup.SetProjectArchived(archivedProject.ProjectFile, false);
-            }
-            ImGui.EndPopup();
-        }
-
-        ImGui.PopStyleVar();
-
-        ImGui.PopID();
     }
 
     private static void DrawBrokenItem(ProjectSetup.BrokenProjectInfo broken)
@@ -753,8 +661,6 @@ internal static class ProjectsPanel
     private static readonly int _renameProjectId = nameof(_renameProjectId).GetHashCode();
     private static readonly int _restoreFromBackupId = nameof(_restoreFromBackupId).GetHashCode();
     private static readonly int _unloadProjectId = nameof(_unloadProjectId).GetHashCode();
-    private static readonly int _archiveProjectId = nameof(_archiveProjectId).GetHashCode();
-    private static readonly int _reactivateProjectId = nameof(_reactivateProjectId).GetHashCode();
     private static readonly int _restoreBrokenFromBackupId = nameof(_restoreBrokenFromBackupId).GetHashCode();
     private static readonly int _revealBrokenInExplorerId = nameof(_revealBrokenInExplorerId).GetHashCode();
     private static readonly int _noBackupsFoundId = nameof(_noBackupsFoundId).GetHashCode();

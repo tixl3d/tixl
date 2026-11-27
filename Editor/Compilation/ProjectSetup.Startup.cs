@@ -80,11 +80,6 @@ internal static partial class ProjectSetup
         BrokenProjects.Clear();
         foreach (var failed in failedProjects)
         {
-            // Archived projects also land in failedProjects (success, but intentionally not loaded);
-            // only genuine failures are "broken".
-            if (failed.success)
-                continue;
-
             BrokenProjects.Add(new BrokenProjectInfo(failed.fileInfo, failed.csProjFile,
                                                      failed.failureReason ?? "The project could not be loaded.",
                                                      failed.hint,
@@ -304,15 +299,8 @@ internal static partial class ProjectSetup
                                   
                                   var csProjFile = loadInfo.CsProjectFile!;
 
-                                  // Check if archived before doing anything else
-                                  if (csProjFile.IsArchived)
-                                  {
-                                      lock (ArchivedProjects)
-                                      {
-                                          ArchivedProjects.Add(new ArchivedProjectInfo(csProjFile));
-                                      }
-                                      return new ProjectLoadInfo(fileInfo, csProjFile, true); // Mark as success but don't process further
-                                  }
+                                  if (csProjFile.TryRemoveArchivedFlag())
+                                      Log.Info($"Unarchived project '{csProjFile.Name}': archiving was removed, all projects load now.");
                                   
                                   // Bring the project to the current format before anything reads or
                                   // writes build output - the compile below must already target the
@@ -339,7 +327,7 @@ internal static partial class ProjectSetup
         failedProjects = [];
         foreach (var projectInfo in projectResults)
         {
-            if (projectInfo is { csProjFile: not null, success: true }&& !projectInfo.csProjFile.IsArchived)
+            if (projectInfo is { csProjFile: not null, success: true })
             {
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);

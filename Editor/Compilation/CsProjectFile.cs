@@ -63,16 +63,27 @@ internal sealed class CsProjectFile
     private string TargetFramework => _projectRootElement.GetOrAddProperty(PropertyType.TargetFramework, ProjectXml.TargetFramework);
     
     /// <summary>
-    /// Prevent loading a project
+    /// Earlier versions could archive a project so it wasn't loaded. That feature is gone; this removes the flag
+    /// from a project that is still archived, so it loads like any other. Saves the file and returns true if the
+    /// flag was set. A flag set to false is left alone to avoid rewriting every project file.
     /// </summary>
-    public bool IsArchived 
+    public bool TryRemoveArchivedFlag()
     {
-        get => _projectRootElement.GetOrAddProperty(PropertyType.IsArchived, "false") == "true";
-        set 
+        var propertyName = PropertyType.IsArchived.GetItemName();
+        foreach (var property in _projectRootElement.Properties)
         {
-            _projectRootElement.SetOrAddProperty(PropertyType.IsArchived, value ? "true" : "false");
+            if (property.Name != propertyName)
+                continue;
+
+            if (!string.Equals(property.Value.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            property.Parent.RemoveChild(property);
             UpdateLastModifiedDate(); // This saves the file
+            return true;
         }
+
+        return false;
     }
     
     /// <summary>
@@ -441,9 +452,7 @@ internal sealed class CsProjectFile
                 NeedsRecompile = true;
             }
 
-            // Archived projects are listed but never compiled or loaded, so checking their build output
-            // would only produce a misleading "needs to be compiled" warning on every start.
-            if (!NeedsRecompile && !file.IsArchived)
+            if (!NeedsRecompile)
             {
                 var versionInfoDirectory = file.GetBuildTargetDirectory();
                 if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out _))

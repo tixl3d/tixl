@@ -481,7 +481,6 @@ internal static partial class ProjectXml
                     (Type: PropertyType.IsEditorOnly, Value: "false"),
                     (Type: PropertyType.ImplicitUsings, Value: "disabled"),
                     (Type: PropertyType.Deterministic, Value: "true"),
-                    (Type: PropertyType.IsArchived, Value: "false"),
                 }
            .ToFrozenDictionary(keySelector: x => x.Type, elementSelector: x => x.Value);
 
