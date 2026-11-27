@@ -1,8 +1,16 @@
 {
   "FormatVersion": 3,
   "Id": "c7e3a9f1-5d28-4b64-8a0f-2e9c6b1d7f35"/*GeometryToMeshChunks*/,
-  "Description": "Compiles geometry parts into one mesh buffer with a chunk per part, for instancing with [DrawMeshChunksAtPoints].\n\nVertices are stored relative to their part's pivot, so moving, rotating or scaling a pivot point transforms the whole chunk on the GPU. Points holds the pivots as CPU points (F2 carries the part's seed index) for further processing with CPoints ops and [UploadToGpu]; GPoints is the same list already uploaded. ChunkIndices maps each point to its chunk. Geometry without parts becomes a single chunk anchored at the origin.\n\nAKA: fracture chunks, mesh parts to instances, explode on GPU",
+  "Description": "Compiles geometry parts into one mesh buffer with a chunk per part, for instancing with [DrawMeshChunksAtPoints].\n\nVertices are stored relative to their part's pivot, so moving, rotating or scaling a pivot point transforms the whole chunk on the GPU. Points holds the pivots as CPU points (F2 carries the part's seed index) for further processing with CPoints ops and [UploadToGpu]; GPoints is the same list already uploaded. ChunkIndices maps each point to its chunk. WriteSizeToScale stores each fragment's size in the point Scale, e.g. as particle radius. Geometry without parts becomes a single chunk anchored at the origin.\n\nAKA: fracture chunks, mesh parts to instances, explode on GPU",
   "InputUis": [
+    {
+      "InputId": "49f97c2e-bcde-4fcc-97e1-edfe9af443de"/*WriteSizeToScale*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Writes each fragment's size (the distance of its farthest vertex from the pivot) into the point's Scale, so [ParticleSystem] forces that use the particle size treat fragments by size. With the particle system's RadiusFactor at 1, [FieldVolumeForce] and [SurfaceForce] collide at half that size, which fits irregular fragments better than the enclosing sphere.\n\nWhen drawing the chunks at these points, keep UseStretch of [DrawMeshChunksAtPoints] off, or every chunk gets scaled by its own size."
+    },
     {
       "InputId": "7f2c9e4b-d631-4a85-b9e7-0c5d8a3f1b62"/*Geometry*/,
       "Relevancy": "Required",

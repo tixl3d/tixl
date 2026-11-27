@@ -1,0 +1,209 @@
+{
+  "FormatVersion": 3,
+  "Id": "15d86cab-dafe-4741-bd0a-519a2f7c1eb5"/*VoronoiFractureExample*/,
+  "Description": "How to combine [VoronoiFracture], [DrawMeshChunksAtPoints] and [ParticleSystem] with [ReconstructiveForce]",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "06ffe142-b5c1-4c03-9df6-e60e2717d702",
+      "SymbolName": "Lib.image.fx.blur.Bloom",
+      "Position": {
+        "X": 668.9785,
+        "Y": 439.04297
+      }
+    },
+    {
+      "ChildId": "1f8d0203-6901-4e94-ade6-1d05d5a78dcf",
+      "SymbolName": "Lib.geometry.modify.ExtrudeCurves",
+      "Position": {
+        "X": 0.0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "2373ed1a-9fce-4c50-93cc-f2232ec4675c",
+      "SymbolName": "Lib.geometry.modify.VoronoiFracture",
+      "Position": {
+        "X": 140.0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "3388689c-20ff-4902-a820-735447243829",
+      "SymbolName": "Lib.render.postfx.MotionBlur",
+      "Position": {
+        "X": 668.9785,
+        "Y": 369.04297
+      }
+    },
+    {
+      "ChildId": "38727968-8efc-46cd-a352-40365415a952",
+      "SymbolName": "Lib.render.basic.RenderScene",
+      "Position": {
+        "X": 668.9785,
+        "Y": 334.04297
+      }
+    },
+    {
+      "ChildId": "3a995747-7c88-43c6-8d39-e60df25cd837",
+      "SymbolName": "Lib.particle.force.FieldVolumeForce",
+      "Position": {
+        "X": 305.40234,
+        "Y": 492.30078
+      }
+    },
+    {
+      "ChildId": "441892f0-2a2e-4a85-a70e-21ffb3d7adb1",
+      "SymbolName": "Lib.particle.force.ReconstructiveForce",
+      "Position": {
+        "X": 305.40234,
+        "Y": 457.30078
+      }
+    },
+    {
+      "ChildId": "5806388a-5324-41d0-afc0-8ff28386a155",
+      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
+      "Position": {
+        "X": 25.402344,
+        "Y": 527.3008
+      }
+    },
+    {
+      "ChildId": "5dbca191-47d5-4cf9-bb5b-fd2f5a4cdbc1",
+      "SymbolName": "Lib.geometry.convert.GeometryToMeshChunks",
+      "Position": {
+        "X": 140.0,
+        "Y": 175.0
+      }
+    },
+    {
+      "ChildId": "5fdbdb18-c07a-4ffa-8b71-ce5fcb629717",
+      "SymbolName": "Lib.particle.ParticleSystem",
+      "Position": {
+        "X": 445.40234,
+        "Y": 352.30078
+      }
+    },
+    {
+      "ChildId": "74a5e17a-2a42-4b39-84d3-23ab48a7a0a6",
+      "SymbolName": "Lib.render.shading.PointLight",
+      "Position": {
+        "X": 668.9785,
+        "Y": 264.04297
+      }
+    },
+    {
+      "ChildId": "7737cc5e-d141-45fd-a242-ec095160f8a5",
+      "SymbolName": "Lib.flow.Once",
+      "Position": {
+        "X": 165.40234,
+        "Y": 387.30078
+      }
+    },
+    {
+      "ChildId": "985a2b87-13a7-4930-a356-6ec1459f93f4",
+      "SymbolName": "Lib.numbers.bool.combine.Any",
+      "Position": {
+        "X": 305.40234,
+        "Y": 387.30078
+      }
+    },
+    {
+      "ChildId": "995b5003-cc64-4a9d-9582-c9397764c955",
+      "SymbolName": "Lib.geometry.generate.StringToCurves",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "ac7439c7-4d98-443c-9a73-0a2e1fbe0ed2",
+      "SymbolName": "Lib.field.generate.sdf.SphereSDF",
+      "Position": {
+        "X": 165.40234,
+        "Y": 492.30078
+      }
+    },
+    {
+      "ChildId": "b63f77ac-722a-4618-be5f-b87f22232c30",
+      "SymbolName": "Lib.numbers.bool.logic.Trigger",
+      "Position": {
+        "X": 165.40234,
+        "Y": 422.30078
+      }
+    },
+    {
+      "ChildId": "c7f4763e-621a-4885-bc8c-185d4bce93fb",
+      "SymbolName": "Lib.render.postfx.ScreenSpaceLighting",
+      "Position": {
+        "X": 668.9785,
+        "Y": 404.04297
+      }
+    },
+    {
+      "ChildId": "d8c3d76a-4110-4ec2-9e39-90cf736b8049",
+      "SymbolName": "Lib.geometry.modify.OffsetCurves",
+      "Position": {
+        "X": 0.0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "d98aaaf6-ce58-45e1-9621-ba7a44356aa2",
+      "SymbolName": "Lib.image.color.ToneMapping",
+      "Position": {
+        "X": 668.9785,
+        "Y": 474.04297
+      }
+    },
+    {
+      "ChildId": "e55f1c48-9206-45b9-bddd-b4bf380b4dc5",
+      "SymbolName": "Lib.render.camera.OrbitCamera",
+      "Position": {
+        "X": 668.9785,
+        "Y": 299.04297
+      }
+    },
+    {
+      "ChildId": "e6b45f9b-265d-4860-a7c2-99c776cc9887",
+      "SymbolName": "Lib.numbers.anim.animators.AnimVec3",
+      "Position": {
+        "X": 25.402344,
+        "Y": 492.30078
+      }
+    },
+    {
+      "ChildId": "ed3de648-7ef2-445e-8832-d43f397e26d3",
+      "SymbolName": "Lib.geometry.generate.ScatterPointsInVolume",
+      "Position": {
+        "X": 0.0,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "ef7b3a7e-adf4-47c3-9676-1fe4d2950ba7",
+      "SymbolName": "Lib.mesh.draw.DrawMeshChunksAtPoints",
+      "Position": {
+        "X": 668.9785,
+        "Y": 159.04297
+      }
+    },
+    {
+      "ChildId": "f4bf4661-4d15-4329-9687-369cdf91ece2",
+      "SymbolName": "Lib.geometry.modify.MergeCurves",
+      "Position": {
+        "X": 0.0,
+        "Y": 70.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "21733197-e845-412f-96b9-e7871d2a8f15"/*Output*/,
+      "Position": {
+        "X": 1078.9785,
+        "Y": 276.1504
+      }
+    }
+  ]
+}

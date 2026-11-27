@@ -37,7 +37,7 @@
     },
     {
       "Id": "7d609639-d9f3-4c7c-9fde-91c71a29aedc"/*UseStretch*/,
-      "DefaultValue": true
+      "DefaultValue": false
     },
     {
       "Id": "821e86ce-9118-429d-94d8-d30f5df9e455"/*Mesh*/,

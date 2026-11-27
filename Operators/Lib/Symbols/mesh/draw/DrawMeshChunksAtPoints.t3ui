@@ -75,7 +75,7 @@
         "X": 3273.2158,
         "Y": 4776.787
       },
-      "Description": "Stretches each instance by the point's Scale attribute."
+      "Description": "Stretches each instance by the point's Scale attribute.\n\nOff by default: points from [GeometryToMeshChunks] with WriteSizeToScale, and particles emitted from them, carry the fragment size in Scale, which would scale each chunk by its own size."
     },
     {
       "InputId": "821e86ce-9118-429d-94d8-d30f5df9e455"/*Mesh*/,
