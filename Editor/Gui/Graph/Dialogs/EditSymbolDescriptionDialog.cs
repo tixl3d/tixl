@@ -122,6 +122,7 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
 
         var symbol = symbolUi.Symbol;
         var changed = CustomComponents.DrawInputFieldWithPlaceholder("e.g. * {Factor}", ref _smartTitleText, 400 * T3Ui.UiScaleFactor);
+        _smartTitleText ??= string.Empty; // The clear button sets null
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(200 * T3Ui.UiScaleFactor);
