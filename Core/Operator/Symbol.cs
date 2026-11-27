@@ -51,8 +51,8 @@ public sealed partial class Symbol : IDisposable, IResource
 
     #endregion Saved Properties
 
-    public string Name => InstanceType?.Name;
-    public string Namespace => InstanceType.Namespace ?? SymbolPackage.AssemblyInformation.Name;
+    public string Name => InstanceType?.Name ?? _lastKnownName;
+    public string Namespace => InstanceType?.Namespace ?? _lastKnownNamespace ?? SymbolPackage.AssemblyInformation.Name;
     public Animator Animator { get; private set; } = new();
 
     /// <summary>
@@ -99,6 +99,9 @@ public sealed partial class Symbol : IDisposable, IResource
 
         if (value == null)
             return;
+
+        _lastKnownName = value.Name;
+        _lastKnownNamespace = value.Namespace;
         
         if(!value.IsAssignableTo(typeof(Instance)))
         {
@@ -408,6 +411,10 @@ public sealed partial class Symbol : IDisposable, IResource
     private int _childrenVersion;
     private readonly ConcurrentDictionary<Guid, Child> _children = new();
     private readonly Dictionary<Guid, Child> _childrenCreatedFromMe = new();
+
+    /** Keeps names valid while the assembly is unloaded, because other packages still save children of this symbol then. */
+    private string _lastKnownName;
+    private string _lastKnownNamespace;
     
     private void ReplaceConnection(Connection con)
     {
