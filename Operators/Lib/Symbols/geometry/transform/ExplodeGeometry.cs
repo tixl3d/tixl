@@ -51,13 +51,21 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
             center /= source.Parts.Length;
         }
 
+        var parts = source.Parts;
+        if (_parts.Length != parts.Length)
+            _parts = new PrimitivePart[parts.Length];
+
         var offsets = source.PrimitiveVertexOffsets;
         var corners = source.VertexPoints;
-        foreach (var part in source.Parts)
+        for (var partIndex = 0; partIndex < parts.Length; partIndex++)
         {
+            var part = parts[partIndex];
             var direction = part.Pivot - center;
             var length = direction.Length();
             var push = length > 1e-6f ? direction / length * distance : Vector3.Zero;
+
+            // Shrinking contracts toward the pivot, so only the push moves it.
+            _parts[partIndex] = part with { Pivot = part.Pivot + push };
 
             var cornerStart = offsets[part.PrimitiveStart];
             var cornerEnd = offsets[part.PrimitiveStart + part.PrimitiveCount];
@@ -75,7 +83,7 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
 
         _output.PrimitiveClosed = source.PrimitiveClosed;
         _output.VertexPoints = source.VertexPoints;
-        _output.Parts = source.Parts;
+        _output.Parts = _parts;
         _output.Attributes.Clear();
         foreach (var attribute in source.Attributes)
         {
@@ -87,6 +95,7 @@ internal sealed class ExplodeGeometry : Instance<ExplodeGeometry>
     }
 
     private readonly Geometry _output = new();
+    private PrimitivePart[] _parts = [];
 
     [Input(Guid = "b7a03e58-c1f9-4d24-8b6a-52e0d9c7f183")]
     public readonly InputSlot<Geometry> Geometry = new();
