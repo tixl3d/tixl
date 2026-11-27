@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "849896ae-78b9-4ab8-891c-0a90e651e004"/*ClxDeck*/,
+  "Inputs": [
+    {
+      "Id": "2d750c55-1168-4afd-89c4-7810dc1dda58"/*Listen*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "302f3e68-9016-4892-b70c-cea89082e73f"/*Deck*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "9d28782f-e341-4665-9230-34b8f138e11f"/*Port*/,
+      "DefaultValue": 3650
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

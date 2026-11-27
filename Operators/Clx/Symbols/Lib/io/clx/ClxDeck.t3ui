@@ -1,0 +1,140 @@
+{
+  "FormatVersion": 3,
+  "Id": "849896ae-78b9-4ab8-891c-0a90e651e004"/*ClxDeck*/,
+  "Description": "Real-time state of one DJ deck from a CLX sender (Clockworks Server, Bridge, prolink-clx): playhead, beat position, tempo, pitch and EQ, updated at about 60 Hz.\n\nConnect [Bars] to [SetPlaybackTime] (Continuously) and [Bpm] to [SetBpm] to lock TiXL's timeline to the deck.\n\nLITE senders send 0 for Position, Beats and Length; use NormalizedPosition with them.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxTrack], [ClxMixer], [ClxBeatgrid], [ClxWaveform]",
+  "InputUis": [
+    {
+      "InputId": "302f3e68-9016-4892-b70c-cea89082e73f"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Deck number, starting at 1 as on the wire."
+    },
+    {
+      "InputId": "9d28782f-e341-4665-9230-34b8f138e11f"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "2d750c55-1168-4afd-89c4-7810dc1dda58"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "e6f4f870-f2f3-4584-b7b2-25eece3e1319"/*Position*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "Playhead in seconds from the start of the track."
+    },
+    {
+      "OutputId": "f16e8edb-6b8f-483e-a8a1-7374e98cbfac"/*NormalizedPosition*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Playhead from 0 (start) to 1 (end of the track)."
+    },
+    {
+      "OutputId": "db1255c6-bc57-48ac-9614-4fbaf49fcb6a"/*Beats*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "Position on the beat grid: beat number plus the fraction of the current beat."
+    },
+    {
+      "OutputId": "846b5fc4-4b34-43bd-ba97-cb2b2edfae52"/*Bars*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "Beats divided by 4: one unit per bar, the unit TiXL's timeline uses."
+    },
+    {
+      "OutputId": "a28d5b55-a8e0-4d42-93e3-d961252c7e9c"/*BeatPhase*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Fraction of the current beat, 0 to 1."
+    },
+    {
+      "OutputId": "d5828520-a7b8-49e5-b8ad-93e64edccee3"/*BeatInBar*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 538.0
+      },
+      "Description": "Current beat in the bar, 1 to 4, or 0 when the sender doesn't report it."
+    },
+    {
+      "OutputId": "a42a6140-7771-4afe-bd9b-009b09052430"/*Bpm*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 638.0
+      },
+      "Description": "Current tempo, including pitch."
+    },
+    {
+      "OutputId": "741d0974-c881-4510-955c-64afe7231068"/*Pitch*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 738.0
+      },
+      "Description": "Tempo multiplier: 1 is unmodified, 1.08 is +8%."
+    },
+    {
+      "OutputId": "4fbed8d7-a08e-4f3e-9c7a-dd7211be0ede"/*Length*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 838.0
+      },
+      "Description": "Track length in seconds."
+    },
+    {
+      "OutputId": "3371b439-cae6-4a62-9eb4-e00b0951375a"/*Eq*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 938.0
+      },
+      "Description": "Low, mid and high EQ gains as X, Y and Z."
+    },
+    {
+      "OutputId": "cbe3c4bc-e1b9-4933-b528-298aa7dc610e"/*State*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 1038.0
+      },
+      "Description": "Play state as sent. Its values depend on the sender; 0 when it isn't reported."
+    },
+    {
+      "OutputId": "d407b3d7-41f7-4da3-96d8-ea7e1ca298c1"/*HasData*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 1138.0
+      },
+      "Description": "True once a Deck packet for this deck has arrived."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "884d7c6b-6873-5786-b5e8-9816b4432c84",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

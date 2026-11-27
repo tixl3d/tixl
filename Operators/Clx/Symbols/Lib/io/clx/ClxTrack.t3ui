@@ -1,0 +1,100 @@
+{
+  "FormatVersion": 3,
+  "Id": "17f4b56c-a250-4e27-9f87-7c37b58749b9"/*ClxTrack*/,
+  "Description": "Metadata of the track loaded on a deck, from a CLX sender.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxDeck], [ClxCues], [ClxWaveform]",
+  "InputUis": [
+    {
+      "InputId": "cebf449e-48bf-481b-a78c-19c6f2eb3329"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Deck number, starting at 1 as on the wire."
+    },
+    {
+      "InputId": "49fa4d91-aa1a-4e8f-babc-0cb3e7588fa8"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "5a11e8ec-3ab6-448a-be9a-8b16f98fba54"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c03ad78d-6256-41a8-a2c6-6d840cd71037"/*Title*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "Track title."
+    },
+    {
+      "OutputId": "0fd44e68-7dab-4ee3-9381-4ebe6a90b091"/*Artist*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Track artist."
+    },
+    {
+      "OutputId": "51b595b1-7722-45ab-957f-034efedb3b85"/*Album*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "Track album."
+    },
+    {
+      "OutputId": "5d78b332-5b6e-4902-88ac-c01261308dd1"/*FilePath*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "Path of the track file on the DJ computer."
+    },
+    {
+      "OutputId": "d586a17f-e1d0-4edd-ab0e-d540bfb9f95a"/*TrackHash*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Hex MD5 of the title, which CLX uses to key waveforms, beat grids and cues."
+    },
+    {
+      "OutputId": "c87d2929-894f-409d-afab-fd54c6787811"/*TrackChanged*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 538.0
+      },
+      "Description": "True for one frame when the deck loads another track."
+    },
+    {
+      "OutputId": "bce715c6-1c40-4aef-9235-09e76a32bc70"/*HasData*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 638.0
+      },
+      "Description": "True once a Meta packet for this deck has arrived."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "f7e84d0f-9e96-584b-8106-3af378f5f566",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

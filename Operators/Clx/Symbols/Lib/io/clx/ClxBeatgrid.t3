@@ -1,0 +1,20 @@
+{
+  "FormatVersion": 3,
+  "Id": "66ccde72-d3ff-462f-bf72-45c6b59d9783"/*ClxBeatgrid*/,
+  "Inputs": [
+    {
+      "Id": "3e1b89a4-ea21-4974-aa9a-b44c50974a9d"/*Deck*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "a4fffd80-4a5b-4ca4-b96c-df5eff655add"/*Listen*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "e8f33b7e-5e29-44eb-a078-738c2ddbe0fb"/*Port*/,
+      "DefaultValue": 3650
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

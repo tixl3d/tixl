@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "2d72dc80-3173-4c48-a790-82e98bd3ce7f"/*ClxEvent*/,
+  "Inputs": [
+    {
+      "Id": "17a6685b-f3e3-4d85-8af8-9f919b91689f"/*Deck*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "8132a4b9-9d3c-48fe-8620-04441b845e49"/*Listen*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "a0538523-1ded-4c7d-a7b1-174289cf1d35"/*Port*/,
+      "DefaultValue": 3650
+    },
+    {
+      "Id": "e3c30ec6-802e-4adf-93ad-084e71178530"/*EventName*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "96de6e3f-3c39-405e-8928-bffb4c2880fd"/*ClxCues*/,
+  "Inputs": [
+    {
+      "Id": "22077b6f-8374-434b-b514-5ab3017ad42f"/*HotcuesOnly*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9c4925a3-3e23-4f86-a73d-7987d76d90e7"/*Listen*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "ccddf67c-1174-4851-b069-0e347c1a17a0"/*Deck*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "f61cf529-3248-4fb9-971d-103068c8e023"/*Port*/,
+      "DefaultValue": 3650
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

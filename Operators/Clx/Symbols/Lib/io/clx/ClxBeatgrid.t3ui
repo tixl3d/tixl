@@ -1,0 +1,84 @@
+{
+  "FormatVersion": 3,
+  "Id": "66ccde72-d3ff-462f-bf72-45c6b59d9783"/*ClxBeatgrid*/,
+  "Description": "Beat grid of the track on a deck, expanded to one entry per beat.\n\nIt arrives after the track loads. Beats after the last marker continue at its tempo up to the track length.\n\nListens for CLX on the given UDP port (3650 by default) and on the multicast group 239.0.0.1. All CLX operators on the same port share one connection. Senders stream to one unicast address and, if enabled, to multicast: when a Clockworks Viewer runs on the same machine, use multicast.\n\nSee also: [ClxCues], [ClxDeck]",
+  "InputUis": [
+    {
+      "InputId": "3e1b89a4-ea21-4974-aa9a-b44c50974a9d"/*Deck*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Deck number, starting at 1 as on the wire."
+    },
+    {
+      "InputId": "e8f33b7e-5e29-44eb-a078-738c2ddbe0fb"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "GroupTitle": "Connection",
+      "Description": "UDP port CLX senders stream to. 3650 unless the sender was changed."
+    },
+    {
+      "InputId": "a4fffd80-4a5b-4ca4-b96c-df5eff655add"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Turn off to close the connection when no other CLX operator uses this port."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "16cf29fb-f3a4-4473-b43d-d1511854df49"/*BeatTimes*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      },
+      "Description": "Time of every beat in seconds."
+    },
+    {
+      "OutputId": "f2282bf1-f15f-4c72-813a-4c0971eb9589"/*DownbeatTimes*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      },
+      "Description": "Time of every 4th beat, counted from the first marker."
+    },
+    {
+      "OutputId": "15ba376c-2405-4d1a-af3c-7214c2785d22"/*MarkerTimes*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      },
+      "Description": "Positions of the grid's tempo markers in seconds."
+    },
+    {
+      "OutputId": "f2c30a95-9312-440b-82ba-ea46a33b35d1"/*MarkerBpms*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      },
+      "Description": "Tempo from each marker on."
+    },
+    {
+      "OutputId": "cc04da54-1247-467c-b778-755f975035a0"/*BeatCount*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      },
+      "Description": "Number of beats."
+    }
+  ],
+  "Links": [
+    {
+      "Id": "08e3de6e-b4d2-5db9-bf98-bd75734da8d6",
+      "Title": "CLX protocol",
+      "Description": "The CLX specification: packets, fields and network behaviour.",
+      "LinkUrl": "https://github.com/medcelerate/CLX-Spec",
+      "LinkType": "Documentation"
+    }
+  ]
+}

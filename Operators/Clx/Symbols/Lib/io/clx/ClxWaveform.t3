@@ -1,0 +1,37 @@
+{
+  "FormatVersion": 3,
+  "Id": "7dc0e3a4-cc8a-4034-95a6-3ea2ae5e620d"/*ClxWaveform*/,
+  "Inputs": [
+    {
+      "Id": "29895470-e52c-42ac-b864-2e7476b64ac5"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "379d6e7c-fc43-4f2d-a826-5f0b21b47ab2"/*Listen*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "61acac5d-4db3-4091-9688-0e098e75d483"/*Height*/,
+      "DefaultValue": 128
+    },
+    {
+      "Id": "883a3a8d-c4d2-4a17-8bd2-7164a75bee6a"/*Port*/,
+      "DefaultValue": 3650
+    },
+    {
+      "Id": "b41fd5d6-3b33-427d-bde9-b6672ff3c994"/*Deck*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "ccd0acfd-0c15-4518-8f77-24e5cb7ae260"/*Width*/,
+      "DefaultValue": 2048
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
