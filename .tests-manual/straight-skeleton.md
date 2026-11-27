@@ -35,6 +35,17 @@ Add `[StringToCurves]` with the text `T` and connect it to `[StraightSkeleton]`.
 - The skeleton branches toward every concave corner of the T, and no curve leaves the glyph.
 - Points at the glyph outline have Z 0; branch and split vertices have Z > 0.
 
+## Step: Detailed glyphs
+
+**Action:**
+Add `[StringToCurves]` with the text `TiXL` and a font that has many outline points, connect it to
+`[StraightSkeleton]`, set `Output` to Roof and pin the result.
+
+**Expected:**
+- All four glyphs, including the X, produce roof geometry.
+- No contour fails; contours that need it are simplified slightly for a stable skeleton.
+- The graph stays responsive with `Async` enabled.
+
 ## Step: Roof faces
 
 **Action:**

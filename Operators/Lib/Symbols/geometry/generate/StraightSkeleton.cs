@@ -134,14 +134,11 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
             foreach (var hole in holeLoops)
                 holes.Add(ToSkeletonPoints(hole.Points));
 
-            Lib.Utils.StraightSkeleton.Skeleton skeleton;
-            try
+            var skeleton = TryBuildSkeleton(outerPoints, holes, outer.Points, holeLoops, tolerance, outerIndex, out var failure);
+            if (skeleton == null)
             {
-                skeleton = SkeletonBuilder.Build(outerPoints, holes.Count > 0 ? holes : null);
-            }
-            catch (Exception exception)
-            {
-                warnings.Add($"Skeleton failed on contour {outerIndex + 1}: {exception.Message}");
+                warnings.Add($"Skeleton failed on contour {outerIndex + 1}: {failure?.Message ?? "unknown error"}");
+                Log.Warning($"StraightSkeleton contour {outerIndex + 1} failed: {failure}", this);
                 continue;
             }
 
@@ -328,6 +325,71 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
         public int Parent = -1;
     }
 
+    /// <summary>
+    /// Builds one island and retries with a progressively simplified outline when the sweep hits a degenerate event.
+    /// </summary>
+    private Lib.Utils.StraightSkeleton.Skeleton? TryBuildSkeleton(List<Vector2d> outerPoints, List<List<Vector2d>> holes,
+                                                                  List<Vector2> outerLoop, List<Loop> holeLoops,
+                                                                  float tolerance, int outerIndex,
+                                                                  out Exception? failure)
+    {
+        failure = null;
+        try
+        {
+            return SkeletonBuilder.Build(outerPoints, holes.Count > 0 ? holes : null);
+        }
+        catch (Exception exception)
+        {
+            failure = exception;
+        }
+
+        var simplify = MathF.Max(tolerance * 0.25f, MinRetryCollinearTolerance);
+        var limit = MathF.Max(simplify * 16f, MaxRetryCollinearTolerance);
+        for (; simplify <= limit; simplify *= 2f)
+        {
+            var simpleOuter = SimplifyContour(outerLoop, simplify);
+            if (simpleOuter.Count < 3)
+                break;
+
+            var simpleHoles = new List<List<Vector2d>>(holeLoops.Count);
+            var valid = true;
+            foreach (var hole in holeLoops)
+            {
+                var simpleHole = SimplifyContour(hole.Points, simplify);
+                if (simpleHole.Count < 3)
+                {
+                    valid = false;
+                    break;
+                }
+
+                simpleHoles.Add(ToSkeletonPoints(simpleHole));
+            }
+
+            if (!valid)
+                continue;
+
+            try
+            {
+                var skeleton = SkeletonBuilder.Build(ToSkeletonPoints(simpleOuter), simpleHoles.Count > 0 ? simpleHoles : null);
+                Log.Debug($"StraightSkeleton contour {outerIndex + 1} simplified to {simplify:R} for a stable skeleton.", this);
+                return skeleton;
+            }
+            catch (Exception exception)
+            {
+                failure = exception;
+            }
+        }
+
+        return null;
+    }
+
+    private static List<Vector2> SimplifyContour(List<Vector2> points, float tolerance)
+    {
+        var copy = new List<Vector2>(points);
+        RemoveCollinearPoints(copy, tolerance);
+        return copy;
+    }
+
     private List<Loop> CollectLoops(Geometry source, float tolerance, List<string> warnings)
     {
         var loops = new List<Loop>();
@@ -389,7 +451,7 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
         while (loop.Points.Count > 1 && Vector2.DistanceSquared(loop.Points[0], loop.Points[^1]) <= 1e-12f)
             loop.Points.RemoveAt(loop.Points.Count - 1);
 
-        RemoveCollinearPoints(loop.Points);
+        RemoveCollinearPoints(loop.Points, CollinearTolerance);
         if (loop.Points.Count < 3)
         {
             warnings.Add($"Primitive {primitive} has fewer than three points and was skipped.");
@@ -406,7 +468,7 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
         loops.Add(loop);
     }
 
-    private static void RemoveCollinearPoints(List<Vector2> points)
+    private static void RemoveCollinearPoints(List<Vector2> points, float tolerance)
     {
         var changed = true;
         while (changed && points.Count > 3)
@@ -421,7 +483,7 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
                 var b = next - current;
                 var cross = MathF.Abs(a.X * b.Y - a.Y * b.X);
                 var length = a.Length() + b.Length();
-                if (cross > length * 1e-5f || Vector2.Dot(a, b) <= 0)
+                if (cross > length * tolerance || Vector2.Dot(a, b) <= 0)
                     continue;
 
                 points.RemoveAt(index);
@@ -591,6 +653,9 @@ internal sealed class StraightSkeleton : Instance<StraightSkeleton>, IStatusProv
 
     private const string SkeletonTimeAttribute = "SkeletonTime";
     private const float TimeEpsilon = 1e-6f;
+    private const float CollinearTolerance = 1e-5f;
+    private const float MinRetryCollinearTolerance = 5e-4f;
+    private const float MaxRetryCollinearTolerance = 8e-3f;
 
     private readonly AsyncComputation<Geometry> _asyncComputation = new();
     private volatile string _buildStatus = string.Empty;
