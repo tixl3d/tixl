@@ -1,0 +1,28 @@
+{
+  "FormatVersion": 3,
+  "Id": "cde60bf0-9ed7-4505-9338-3a397befacb0"/*StraightSkeleton*/,
+  "Inputs": [
+    {
+      "Id": "13ffec39-19ec-4d3d-8425-2f82412651be"/*Async*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "309ed1ce-5fff-46e4-9e2b-9bb9d51195e5"/*Height*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "348a2532-139d-4bc1-80b7-c6051a6353cd"/*Tolerance*/,
+      "DefaultValue": 0.002
+    },
+    {
+      "Id": "52990565-f0ab-45cf-923b-b1a7cd5bdb07"/*Output*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "76653262-91d0-41e4-b807-efcd34dd86f9"/*Curves*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

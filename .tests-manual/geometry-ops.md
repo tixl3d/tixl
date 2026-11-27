@@ -517,6 +517,31 @@ Connect [StringToCurves] (text `TiXL`) -> [MergeCurves] -> [ExtrudeCurves] and l
 - Xor turns overlaps into holes; Intersect keeps only the overlapping areas.
 - A [CubeGeometry] as input passes through with the warning that there are no closed curves.
 
+## Step: Simple extrude without triangulation
+
+**Action:**
+Connect two overlapping `[NGonCurves]` through `[CombineGeometry]` -> `[MergeCurves]`, insert `[Extrude]` and look at
+its Stats. Compare the same input through `[ExtrudeCurves]`. Then switch `Front`, `Back` and `Sides` off one at a time
+and set `Depth` to 0.
+
+**Expected:**
+- `[Extrude]` outputs 2 cap polygons plus one quad per outline segment (12 polygons for a 10-point outline); no
+  triangles.
+- Boundary edges 0, non-manifold edges 0, and Volume = outline area × Depth; the solid runs from Z 0 to −Depth.
+- Caps stay single N-gons and walls stay quads, so a `[BevelGeometry]` after it bevels whole edges instead of triangle
+  edges.
+- `Front`, `Back` and `Sides` off remove the respective faces; `Depth` 0 gives the flat caps only; a `[CubeGeometry]`
+  as input reports “No closed curves to extrude.”
+- A glyph with a hole (`o`) renders with a real through-hole: the hole contour is spliced into the outline, so the cap
+  stays one N-gon. The stats stay watertight (0 boundary and 0 non-manifold edges) and Volume is that of the ring; the
+  two bridge slits show as thin seams on the caps. An `8` has two holes. `[ExtrudeCurves]` gives the same holes without
+  the slits.
+- The two bridge edges per hole carry the `IsBridge` edge attribute and no walls are built there; a shape without
+  holes has no `IsBridge` attribute and 0 boundary edges.
+- A concave outline renders without folds: `[GeometryToMesh]` triangulates concave N-gons with a constrained Delaunay
+  triangulation instead of a fan, so a cap like the merged outline keeps its notch. Compare with `[TriangulateGeometry]`
+  on the same geometry, which still fans and folds there.
+
 ## Step: Weld duplicated points
 
 **Action:**

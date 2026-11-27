@@ -2288,11 +2288,17 @@ internal static class DebugServer
     /** Polygon edges with a face on one side only; 0 for a closed surface. */
     private static int CountBoundaryEdges(T3.Core.DataTypes.Geometry geometry)
     {
+        var edges = geometry.Edges.Edges;
+        geometry.Attributes.TryGet<float>(T3.Core.DataTypes.GeometryAttributeNames.IsBridge, T3.Core.DataTypes.AttributeDomain.Edge,
+                                          out var isBridge);
         var count = 0;
-        foreach (var edge in geometry.Edges.Edges)
+        for (var edgeIndex = 0; edgeIndex < edges.Length; edgeIndex++)
         {
-            if (edge.Face1 < 0)
-                count++;
+            // A bridge edge is used twice by the same cap; it joins a hole to the outline instead of opening the surface
+            if (edges[edgeIndex].Face1 >= 0 || isBridge != null && isBridge.Values[edgeIndex] != 0)
+                continue;
+
+            count++;
         }
 
         return count;

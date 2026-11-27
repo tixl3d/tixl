@@ -11,7 +11,7 @@ namespace Lib.geometry.convert;
 /// vertices that one-vertex-per-corner compilation produces.
 /// </summary>
 [Guid("4fea8c0e-cb7f-41fe-a410-df1d3886bf98")]
-[ExportDependencies("LibTessDotNet.dll")]
+[ExportDependencies("LibTessDotNet.dll", "CDT.Core.dll")]
 internal sealed class GeometryToMesh : Instance<GeometryToMesh>, IStatusProvider
 {
     [Output(Guid = "4bf00eb5-a39c-4567-a81e-46c2276d1418")]

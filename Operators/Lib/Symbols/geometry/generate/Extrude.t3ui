@@ -1,0 +1,67 @@
+{
+  "FormatVersion": 3,
+  "Id": "29b77355-3eb3-4d56-a75d-6d129c2e684e"/*Extrude*/,
+  "Description": "Extrudes the closed curves of a Geometry straight along -Z into a solid, keeping the caps as N-gons and the walls as quads.\n\nUnlike [ExtrudeCurves] it does not fill, resolve overlaps, bevel or triangulate: every contour becomes one cap polygon, so a shape can be modelled further without its outline being split into triangles. Nested contours become holes by splicing each one into its outline at the closest pair of points, like a keyhole: the part keeps one cap N-gon, the hole is cut correctly, and the two bridge edges carry the IsBridge edge attribute and get no walls. Contours are oriented by nesting (outlines counter-clockwise, holes clockwise); overlapping contours are not resolved, so use [MergeCurves] first. Only closed curves are extruded; open curves and polygons are ignored. Depth 0 keeps the flat caps only.\n\nAKA: extrude shape, extrude outlines, solid from curves",
+  "InputUis": [
+    {
+      "InputId": "5722145b-471e-4fa5-95c4-0308b155a096"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Maximum deviation when flattening curves into straight segments. Smaller values give smoother outlines and more walls.",
+      "Scale": 1E-05,
+      "Format": "{0:0.0000}"
+    },
+    {
+      "InputId": "5be214cd-c690-406d-b5bc-32dd1e36d56f"/*Back*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 180.0
+      },
+      "Description": "Generates the back cap, Depth below the front."
+    },
+    {
+      "InputId": "6256a7bd-bd12-4d43-a5f2-21d0c674e225"/*Depth*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Extrusion depth along -Z. 0 extrudes the flat caps only."
+    },
+    {
+      "InputId": "7c148d6e-84b6-43f5-8a09-9f88d6183b48"/*Curves*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d827b3e9-301b-4024-9ee4-7ea3f7a1a69f"/*Front*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Generates the front cap at the input curves' positions."
+    },
+    {
+      "InputId": "f3d1bfbd-349b-494a-b5a3-4ce8583c45fb"/*Sides*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Generates the quad walls between the caps. Only used with Depth > 0."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2cadce4a-3e9d-4764-9d12-f078fe8f46d1"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

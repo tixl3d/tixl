@@ -1,0 +1,32 @@
+{
+  "FormatVersion": 3,
+  "Id": "29b77355-3eb3-4d56-a75d-6d129c2e684e"/*Extrude*/,
+  "Inputs": [
+    {
+      "Id": "5722145b-471e-4fa5-95c4-0308b155a096"/*Tolerance*/,
+      "DefaultValue": 0.002
+    },
+    {
+      "Id": "5be214cd-c690-406d-b5bc-32dd1e36d56f"/*Back*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "6256a7bd-bd12-4d43-a5f2-21d0c674e225"/*Depth*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "7c148d6e-84b6-43f5-8a09-9f88d6183b48"/*Curves*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d827b3e9-301b-4024-9ee4-7ea3f7a1a69f"/*Front*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "f3d1bfbd-349b-494a-b5a3-4ce8583c45fb"/*Sides*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

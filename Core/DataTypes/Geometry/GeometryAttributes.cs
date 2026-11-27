@@ -67,6 +67,12 @@ public static class GeometryAttributeNames
     /// <summary>Primitive (or Face) domain, 1 on extrusion walls and bevels ([ExtrudeCurves]), 0 on caps.</summary>
     public const string IsSide = "IsSide";
 
+    /// <summary>
+    /// Edge domain, 1 on the artificial bridge edges that splice nested contours into one keyhole outline
+    /// ([Extrude]); no walls are built there.
+    /// </summary>
+    public const string IsBridge = "IsBridge";
+
     /// <summary>Primitive (or Face) domain, 1 on the inset ring faces ([FillCurves]), 0 on the cap.</summary>
     public const string IsInset = "IsInset";
 

@@ -10,6 +10,7 @@ namespace Lib.geometry.convert;
 /// point transforms the whole chunk on the GPU.
 /// </summary>
 [Guid("c7e3a9f1-5d28-4b64-8a0f-2e9c6b1d7f35")]
+[ExportDependencies("CDT.Core.dll")]
 internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
 {
     [Output(Guid = "3a8f1c5e-b2d7-4e90-9c46-d1f5a7e3b082")]
