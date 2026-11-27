@@ -106,43 +106,18 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         newDestinationProject.SymbolUiDict.TryAdd(id, symbolUi);
         newDestinationProject.FilePathHandlers.TryAdd(id, symbolPathHandler);
         
-        // Copy thumbnails...
-        {
-            var sourceFilePath = Path.Combine(Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder, id + ".png");
-            if (File.Exists(sourceFilePath))
-            {
-                var targetFolder = Path.Combine(newDestinationProject.Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder);
-                var targetFilePath = Path.Combine(targetFolder, id + ".png");
-                Directory.CreateDirectory(targetFolder);
-                try
-                {
-                    File.Move(sourceFilePath, targetFilePath);
-                }
-                catch (Exception e)
-                {
-                    Log.Warning("Can't move thumbnail " + e.Message);
-                }
-            }
-        }
+        // The symbol's thumbnail, its presets and snapshots, and their thumbnails live in the package's .meta folder
+        var sourceThumbnailFolder = Path.Combine(Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder);
+        var targetThumbnailFolder = Path.Combine(newDestinationProject.Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder);
+        MoveMetaFile(Path.Combine(sourceThumbnailFolder, id + ".png"), Path.Combine(targetThumbnailFolder, id + ".png"));
 
-        // Move variations...
+        var targetVariationsFilePath = SymbolVariationPool.GetVariationFilePathInPackage(newDestinationProject.Folder, id);
+        MoveMetaFile(SymbolVariationPool.GetVariationFilePathInPackage(Folder, id), targetVariationsFilePath);
+        foreach (var variation in SymbolVariationPool.LoadVariationsFromFile(targetVariationsFilePath, id))
         {
-            var sourceFilePath = SymbolVariationPool.GetVariationFilePathInPackage(Folder, id);
-            if (File.Exists(sourceFilePath))
-            {
-                var targetFilePath = SymbolVariationPool.GetVariationFilePathInPackage(newDestinationProject.Folder, id);
-                try
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(targetFilePath)!);
-                    File.Move(sourceFilePath, targetFilePath);
-                }
-                catch (Exception e)
-                {
-                    Log.Warning("Can't move variations " + e.Message);
-                }
-            }
+            var thumbnailFileName = variation.Id + ".png";
+            MoveMetaFile(Path.Combine(sourceThumbnailFolder, thumbnailFileName), Path.Combine(targetThumbnailFolder, thumbnailFileName));
         }
-
 
         // move files to new project - incorrect paths will be corrected by the loading process
         symbolPathHandler.UpdateFromSymbol();
@@ -152,6 +127,23 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         symbolUi.FlagAsModified();
     }
 
+
+    /** The moved symbol owns its meta files, so a stale file at the target is replaced. */
+    private static void MoveMetaFile(string sourceFilePath, string targetFilePath)
+    {
+        if (!File.Exists(sourceFilePath))
+            return;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(targetFilePath)!);
+            File.Move(sourceFilePath, targetFilePath, overwrite: true);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            Log.Warning($"Can't move {Path.GetFileName(sourceFilePath)} with its operator: {e.Message}");
+        }
+    }
 
     protected override IEnumerable<string> SymbolUiSearchFiles => FindFilesOfType(SymbolUiExtension);
 
