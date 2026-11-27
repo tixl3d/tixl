@@ -131,6 +131,23 @@ internal abstract class IntVectorInputValueUi<T> : InputValueUi<T>
     public float Scale  => 0.1f;
     public bool ClampMin;
     public bool ClampMax;
+
+    /// <summary>The range to draw with: the input's own, unless the drawn op's code gives it one (<see cref="InputArea.RangeOverride"/>).</summary>
+    protected void GetDrawRange(out int min, out int max, out bool clampMin, out bool clampMax)
+    {
+        if (InputArea.RangeOverride is { } annotated)
+        {
+            min = (int)MathF.Round(annotated.Min);
+            max = (int)MathF.Round(annotated.Max);
+            clampMin = clampMax = annotated.Clamp;
+            return;
+        }
+
+        min = Min;
+        max = Max;
+        clampMin = ClampMin;
+        clampMax = ClampMax;
+    }
         
     protected readonly int[] IntComponents;
 

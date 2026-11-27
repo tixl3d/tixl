@@ -393,7 +393,7 @@
     },
     {
       "ChildId": "93ddefef-0c9a-4b1b-aa80-a566d346b762",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "SectionId": "6b78264a-ea40-4ba8-845e-be3fcb1868c9",
       "Position": {
         "X": 737.10144,

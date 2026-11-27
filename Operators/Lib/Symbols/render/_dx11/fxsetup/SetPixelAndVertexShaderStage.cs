@@ -45,7 +45,12 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
             vsStage.SetShaderResources(_shaderResourceViews.Length, _additionalSrvs.Length, _additionalSrvs);
         }
 
-        if (ps != null)
+        // Depth-only shadow passes need no pixel shader, unless its discards shape the silhouette.
+        if (context.RenderPass.IsShadowPass && SkipPixelShaderInShadowPass.GetValue(context))
+        {
+            psStage.Set(null);
+        }
+        else if (ps != null)
         {
             psStage.Set(ps);
             psStage.SetSamplers(0, _samplerStates.Length, _samplerStates);
@@ -112,4 +117,7 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
 
     [Input(Guid = "60bae25c-64fe-40df-a2e6-a99297a92e0b")]
     public readonly MultiInputSlot<SamplerState> SamplerStates = new();
+
+    [Input(Guid = "18823709-a71d-43e3-9b4f-966ce56b745c")]
+    public readonly InputSlot<bool> SkipPixelShaderInShadowPass = new();
 }

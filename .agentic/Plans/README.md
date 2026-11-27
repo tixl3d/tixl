@@ -160,6 +160,7 @@ These matter more than any filing decision.
 | [Plan_UiTimelapse](Plan_UiTimelapse.md) | Nothing shipped | Its encoder gate looks set to disable it on the Radeon machine, since the probe has no VAAPI candidate (not run). Cursor code paths are stale |
 | [Plan_CodeInputs](Plan_CodeInputs.md) | Nothing shipped; written 2026-11-20 | `UsageType.Code` + `CodeLanguage` for snippet inputs; `// A: Scale 0..1` comments relabel A–D per instance; highlighting later. Syntax and 4 other decisions open |
 | [Plan_CatAnimationDemo](Plan_CatAnimationDemo.md) | Nothing shipped; written 2026-11-23 | Rigify cat on top of the glTF pose ops: distance-driven cycle phase, gait blending, quadruped foot IK with stateless locking, PBD powered ragdoll + tail, GPU verlet whiskers. Phase 0 = GltfAnimation verification items. 5 questions open |
+| [Plan_ShadertoyAndIsfImport](Plan_ShadertoyAndIsfImport.md) | Nothing shipped; research 2026-11-27 | Slang `-allow-glsl` compiles verbatim Shadertoy/ISF GLSL in a TiXL template (tested), so no translator. Opt-in marker per shader, `[ShadertoyShader]` op, ISF files imported as generated symbols with typed inputs. 5 decisions open |
 
 ## Parked
 

@@ -28,6 +28,7 @@ using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.UiModel.Selection;
 using T3.Serialization;
 
@@ -168,6 +169,14 @@ public abstract class InputValueUi<T> : IInputUi
         var rowTopLeft = ImGui.GetCursorScreenPos();
         var rowRight = rowTopLeft.X + ImGui.GetContentRegionAvail().X;
 
+        // The op's code can label this input and give it a range, e.g. "// A: Scale 0..1" in a custom shader.
+        var annotations = CodeParameterAnnotations.GetFor(inputSlot.Parent);
+        var isAnnotated = annotations.TryGet(input.Name, out var annotation);
+        var nameButtonLabel = isAnnotated && annotation.ButtonLabel.Length > 0
+                                  ? annotation.ButtonLabel
+                                  : $"{input.Name.AddSpacesForImGuiOutput()}##ParamName";
+        InputArea.RangeOverride = isAnnotated && annotation.HasRange ? annotation : null;
+
         if (inputSlot.HasInputConnections)
         {
             editState = DrawConnectedParameter();
@@ -180,6 +189,8 @@ public abstract class InputValueUi<T> : IInputUi
         {
             editState = DrawNormalParameter();
         }
+
+        InputArea.RangeOverride = null;
 
         var rowRect = new ImRect(rowTopLeft,
                                  new Vector2(rowRight, ImGui.GetItemRectMax().Y));
@@ -261,7 +272,7 @@ public abstract class InputValueUi<T> : IInputUi
                 // Draw Name
                 ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1.0f, 0.5f));
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
-                ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+                ImGui.Button(nameButtonLabel, new Vector2(ParameterNameWidth, 0.0f));
                 ImGui.PopStyleColor();
                 /*if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
                 {
@@ -303,6 +314,8 @@ public abstract class InputValueUi<T> : IInputUi
                                                         {
                                                             ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                                                         }
+
+                                                        DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
 
                                                         if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                                                             editState = InputEditStateFlags.ShowOptions;
@@ -402,7 +415,7 @@ public abstract class InputValueUi<T> : IInputUi
 
             // Draw Name
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1.0f, 0.5f));
-            var isClicked = ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+            var isClicked = ImGui.Button(nameButtonLabel, new Vector2(ParameterNameWidth, 0.0f));
             CustomComponents.ContextMenuForItem
                 (() =>
                  {
@@ -453,12 +466,14 @@ public abstract class InputValueUi<T> : IInputUi
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
 
+                     DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
+
                      if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
                  });
             ImGui.PopStyleVar();
 
-            DrawInputTooltipAndResetIcon(input);
+            DrawInputTooltipAndResetIcon(input, null, isAnnotated ? annotation : null);
 
             if (isClicked)
             {
@@ -511,7 +526,7 @@ public abstract class InputValueUi<T> : IInputUi
                 hasStyleCount = 1;
             }
 
-            var isClicked = ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+            var isClicked = ImGui.Button(nameButtonLabel, new Vector2(ParameterNameWidth, 0.0f));
             var nameButtonHovered = ImGui.IsItemHovered();
 
             if (hasStyleCount > 0)
@@ -525,7 +540,7 @@ public abstract class InputValueUi<T> : IInputUi
             var hasSkillHint = SkillQuestParameterHint.TryGetVisible(symbolChildUi.Id, input.InputDefinition.Id,
                                                                      out var skillHint, out var skillAlpha);
 
-            DrawInputTooltipAndResetIcon(input, hasSkillHint ? skillHint : null);
+            DrawInputTooltipAndResetIcon(input, hasSkillHint ? skillHint : null, isAnnotated ? annotation : null);
 
             var revertIconWouldShow = nameButtonHovered && !input.IsDefault;
             if (hasSkillHint && !revertIconWouldShow)
@@ -612,6 +627,8 @@ public abstract class InputValueUi<T> : IInputUi
                      {
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
+
+                     DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
 
                      if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
@@ -704,6 +721,23 @@ public abstract class InputValueUi<T> : IInputUi
 
     private const Relevancy DefaultRelevancy = Relevancy.Optional;
 
+    /// <summary>Toggles a smart title that shows just this input's value on all instances of the symbol.</summary>
+    private static void DrawUseAsTitleMenuItem(Symbol symbol, Guid inputId)
+    {
+        if (!symbol.TryGetSymbolUi(out var symbolUi))
+            return;
+
+        var isChecked = symbolUi.SmartTitle != null && symbolUi.SmartTitle.IsSingleInput(inputId);
+        if (!CustomComponents.DrawMenuItem(_useAsTitleItemId, Icon.None, "Use as Title",
+                                           isChecked: isChecked,
+                                           isEnabled: !symbol.SymbolPackage.IsReadOnly))
+            return;
+
+        var newTitle = isChecked ? null : SmartTitle.ForInput(inputId);
+        UndoRedoStack.AddAndExecute(new ChangeSmartTitleCommand(symbol.Id, symbolUi.SmartTitle, newTitle));
+    }
+
+    private static readonly int _useAsTitleItemId = "useParamAsTitle".GetHashCode();
     private static readonly int _animateItemId = "animateParam".GetHashCode();
     private static readonly int _createConnectedItemId = "createConnectedParam".GetHashCode();
     private static readonly int _extractItemId = "extractParam".GetHashCode();
@@ -718,13 +752,24 @@ public abstract class InputValueUi<T> : IInputUi
     private static readonly int _insertKeyframeItemId = "insertKeyframe".GetHashCode();
     private static readonly int _removeAnimationItemId = "removeAnimation".GetHashCode();
 
+    /// <param name="annotation">What the op's code says about this input; its tooltip goes first.</param>
     private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input,
-                                              SkillQuestParameterHint.Hint? skillQuestHint = null)
+                                              SkillQuestParameterHint.Hint? skillQuestHint = null,
+                                              CodeParameterAnnotations.Entry? annotation = null)
     {
         if (!ImGui.IsItemHovered())
             return;
 
         var text = Description ?? string.Empty;
+        if (annotation is { } codeNote)
+        {
+            var note = codeNote.IsUnused ? "Not used by the code." : codeNote.Tooltip;
+            if (codeNote.IsUnused && codeNote.Tooltip.Length > 0)
+                note = $"{note} {codeNote.Tooltip}";
+
+            if (note.Length > 0)
+                text = text.Length > 0 ? $"{note}\n\n{text}" : note;
+        }
 
         // In the snapshot control view the name-click reverts to the active snapshot's value,
         // matching the row highlight (which compares against the snapshot, not the default)
@@ -792,6 +837,12 @@ internal static class InputArea
         ImGui.SetCursorScreenPos(new Vector2(leftEdge, cursor.Y));
         ImGui.SetNextItemWidth(MathF.Max(1, rightEdge - leftEdge));
     }
+
+    /// <summary>
+    /// A slider range the op's code gives the drawn input (see <see cref="CodeParameterAnnotations"/>), used instead of the
+    /// input's own. Set around drawing one parameter row and reset to null afterwards.
+    /// </summary>
+    internal static CodeParameterAnnotations.Entry? RangeOverride;
 
     /// <summary>
     /// Context-menu toggle for per-parameter snapshot control. Hidden for parameters the

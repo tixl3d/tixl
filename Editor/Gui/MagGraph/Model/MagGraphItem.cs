@@ -1,7 +1,9 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.OpUis;
@@ -40,6 +42,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public OpUiBinding? OpUiBinding;
     public MeasuredTextWidth MeasuredLabel;
+    public MeasuredTextWidth MeasuredSmartTitle;
+    private SmartTitle.Cache? _smartTitleCache;
     
     public ImRect Area => ImRect.RectWithSize(PosOnCanvas, Size);
     public ImRect VerticalStackArea;
@@ -96,6 +100,43 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
                        };
         }
     }
+
+    /// <summary>
+    /// The symbol's smart title filled in with this child's values, drawn small below the operator name. Operators
+    /// that load a file show its name unless their symbol defines a smart title. Null for renamed operators (their
+    /// name already describes them) and when the title can't be shown.
+    /// </summary>
+    public string? SmartTitleText
+    {
+        get
+        {
+            if (Variant != Variants.Operator
+                || SymbolChild == null
+                || SymbolChild.HasCustomName)
+                return null;
+
+            if (SymbolUi?.SmartTitle is { } smartTitle)
+            {
+                _smartTitleCache ??= new SmartTitle.Cache();
+                return _smartTitleCache.GetText(smartTitle, SymbolChild, Instance);
+            }
+
+            if (Instance is not IDescriptiveFilename describedFile)
+                return null;
+
+            var path = describedFile.SourcePathSlot.GetCurrentValue();
+            if (!string.Equals(path, _titledFilePath))
+            {
+                _titledFilePath = path;
+                _titledFileName = string.IsNullOrEmpty(path) ? null : Path.GetFileName(path);
+            }
+
+            return _titledFileName;
+        }
+    }
+
+    private string? _titledFilePath;
+    private string? _titledFileName;
 
     // public bool IsSelected(NodeSelection nodeSelection)
     // {

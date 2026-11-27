@@ -1,0 +1,48 @@
+{
+  "FormatVersion": 3,
+  "Id": "dcaba500-d78b-4193-9235-7666ab332385"/*_DrawChunksIndirect*/,
+  "Description": "Internal helper that draws mesh chunks at points with one indexed multi-draw indirect command.\n\nA compute pass writes one draw record per point (the index range of the chunk it references), so the draw needs neither a readback nor a per-face table, and vertices are reused within each chunk. The records are rebuilt when the mesh, the chunk indices or the point count change; ForceUpdate rebuilds them every frame.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "595ea09b-f995-4359-8acc-3cb5ce2fe5fb"/*ChunkIndices*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "a5e83232-0ece-4f14-b2a3-6965b44a95e4"/*ForceUpdate*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "b79e3a8e-ceac-4d4d-998d-27f125217896"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "dea56386-8447-4f3e-8c1a-bef2ec4f3795"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b66ff964-72bf-41e3-8f1c-5f2d567b5b17"/*Output*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

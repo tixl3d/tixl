@@ -146,6 +146,7 @@ public sealed partial class SymbolUi
         newSymbolUi.WindowLayout = WindowLayout;
         newSymbolUi.WindowLayoutImGuiVersion = WindowLayoutImGuiVersion;
         newSymbolUi.WindowVisibility = WindowVisibility == null ? null : new Dictionary<string, bool>(WindowVisibility);
+        newSymbolUi.SmartTitle = hasIdMap ? SmartTitle?.RemapInputIds(oldToNewIds) : SmartTitle;
 
         return newSymbolUi;
     }

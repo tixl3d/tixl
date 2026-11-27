@@ -12,7 +12,7 @@
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "float d= 1 - length(uv - 0.5 - Offset * float2(1,-1));\nd = ApplyGainAndBias(d, GainAndBias);\n\nc= ImageA.Sample(Sampler, uv);\nc.rgb*= Gradient.SampleLevel( ClampedSampler, float2(d, 0.5),0).rgb; "
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A,B,C,D: -\nfloat d= 1 - length(uv - 0.5 - Offset * float2(1,-1));\nd = ApplyGainAndBias(d, GainAndBias);\n\nc= ImageA.Sample(Sampler, uv);\nc.rgb*= Gradient.SampleLevel( ClampedSampler, float2(d, 0.5),0).rgb; "
         }
       }
     },
@@ -36,7 +36,7 @@
             "X": 0.43500006,
             "Y": 0.735
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv  );\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));"
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A,B,C,D: -\n// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv  );\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));"
         }
       }
     },
@@ -92,7 +92,7 @@
               ]
             }
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A simple color grading using the gradient\n\nc= ImageA.Sample(Sampler, uv);\n\nc = float4(\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.r, 0.5),0).r),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.g, 0.5),0).g),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.b, 0.5),0).b),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.a, 0.5),0).a)\n);\n"
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Offset,A,B,C,D: -\n// A simple color grading using the gradient\n\nc= ImageA.Sample(Sampler, uv);\n\nc = float4(\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.r, 0.5),0).r),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.g, 0.5),0).g),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.b, 0.5),0).b),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.a, 0.5),0).a)\n);\n"
         }
       }
     },
@@ -163,7 +163,7 @@
               ]
             }
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv );\n\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));\nc.rgb *= SampleGradient(d).rgb;\n"
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A,B,C,D: -\n// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv );\n\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));\nc.rgb *= SampleGradient(d).rgb;\n"
         }
       }
     },
@@ -205,7 +205,7 @@
               ]
             }
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\nh.z=ApplyGainAndBias(SampleGradient(h.z).x, GainAndBias);\nc.rgb=hsv2rgb(h);\n",
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Offset,A,B,C,D: -\nc= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\nh.z=ApplyGainAndBias(SampleGradient(h.z).x, GainAndBias);\nc.rgb=hsv2rgb(h);\n",
           "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
         }
       }
@@ -298,7 +298,7 @@
               ]
             }
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat4 c0=c;\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\n\nc.rgb=SampleGradient(h.x).rgb;\nc.rgb=max(c.rgb,0);\nc.rgb=lerp(dot(c0.rgb,1./3),c.rgb,h.y)*h.z;",
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Offset,A,B,C,D: -\nc= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat4 c0=c;\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\n\nc.rgb=SampleGradient(h.x).rgb;\nc.rgb=max(c.rgb,0);\nc.rgb=lerp(dot(c0.rgb,1./3),c.rgb,h.y)*h.z;",
           "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
         }
       }
@@ -320,7 +320,7 @@
               "Interpolation": "Linear",
               "Steps": [
                 {
-                  "Id": "3609e318-08af-498f-a665-4e31a60fcf41",
+                  "Id": "0bf40424-4f04-4953-834c-b14ba0511f50",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 0.0,
@@ -330,7 +330,7 @@
                   }
                 },
                 {
-                  "Id": "bf71d868-d0e6-4d5f-bf2e-43ab68d65e36",
+                  "Id": "60e4f823-6f46-4fe2-9694-1185c45b8f7b",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 1.0,
@@ -342,7 +342,7 @@
               ]
             }
           },
-          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Visualize a RenderTarget velocity\n// rg-detec\nc= ImageA.Sample(Sampler, uv);\nc.a= 1;\n\nc.rg *=A;\nc.rgb+=0.5;"
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A: Amount 0..1000\n// Offset,B,C,D: -\n// Visualize a RenderTarget velocity\n// rg-detec\nc= ImageA.Sample(Sampler, uv);\nc.a= 1;\n\nc.rg *=A;\nc.rgb+=0.5;"
         }
       }
     }

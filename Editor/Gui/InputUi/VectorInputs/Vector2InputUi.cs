@@ -36,7 +36,8 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
         var showControl = (controlRatio > 1f && UseVec2Control != Vec2Controls.None);
         var rightPadding = showControl ? ImGui.GetFrameHeight() * controlRatio : 0;
 
-        var inputEditState = VectorValueEdit.Draw(FloatComponents, Min, Max, Scale, ClampMin, ClampMax, rightPadding , Format);
+        GetDrawRange(out var rangeMin, out var rangeMax, out var scale, out var clampMin, out var clampMax);
+        var inputEditState = VectorValueEdit.Draw(FloatComponents, rangeMin, rangeMax, scale, clampMin, clampMax, rightPadding , Format);
         var shouldClamp = false;
             
         if (showControl)
@@ -51,7 +52,7 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
                                         ? UiColors.BackgroundActive.Fade(0.4f)
                                         : (UiColors.BackgroundButton.Fade(ImGui.IsItemHovered() ? 1 : 0.5f));
             drawList.AddRectFilled(min, max, backgroundColor);
-            var normalizedVec = ((float2Value - new Vector2(Min)) / (Max - Min) - new Vector2(0.5f)) * new Vector2(controlRatio,1) + new Vector2(0.5f);
+            var normalizedVec = ((float2Value - new Vector2(rangeMin)) / (rangeMax - rangeMin) - new Vector2(0.5f)) * new Vector2(controlRatio,1) + new Vector2(0.5f);
             var valueColor = input == null ? UiColors.StatusAutomated
                         : input.IsDefault ? UiColors.TextMuted
                         : UiColors.ForegroundFull;
@@ -158,8 +159,8 @@ internal sealed class Vector2InputUi : FloatVectorInputValueUi<Vector2>
 
                 if (shouldClamp)
                 {
-                    FloatComponents[0] = FloatComponents[0].Clamp(Min, Max);
-                    FloatComponents[1] = FloatComponents[1].Clamp(Min, Max);
+                    FloatComponents[0] = FloatComponents[0].Clamp(rangeMin, rangeMax);
+                    FloatComponents[1] = FloatComponents[1].Clamp(rangeMin, rangeMax);
                 }
             }
 

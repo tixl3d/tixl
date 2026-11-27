@@ -90,7 +90,7 @@ Draw operators fall into two groups.
 
 **Stylized and specialized shading** has its own lighting and only knows point lights for now:
 
-- [DrawMeshCelShading], [DrawMeshHatched], [DrawMeshWithShadow]
+- [DrawMeshCelShading], [DrawMeshHatched]
 - [DrawMeshAtPoints2], [DrawMeshChunksAtPoints]
 - [DrawTubes], [DrawRibbons], [DrawPointSpritesShaded]
 
@@ -125,9 +125,21 @@ the effect's parameters.
 
 ## Shadows
 
-[SetShadow] renders a shadow map from a light position toward a target. Only [DrawMeshWithShadow] receives it,
-and the shadow is independent of the light operators: place it to match the light you want to cast shadows. For
-soft contact shadows on any geometry, [ScreenSpaceLighting] and ambient occlusion often work better.
+Put a [SetShadow] between the draws and a light, for example [DrawMesh] → [SetShadow] → [SpotLight]. It renders a
+shadow map from that light, and every [DrawMesh] inside it receives the shadow. All draws inside it cast shadows, but
+the other draw operators don't receive them. Without a [SetShadow], [DrawMesh] skips the shadow lookup and costs
+nothing extra.
+
+In its default **FromLight** mode the shadow follows the light picked in SourceLight: "1st Light" is the light operator
+closest above [SetShadow], "2nd Light" the next one further up. Picking a light by name instead keeps the shadow on
+that light when you add more lights. A spot light casts the shadow of its cone, a directional light covers AreaSize
+around LightTarget, and a point light shines toward LightTarget within FieldOfView. In **Manual** mode the shadow is
+cast from LightPosition toward LightTarget, independent of any light.
+
+ShadowColor and its alpha set how dark shadowed surfaces get. If lit surfaces show striped self-shadowing, increase
+NormalOffset, which counts in shadow map texels, or ShadowBias. To check resolution and depth range, look at the
+ShadowMap output. For soft contact shadows on any geometry, [ScreenSpaceLighting] and ambient occlusion often work
+better.
 
 ## Lights and blend modes
 

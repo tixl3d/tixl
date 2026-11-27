@@ -18,7 +18,8 @@ internal sealed class FloatInputUi : FloatVectorInputValueUi<float>
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref float value, bool readOnly)
     {
         FloatComponents[0] = value;
-        var inputEditState = VectorValueEdit.Draw(FloatComponents, Min, Max, Scale, ClampMin, ClampMax, 0, Format);
+        GetDrawRange(out var min, out var max, out var scale, out var clampMin, out var clampMax);
+        var inputEditState = VectorValueEdit.Draw(FloatComponents, min, max, scale, clampMin, clampMax, 0, Format);
         if (readOnly)
             return InputEditStateFlags.Nothing;
             
@@ -28,7 +29,8 @@ internal sealed class FloatInputUi : FloatVectorInputValueUi<float>
         
     public InputEditStateFlags DrawEditControl(ref float value)
     {
-        return SingleValueEdit.Draw(ref value, -Vector2.UnitX, Min, Max, ClampMin, ClampMax, Scale);
+        GetDrawRange(out var min, out var max, out var scale, out var clampMin, out var clampMax);
+        return SingleValueEdit.Draw(ref value, -Vector2.UnitX, min, max, clampMin, clampMax, scale);
     }
         
     public override void ApplyValueToAnimation(IInputSlot inputSlot, InputValue inputValue, Animator animator, double time)

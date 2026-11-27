@@ -32,7 +32,7 @@ internal sealed class SetSpotLight : Instance<SetSpotLight>, ITransformable
                                      Decay.GetValue(context),
                                      ConeAngle.GetValue(context),
                                      Softness.GetValue(context));
-        var wasPushed = lights.Push(light);
+        var wasPushed = lights.Push(light, this);
 
         Command.GetValue(context); // Evaluate sub-tree
 

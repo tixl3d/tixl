@@ -1102,6 +1102,17 @@ internal static class DebugServer
                                 };
             if (child.HasCustomName)
                 childJson["name"] = child.Name;
+            else if (SymbolUiRegistry.TryGetSymbolUi(child.Symbol.Id, out var childSymbolUi)
+                     && childSymbolUi.SmartTitle != null)
+            {
+                Instance? titledInstance = null;
+                compositionInstance?.Children.TryGetChildInstance(childId, out titledInstance, allowCreate: false);
+                // What the graph node shows; absent when the title falls back to the symbol name.
+                var smartTitle = new SmartTitle.Cache().GetText(childSymbolUi.SmartTitle, child, titledInstance);
+                if (smartTitle != null)
+                    childJson["smartTitle"] = smartTitle;
+            }
+
             if (child.IsBypassed)
                 childJson["isBypassed"] = true;
             if (child.IsDisabled)

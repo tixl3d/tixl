@@ -21,7 +21,7 @@ internal sealed class SetPointLight : Instance<SetPointLight>
                                       Color.GetValue(context),
                                       Range.GetValue(context),
                                       Decay.GetValue(context));
-        var wasPushed = lights.Push(light);
+        var wasPushed = lights.Push(light, this);
 
         Command.GetValue(context); // Evaluate sub-tree
 

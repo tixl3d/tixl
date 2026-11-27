@@ -3,6 +3,9 @@
   "Id": "17b60044-9125-4961-8a79-ca94697b3726"/*Multiply*/,
   "Description": "Multiplies two floats.\n\nAKA: mul, times, product\n\nSee also: [Div], [Sum]",
   "SymbolTags": "1",
+  "SmartTitle": {
+    "Template": "* {5ae4bb07-4214-4ec3-a499-24d9f6d404a5}"
+  },
   "InputUis": [
     {
       "InputId": "372288fa-3794-47ba-9f91-59240513217a"/*A*/,

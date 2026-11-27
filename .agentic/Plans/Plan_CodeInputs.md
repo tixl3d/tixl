@@ -1,6 +1,6 @@
 # Code inputs: annotated parameters and syntax highlighting
 
-Status: **Phase 1 done** (2026-11-21), plus error display and the code editor popup ahead of Phase 4 (2026-11-22,
+Status: **Phase 1 done** (2026-11-21), **Phase 2 built** (2026-11-27), plus error display and the code editor popup ahead of Phase 4 (2026-11-22,
 built and unit-tested, not yet tried in the editor). Drafted 2026-11-20.
 
 ## Goal
@@ -108,7 +108,16 @@ One annotation per line, anywhere in the snippet:
 - Switch the ops in scope from `Multiline` to `Code` with their language in `.t3ui`.
 - Done when: all snippet ops load, edit and save as before; `.t3ui` diff is only the usage/language fields.
 
-### Phase 2: Parameter annotations
+### Phase 2: Parameter annotations (built 2026-11-27, not yet tried in the editor)
+Done: `Editor/Gui/InputUi/SimpleInputUis/CodeParameterAnnotations` parses the code (cached per string in a
+`ConditionalWeakTable`, resolved once per op and frame). `InputValueUi.DrawParameterEdit` uses the label for all three
+name buttons as "Label (A)", shows the annotation's tooltip, labels inputs marked unused with `// C,D: -` as "- (C)"
+(decision 1, changed twice on 2026-11-27: dimming every unlabelled single-letter input also dimmed inputs the code used,
+and dimming marked ones hid whether they were at their default; several names may share any line), and sets `InputArea.RangeOverride` for the row; the numeric input UIs read their
+range through `GetDrawRange`. Syntax as recommended (decision 4). Parser checked against the edge cases by hand; there
+is no Editor unit-test project. Still open: popover labels, node labels, and annotating the bundled presets (none use
+the convention yet; the user starts by hand, then infer more from the code).
+
 - `CodeParameterAnnotations` parser + unit tests for the grammar (edge cases: missing range, reversed
   range, negative/decimal numbers, unknown input name, duplicate annotation = first wins).
 - Lookup + override in `DrawParameterEdit` and the float/int/vector edit controls.

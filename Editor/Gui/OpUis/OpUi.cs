@@ -35,11 +35,6 @@ public static class OpUi
                                                 ScalableCanvas canvas,
                                                 ref OpUiBinding? binding)
     {
-        if (instance is IDescriptiveFilename)
-        {
-            return DescriptiveUi.DrawChildUi(instance, drawList, selectableScreenRect, canvas, ref binding);
-        }
-        
         if (!_drawFunctionsForSymbolIds.TryGetValue(instance.Symbol.Id, out var drawFunction))
             return OpUi.CustomUiResult.None;
 

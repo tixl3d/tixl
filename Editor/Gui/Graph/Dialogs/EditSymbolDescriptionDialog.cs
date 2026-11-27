@@ -42,6 +42,10 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
                 _originalLinks.Clear();
                 foreach (var link in symbolUi.Links.Values)
                     _originalLinks.Add(link.Clone());
+
+                _originalSmartTitle = symbolUi.SmartTitle;
+                _smartTitleText = symbolUi.SmartTitle?.ToDisplayTemplate(symbolUi.Symbol) ?? string.Empty;
+                UpdateSmartTitleStatus(symbolUi.Symbol, symbolUi.SmartTitle, null);
             }
 
             var desc = symbolUi.Description ?? string.Empty;
@@ -55,6 +59,8 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
 
             ImGui.InputTextMultiline("##name", ref desc, 2000, new Vector2(-1, 400 * T3Ui.UiScaleFactor), ImGuiInputTextFlags.None);
             symbolUi.Description = desc;
+
+            DrawSmartTitleInput(symbolUi);
 
             ImGui.Text("Links...");
             foreach (var l in symbolUi.Links.Values)
@@ -109,6 +115,65 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
         EndDialog();
     }
 
+    private void DrawSmartTitleInput(SymbolUi symbolUi)
+    {
+        FormInputs.AddVerticalSpace();
+        ImGui.TextUnformatted("Smart Title");
+
+        var symbol = symbolUi.Symbol;
+        var changed = CustomComponents.DrawInputFieldWithPlaceholder("e.g. * {Factor}", ref _smartTitleText, 400 * T3Ui.UiScaleFactor);
+        _smartTitleText ??= string.Empty; // The clear button sets null
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(200 * T3Ui.UiScaleFactor);
+        if (ImGui.BeginCombo("##insertParameter", "Insert parameter"))
+        {
+            foreach (var inputDefinition in symbol.InputDefinitions)
+            {
+                if (ImGui.Selectable(inputDefinition.Name))
+                {
+                    _smartTitleText += "{" + inputDefinition.Name + "}";
+                    changed = true;
+                }
+            }
+
+            ImGui.EndCombo();
+        }
+
+        if (changed)
+        {
+            SmartTitle.TryFromDisplayTemplate(symbol, _smartTitleText, out var smartTitle, out var unknownName);
+            symbolUi.SmartTitle = smartTitle;
+            UpdateSmartTitleStatus(symbol, smartTitle, unknownName);
+        }
+
+        if (_smartTitleIsWarning)
+        {
+            ImGui.TextColored(UiColors.StatusWarning, _smartTitleStatus);
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted(_smartTitleStatus);
+            ImGui.PopStyleColor();
+        }
+
+        FormInputs.AddHint("Graph nodes of this operator show the smart title instead of its name, filled in with their "
+                           + "parameter values. Applies to all instances. Renamed operators keep their name.");
+        FormInputs.AddVerticalSpace();
+    }
+
+    /// <summary>Formats the status line once per edit instead of every frame.</summary>
+    private void UpdateSmartTitleStatus(Symbol symbol, SmartTitle smartTitle, string unknownName)
+    {
+        _smartTitleIsWarning = unknownName != null;
+        _smartTitleStatus = unknownName != null
+                                ? $"Unknown parameter \"{unknownName}\""
+                                : smartTitle != null
+                                    ? "Preview with default values: " + smartTitle.FormatWithDefaults(symbol)
+                                    : "No smart title: nodes show the operator name.";
+    }
+
     private void CommitEdits(SymbolUi symbolUi)
     {
         if (_editingSymbolId == Guid.Empty)
@@ -117,6 +182,14 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
         var currentDescription = symbolUi.Description ?? string.Empty;
         var descriptionChanged = currentDescription != _originalDescription;
         var linksChanged = !LinksEqual(_originalLinks, symbolUi.Links);
+        var smartTitleChanged = symbolUi.SmartTitle?.Template != _originalSmartTitle?.Template;
+
+        if (smartTitleChanged)
+        {
+            // Pushed without executing, like the description below: the model already holds the edit.
+            UndoRedoStack.Add(new ChangeSmartTitleCommand(_editingSymbolId, _originalSmartTitle, symbolUi.SmartTitle));
+            symbolUi.FlagAsModified();
+        }
 
         if (descriptionChanged || linksChanged)
         {
@@ -139,6 +212,7 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
         _editingSymbolId = Guid.Empty;
         _originalLinks.Clear();
         _originalDescription = string.Empty;
+        _originalSmartTitle = null;
     }
 
     private static bool LinksEqual(List<ExternalLink> a, OrderedDictionary<Guid, ExternalLink> b)
@@ -166,4 +240,8 @@ public sealed class EditSymbolDescriptionDialog : ModalDialog
     private Guid _editingSymbolId;
     private string _originalDescription = string.Empty;
     private readonly List<ExternalLink> _originalLinks = [];
+    private SmartTitle _originalSmartTitle;
+    private string _smartTitleText = string.Empty;
+    private string _smartTitleStatus = string.Empty;
+    private bool _smartTitleIsWarning;
 }

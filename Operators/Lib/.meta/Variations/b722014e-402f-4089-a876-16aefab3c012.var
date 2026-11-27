@@ -19,7 +19,7 @@
             "Y": 0.5,
             "Z": 0.5
           },
-          "074aed08-271d-4f2b-869f-1e2e869fdba5": "float4 noise = hash41u(vertexIndex);\n\nv.Position +=  v.Normal * (noise.xyz- 0.5) * Offset * A;"
+          "074aed08-271d-4f2b-869f-1e2e869fdba5": "// B,C,D: -\nfloat4 noise = hash41u(vertexIndex);\n\nv.Position +=  v.Normal * (noise.xyz- 0.5) * Offset * A;"
         }
       }
     },
@@ -42,7 +42,7 @@
             "Y": 0.5,
             "Z": 0.5
           },
-          "074aed08-271d-4f2b-869f-1e2e869fdba5": "float4 noise = hash41u(vertexIndex);\n\nfloat3 pos = v.Position;\nfloat4 field = GetField( float4(pos,1));\n\nv.Position +=  v.Normal * field.x * A;  // * (noise.xyz- 0.5) * Offset * A;"
+          "074aed08-271d-4f2b-869f-1e2e869fdba5": "// Offset,B,C,D: -\nfloat4 noise = hash41u(vertexIndex);\n\nfloat3 pos = v.Position;\nfloat4 field = GetField( float4(pos,1));\n\nv.Position +=  v.Normal * field.x * A;  // * (noise.xyz- 0.5) * Offset * A;"
         }
       }
     },
@@ -99,7 +99,7 @@
               ]
             }
           },
-          "074aed08-271d-4f2b-869f-1e2e869fdba5": "float4 noise = hash41u(vertexIndex);\nfloat3 pos = v.Position;\nfloat4 f = GetField( float4(pos, 0));\nfloat4 fColor = GetField( float4(pos, 1));\n\nv.Position +=  A * (noise - 0.5) * f.w;\n\nfloat4 c= Gradient.SampleLevel(Sampler, float2(f.w * C, 0.5), 0);\nv.ColorRGB= c.rgb;\n"
+          "074aed08-271d-4f2b-869f-1e2e869fdba5": "// Offset,B,D: -\nfloat4 noise = hash41u(vertexIndex);\nfloat3 pos = v.Position;\nfloat4 f = GetField( float4(pos, 0));\nfloat4 fColor = GetField( float4(pos, 1));\n\nv.Position +=  A * (noise - 0.5) * f.w;\n\nfloat4 c= Gradient.SampleLevel(Sampler, float2(f.w * C, 0.5), 0);\nv.ColorRGB= c.rgb;\n"
         }
       }
     },
@@ -145,7 +145,7 @@
               ]
             }
           },
-          "074aed08-271d-4f2b-869f-1e2e869fdba5": "// A: Falloff\n// B: Size\n\nfloat4 noise = hash41u(vertexIndex);\nfloat3 pos = v.Position;\nfloat d = GetField( float4(pos, 0)).w;\n\nfloat f = Biased(smoothstep(1,0,(d-A) / B));\nv.ColorRGB = SampleGradient(f);\n"
+          "074aed08-271d-4f2b-869f-1e2e869fdba5": "// Offset,C,D: -\n// A: Falloff\n// B: Size\n\nfloat4 noise = hash41u(vertexIndex);\nfloat3 pos = v.Position;\nfloat d = GetField( float4(pos, 0)).w;\n\nfloat f = Biased(smoothstep(1,0,(d-A) / B));\nv.ColorRGB = SampleGradient(f);\n"
         }
       }
     }

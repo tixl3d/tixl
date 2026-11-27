@@ -3,6 +3,9 @@
   "Id": "3ba13faf-ea80-44ec-948a-02ed3d653a20"/*Sub*/,
   "Description": "Subtracts Input2 from Input1.\n\nAKA: subtract, minus\n\nSee also: [Add]",
   "SymbolTags": "1",
+  "SmartTitle": {
+    "Template": "- {49ea5e01-cc8f-47a0-8988-3de2adb1805c}"
+  },
   "InputUis": [
     {
       "InputId": "4889e720-e47c-4617-8353-06acf0af5283"/*Input1*/,

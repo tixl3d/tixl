@@ -12,7 +12,7 @@
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "return p.Length() - A + MathF.Sin(p.X * C) *B;",
+          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "// D: -\nreturn p.Length() - A + MathF.Sin(p.X * C) *B;",
           "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53": -4.0,
           "d19f6b28-4e73-4a05-8c9d-3b6f1e0a7c42": 40.0
         }
@@ -29,7 +29,7 @@
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "return p.Length() - A + MathF.Atan2(p.X,p.Y) *B;",
+          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "// C,D: -\nreturn p.Length() - A + MathF.Atan2(p.X,p.Y) *B;",
           "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53": 12.0,
           "d19f6b28-4e73-4a05-8c9d-3b6f1e0a7c42": 40.0
         }
@@ -46,7 +46,7 @@
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "return p.Length() - A + MathF.Atan2(p.X,p.Y) *B;",
+          "6e2a9c47-d580-4b13-8f6e-a1c3d7b9e024": "// C,D: -\nreturn p.Length() - A + MathF.Atan2(p.X,p.Y) *B;",
           "2c7e5a91-b3d8-4f04-96c1-7a0e4d8b2f53": 12.0,
           "d19f6b28-4e73-4a05-8c9d-3b6f1e0a7c42": 40.0
         }

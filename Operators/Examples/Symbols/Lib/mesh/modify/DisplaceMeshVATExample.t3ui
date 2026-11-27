@@ -145,7 +145,7 @@
     },
     {
       "ChildId": "56f70757-90d0-49b6-a56a-295dd3f76c99",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "SectionId": "413e6c00-5c07-40d1-9f28-1434489f75f3",
       "Position": {
         "X": 539.052,
@@ -208,7 +208,7 @@
     },
     {
       "ChildId": "751be3a5-0ea0-4eef-a7e3-a38ce2d3f6bc",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "SectionId": "32d6256d-ebbd-4ede-a339-279a1cd3a23d",
       "Position": {
         "X": 538.49164,
@@ -251,7 +251,7 @@
     },
     {
       "ChildId": "853f6f96-8cf6-44c0-973e-73fa37916600",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 965.2267,
         "Y": 392.27142
@@ -381,7 +381,7 @@
     },
     {
       "ChildId": "c841d358-8b21-4e11-8420-f5e059fab8a6",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 1020.91943,
         "Y": 169.5795

@@ -1150,10 +1150,40 @@ internal sealed class TimeClipInteractions
                             ? _context.ClipSelection.GetSelectedClips().ToList()
                             : [];
 
-        _moveClipsCommand = new MoveTimeClipsCommand(composition, selection);
-        _layerIndexOnDragStart = 0;
+        _moveClipsCommand = new MoveTimeClipsCommand(composition, selection, displaceOverlappedClips: true);
+        _layerOffsetApplied = 0;
 
+        _laneMinOnDragStart = int.MaxValue;
+        _laneMaxOnDragStart = int.MinValue;
+        foreach (var clip in _context.ClipSelection.CompositionTimeClips.Values)
+        {
+            _laneMinOnDragStart = Math.Min(_laneMinOnDragStart, clip.LayerIndex);
+            _laneMaxOnDragStart = Math.Max(_laneMaxOnDragStart, clip.LayerIndex);
+        }
+
+        _selectionMinLayerOnDragStart = int.MaxValue;
+        _selectionMaxLayerOnDragStart = int.MinValue;
+        foreach (var clip in selection)
+        {
+            _selectionMinLayerOnDragStart = Math.Min(_selectionMinLayerOnDragStart, clip.LayerIndex);
+            _selectionMaxLayerOnDragStart = Math.Max(_selectionMaxLayerOnDragStart, clip.LayerIndex);
+        }
+
+        _isLaneRangeFrozen = _laneMinOnDragStart <= _laneMaxOnDragStart;
         return _moveClipsCommand;
+    }
+
+    /// <summary>
+    /// Widens the drawn lane range to the one at drag start. Rows are laid out from the lowest layer, so
+    /// without this, dragging the only clip off the top or bottom lane shifts every other lane under the mouse.
+    /// </summary>
+    public void IncludeLaneRangeOfDrag(ref int minLayerIndex, ref int maxLayerIndex)
+    {
+        if (_moveClipsCommand == null || !_isLaneRangeFrozen)
+            return;
+
+        minLayerIndex = Math.Min(minLayerIndex, _laneMinOnDragStart);
+        maxLayerIndex = Math.Max(maxLayerIndex, _laneMaxOnDragStart);
     }
 
     public void UpdateDragCommand(double dt, double dy)
@@ -1163,9 +1193,18 @@ internal sealed class TimeClipInteractions
         var dragInside = io.KeyCtrl && io.KeyAlt;
         var lockTime = io.KeyCtrl && !io.KeyAlt;
 
-        var indexDelta = _layerIndexOnDragStart - (int)(dy / ClipArea.LayerHeight);
-        if (indexDelta != 0)
-            _layerIndexOnDragStart -= indexDelta;
+        // At most one new lane above or below the existing ones, matching asset drops. A new top lane still
+        // shifts the others down by one row, but further dragging can't open a growing gap.
+        var layerOffset = -(int)(dy / ClipArea.LayerHeight);
+        if (_isLaneRangeFrozen && _selectionMinLayerOnDragStart <= _selectionMaxLayerOnDragStart)
+        {
+            layerOffset = Math.Clamp(layerOffset,
+                                     _laneMinOnDragStart - 1 - _selectionMinLayerOnDragStart,
+                                     _laneMaxOnDragStart + 1 - _selectionMaxLayerOnDragStart);
+        }
+
+        var indexDelta = layerOffset - _layerOffsetApplied;
+        _layerOffsetApplied = layerOffset;
 
         foreach (var clipId in _context.ClipSelection.SelectedClipsIds)
         {
@@ -1310,6 +1349,7 @@ internal sealed class TimeClipInteractions
             return;
         _moveClipsCommand.StoreCurrentValues();
         _moveClipsCommand = null;
+        _isLaneRangeFrozen = false;
     }
 
     // ---------------------------------------------------------------------------
@@ -1467,7 +1507,12 @@ internal sealed class TimeClipInteractions
     private readonly Func<Instance> _getCompositionOp;
 
     private Playback? _playback;
-    private int _layerIndexOnDragStart;
+    private int _layerOffsetApplied;
+    private bool _isLaneRangeFrozen;
+    private int _laneMinOnDragStart;
+    private int _laneMaxOnDragStart;
+    private int _selectionMinLayerOnDragStart;
+    private int _selectionMaxLayerOnDragStart;
     private bool _contextMenuIsOpen;
     private int _lastOpVersion = -1;
 

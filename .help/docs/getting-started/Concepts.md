@@ -76,6 +76,19 @@ We recommend following this guideline
 ### Descriptions
 We highly recommend adding a short description to any Operator-Symbols you create. If available, this inline documentation will display wherever possible, and also make it easier to search for Operators by synonyms.
 
+### Smart titles
+An Operator-Symbol can define a smart title: a short template the graph shows in smaller text below the operator name, filled in with each instance's parameter values. [Multiply] uses `* {B}`, so an instance shows `* 0.3` below `Multiply`, and [Text] shows its text. This keeps a graph readable without renaming operators by hand, and the title follows when you change the value. The second line appears once you zoom in far enough to read it, and text that doesn't fit the operator ends with `…`.
+
+- Right-click a parameter in the Parameter Window and choose **Use as Title** to show only that value. Choose it again to remove the smart title.
+- For more text, open **Edit description** and write a template in the **Smart Title** field. Put parameter names in braces, like `Size {Size}`. **Insert parameter** adds one for you, and a preview shows the result with default values.
+- Add a number format after a colon, like `{Size:0.00}`. `{Path:file}` shows only the file name of a path.
+- A checkbox parameter shows its name when it is on and nothing when it is off.
+- If a parameter used in the title is connected or animated, the operator shows only its name.
+- An operator you renamed shows only its name.
+- Operators that load a file, like [AudioClip], [LoadImage] or [LoadObj], show the file name as their smart title unless they define another one.
+
+The smart title belongs to the symbol, so it changes the title of every instance. Operators from read-only libraries can't be changed.
+
 ### GUIDs
 You might have notices that TiXL works a lot with numbers like these: `723cd13e-0ca0-4995-a80b-a3b616400997`. These numbers are so-called random unique identifiers. TiXL uses these identifiers extensively for referencing between objects. This allows us to rename symbols or their parameters without breaking anything! You can read more about GUIDs on [Wikipedia](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 

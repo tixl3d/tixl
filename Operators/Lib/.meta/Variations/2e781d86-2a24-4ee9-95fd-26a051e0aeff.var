@@ -14,7 +14,7 @@
         "00000000-0000-0000-0000-000000000000": {
           "6b66dbbd-7d8d-4e98-845c-d472bb1cf296": 3,
           "945f7c9d-fef3-40fa-bd00-b612dc3a7979": "Selection",
-          "837cd3ee-d92e-46c3-8d42-69f438c81e50": "return Min(1,Max(0,A*i / (float)count));",
+          "837cd3ee-d92e-46c3-8d42-69f438c81e50": "// Offset,B: -\nreturn Min(1,Max(0,A*i / (float)count));",
           "5fdbbd34-2144-4ba0-bea1-2866726ca09b": 2.0
         }
       }

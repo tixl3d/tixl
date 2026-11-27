@@ -44,6 +44,10 @@ public static class UiColors
                   Description = "The backdrop of the graph editor and the Hub — the large central canvas. Independent from Panel Background so the editing surface can differ from regular panels.")]
     public static Color EditorBackground = new(0.23f, 0.23f, 0.23f, 0.5f);
 
+    [T3Style.Hint(DisplayName = "Canvas Background (Read Only)",
+                  Description = "The graph editor backdrop while viewing a read-only composition, e.g. a library operator. Should differ clearly from Canvas / Editor Background so read-only graphs can't be mistaken for editable ones.")]
+    public static Color EditorBackgroundReadOnly = new(0.12f, 0.12f, 0.12f, 0.5f);
+
     [T3Style.Hint(Description = "Background for dialogs, popup windows and context menus.")]
     public static Color BackgroundPopup = new(0.18f, 0.18f, 0.18f, 0.98f);
 

@@ -260,6 +260,12 @@
       "Z": 0.23444974,
       "W": 0.49760765
     },
+    "EditorBackgroundReadOnly": {
+      "X": 0.12,
+      "Y": 0.12,
+      "Z": 0.12,
+      "W": 0.5
+    },
     "BackgroundPopup": {
       "X": 0.18,
       "Y": 0.18,

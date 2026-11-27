@@ -271,6 +271,10 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
         // their own where the feature is missing, which is better than no device at all.
         features2.features.geometryShader = supported.features.geometryShader;
         _supportsGeometryShader = supported.features.geometryShader;
+        // Chunk draws store the point index in firstInstance, so multi-draw is only useful with both.
+        features2.features.multiDrawIndirect = supported.features.multiDrawIndirect;
+        features2.features.drawIndirectFirstInstance = supported.features.drawIndirectFirstInstance;
+        SupportsMultiDrawIndirect = supported.features.multiDrawIndirect && supported.features.drawIndirectFirstInstance;
 
         VkDeviceCreateInfo deviceInfo = new()
                                             {
@@ -927,6 +931,11 @@ public sealed unsafe class VulkanBackend : IGraphicsBackend, IDisposable
 
     private string DescribeGeometryStage(in GraphicsPipelineDescription description)
         => description.GeometryShader != null && !_supportsGeometryShader ? " (it uses a geometry shader, which this GPU lacks)" : string.Empty;
+
+    /** Whether one indirect command can carry several draws, each with its own first instance. */
+    internal bool SupportsMultiDrawIndirect { get; private set; }
+
+    internal uint MaxDrawIndirectCount => _limits.maxDrawIndirectCount;
 
     public bool Supports(Topology topology)
     {

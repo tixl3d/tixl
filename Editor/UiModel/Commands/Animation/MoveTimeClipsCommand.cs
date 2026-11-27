@@ -26,10 +26,17 @@ internal sealed class MoveTimeClipsCommand : ICommand
 
     private readonly Entry[] _entries;
     private readonly Guid[] _compositionPath;
+    private readonly bool _displaceOverlappedClips;
 
-    internal MoveTimeClipsCommand(Instance compositionOp, IReadOnlyList<TimeClip> clips)
+    /** Layer index of each unmoved clip that <see cref="Do"/> pushed up to make room, before it moved. */
+    private readonly Dictionary<Guid, int> _displacedClipLayers = new();
+
+    /// <param name="displaceOverlappedClips">When true, clips the moved ones land on move up to a free layer, so
+    /// the moved clips keep the layer they were dropped on. Otherwise the moved clips themselves move up.</param>
+    internal MoveTimeClipsCommand(Instance compositionOp, IReadOnlyList<TimeClip> clips, bool displaceOverlappedClips = false)
     {
         _compositionPath = compositionOp.InstancePath.ToArray();
+        _displaceOverlappedClips = displaceOverlappedClips;
         _entries = new Entry[clips.Count];
         for (var i = 0; i < _entries.Length; i++)
         {
@@ -104,6 +111,15 @@ internal sealed class MoveTimeClipsCommand : ICommand
             changed = true;
         }
 
+        foreach (var clip in Structure.GetAllTimeClips(compositionOp))
+        {
+            if (!_displacedClipLayers.TryGetValue(clip.Id, out var layerIndex))
+                continue;
+
+            clip.LayerIndex = layerIndex;
+            changed = true;
+        }
+
         if (changed)
         {
             compositionOp.GetSymbolUi().FlagAsModified();
@@ -118,6 +134,7 @@ internal sealed class MoveTimeClipsCommand : ICommand
         var allTimeClips = Structure.GetAllTimeClips(compositionOp).ToList();
 
         bool changed = false;
+        var movedClips = new List<TimeClip>(_entries.Length);
         foreach (var clip in allTimeClips)
         {
             var selectedEntry = _entries.SingleOrDefault(entry => entry.Id == clip.Id);
@@ -127,13 +144,32 @@ internal sealed class MoveTimeClipsCommand : ICommand
             clip.TimeRange = selectedEntry.TimeRange.Clone();
             clip.SourceRange = selectedEntry.SourceRange.Clone();
             clip.LayerIndex = selectedEntry.LayerIndex;
+            movedClips.Add(clip);
+            changed = true;
+        }
 
+        _displacedClipLayers.Clear();
+        if (_displaceOverlappedClips)
+        {
+            foreach (var clip in allTimeClips)
+            {
+                if (movedClips.Contains(clip) || !clip.IsClipOverlappingOthers(movedClips))
+                    continue;
+
+                _displacedClipLayers[clip.Id] = clip.LayerIndex;
+                while (clip.IsClipOverlappingOthers(allTimeClips))
+                {
+                    clip.LayerIndex--; // Move up
+                }
+            }
+        }
+
+        foreach (var clip in movedClips)
+        {
             while (clip.IsClipOverlappingOthers(allTimeClips))
             {
                 clip.LayerIndex--; // Move up
             }
-                
-            changed = true;
         }
 
         if (changed)

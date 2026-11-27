@@ -12,7 +12,7 @@
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "76299c6d-3add-4f26-a81c-ed628257ed8f": "float d= GetDistance(p.Position);\nfloat3 n = GetNormal(p.Position);\n\nif(d<0) \n  v += n / (d+ 1);"
+          "76299c6d-3add-4f26-a81c-ed628257ed8f": "// Offset,A,B,C,D: -\nfloat d= GetDistance(p.Position);\nfloat3 n = GetNormal(p.Position);\n\nif(d<0) \n  v += n / (d+ 1);"
         }
       }
     },
@@ -76,7 +76,7 @@
               ]
             }
           },
-          "76299c6d-3add-4f26-a81c-ed628257ed8f": "float d= GetDistance(p.Position);\n\nif(d<0)  {\n  float4 c = SampleGradient( saturate(-d/A));\n  p.Color.rgb = lerp(p.Color.rgb, c.rgb, c.a); \n} \n\nv+= B*GetNormal(p.Position)*saturate(0.5-d);"
+          "76299c6d-3add-4f26-a81c-ed628257ed8f": "// Offset,C,D: -\nfloat d= GetDistance(p.Position);\n\nif(d<0)  {\n  float4 c = SampleGradient( saturate(-d/A));\n  p.Color.rgb = lerp(p.Color.rgb, c.rgb, c.a); \n} \n\nv+= B*GetNormal(p.Position)*saturate(0.5-d);"
         }
       }
     }

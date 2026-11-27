@@ -237,6 +237,8 @@ Progress 2026-11-23 (uncommitted):
 
 ### Phase 4: Third-party packages in their own repos
 
+Mid-term form for source extensions (compiled by the editor, published on their own schedule, reviewed registry): [Plan_ExternalExtensions](Plan_ExternalExtensions.md).
+
 - [ ] `TiXL.Sdk` on nuget.org: reference assemblies of Core, Graphics, Graphics.Compat, Logging plus the shared
       `Using` props that every package csproj repeats today.
 - [ ] Template repository with a GitHub Action that builds, packs and publishes; catalog PR as the listing step.

@@ -69,6 +69,19 @@ cbuffer PreviousTransforms : register(b6)
     float4x4 PrevObjectToClipSpace;
 };
 
+/** Set by [SetShadow] for the draws inside it. Elsewhere all 0, so the transparent ShadowColor skips the lookup. */
+cbuffer ShadowParams : register(b7)
+{
+    float4x4 WorldToLightClipSpace;
+    float4 ShadowColor; // Alpha is the strength
+    float ShadowBias;
+    float ShadowNormalOffset; // In shadow map texels
+    float ShadowTexelSizePerW;
+    float ShadowSpotCosInner;
+    float ShadowSpotCosOuter; // Below -1 when the shadow doesn't come from a spot light
+    float ShadowTanHalfFieldOfView;
+};
+
 struct psInput
 {
     float2 texCoord : TEXCOORD;
@@ -104,6 +117,7 @@ Texture2D<float4> NormalMap : register(t5);
 
 TextureCube<float4> PrefilteredSpecular : register(t6);
 Texture2D<float4> BRDFLookup : register(t7);
+Texture2D<float> ShadowMap : register(t8);
 
 psInput vsMain(uint id : SV_VertexID)
 {
@@ -152,7 +166,7 @@ psInput vsMain(uint id : SV_VertexID)
 /*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
-/*{RESOURCES(t8)}*/
+/*{RESOURCES(t9)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -177,6 +191,53 @@ float GetDistance(float3 p3)
 }
 //===================================================================
 
+/** 1 where the light reaches the surface, 0 in shadow, filtered over 3x3 shadow map texels. */
+float ComputeShadowLight(float3 worldPosition, float3 normal)
+{
+    // A texel covers more of the surface further from a perspective light, so the offset grows with the distance (w).
+    float texelWorldSize = mul(float4(worldPosition, 1), WorldToLightClipSpace).w * ShadowTexelSizePerW;
+    float4 posInLightClipSpace = mul(float4(worldPosition + normal * ShadowNormalOffset * texelWorldSize, 1), WorldToLightClipSpace);
+    float3 shadowCoord = posInLightClipSpace.xyz / posInLightClipSpace.w;
+    float2 offsetFromAxis = shadowCoord.xy * ShadowTanHalfFieldOfView;
+    shadowCoord.xy = shadowCoord.xy * float2(0.5, -0.5) + 0.5;
+
+    // Outside the shadow map nothing is known about occluders.
+    if (any(shadowCoord.xy < 0) || any(shadowCoord.xy > 1) || shadowCoord.z > 1)
+        return 1;
+
+    uint width, height;
+    ShadowMap.GetDimensions(width, height);
+    float2 texelSize = 1.0 / float2(width, height);
+
+    float shadowedCount = 0;
+    [unroll]
+    for (int y = -1; y <= 1; y++)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; x++)
+        {
+            float occluderDepth = ShadowMap.SampleLevel(ClampedSampler, shadowCoord.xy + float2(x, y) * texelSize, 0);
+            shadowedCount += shadowCoord.z > occluderDepth + ShadowBias ? 1 : 0;
+        }
+    }
+
+    // Outside a spot light's cone its light doesn't reach the surface, so its shadow doesn't either. Same fade as
+    // EvaluateLight(), with the angle taken from the shadow camera, which looks along the cone's axis.
+    float cosAngleToAxis = rsqrt(1 + dot(offsetFromAxis, offsetFromAxis));
+    float cone = smoothstep(ShadowSpotCosOuter, max(ShadowSpotCosInner, ShadowSpotCosOuter + 1e-4), cosAngleToAxis);
+    return 1 - shadowedCount / 9 * cone;
+}
+
+float3 ApplyShadow(float3 litColor)
+{
+    if (ShadowColor.a <= 0)
+        return litColor;
+
+    float light = ComputeShadowLight(frag.worldPosition, frag.N);
+    return lerp(litColor, ShadowColor.rgb, (1 - light) * ShadowColor.a);
+}
+
+#define PBR_APPLY_SHADOW(litColor) ApplyShadow(litColor)
 #include "shared/pbr-render.hlsl"
 
 /** Set by psMain. Back faces of meshes drawn without culling need their normal flipped to face the viewer. */

@@ -40,7 +40,8 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         else
         {
             IntComponents[0] = value;
-            result = VectorValueEdit.Draw(IntComponents, Min, Max, Scale, ClampMin, ClampMax);
+            GetDrawRange(out var min, out var max, out var clampMin, out var clampMax);
+            result = VectorValueEdit.Draw(IntComponents, min, max, Scale, clampMin, clampMax);
             if (readOnly)
                 return InputEditStateFlags.Nothing;
                 
@@ -52,7 +53,8 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
 
     public InputEditStateFlags DrawEditControl(ref int value)
     {
-        return SingleValueEdit.Draw(ref value, -Vector2.UnitX, Min, Max, ClampMin, ClampMax, Scale);
+        GetDrawRange(out var min, out var max, out var clampMin, out var clampMax);
+        return SingleValueEdit.Draw(ref value, -Vector2.UnitX, min, max, clampMin, clampMax, Scale);
     }
 
     public override void ApplyValueToAnimation(IInputSlot inputSlot, InputValue inputValue, Animator animator, double time)

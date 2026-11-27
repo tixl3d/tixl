@@ -55,7 +55,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb= SampleGradient(g).rgb;\n\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,A,B,C,D: -\nfrag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g=mul(frag.N.xyz,transpose((float3x3)CameraToWorld)).z;\nc.rgb= SampleGradient(g).rgb;\n\n\n"
         }
       }
     },
@@ -75,7 +75,7 @@
             "Y": 0.81,
             "Z": 1.0
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "frag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g= dot(mul(frag.N.xyz, transpose((float3x3)CameraToWorld)), normalize(Offset));\nc.rgb= SampleGradient( Biased( saturate(g))).rgb;\n\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// A,B,C,D: -\nfrag.N = ComputeNormal(pin, pin.tbnToWorld);\nfloat g= dot(mul(frag.N.xyz, transpose((float3x3)CameraToWorld)), normalize(Offset));\nc.rgb= SampleGradient( Biased( saturate(g))).rgb;\n\n\n"
         }
       }
     },
@@ -91,7 +91,7 @@
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
           "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": -0.9,
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "SetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\n\nc = ComputePbr();\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,B,C,D: -\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\n\nc = ComputePbr();\n\n"
         }
       }
     },
@@ -108,7 +108,7 @@
         "00000000-0000-0000-0000-000000000000": {
           "e7dc01ac-cb1d-409a-b8f3-ad22b1255771": 1.0,
           "05feb9d0-3bfc-4c96-b79e-b884132813e9": 0.5,
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//see the example\nfloat3 vn=mul(ComputeNormal(pin, pin.tbnToWorld).xyz,transpose((float3x3)CameraToWorld));\npin.texCoord.xy=vn.xy*B*float2(1,-1)+.5;\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\nc=frag.albedo;\n//c = ComputePbr();\n\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,C,D: -\n//see the example\nfloat3 vn=mul(ComputeNormal(pin, pin.tbnToWorld).xyz,transpose((float3x3)CameraToWorld));\npin.texCoord.xy=vn.xy*B*float2(1,-1)+.5;\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nfloat3 nf=-normalize(cross(ddx(pin.worldPosition.xyz),ddy(pin.worldPosition.xyz)));\nfrag.N=normalize(lerp(nf,frag.N,A));\nc=frag.albedo;\n//c = ComputePbr();\n\n"
         }
       }
     },
@@ -173,7 +173,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "float3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C))).rgb;",
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,D: -\nfloat3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat d=GetDistance(p)+B;\n\nc.a=exp2(-abs(d)*A);\nc.rgb=SampleGradient(exp(d*C)/(1+exp(d*C))).rgb;",
           "7f731ea3-c246-4e9c-95b3-b30260887161": true,
           "92736363-ef71-4828-bf2b-4e9f407b1155": false
         }
@@ -241,7 +241,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//Needs Fix\n SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,A,B,C,D: -\n//Needs Fix\n SetupFrag(pin);\nc= ComputePbr(); // Computes CosLo\nc+= SampleGradient( Biased(frag.cosLo));\n"
         }
       }
     },
@@ -287,7 +287,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//A = offset\n//B = scale\n//C = width/blur\n//D = mode switch\n\n\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nc = ComputePbr();\n\nfloat d=GetDistance(pin.worldPosition.xyz);\n\nfloat f=d*B+A;\n\nfloat wd=fwidth(f);\n\nf=abs(frac(f)*2-1)-.5;\nif(D>.5){\nf=f>0;\n}else{\nf=smoothstep(-wd,wd,f*C);\n}\nfloat4 col=SampleGradient(1);\nc.rgb=f;\n//c=lerp(col,c,f);\n"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// A: Offset\n// B: Scale\n// C: Width/blur\n// D: Mode switch\n// Offset: -\n//A = offset\n//B = scale\n//C = width/blur\n//D = mode switch\n\n\nSetupFrag(pin);\n//frag.Metalness += Points[pin.pointIndex].FX1;\nc = ComputePbr();\n\nfloat d=GetDistance(pin.worldPosition.xyz);\n\nfloat f=d*B+A;\n\nfloat wd=fwidth(f);\n\nf=abs(frac(f)*2-1)-.5;\nif(D>.5){\nf=f>0;\n}else{\nf=smoothstep(-wd,wd,f*C);\n}\nfloat4 col=SampleGradient(1);\nc.rgb=f;\n//c=lerp(col,c,f);\n"
         }
       }
     },
@@ -359,7 +359,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "c.rgb *= SampleGradient( frac(length(pin.worldPosition - Offset) / A)).rgb;"
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// B,C,D: -\nc.rgb *= SampleGradient( frac(length(pin.worldPosition - Offset) / A)).rgb;"
         }
       }
     },
@@ -405,7 +405,7 @@
               ]
             }
           },
-          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "//See the example\nSetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n",
+          "7a6ca5a8-17a6-4a8b-9610-ed4c9e292cfe": "// Offset,C: -\n//See the example\nSetupFrag(pin);\n//frag.Metalness = Points[pin.pointIndex].FX1;\n//frag.Roughness = Points[pin.pointIndex].FX2;\n\nfloat3 p=mul(float4(pin.worldPosition,1),WorldToObject).xyz;\nfloat2 e=float2(.0006,0);\nfloat3 nf=float3(GetDistance(p+e.xyy),GetDistance(p+e.yxy),GetDistance(p+e.yyx))-GetDistance(p);\nnf=(float3(FM(GetDistance(p+e.xyy)),FM(GetDistance(p+e.yxy)),FM(GetDistance(p+e.yyx)))-FM(GetDistance(p)))*.1/e.x;\nfrag.N=normalize(frag.N+mul(nf,transpose((float3x3)WorldToObject))*D);\nfrag.Metalness=FM(GetDistance(p));\nfloat mask=smoothstep(0.9,.99,FM(GetDistance(p)));\nfrag.albedo*=SampleGradient(mask);\nc = ComputePbr();\n\n",
           "f5754aaf-f276-474f-b36f-4b608bdbfe88": "float FM(float d){\nfloat f=smoothstep(.3,.7,abs(-1+2*frac((d+B)*A)));\nreturn f;\n}",
           "3e7b6c69-f4d1-4f96-a693-a2162fe29a77": ""
         }

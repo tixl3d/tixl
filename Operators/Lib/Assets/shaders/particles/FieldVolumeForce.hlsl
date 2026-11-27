@@ -108,11 +108,20 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
     float3 posNext = float4(pos + velocity * SpeedFactor * 0.01 * 2, 1).xyz;
     float distanceNext = GetDistance(posNext);
 
+    // Particles collide with their surface, not their center. Particle.Radius holds the size, so half of it is the
+    // radius, as in SurfaceForce. Dead particles carry NaN.
+    float radius = Particles[gi].Radius * 0.5;
+    radius = isnan(radius) ? 0 : max(0, radius);
+
+    // Gap between the particle's surface and the volume's surface, positive on the particle's free side.
+    float gap = distance * InvertVolumeFactor - radius;
+    float gapNext = distanceNext * InvertVolumeFactor - radius;
+
     float3 force = 0;
     surfaceN *= InvertVolumeFactor;
 
-    // Reflect if distance changes
-    if (sign(distance * distanceNext) < 0 && distance * InvertVolumeFactor > 0)
+    // Reflect if the particle's surface would cross the volume's surface
+    if (gap > 0 && gapNext < 0)
     {
         float4 rand = hash41u(gi);
         float3 v = lerp(velocity,
@@ -135,13 +144,13 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
     }
     else
     {
-        if (distance * InvertVolumeFactor < 0)
+        if (gap < 0)
         {
             force = surfaceN * Repulsion;
         }
         else
         {
-            force = -surfaceN * Attraction / (1 + distance * AttractionDecay);
+            force = -surfaceN * Attraction / (1 + gap * InvertVolumeFactor * AttractionDecay);
         }
         velocity += force * Amount * SpeedFactor;
     }

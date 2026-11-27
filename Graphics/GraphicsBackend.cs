@@ -197,7 +197,18 @@ public interface ICommandList
 
     void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance);
     void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
-    void DrawIndirect(GpuBuffer arguments, int offset);
+    /// <summary>
+    /// Draws <paramref name="drawCount"/> records of 4 uints (vertex count, instance count, first vertex, first
+    /// instance) that lie <paramref name="stride"/> bytes apart. Backends without multi-draw indirect issue one
+    /// draw per record, which gives the same result at a higher CPU cost.
+    /// </summary>
+    void DrawIndirect(GpuBuffer arguments, int offset, int drawCount, int stride);
+
+    /// <summary>
+    /// Like <see cref="DrawIndirect"/> with records of 5 values (index count, instance count, first index, vertex
+    /// offset, first instance) read through the bound index buffer.
+    /// </summary>
+    void DrawIndexedIndirect(GpuBuffer arguments, int offset, int drawCount, int stride);
     void Dispatch(int groupsX, int groupsY, int groupsZ);
     void DispatchIndirect(GpuBuffer arguments, int offset);
 

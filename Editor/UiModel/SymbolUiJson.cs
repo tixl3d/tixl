@@ -31,6 +31,8 @@ internal static class SymbolUiJson
             if (symbolUi.Tags != SymbolUi.SymbolTags.None)
                 writer.WriteObject(JsonKeys.SymbolTags, (int)symbolUi.Tags); // Writing as bitmask might not be ideal...
 
+            WriteSmartTitle(symbolUi, writer);
+
             WriteInputUis(symbolUi, writer);
             WriteChildUis(symbolUi, writer);
             WriteOutputUis(symbolUi, writer);
@@ -240,6 +242,18 @@ internal static class SymbolUiJson
         }
 
         writer.WriteEndArray();
+    }
+
+    /// <summary>An object rather than a bare string, so later options (e.g. a layout) fit in without a migration.</summary>
+    private static void WriteSmartTitle(SymbolUi symbolUi, JsonTextWriter writer)
+    {
+        if (symbolUi.SmartTitle == null)
+            return;
+
+        writer.WritePropertyName(JsonKeys.SmartTitle);
+        writer.WriteStartObject();
+        writer.WriteObject(JsonKeys.Template, symbolUi.SmartTitle.Template);
+        writer.WriteEndObject();
     }
 
     private static void WriteLinks(SymbolUi symbolUi, JsonTextWriter writer)
@@ -548,6 +562,8 @@ internal static class SymbolUiJson
         if (descriptionEntry?.Value<string>() != null)
             symbolUi.Description = descriptionEntry.Value<string>() ?? string.Empty;
 
+        symbolUi.SmartTitle = SmartTitle.FromTemplate((mainObject[JsonKeys.SmartTitle] as JObject)?[JsonKeys.Template]?.Value<string>());
+
         var tagsEntry = mainObject[JsonKeys.SymbolTags];
         if (tagsEntry?.Value<int>() != null)
             symbolUi.Tags = (SymbolUi.SymbolTags)tagsEntry.Value<int>();
@@ -829,6 +845,7 @@ internal static class SymbolUiJson
         public const string Id = nameof(Id);
         public const string Description = nameof(Description);
         public const string SymbolTags = nameof(SymbolTags);
+        public const string SmartTitle = nameof(SmartTitle);
         public const string InputUis = nameof(InputUis);
         public const string SymbolChildUis = nameof(SymbolChildUis);
         public const string OutputUis = nameof(OutputUis);
@@ -837,6 +854,9 @@ internal static class SymbolUiJson
         public const string TourPoints = nameof(TourPoints);
         public const string ConnectionRoutes = nameof(ConnectionRoutes);
         // Settings is written by WriteSettings()
+
+        // SmartTitle fields
+        public const string Template = nameof(Template);
 
         // InputUi fields
         public const string InputId = nameof(InputId);

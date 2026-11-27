@@ -265,6 +265,9 @@ public sealed partial class SymbolUi : ISelectionContainer
     }
 
     internal string Description { get; set; } = string.Empty;
+
+    /// <summary>Title template graph nodes of this symbol show instead of its name. Null if none is set.</summary>
+    internal SmartTitle? SmartTitle { get; set; }
     internal SymbolTags Tags { get; set; }
 
     /// <summary>
@@ -378,6 +381,7 @@ public sealed partial class SymbolUi : ISelectionContainer
         Links = newSymbolUi.Links;
         ConnectionRoutes = newSymbolUi.ConnectionRoutes;
         Description = newSymbolUi.Description;
+        SmartTitle = newSymbolUi.SmartTitle;
     }
 
     public override string ToString()

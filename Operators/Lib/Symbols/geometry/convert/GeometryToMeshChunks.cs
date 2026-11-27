@@ -1,4 +1,5 @@
 using Lib.Utils;
+using T3.Core.Rendering;
 
 namespace Lib.geometry.convert;
 
@@ -49,6 +50,7 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
             return;
         }
 
+        var writeSizeToScale = WriteSizeToScale.GetValue(context);
         _compiler.Compile(geometry, relativeToPartPivots: true);
         var chunks = _compiler.Chunks;
         var parts = geometry.Parts;
@@ -62,13 +64,14 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
         {
             // Part-less geometry is a single chunk anchored at the origin, so it renders where it was
             var pivot = parts.Length > 0 ? parts[chunkIndex].Pivot : Vector3.Zero;
+            var scale = writeSizeToScale ? new Vector3(BoundingRadius(chunks[chunkIndex])) : Vector3.One;
             _pointList.TypedElements[chunkIndex] = new Point
                                                        {
                                                            Position = pivot,
                                                            F1 = 1,
                                                            F2 = parts.Length > 0 ? parts[chunkIndex].SeedIndex : 0,
                                                            Orientation = Quaternion.Identity,
-                                                           Scale = Vector3.One,
+                                                           Scale = scale,
                                                            Color = Vector4.One,
                                                        };
             _chunkIndices[chunkIndex] = chunkIndex;
@@ -91,6 +94,20 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
         ChunkCount.Value = chunks.Length;
     }
 
+    /** Distance of the chunk's farthest vertex from its pivot; vertices are stored relative to the pivot. */
+    private float BoundingRadius(MeshChunkDef chunk)
+    {
+        var vertices = _compiler.Vertices;
+        var end = Math.Min(chunk.StartVertexIndex + chunk.VertexCount, vertices.Length);
+        var maxLengthSquared = 0f;
+        for (var vertexIndex = chunk.StartVertexIndex; vertexIndex < end; vertexIndex++)
+        {
+            maxLengthSquared = MathF.Max(maxLengthSquared, vertices[vertexIndex].Position.LengthSquared());
+        }
+
+        return MathF.Sqrt(maxLengthSquared);
+    }
+
     private readonly GeometryMeshCompiler _compiler = new();
     private readonly StructuredList<Point> _pointList = new(1);
     private int[] _chunkIndices = [];
@@ -103,4 +120,7 @@ internal sealed class GeometryToMeshChunks : Instance<GeometryToMeshChunks>
 
     [Input(Guid = "7f2c9e4b-d631-4a85-b9e7-0c5d8a3f1b62")]
     public readonly InputSlot<Geometry> Geometry = new();
+
+    [Input(Guid = "49f97c2e-bcde-4fcc-97e1-edfe9af443de")]
+    public readonly InputSlot<bool> WriteSizeToScale = new();
 }

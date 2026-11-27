@@ -334,6 +334,25 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
     //private bool Clamp;
     public bool ClampMin;
     public bool ClampMax;
+
+    /// <summary>The range to draw with: the input's own, unless the drawn op's code gives it one (<see cref="InputArea.RangeOverride"/>).</summary>
+    protected void GetDrawRange(out float min, out float max, out float scale, out bool clampMin, out bool clampMax)
+    {
+        if (InputArea.RangeOverride is { } annotated)
+        {
+            min = annotated.Min;
+            max = annotated.Max;
+            scale = GetScaleFromRange(0, min, max);
+            clampMin = clampMax = annotated.Clamp;
+            return;
+        }
+
+        min = Min;
+        max = Max;
+        scale = Scale;
+        clampMin = ClampMin;
+        clampMax = ClampMax;
+    }
     public string Format;
 
     protected readonly float[] FloatComponents;
