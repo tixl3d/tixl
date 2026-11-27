@@ -3,6 +3,9 @@
   "Id": "2e4ecee7-2975-46e1-8f98-900935559176"/*AnimatedText*/,
   "Description": "Draws text whose characters or words build in and out one after another.\n\nCombines [TextSprites], [TextBuildup] and [DrawPointSprites] with the most useful parameters. Each unit moves from a hidden state (offset, rotation, scale and the edges of the gradient) to its resting place when RangeEnd passes its index, and leaves again when RangeStart passes it.\n\nAKA: text animation, typewriter, reveal, kinetic typography, build in\n\nTips:\n- Animate RangeEnd from 0 to the number of words with linear keyframes, or set RangeMode to Normalized and animate it from 0 to 1.\n- Separate phrases with a GroupSeparator like \",\" to animate them as a whole.\n- For full control, combine [TextSprites], [TextBuildup] and [DrawPointSprites] directly.\n\nSee also: [Text], [TextSprites], [TextBuildup]",
   "SymbolTags": "8",
+  "SmartTitle": {
+    "Template": "{72e3e29b-ecc4-4b5c-9814-2b4353a5ee60}"
+  },
   "InputUis": [
     {
       "InputId": "00a16561-cfc6-4644-a62d-d6d6ad07be58"/*VerticalAlign*/,

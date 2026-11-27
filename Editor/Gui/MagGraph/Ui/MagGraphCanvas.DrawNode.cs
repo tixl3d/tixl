@@ -281,8 +281,28 @@ internal sealed partial class MagGraphView
                 var fontSize = font.FontSize * (downScaleFactor * CanvasScale).Clamp(0.1f, 1);
 
                 var visibleLineHeight = Math.Min(pMaxVisible.Y - pMinVisible.Y, MagGraphItem.LineHeight * CanvasScale);
-                var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale),
-                                           MathF.Round(pMin.Y + visibleLineHeight / 2 - fontSize / 2));
+                var labelY = pMin.Y + visibleLineHeight / 2 - fontSize / 2;
+
+                // Smart title: a smaller second line below the operator name, shown once the row is tall enough to read it.
+                var smartTitle = item.SmartTitleText;
+                if (smartTitle != null)
+                {
+                    var subtitleFont = CanvasScale > 1.8f ? Fonts.FontNormal : Fonts.FontSmall;
+                    var subtitleSize = MathF.Min(subtitleFont.FontSize, visibleLineHeight * SmartTitleHeightRatio);
+                    var subtitleFade = subtitleSize.RemapAndClamp(MinSmartTitleSize * T3Ui.UiScaleFactor,
+                                                                  (MinSmartTitleSize + 3) * T3Ui.UiScaleFactor, 0, 1);
+                    if (subtitleFade > 0)
+                    {
+                        fontSize = MathF.Min(fontSize, visibleLineHeight * (1 - SmartTitleHeightRatio));
+                        labelY = pMin.Y + (visibleLineHeight - fontSize - subtitleSize) / 2;
+                        var subtitlePos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale), MathF.Round(labelY + fontSize));
+                        var subtitleColor = labelColor.Fade(0.75f * subtitleFade * CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1));
+                        DrawSmartTitle(drawList, item, smartTitle, subtitleFont, subtitleSize, subtitlePos,
+                                       availableLabelWidth * CanvasScale, subtitleColor);
+                    }
+                }
+
+                var labelPos = new Vector2(MathF.Round(pMin.X + 8 * CanvasScale), MathF.Round(labelY));
 
                 drawList.AddText(font,
                                  fontSize,
@@ -1579,6 +1599,28 @@ internal sealed partial class MagGraphView
 
     /** Input names smaller than this fraction of the label size get hard to read, so they are cut instead. */
     private const float MinInputLabelShrinkFactor = 0.8f;
+
+    /// <summary>Share of the first row's height given to the smart title line.</summary>
+    private const float SmartTitleHeightRatio = 0.4f;
+
+    /// <summary>Font size in pixels (at UI scale 1) below which the smart title is hidden.</summary>
+    private const float MinSmartTitleSize = 6;
+
+    /// <summary>Draws the smart title, cut with an ellipsis where it doesn't fit the node.</summary>
+    private static void DrawSmartTitle(ImDrawListPtr drawList, MagGraphItem item, string text, ImFontPtr font, float fontSize,
+                                       Vector2 pos, float maxWidth, Color color)
+    {
+        var width = item.MeasuredSmartTitle.GetWidth(font, fontSize, text, text);
+        if (width <= maxWidth)
+        {
+            drawList.AddText(font, fontSize, pos, color, text);
+            return;
+        }
+
+        var fittedWidth = item.MeasuredSmartTitle.GetFittingLength(font, fontSize, maxWidth, text, LabelCutSuffix, out var fittedLength);
+        drawList.AddText(font, fontSize, pos, color, text.AsSpan(0, fittedLength));
+        drawList.AddText(font, fontSize, pos + new Vector2(fittedWidth, 0), color, LabelCutSuffix);
+    }
 
     private const string LabelCutSuffix = "…";
 

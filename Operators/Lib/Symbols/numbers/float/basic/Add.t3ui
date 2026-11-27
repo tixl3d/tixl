@@ -3,6 +3,9 @@
   "Id": "c160f925-0a66-4505-a569-cadd878dbb6f"/*Add*/,
   "Description": "Adds two float values.\n\nSee also: [Sum], [Sub]",
   "SymbolTags": "1",
+  "SmartTitle": {
+    "Template": "+ {993d59bb-1fc0-4857-a36d-629b0e7aa0d2}"
+  },
   "InputUis": [
     {
       "InputId": "993d59bb-1fc0-4857-a36d-629b0e7aa0d2"/*Input2*/,

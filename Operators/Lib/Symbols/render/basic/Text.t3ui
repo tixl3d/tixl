@@ -3,6 +3,9 @@
   "Id": "fd31d208-12fe-46bf-bfa3-101211f8f497"/*Text*/,
   "Description": "Creates flat 2D text as an object in 3D space from bitmap fonts.\n\nFor each character a quad is generated. Any string operator can be used as text input. The fonts consist of a BmFont font definition file and the matching MSDF (multichannel signed distance field) texture.\n\nSee also: [TextSprites], [TextOutlines]",
   "SymbolTags": "1",
+  "SmartTitle": {
+    "Template": "{f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1}"
+  },
   "InputUis": [
     {
       "InputId": "065b6437-64ed-4ebc-bee0-578677421efb"/*BillboardMode*/,

@@ -1,6 +1,18 @@
 # Smart Titles
 
-**Status (2026-11-26):** proposal, nothing built.
+**Status (2026-11-27):** phases 1, 2 and 4 built (uncommitted, on `main`); phase 3 partly: templates for [Multiply],
+[Div], [Add], [Sub], [Text], [Blur]. Open: enum names, search matching, live visual check of the graph label.
+Open questions answered with the proposals below.
+**Layout changed after review (2026-11-27):** a smart title no longer replaces the label. The operator name stays the
+main label and the smart title is a smaller second line below it (`DrawSmartTitle` in `MagGraphCanvas.DrawNode.cs`),
+shown when the first row is tall enough (fades in from 6 px font size, `FontNormal` instead of `FontSmall` when zoomed
+far in) and cut to the node width with `…`. Templates no longer need a prefix naming the op, so [Blur] uses
+`Size {Size}`. Reviewer feedback: with the type and the content in one label they were hard to tell apart, and
+the node space was poorly used.
+`DescriptiveUi` is removed: operators implementing `IDescriptiveFilename` (AudioClip, VideoClip, LoadImage, LoadObj,
+shader ops, ...) show their file name as the default smart title (`MagGraphItem.SmartTitleText`), so they share the
+layout without templates in 17 `.t3ui` files. The legacy graph now shows only their name. `getGraphState` reports `smartTitle` per child for bridge tests.
+Manual test set: [`graph-smart-titles`](../../.tests-manual/graph-smart-titles.md).
 
 **Goal:** let a symbol define a title template that the graph shows instead of the symbol name, filled with
 the child's current parameter values. Examples:
@@ -84,7 +96,7 @@ Default formats by type (shorter than `ValueUtils.GetValueString`, which pads `0
 | int | `G` | int inputs with a mapped enum show the enum name (phase 3) |
 | bool | the input's name when true, empty when false | so `{Invert}` reads naturally |
 | Vector2/3/4 | `0.##` per component, comma separated | |
-| string | first line, cut at ~40 chars with `…` | the label's existing downscaling handles the rest |
+| string | line breaks become spaces, cut at ~28 chars with `…` | the label's existing downscaling handles the rest |
 | other | placeholder resolves empty | |
 
 A placeholder format string overrides the default for numeric types (`{B:0.00}`). One named format is

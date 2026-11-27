@@ -304,6 +304,8 @@ public abstract class InputValueUi<T> : IInputUi
                                                             ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                                                         }
 
+                                                        DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
+
                                                         if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                                                             editState = InputEditStateFlags.ShowOptions;
                                                     });
@@ -452,6 +454,8 @@ public abstract class InputValueUi<T> : IInputUi
                      {
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
+
+                     DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
 
                      if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
@@ -613,6 +617,8 @@ public abstract class InputValueUi<T> : IInputUi
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
 
+                     DrawUseAsTitleMenuItem(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
+
                      if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
                  });
@@ -704,6 +710,23 @@ public abstract class InputValueUi<T> : IInputUi
 
     private const Relevancy DefaultRelevancy = Relevancy.Optional;
 
+    /// <summary>Toggles a smart title that shows just this input's value on all instances of the symbol.</summary>
+    private static void DrawUseAsTitleMenuItem(Symbol symbol, Guid inputId)
+    {
+        if (!symbol.TryGetSymbolUi(out var symbolUi))
+            return;
+
+        var isChecked = symbolUi.SmartTitle != null && symbolUi.SmartTitle.IsSingleInput(inputId);
+        if (!CustomComponents.DrawMenuItem(_useAsTitleItemId, Icon.None, "Use as Title",
+                                           isChecked: isChecked,
+                                           isEnabled: !symbol.SymbolPackage.IsReadOnly))
+            return;
+
+        var newTitle = isChecked ? null : SmartTitle.ForInput(inputId);
+        UndoRedoStack.AddAndExecute(new ChangeSmartTitleCommand(symbol.Id, symbolUi.SmartTitle, newTitle));
+    }
+
+    private static readonly int _useAsTitleItemId = "useParamAsTitle".GetHashCode();
     private static readonly int _animateItemId = "animateParam".GetHashCode();
     private static readonly int _createConnectedItemId = "createConnectedParam".GetHashCode();
     private static readonly int _extractItemId = "extractParam".GetHashCode();
