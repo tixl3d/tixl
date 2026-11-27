@@ -62,7 +62,7 @@
               ]
             }
           },
-          "0957ec56-8c74-4e72-aee3-c14abddcc655": "float3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n",
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// C,D: -\nfloat3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n",
           "1dc7a589-93f7-4e0b-acbd-02670c97ebf8": "// additional"
         }
       }
@@ -131,7 +131,7 @@
               ]
             }
           },
-          "0957ec56-8c74-4e72-aee3-c14abddcc655": "//int3 faceIndicies\n//PbrVertex v1,v2,v3\n//float4 noise= hash41u(faceIndices.x);\n\nfloat3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n\nv1.Position += (hash41u(faceIndices.x)-0.5) * C;\nv2.Position += (hash41u(faceIndices.y)-0.5) * C;\nv3.Position += (hash41u(faceIndices.z)-0.5) * C;\n"
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// D: -\n//int3 faceIndicies\n//PbrVertex v1,v2,v3\n//float4 noise= hash41u(faceIndices.x);\n\nfloat3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n\nv1.Position += (hash41u(faceIndices.x)-0.5) * C;\nv2.Position += (hash41u(faceIndices.y)-0.5) * C;\nv3.Position += (hash41u(faceIndices.z)-0.5) * C;\n"
         }
       }
     },
@@ -175,7 +175,7 @@
               ]
             }
           },
-          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// A: strength\n// B: Mode (0-> position, 1->UV)\n\nfloat2 uv1=v1.TexCoord.xy;\nfloat2 uv2=v2.TexCoord.xy;\nfloat2 uv3=v3.TexCoord.xy;\n\nif(B>0.5){\n  float s=1;\n  uv1=(v1.Position+Offset).xy*s+0.5;\n  uv2=(v2.Position+Offset).xy*s+0.5;\n  uv3=(v3.Position+Offset).xy*s+0.5;\n}\n\nfloat2 uvc=(uv1+uv2+uv3)/3;\nuv1=(uv1-(uv2+uv3)/2)*A+(uv2+uv3)/2;\nuv2=(uv2-(uv1+uv3)/2)*A+(uv1+uv3)/2;\nuv3=(uv3-(uv2+uv1)/2)*A+(uv2+uv1)/2;\n\nuv1.y=1.0-uv1.y;\nuv2.y=1.0-uv2.y;\nuv3.y=1.0-uv3.y;\n\nfloat4 smpc=Image.SampleLevel(Sampler,uvc,0);\nfloat4 smp1=Image.SampleLevel(Sampler,uv1,0);\nfloat4 smp2=Image.SampleLevel(Sampler,uv2,0);\nfloat4 smp3=Image.SampleLevel(Sampler,uv3,0);\n\nv1.ColorRGB=smp1.rgb;\nv2.ColorRGB=smp2.rgb;\nv3.ColorRGB=smp3.rgb;\n"
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// C,D: -\n// A: strength\n// B: Mode (0-> position, 1->UV)\n\nfloat2 uv1=v1.TexCoord.xy;\nfloat2 uv2=v2.TexCoord.xy;\nfloat2 uv3=v3.TexCoord.xy;\n\nif(B>0.5){\n  float s=1;\n  uv1=(v1.Position+Offset).xy*s+0.5;\n  uv2=(v2.Position+Offset).xy*s+0.5;\n  uv3=(v3.Position+Offset).xy*s+0.5;\n}\n\nfloat2 uvc=(uv1+uv2+uv3)/3;\nuv1=(uv1-(uv2+uv3)/2)*A+(uv2+uv3)/2;\nuv2=(uv2-(uv1+uv3)/2)*A+(uv1+uv3)/2;\nuv3=(uv3-(uv2+uv1)/2)*A+(uv2+uv1)/2;\n\nuv1.y=1.0-uv1.y;\nuv2.y=1.0-uv2.y;\nuv3.y=1.0-uv3.y;\n\nfloat4 smpc=Image.SampleLevel(Sampler,uvc,0);\nfloat4 smp1=Image.SampleLevel(Sampler,uv1,0);\nfloat4 smp2=Image.SampleLevel(Sampler,uv2,0);\nfloat4 smp3=Image.SampleLevel(Sampler,uv3,0);\n\nv1.ColorRGB=smp1.rgb;\nv2.ColorRGB=smp2.rgb;\nv3.ColorRGB=smp3.rgb;\n"
         }
       }
     },
@@ -219,7 +219,7 @@
               ]
             }
           },
-          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// SDF -> simple gradient\n// A: Range\n// B: FallOff\n\nfloat3 pCenter = (v1.Position + v2.Position + v3.Position)/3;\n\nfloat f= GetField(float4(pCenter,1)).w;\nf= smoothstep(1,0, (f-A)/B);\n\nfloat4 c = SampleGradient(f);\nv1.ColorRGB = c.rgb;\nv2.ColorRGB = c.rgb;\nv3.ColorRGB = c.rgb;\n\n"
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// Offset,C,D: -\n// SDF -> simple gradient\n// A: Range\n// B: FallOff\n\nfloat3 pCenter = (v1.Position + v2.Position + v3.Position)/3;\n\nfloat f= GetField(float4(pCenter,1)).w;\nf= smoothstep(1,0, (f-A)/B);\n\nfloat4 c = SampleGradient(f);\nv1.ColorRGB = c.rgb;\nv2.ColorRGB = c.rgb;\nv3.ColorRGB = c.rgb;\n\n"
         }
       }
     },
