@@ -70,7 +70,8 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
     {
         float4Value.CopyTo(FloatComponents);
         var thumbWidth = ImGui.GetFrameHeight();
-        var inputEditState = VectorValueEdit.Draw(FloatComponents, Min, Max, Scale, ClampMin, ClampMax, thumbWidth+1);
+        GetDrawRange(out var min, out var max, out var scale, out var clampMin, out var clampMax);
+        var inputEditState = VectorValueEdit.Draw(FloatComponents, min, max, scale, clampMin, clampMax, thumbWidth+1);
             
         ImGui.SameLine();
         if (!readOnly)

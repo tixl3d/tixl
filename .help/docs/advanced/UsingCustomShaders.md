@@ -31,6 +31,25 @@ Your fragment works with **prepared local variables** and is expected to **set o
 
 The `AdditionalCode` / `AdditionalDefines` parameter is inserted at **global scope** above the main function. Use it for your own helper functions, constants, or declarations of additional resources.
 
+## Labelling parameters
+
+A comment line in your code can rename a parameter in the Parameter Window and give it a slider range:
+
+```hlsl
+// A: Scale 0..1
+// B: Twist [-180..180] - rotation in degrees
+// C: Seed
+// D: -
+// Offset: Center
+```
+
+- `0..1` sets the slider range; you can still drag or type values outside it. `[0..1]` clamps to it.
+- Text after ` - ` becomes the parameter's tooltip.
+- The label keeps the input's name, e.g. **Scale (A)**, because your code uses that name. Any input works, not only A to D.
+- `-` marks parameters your code doesn't use: `// C,D: -` shows them as **- (C)** and **- (D)**. Text after it becomes the tooltip.
+- Several parameters can share a line, e.g. `// A,B: 0..1`.
+- The labels belong to the code, so they are saved in presets and travel with them. The operator's inputs keep their names, and connections are not affected.
+
 ## Required output variables
 
 This is the contract per operator — what you get, and what you are expected to set:
@@ -265,7 +284,7 @@ p.Rotation = qLookAt(fwd, up);
 
 - **Open the template.** The `TemplateFile` parameter points to the full shader source — it is the authoritative reference for what surrounds your code and which registers are bound.
 - **Use the presets as starting points.** They are regular parameter snapshots; saving your own preset captures the shader code along with all parameters.
-- **Comment your parameters.** A line like `// A: Falloff` at the top of the fragment makes presets reusable for others.
+- **Label your parameters.** A line like `// A: Falloff 0..2` at the top of the fragment renames the parameter and sets its range, which makes presets reusable for others (see [Labelling parameters](#labelling-parameters)).
 - **Compile errors** appear below the code field, with the line counted within the field.
 - **Edit in a larger window.** The icon at the right end of the ShaderCode row opens a resizable code editor with line numbers. Its footer lists every error and warning the compiler reported; click one to jump to its line. **Compiled source** shows the whole shader your code was pasted into, read-only and with its own line numbers. Use it for errors outside your code (listed as *Template line*), e.g. caused by a define. `Esc` closes the editor and keeps your changes.
 

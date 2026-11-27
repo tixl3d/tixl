@@ -3,6 +3,7 @@ using System.IO;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
@@ -235,11 +236,12 @@ public sealed class StringInputUi : InputValueUi<string>
         ImGui.PushFont(Fonts.Code);
         var lineCount = value.LineCount().Clamp(1, 30) + 1;
         var lineHeight = Fonts.Code.FontSize;
-        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
         var requestedContentHeight = lineCount * lineHeight;
         var clampedToWindowHeight = MathF.Min(requestedContentHeight, ImGui.GetWindowSize().Y * 0.5f);
         
         var hasError = status is { IsError: true, Message.Length: > 0 };
+        var marksErrorLine = hasError && TryMarkErrorLine(value, status!.Value.Line, lineHeight, clampedToWindowHeight);
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, (marksErrorLine ? Color.Transparent : UiColors.BackgroundInputField).Rgba);
         if (hasError)
         {
             ImGui.PushStyleColor(ImGuiCol.Border, UiColors.StatusError.Rgba);
@@ -266,6 +268,26 @@ public sealed class StringInputUi : InputValueUi<string>
 
         FormInputs.AddVerticalSpace(3);
         return changed ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
+    }
+
+    /// <summary>
+    /// Draws the field background with the error line highlighted, so the field must be drawn with a transparent background.
+    /// Skipped when the text doesn't fit, because the field then scrolls it by an offset that can't be read from here.
+    /// </summary>
+    private static bool TryMarkErrorLine(string value, int errorLine, float lineHeight, float fieldHeight)
+    {
+        var framePaddingY = ImGui.GetStyle().FramePadding.Y;
+        if (errorLine <= 0 || errorLine > value.LineCount() || value.LineCount() * lineHeight + 2 * framePaddingY > fieldHeight)
+            return false;
+
+        var fieldMin = ImGui.GetCursorScreenPos();
+        var fieldMax = fieldMin + new Vector2(ImGui.GetContentRegionAvail().X, fieldHeight);
+        var drawList = ImGui.GetWindowDrawList();
+        drawList.AddRectFilled(fieldMin, fieldMax, UiColors.BackgroundInputField);
+
+        var rowTop = MathF.Round(fieldMin.Y + framePaddingY + (errorLine - 1) * lineHeight);
+        drawList.AddRectFilled(new Vector2(fieldMin.X, rowTop), new Vector2(fieldMax.X, rowTop + lineHeight), UiColors.StatusError.Fade(0.18f));
+        return true;
     }
 
     private static InputEditStateFlags DrawCustomDropdown(Symbol.Child.Input input)

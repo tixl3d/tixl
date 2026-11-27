@@ -29,6 +29,7 @@ Keep the `rotate_vector` line from the previous step and look at the parameter w
 **Expected:**
 - The ShaderCode field has an error border, and below it the error with the line number counted within the field
   (the line you typed, not a line of the full shader), followed by the `qRotateVec3` hint.
+- That line is highlighted in red inside the field, as in the code editor popup.
 - An error in AdditionalCode shows below that field instead.
 - Fixing the line removes the border and the message.
 
