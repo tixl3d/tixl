@@ -14,7 +14,7 @@
     },
     {
       "ChildId": "4a18ea3a-4f45-4262-abd5-10e6f86aae13",
-      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
+      "SymbolName": "pixtur.DemosByStill.worksforeverybody.WorksForEverybody",
       "Position": {
         "X": 0.0,
         "Y": 0.0
@@ -30,7 +30,7 @@
     },
     {
       "ChildId": "7319e3f8-c410-4ecf-84e2-284402821169",
-      "SymbolName": "Examples.user.still.there.ThereDemo",
+      "SymbolName": "pixtur.DemosByStill.there.ThereDemo",
       "Position": {
         "X": 0.0,
         "Y": 93.361664
@@ -62,7 +62,7 @@
     },
     {
       "ChildId": "a26e199b-cc62-443b-9a60-5ab56ea19fbb",
-      "SymbolName": "Examples.user.still.katsu.Katsumaki",
+      "SymbolName": "pixtur.DemosByStill.katsumaki.Katsumaki",
       "Position": {
         "X": 0.0,
         "Y": 199.89496

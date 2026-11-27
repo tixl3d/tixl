@@ -4401,7 +4401,7 @@
     {
       "Id": "dccd1b9c-fa77-4975-836d-612f4935f78a"/*WorksForEverybody*/,
       "SymbolId": "00485ce8-d342-4c97-aac3-1af8a7f03897",
-      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
+      "SymbolName": "pixtur.DemosByStill.worksforeverybody.WorksForEverybody",
       "InputValues": [],
       "Outputs": []
     },

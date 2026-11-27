@@ -290,7 +290,9 @@ asset relinking, undo across projects), then 5.
 2. **First external extension:** the showcase graphs `Examples/Symbols/user` + `Assets/user` (~220 MB, 122 MB
    zstd) into an official repo, e.g. `tixl3d/tixl-showcase`, with a `track` entry. Installer shrinks by ~120 MB.
    GUIDs unchanged (`git mv`, history-preserving split).
-3. **pixtur's projects** from `pixtur/T3Projects` into one new repository, projects unchanged (D0). Archive ↔ Wake
+3. **pixtur's projects** from `pixtur/T3Projects` into one new repository, projects unchanged (D0). Started
+   2026-11-27: `pixtur/tixl-examples-pixtur` (`~/Documents/tixl-examples-pixtur`) with ExamplesByPixtur and DemosByStill (Still's
+   demos moved out of Examples; DemoProjectTests in Examples depends on it until the visual tests are split). Archive ↔ Wake
    use each other's operators (8 / 2) and Video_44_Highlights uses 3 of Video_OutputSetup, so those form two
    multi-project extensions (or one, if preferred); ArtNet, DronesOfFury, ProjDesyAR, Tixl42_Release and VJCasual
    are independent. Playground (16 GB) and `_agentTests` stay out. Dedupe `Examples/Assets/user/wake` (41 MB)

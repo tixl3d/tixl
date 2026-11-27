@@ -234,7 +234,7 @@
     {
       "Id": "994a15a5-cb1b-4235-ab21-747752fcb14b"/*FadingSlideShow2*/,
       "SymbolId": "7eb80902-dd6f-4887-bb99-68741bff6f69",
-      "SymbolName": "pixtur.Playground.helper.FadingSlideShow2",
+      "SymbolName": "Examples.user.pixtur.helper.FadingSlideShow2",
       "InputValues": [
         {
           "Id": "989caa58-3d5c-4ea3-8507-e746a3bfe689"/*FadeType*/,
@@ -325,11 +325,6 @@
           "Id": "8b5fb93a-ee65-44d9-88be-66ee2e174385"/*FadeType*/,
           "Type": "System.Int32",
           "Value": 1
-        },
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "pixtur.Playground:images/slides/"
         }
       ],
       "Outputs": []

@@ -2191,7 +2191,7 @@
     },
     {
       "ChildId": "dccd1b9c-fa77-4975-836d-612f4935f78a",
-      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
+      "SymbolName": "pixtur.DemosByStill.worksforeverybody.WorksForEverybody",
       "Position": {
         "X": 3784.8252,
         "Y": 4496.872

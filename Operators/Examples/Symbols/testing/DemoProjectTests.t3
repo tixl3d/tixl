@@ -38,7 +38,7 @@
     {
       "Id": "4a18ea3a-4f45-4262-abd5-10e6f86aae13"/*WorksForEverybody*/,
       "SymbolId": "00485ce8-d342-4c97-aac3-1af8a7f03897",
-      "SymbolName": "Examples.user.still.worksforeverybody.WorksForEverybody",
+      "SymbolName": "pixtur.DemosByStill.worksforeverybody.WorksForEverybody",
       "InputValues": [],
       "Outputs": []
     },
@@ -63,7 +63,7 @@
     {
       "Id": "7319e3f8-c410-4ecf-84e2-284402821169"/*ThereDemo*/,
       "SymbolId": "5ea8bc54-d1f6-4748-9839-e3e4415a5608",
-      "SymbolName": "Examples.user.still.there.ThereDemo",
+      "SymbolName": "pixtur.DemosByStill.there.ThereDemo",
       "InputValues": [],
       "Outputs": []
     },
@@ -152,7 +152,7 @@
     {
       "Id": "a26e199b-cc62-443b-9a60-5ab56ea19fbb"/*Katsumaki*/,
       "SymbolId": "bfa5b00c-e1f3-4b15-8fec-859156facfce",
-      "SymbolName": "Examples.user.still.katsu.Katsumaki",
+      "SymbolName": "pixtur.DemosByStill.katsumaki.Katsumaki",
       "InputValues": [],
       "Outputs": []
     },

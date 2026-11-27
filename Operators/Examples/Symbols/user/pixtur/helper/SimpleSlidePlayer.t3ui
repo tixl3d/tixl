@@ -171,7 +171,7 @@
     },
     {
       "ChildId": "994a15a5-cb1b-4235-ab21-747752fcb14b",
-      "SymbolName": "pixtur.Playground.helper.FadingSlideShow2",
+      "SymbolName": "Examples.user.pixtur.helper.FadingSlideShow2",
       "Position": {
         "X": 1005.2151,
         "Y": 462.0736

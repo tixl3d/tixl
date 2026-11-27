@@ -211,7 +211,7 @@
         {
           "Id": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-katsumaki/soundtrack/rp-katsumaki-v3.mp3"
+          "Value": "pixtur.DemosByStill:katsumaki/soundtrack/rp-katsumaki-v3.mp3"
         },
         {
           "Id": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
@@ -604,7 +604,7 @@
         {
           "Id": "625951af-5f99-4171-b5b0-c97413121f56"/*Path*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-there/soundtrack/partial.mp3"
+          "Value": "pixtur.DemosByStill:there/soundtrack/partial.mp3"
         },
         {
           "Id": "8f2e6b10-4c5d-4e8f-9a1b-2c3d4e5f6a70"/*Display*/,
@@ -632,7 +632,7 @@
                 "End": 191.994
               },
               "LayerIndex": 0,
-              "SourceUnit": "Bars"
+              "SourceUnit": "Seconds"
             }
           }
         }
