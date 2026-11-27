@@ -231,15 +231,17 @@ namespace Lib.Utils.StraightSkeleton
                 var chainBegin = chains[i];
                 var chainEnd = chains[(i + 1)%edgeListSize];
 
-                var newVertex = CreateMultiSplitVertex(chainBegin.NextEdge, chainEnd.PreviousEdge,
-                    center, @event.Distance);
-
                 var beginNextVertex = chainBegin.NextVertex;
                 var endPreviousVertex = chainEnd.PreviousVertex;
 
+                // Chains at one level can share and mutate a vertex. Use the edges the vertices
+                // actually have, not the edges the chains expected before the earlier chains ran.
+                var newVertex = CreateMultiSplitVertex(beginNextVertex.PreviousEdge, endPreviousVertex.NextEdge,
+                    center, @event.Distance);
+
                 CorrectBisectorDirection(newVertex.Bisector, beginNextVertex, endPreviousVertex,
-                    chainBegin.NextEdge,
-                    chainEnd.PreviousEdge);
+                    beginNextVertex.PreviousEdge,
+                    endPreviousVertex.NextEdge);
 
                 if (LavUtil.IsSameLav(beginNextVertex, endPreviousVertex))
                 {
