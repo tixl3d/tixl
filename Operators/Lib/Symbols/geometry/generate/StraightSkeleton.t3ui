@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "cde60bf0-9ed7-4505-9338-3a397befacb0"/*StraightSkeleton*/,
+  "Description": "Computes the straight skeleton of the closed curves in a Geometry: every contour edge moves inward at the same speed and the traces of the corners become the skeleton.\n\nThe skeleton is the basis for offsetting, insetting, beveling and roof-shaped geometry. Nested contours become holes, every hole can contain another island, and multiple islands are kept as separate parts. Open curves are ignored. The curves are flattened in the XY plane, so a contour's average Z is used as its base height. Contours must be simple and must not touch each other; nearly degenerate geometry can fail with a warning.\n\nThe Skeleton output is the set of inward traces as curves, with Z rising by Height per unit of inward travel. The Roof output is the raised roof surface, one N-gon per contour edge. Both emits the roof polygons and the skeleton curves together: use [GeometryToMesh] or [DrawMesh] for the roof and [DrawCurves] for the skeleton. A float SkeletonTime attribute on the points stores the inward distance.\n\nAKA: straight skeleton, medial axis, roof, offset skeleton\n\nTips\n- Feed [MergeCurves] or [Extrude] outlines with holes into this node.\n- Set Height to 0 for a flat skeleton or to 1 for a roof whose slope is 45 degrees.\n- The computation grows roughly quadratically with the number of points; keep Async enabled for large text or SVG outlines.",
+  "InputUis": [
+    {
+      "InputId": "13ffec39-19ec-4d3d-8425-2f82412651be"/*Async*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Computes the skeleton on a background thread. The previous result stays visible until the new one is ready."
+    },
+    {
+      "InputId": "309ed1ce-5fff-46e4-9e2b-9bb9d51195e5"/*Height*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Scales inward travel into Z. 0 keeps the result flat, 1 raises the roof at 45 degrees. The SkeletonTime point attribute keeps the unscaled distance.",
+      "Min": 0.0,
+      "Max": 10.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "348a2532-139d-4bc1-80b7-c6051a6353cd"/*Tolerance*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Maximum deviation when flattening curves into straight segments. Smaller values keep round shapes rounder and add more skeleton edges.",
+      "Min": 0.0,
+      "Max": 0.1,
+      "Scale": 1E-05,
+      "Format": "{0:0.0000}"
+    },
+    {
+      "InputId": "52990565-f0ab-45cf-923b-b1a7cd5bdb07"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Skeleton emits the inward traces as curves, Roof the raised roof faces, Both the roof faces and the skeleton curves.",
+      "DisplayAs": "SegmentedSwitch"
+    },
+    {
+      "InputId": "76653262-91d0-41e4-b807-efcd34dd86f9"/*Curves*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4fa8de00-a7f4-4487-a725-f8b4170d3b63"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

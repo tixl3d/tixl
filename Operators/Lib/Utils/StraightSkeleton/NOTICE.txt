@@ -1,0 +1,9 @@
+StraightSkeletonNet
+Copyright © Ilya Builuk, 2016
+https://github.com/reinterpretcat/csharp-libs/tree/master/straight_skeleton
+
+Licensed under the Apache License, Version 2.0 (see LICENSE-APACHE.txt).
+This directory is a vendored, namespace-adjusted copy of that implementation,
+used by the [StraightSkeleton] operator. The original was in turn a port of
+the kendzi-straight-skeleton Java library and is algorithmically related to
+StrandedKitty/straight-skeleton.
