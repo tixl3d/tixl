@@ -111,6 +111,7 @@ internal sealed partial class MagGraphView
 
             if (!LayoutHandling.FocusMode)
             {
+                DrawReadOnlyWatermark(drawList);
                 DrawBackgroundGrids(drawList);
             }
 
@@ -452,6 +453,23 @@ internal sealed partial class MagGraphView
                 //                       );
             }
         }
+    }
+
+    /** Without it a read-only composition looks editable until an edit gets refused. */
+    private void DrawReadOnlyWatermark(ImDrawListPtr drawList)
+    {
+        if (!_context.CompositionInstance.Symbol.SymbolPackage.IsReadOnly)
+            return;
+
+        const string label = "READ ONLY";
+        var font = Fonts.FontBold;
+        var fontSize = MathF.Round(MathF.Min(WindowSize.X * 0.1f, 96 * T3Ui.UiScaleFactor));
+        var textSize = font.CalcTextSizeA(fontSize, float.MaxValue, 0, label);
+        var pos = WindowPos + (WindowSize - textSize) * 0.5f;
+        drawList.AddText(font, fontSize,
+                         new Vector2(MathF.Round(pos.X), MathF.Round(pos.Y)),
+                         UiColors.ForegroundFull.Fade(0.05f * _context.GraphOpacity),
+                         label);
     }
 
     private void DrawBackgroundGrids(ImDrawListPtr drawList)
