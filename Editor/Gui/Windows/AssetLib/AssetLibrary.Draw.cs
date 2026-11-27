@@ -153,6 +153,9 @@ internal sealed partial class AssetLibrary
 
             CustomComponents.DrawHoverHighlightOnLastItem();
 
+            if (CanBeMoved(folder))
+                DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.AssetFolder, folder.Address);
+
             if (isLinkMountRoot)
             {
                 if (ImGui.IsItemHovered())
@@ -184,6 +187,7 @@ internal sealed partial class AssetLibrary
 
             HandleDropFilesIntoFolder(folder);
             HandleDropAssetsIntoFolder(folder);
+            HandleDropFolderIntoFolder(folder);
 
             _folderForMenu = folder;
             CustomComponents.ContextMenuForItem(() =>

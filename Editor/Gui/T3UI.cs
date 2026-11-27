@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.IoServices;
 using T3.Core.Animation;
 using T3.Core.Operator;
+using T3.Core.Resource.Assets;
 using T3.Core.DataTypes.DataSet;
 using T3.Editor.Gui.Dialog;
 using T3.Editor.Gui.Dialogs;
@@ -33,6 +34,14 @@ public static partial class T3Ui
         Playback.Current = DefaultTimelinePlayback;
         ThemeHandling.Initialize();
         OperatorEditCommand.RegisterAsOperatorUndoHandler();
+        AssetRegistry.SymbolReferencesRewritten += FlagSymbolForSaving;
+    }
+
+    /** Asset moves rewrite input values directly in the symbols; without this they would not be saved. */
+    private static void FlagSymbolForSaving(Guid symbolId)
+    {
+        if (SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
+            symbolUi.FlagAsModified();
     }
 
     internal static readonly Playback DefaultTimelinePlayback = new();

@@ -283,6 +283,7 @@ internal static class DragAndDropHandling
         None,
         Symbol,
         FileAsset,
+        AssetFolder,
         ExternalFile,
         SymbolNameSpace,
         SetupEntity,

@@ -547,94 +547,144 @@ public static class AssetRegistry
         return false;
     }
 
+    /// <summary>
+    /// Re-registers a file or folder after it moved on disk, possibly into another package, and rewrites every
+    /// input of a loaded symbol whose value is the old address; for a folder, everything below it too. Inputs are
+    /// found by scanning the symbols, not through <see cref="ReferencesForAssetId"/>, which only knows the paths
+    /// of startup and goes stale when paths are edited. Raises <see cref="SymbolReferencesRewritten"/> for each
+    /// symbol whose inputs changed. A move that was already applied (the file watcher reports moves the editor
+    /// made itself) is ignored.
+    /// </summary>
     public static Asset? UpdateMovedAsset(string oldPath, string newPath)
     {
         var isDir = Directory.Exists(newPath);
 
-        // Remove old address
-        if (!TryConvertFilepathToAddress(oldPath, isDir, out var oldAddress, out _))
+        if (!TryConvertFilepathToAddress(new string(oldPath), isDir, out var oldAddress, out _)
+            || !_assetsByAddress.TryGetValue(oldAddress, out var oldAsset))
         {
-            Log.Warning("Can't resolve old path");
+            if (TryToGetAssetFromFilepath(new string(newPath), isDir, out var alreadyMoved))
+                return alreadyMoved;
+
+            Log.Warning($"Can't resolve moved asset {oldPath}");
             return null;
         }
 
-        if (!_assetsByAddress.TryRemove(oldAddress, out var oldAsset))
+        if (!TryConvertFilepathToAddress(new string(newPath), isDir, out _, out var targetPackage))
         {
-            Log.Warning("Can't resolve old path");
-            return null;
-        }
-        
-        var package = ResourcePackageManager.SharedResourcePackages.FirstOrDefault(p => p.Id == oldAsset.PackageId);
-        if (package == null)
-        {
-            Log.Warning("Can't resolve old path package");
+            Log.Warning($"{newPath} is not inside a package's assets folder");
             return null;
         }
 
-        // Register new address - paths below a linked folder need their virtual mount address
-        FileSystemInfo info = isDir ? new DirectoryInfo(newPath) : new FileInfo(newPath);
-        Asset newAsset;
-        if (AssetLinkFolders.TryGetMountForAbsolutePath(newPath.ToForwardSlashes(), out var mount, out var mountRelativePart))
-        {
-            newAsset = RegisterLinkedEntry(info, mount, $"{mount.VirtualDir}/{mountRelativePart}", isDir);
-        }
-        else
-        {
-            newAsset = RegisterPackageEntry(info, package, isDir);
-        }
+        var movedAssets = new Dictionary<string, Asset>(StringComparer.OrdinalIgnoreCase);
+        var oldFolderPrefix = oldAsset.FullPath.TrimEnd('/') + "/";
+        var newAsset = MoveRegisteredAsset(oldAsset, newPath, isDir, targetPackage, movedAssets);
 
-        ResourceFileWatcher.FileStateChangeCounter++;    
-        
-        // Update references...
-        if (!ReferencesForAssetId.Remove(oldAsset.Id, out var references))
-            return newAsset;
-
-        foreach (var r in references)
+        if (isDir)
         {
-            if (!UpdateAddressForReference(r, newAsset))
-                Log.Warning("Failed to update asset reference: " + r);
+            var containedAssets = new List<Asset>();
+            foreach (var asset in _assetsByAddress.Values)
+            {
+                if (asset.FullPath.StartsWith(oldFolderPrefix, StringComparison.OrdinalIgnoreCase))
+                    containedAssets.Add(asset);
+            }
+
+            var newFolderPrefix = newPath.ToForwardSlashes().TrimEnd('/') + "/";
+            foreach (var asset in containedAssets)
+            {
+                var movedPath = newFolderPrefix + asset.FullPath[oldFolderPrefix.Length..];
+                MoveRegisteredAsset(asset, movedPath, asset.IsDirectory, targetPackage, movedAssets);
+            }
         }
 
-        
+        ResourceFileWatcher.FileStateChangeCounter++;
+
+        var rewrittenSymbolIds = new HashSet<Guid>();
+        RewriteMovedAddresses(movedAssets, rewrittenSymbolIds);
+        foreach (var symbolId in rewrittenSymbolIds)
+        {
+            SymbolReferencesRewritten?.Invoke(symbolId);
+        }
+
         return newAsset;
     }
 
-    private static bool UpdateAddressForReference(AssetReference reference, Asset newAsset)
+    /// <summary>
+    /// Raised with the id of a symbol whose input values were rewritten because an asset moved, so the editor can
+    /// mark it for saving.
+    /// </summary>
+    public static event Action<Guid>? SymbolReferencesRewritten;
+
+    private static Asset MoveRegisteredAsset(Asset oldAsset, string newPath, bool isDir, IResourcePackage targetPackage,
+                                             Dictionary<string, Asset> movedAssets)
     {
-        if (!SymbolRegistry.TryGetSymbol(reference.SymbolId, out var symbol))
+        _assetsByAddress.TryRemove(oldAsset.Address, out _);
+        ReferencesForAssetId.Remove(oldAsset.Id);
+
+        // Paths below a linked folder need their virtual mount address
+        FileSystemInfo info = isDir ? new DirectoryInfo(newPath) : new FileInfo(newPath);
+        var newAsset = AssetLinkFolders.TryGetMountForAbsolutePath(newPath.ToForwardSlashes(), out var mount, out var mountRelativePart)
+                           ? RegisterLinkedEntry(info, mount, $"{mount.VirtualDir}/{mountRelativePart}", isDir)
+                           : RegisterPackageEntry(info, targetPackage, isDir);
+
+        movedAssets[oldAsset.Address] = newAsset;
+        return newAsset;
+    }
+
+    private static void RewriteMovedAddresses(Dictionary<string, Asset> movedAssets, HashSet<Guid> rewrittenSymbolIds)
+    {
+        foreach (var package in SymbolPackage.AllPackages)
         {
-            Log.Debug("Symbol for asset reference not found? " + reference.SymbolId);
+            foreach (var symbol in package.Symbols.Values)
+            {
+                foreach (var inputDefinition in symbol.InputDefinitions)
+                {
+                    if (inputDefinition.DefaultValue is not InputValue<string> defaultValue
+                        || !TryGetMovedAddress(movedAssets, defaultValue.Value, out var newAsset, out var newAddress))
+                        continue;
+
+                    defaultValue.Value = newAddress;
+                    AddAssetReference(newAsset, symbol.Id, Guid.Empty, inputDefinition.Id);
+                    rewrittenSymbolIds.Add(symbol.Id);
+                }
+
+                foreach (var child in symbol.Children.Values)
+                {
+                    foreach (var input in child.Inputs.Values)
+                    {
+                        if (input.IsDefault
+                            || input.Value is not InputValue<string> stringValue
+                            || !TryGetMovedAddress(movedAssets, stringValue.Value, out var newAsset, out var newAddress))
+                            continue;
+
+                        stringValue.Value = newAddress;
+                        AddAssetReference(newAsset, symbol.Id, child.Id, input.Id);
+                        symbol.InvalidateInputInAllChildInstances(input.Id, child.Id);
+                        rewrittenSymbolIds.Add(symbol.Id);
+                    }
+                }
+            }
+        }
+    }
+
+    /** Folder inputs may omit the trailing slash the registry uses for folders; the rewritten value keeps that style. */
+    private static bool TryGetMovedAddress(Dictionary<string, Asset> movedAssets, string? address,
+                                           [NotNullWhen(true)] out Asset? newAsset, [NotNullWhen(true)] out string? newAddress)
+    {
+        newAddress = null;
+        newAsset = null;
+        if (string.IsNullOrEmpty(address))
             return false;
-        }
 
-        if (reference.IsDefaultValueReference)
+        if (movedAssets.TryGetValue(address, out newAsset))
         {
-            var inputDefinition = symbol.InputDefinitions.FirstOrDefault(i => i.Id == reference.InputId);
-            if (inputDefinition == null)
-                return false;
-
-            if (inputDefinition.DefaultValue.ValueType != typeof(string))
-                return false;
-
-            inputDefinition.DefaultValue.Assign(new InputValue<string>(newAsset.Address));
-            AddAssetReference(newAsset, symbol.Id, Guid.Empty, inputDefinition.Id);
-        }
-        else
-        {
-            if (!symbol.Children.TryGetValue(reference.SymbolChildId, out var symbolChild))
-            {
-                return false;
-            }
-
-            if (!symbolChild.Inputs.TryGetValue(reference.InputId, out var input))
-            {
-                return false;
-            }
-
-            input.Value.Assign(new InputValue<string>(newAsset.Address));
-            AddAssetReference(newAsset, symbol.Id, symbolChild.Id, input.Id);
+            newAddress = newAsset.Address;
+            return true;
         }
 
+        if (address.EndsWith('/') || !movedAssets.TryGetValue(address + "/", out newAsset))
+            return false;
+
+        newAddress = newAsset.Address.TrimEnd('/');
         return true;
     }
 
