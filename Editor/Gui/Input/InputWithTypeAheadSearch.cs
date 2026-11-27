@@ -28,7 +28,7 @@ internal static class InputWithTypeAheadSearch
         var inputId = ImGui.GetID(label); 
         var isSearchResultWindowOpen = inputId == _activeInputId;
         var shouldUpdateScroll = false;
-        var  wasSelected= false;
+        var wasSelected = false;
         selected = searchString;
 
         if (outlineOnly)
@@ -45,27 +45,22 @@ internal static class InputWithTypeAheadSearch
         
         if (isSearchResultWindowOpen)
         {
-            //Log.Debug("SearchString: " + searchString);
+            // Arrow keys only move the highlight; Return commits it. Reporting a selection here would
+            // apply the value on every key press and reset the highlight to the applied value.
             if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
             {
                 if (_lastTypeAheadResults.Count > 0)
                 {
                     _selectedResultIndex = (_selectedResultIndex + 1).Clamp(0, _lastTypeAheadResults.Count-1);
                     shouldUpdateScroll = true;
-                    selected = searchString;
-                    wasSelected = true;
                 }
             }
             else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
             {
                 if (_lastTypeAheadResults.Count > 0)
                 {
-                    _selectedResultIndex--;
-                    if (_selectedResultIndex < 0)
-                        _selectedResultIndex = 0;
+                    _selectedResultIndex = (_selectedResultIndex - 1).Clamp(0, _lastTypeAheadResults.Count-1);
                     shouldUpdateScroll = true;
-                    selected = searchString;
-                    wasSelected = true;
                 }
             }
             
@@ -96,16 +91,6 @@ internal static class InputWithTypeAheadSearch
             }
         }
 
-        
-        //var filterInputChanged = true;
-        
-        // Sadly, ImGui will revert the searchSearch to its internal state if cursor is moved up or down.
-        // To apply is as a new result we need to revert that...
-        if (wasSelected)
-        {
-            searchString = selected;
-        }
-        
         ImGui.PopStyleColor();
             
             
