@@ -4,7 +4,7 @@ using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Slots;
 using System.Runtime.InteropServices;
 
-namespace Examples{
+namespace Examples.Lib.geometry.modify{
     [Guid("15d86cab-dafe-4741-bd0a-519a2f7c1eb5")]
     internal sealed class VoronoiFractureExample : Instance<VoronoiFractureExample>
     {
