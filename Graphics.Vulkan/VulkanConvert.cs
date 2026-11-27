@@ -156,8 +156,10 @@ internal static class VulkanConvert
 
         // Both of D3D11's buffer shapes are storage buffers in Vulkan: a structured buffer reads through the
         // same descriptor type, only its element layout differs.
+        // Any structured buffer can hold a mesh's indices, including ones a compute shader wrote, and chunk draws
+        // bind it as the index buffer.
         if ((usage & (BufferUsage.Structured | BufferUsage.Storage)) != 0)
-            flags |= VkBufferUsageFlags.StorageBuffer;
+            flags |= VkBufferUsageFlags.StorageBuffer | VkBufferUsageFlags.IndexBuffer;
 
         if ((usage & BufferUsage.Indirect) != 0)
             flags |= VkBufferUsageFlags.IndirectBuffer;

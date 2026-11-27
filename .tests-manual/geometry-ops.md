@@ -209,7 +209,9 @@ between `GPoints` and the draw op and raise its `Scale` to ~1.8.
 - With a `[ColorFacesFromAttribute]` upstream, every chunk keeps its color in
   the chunk draw (vertex colors are used, multiplied with the point color).
 - Dragging the `[TransformPoints]` scale is as smooth as `[DrawMesh]`; changing
-  the seed count re-fits the draw table without a visible hitch.
+  the seed count re-fits the draw without a visible hitch.
+- Changing the `[ScatterPointsInVolume]` Seed (same seed count) redraws every
+  chunk as a closed piece; no torn slivers from the previous fracture remain.
 - Routing `Points` through `[TransformCPoints]` and `[UploadToGpu]` instead of
   `GPoints` through `[TransformPoints]` gives the same picture for the same
   Scale and Rotation values.

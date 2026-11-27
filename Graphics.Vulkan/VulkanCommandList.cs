@@ -569,9 +569,9 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
                                      (uint)firstInstance);
     }
 
-    public void DrawIndirect(GpuBuffer arguments, int offset)
+    public void DrawIndirect(GpuBuffer arguments, int offset, int drawCount, int stride)
     {
-        if (arguments is not VulkanBuffer buffer)
+        if (arguments is not VulkanBuffer buffer || drawCount <= 0)
             return;
 
         BarrierIndirectArguments(buffer);
@@ -579,7 +579,62 @@ internal sealed unsafe class VulkanCommandList(VulkanBackend backend) : ICommand
         if (!PrepareDraw())
             return;
 
-        backend.Api.vkCmdDrawIndirect(_commandBuffer, buffer.Buffer, (ulong)offset, 1, 0);
+        if (drawCount == 1)
+        {
+            backend.Api.vkCmdDrawIndirect(_commandBuffer, buffer.Buffer, (ulong)offset, 1, (uint)stride);
+            return;
+        }
+
+        if (backend.SupportsMultiDrawIndirect)
+        {
+            var maxPerCommand = (int)Math.Min(backend.MaxDrawIndirectCount, int.MaxValue);
+            for (var first = 0; first < drawCount; first += maxPerCommand)
+            {
+                var count = Math.Min(maxPerCommand, drawCount - first);
+                backend.Api.vkCmdDrawIndirect(_commandBuffer, buffer.Buffer, (ulong)(offset + (long)first * stride), (uint)count, (uint)stride);
+            }
+
+            return;
+        }
+
+        for (var drawIndex = 0; drawIndex < drawCount; drawIndex++)
+        {
+            backend.Api.vkCmdDrawIndirect(_commandBuffer, buffer.Buffer, (ulong)(offset + (long)drawIndex * stride), 1, (uint)stride);
+        }
+    }
+
+    public void DrawIndexedIndirect(GpuBuffer arguments, int offset, int drawCount, int stride)
+    {
+        if (arguments is not VulkanBuffer buffer || drawCount <= 0)
+            return;
+
+        BarrierIndirectArguments(buffer);
+
+        if (!PrepareDraw())
+            return;
+
+        if (drawCount == 1)
+        {
+            backend.Api.vkCmdDrawIndexedIndirect(_commandBuffer, buffer.Buffer, (ulong)offset, 1, (uint)stride);
+            return;
+        }
+
+        if (backend.SupportsMultiDrawIndirect)
+        {
+            var maxPerCommand = (int)Math.Min(backend.MaxDrawIndirectCount, int.MaxValue);
+            for (var first = 0; first < drawCount; first += maxPerCommand)
+            {
+                var count = Math.Min(maxPerCommand, drawCount - first);
+                backend.Api.vkCmdDrawIndexedIndirect(_commandBuffer, buffer.Buffer, (ulong)(offset + (long)first * stride), (uint)count, (uint)stride);
+            }
+
+            return;
+        }
+
+        for (var drawIndex = 0; drawIndex < drawCount; drawIndex++)
+        {
+            backend.Api.vkCmdDrawIndexedIndirect(_commandBuffer, buffer.Buffer, (ulong)(offset + (long)drawIndex * stride), 1, (uint)stride);
+        }
     }
 
     public void Dispatch(int groupsX, int groupsY, int groupsZ)

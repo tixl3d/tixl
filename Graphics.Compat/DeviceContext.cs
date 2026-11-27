@@ -140,11 +140,32 @@ public sealed class DeviceContext
 
     public void DrawInstancedIndirect(Buffer arguments, int alignedByteOffset)
     {
-        if (arguments.GpuBuffer == null || !PrepareDraw())
+        DrawInstancedIndirect(arguments, alignedByteOffset, 1, DrawInstancedIndirectArgsStride);
+    }
+
+    /// <summary>Draws <paramref name="drawCount"/> argument records <paramref name="stride"/> bytes apart with one command.</summary>
+    public void DrawInstancedIndirect(Buffer arguments, int alignedByteOffset, int drawCount, int stride)
+    {
+        if (arguments.GpuBuffer == null || drawCount <= 0 || !PrepareDraw())
             return;
 
-        Commands.DrawIndirect(arguments.GpuBuffer, alignedByteOffset);
+        Commands.DrawIndirect(arguments.GpuBuffer, alignedByteOffset, drawCount, stride);
     }
+
+    /** Vertex count, instance count, first vertex, first instance. */
+    public const int DrawInstancedIndirectArgsStride = 16;
+
+    /// <summary>Draws <paramref name="drawCount"/> indexed argument records <paramref name="stride"/> bytes apart with one command.</summary>
+    public void DrawIndexedInstancedIndirect(Buffer arguments, int alignedByteOffset, int drawCount, int stride)
+    {
+        if (arguments.GpuBuffer == null || drawCount <= 0 || !PrepareDraw())
+            return;
+
+        Commands.DrawIndexedIndirect(arguments.GpuBuffer, alignedByteOffset, drawCount, stride);
+    }
+
+    /** Index count, instance count, first index, vertex offset, first instance. */
+    public const int DrawIndexedInstancedIndirectArgsStride = 20;
 
     public void Dispatch(int countX, int countY, int countZ)
     {

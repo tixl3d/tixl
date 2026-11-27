@@ -89,19 +89,14 @@ cbuffer PreviousTransforms : register(b6)
     float4x4 PrevObjectToClipSpace;
 };
 
-// One entry per drawn face: the point placing it and its index into the mesh index buffer
-struct IndicesForDraw
-{
-    int PointIndex;
-    int FaceIndex;
-};
 
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
 StructuredBuffer<PbrVertex> PbrVertices : register(t0);
 StructuredBuffer<Point> Points : register(t1);
-StructuredBuffer<IndicesForDraw> DrawData : register(t2);
+// t2 and t10 are unused: each point is its own sub-draw of an indexed multi-draw indirect command, and the
+// hardware reads the chunk's faces from the bound index buffer.
 
 Texture2D<float4> BaseColorMap : register(t3);
 Texture2D<float4> EmissiveColorMap : register(t4);
@@ -110,20 +105,17 @@ Texture2D<float4> NormalMap : register(t6);
 TextureCube<float4> PrefilteredSpecular : register(t7);
 Texture2D<float4> BRDFLookup : register(t8);
 Texture2D<float> ShadowMap : register(t9);
-StructuredBuffer<int3> FaceIndices : register(t10);
 
 /** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
 StructuredBuffer<Point> PreviousPoints : register(t11);
 
-psInput vsMain(uint id : SV_VertexID)
+// Each sub-draw walks its chunk's index range through the bound index buffer and carries its point index as
+// firstInstance. With a zero vertex offset, SV_VertexID is the absolute index.
+psInput vsMain(uint vertexIndex : SV_VertexID, uint firstInstance : SV_StartInstanceLocation)
 {
     psInput output;
 
-    uint drawFaceIndex = id / 3;
-    uint faceVertexIndex = id % 3;
-    IndicesForDraw drawEntry = DrawData[drawFaceIndex];
-    uint vertexIndex = FaceIndices[drawEntry.FaceIndex][faceVertexIndex];
-    uint pointIndex = drawEntry.PointIndex;
+    uint pointIndex = firstInstance;
 
     PbrVertex vertex = PbrVertices[vertexIndex];
     float4 posInObject = float4(vertex.Position, 1);

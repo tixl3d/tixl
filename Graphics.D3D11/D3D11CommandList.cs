@@ -223,10 +223,27 @@ internal sealed class D3D11CommandList(D3D11Device device) : ICommandList
             Context.DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
-    public void DrawIndirect(GpuBuffer arguments, int offset)
+    public void DrawIndirect(GpuBuffer arguments, int offset, int drawCount, int stride)
     {
-        if ((arguments as D3D11Buffer)?.Buffer is { } buffer)
-            Context.DrawInstancedIndirect(buffer, offset);
+        if ((arguments as D3D11Buffer)?.Buffer is not { } buffer)
+            return;
+
+        // D3D11 has no multi-draw indirect
+        for (var drawIndex = 0; drawIndex < drawCount; drawIndex++)
+        {
+            Context.DrawInstancedIndirect(buffer, offset + drawIndex * stride);
+        }
+    }
+
+    public void DrawIndexedIndirect(GpuBuffer arguments, int offset, int drawCount, int stride)
+    {
+        if ((arguments as D3D11Buffer)?.Buffer is not { } buffer)
+            return;
+
+        for (var drawIndex = 0; drawIndex < drawCount; drawIndex++)
+        {
+            Context.DrawIndexedInstancedIndirect(buffer, offset + drawIndex * stride);
+        }
     }
 
     public void Dispatch(int groupsX, int groupsY, int groupsZ) => Context.Dispatch(groupsX, groupsY, groupsZ);

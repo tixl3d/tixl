@@ -183,7 +183,8 @@ internal sealed class FakeCommandList : ICommandList
 
     public void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) => Draws++;
     public void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) => Draws++;
-    public void DrawIndirect(GpuBuffer arguments, int offset) => Draws++;
+    public void DrawIndirect(GpuBuffer arguments, int offset, int drawCount, int stride) => Draws += drawCount;
+    public void DrawIndexedIndirect(GpuBuffer arguments, int offset, int drawCount, int stride) => Draws += drawCount;
     public void Dispatch(int groupsX, int groupsY, int groupsZ) => Dispatches++;
     public void DispatchIndirect(GpuBuffer arguments, int offset) => Dispatches++;
 
