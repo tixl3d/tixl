@@ -19,7 +19,12 @@ namespace Lib.Utils.StraightSkeleton
     internal class SkeletonBuilder
     {
         // Error epsilon.
-        private const double SplitEpsilon = 1E-10;
+        /// <summary>
+        /// Tolerance for treating events as simultaneous. TiXL geometry is float-quantized, so a fixed
+        /// 1e-10 fails on regular polygons whose events should coincide; Build sets this relative to the
+        /// contour extent.
+        /// </summary>
+        [ThreadStatic] private static double SplitEpsilon;
 
         /// <summary> Creates straight skeleton for given polygon. </summary>
         public static Skeleton Build(List<Vector2d> polygon)
@@ -32,6 +37,35 @@ namespace Lib.Utils.StraightSkeleton
         {
             polygon = InitPolygon(polygon);
             holes = MakeClockwise(holes);
+
+            var minX = double.MaxValue;
+            var minY = double.MaxValue;
+            var maxX = double.MinValue;
+            var maxY = double.MinValue;
+            foreach (var point in polygon)
+            {
+                minX = Math.Min(minX, point.X);
+                minY = Math.Min(minY, point.Y);
+                maxX = Math.Max(maxX, point.X);
+                maxY = Math.Max(maxY, point.Y);
+            }
+
+            if (holes != null)
+            {
+                foreach (var hole in holes)
+                {
+                    foreach (var point in hole)
+                    {
+                        minX = Math.Min(minX, point.X);
+                        minY = Math.Min(minY, point.Y);
+                        maxX = Math.Max(maxX, point.X);
+                        maxY = Math.Max(maxY, point.Y);
+                    }
+                }
+            }
+
+            var extent = Math.Max(maxX - minX, maxY - minY);
+            SplitEpsilon = Math.Max(1E-10, extent * 1E-5);
 
             var queue = new PriorityQueue<SkeletonEvent>(3, new SkeletonEventDistanseComparer());
             var sLav = new HashSet<CircularList<Vertex>>();
