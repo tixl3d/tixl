@@ -7,8 +7,8 @@
     {
       "InputId": "010d4e6c-26b8-444e-8d22-3be0d93222ef"/*AlphaCutOff*/,
       "Position": {
-        "X": 3464.2683,
-        "Y": 3900.6113
+        "X": 3413.2158,
+        "Y": 4348.5107
       },
       "GroupTitle": "Advanced",
       "Description": "Fragments with an alpha below this value are discarded. 0 disables alpha testing."
@@ -16,8 +16,8 @@
     {
       "InputId": "271ffc87-bf9a-4958-ab9f-387f27744aee"/*ShadowBias*/,
       "Position": {
-        "X": 3464.2683,
-        "Y": 3970.6113
+        "X": 3413.2158,
+        "Y": 4418.511
       },
       "Description": "Depth tolerance when comparing against the shadow map. Increase it to remove shadow acne, decrease it if shadows detach from objects.",
       "Min": -0.01,
@@ -27,8 +27,8 @@
     {
       "InputId": "2ba5d5a0-2292-409a-b603-867bc2c347c7"/*ShadowOffset*/,
       "Position": {
-        "X": 3464.2683,
-        "Y": 3935.6113
+        "X": 3413.2158,
+        "Y": 4383.5107
       },
       "Description": "Offsets the shadow lookup position along the surface normal. Helps against self-shadowing artifacts.",
       "AddPadding": "True",
@@ -49,31 +49,31 @@
       "InputId": "40e840c7-b707-4f63-8ae8-bd7498d34f54"/*GPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 2897.3513,
-        "Y": 4605.412
+        "X": 2776.8105,
+        "Y": 4893.3477
       }
     },
     {
       "InputId": "43527e99-7da1-459a-b51d-0addeeb6786a"/*Color*/,
       "Position": {
-        "X": 3184.2683,
-        "Y": 3760.6113
+        "X": 3133.2158,
+        "Y": 4208.511
       },
       "GroupTitle": "Settings"
     },
     {
       "InputId": "5ff607e0-a3db-4ece-93dc-3713669def9e"/*UseF1ForSize*/,
       "Position": {
-        "X": 3324.2683,
-        "Y": 4368.0557
+        "X": 3273.2158,
+        "Y": 4741.787
       },
       "Description": "Scales each instance by the point's F1 attribute."
     },
     {
       "InputId": "7d609639-d9f3-4c7c-9fde-91c71a29aedc"/*UseStretch*/,
       "Position": {
-        "X": 3324.2683,
-        "Y": 4403.0557
+        "X": 3273.2158,
+        "Y": 4776.787
       },
       "Description": "Stretches each instance by the point's Scale attribute."
     },
@@ -81,8 +81,8 @@
       "InputId": "821e86ce-9118-429d-94d8-d30f5df9e455"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 2880.021,
-        "Y": 5630.837
+        "X": 3308.8044,
+        "Y": 5230.5854
       }
     },
     {
@@ -107,8 +107,8 @@
     {
       "InputId": "93561534-b33e-4e72-9601-36216031e5d2"/*Size*/,
       "Position": {
-        "X": 3464.2683,
-        "Y": 3865.6113
+        "X": 3413.2158,
+        "Y": 4313.5107
       },
       "Description": "Uniform scale of each instance.",
       "Min": 0.0,
@@ -125,8 +125,8 @@
     {
       "InputId": "c54759f0-759d-470e-8000-03cdfe609f1c"/*ShadowColor*/,
       "Position": {
-        "X": 3324.2683,
-        "Y": 4005.6113
+        "X": 3273.2158,
+        "Y": 4453.5117
       },
       "Description": "Color of shadowed areas. Alpha controls the shadow intensity.",
       "Min": 0.0,
@@ -165,8 +165,8 @@
       "ChildId": "066a981a-2967-4619-80c2-1041c5570cbe",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
-        "X": 3464.2683,
-        "Y": 4403.0557
+        "X": 3413.2158,
+        "Y": 4776.787
       }
     },
     {
@@ -181,16 +181,16 @@
       "ChildId": "0da030f8-8ca1-4cd4-906e-8c32c52d8628",
       "SymbolName": "Lib.flow.context.GetForegroundColor",
       "Position": {
-        "X": 3324.2683,
-        "Y": 3690.6113
+        "X": 3273.2158,
+        "Y": 4138.5107
       }
     },
     {
       "ChildId": "101e91a8-f3bf-438d-8a0b-6693c275d644",
       "SymbolName": "Lib.mesh._._MeshBufferComponents",
       "Position": {
-        "X": 3464.2683,
-        "Y": 4944.5806
+        "X": 3773.129,
+        "Y": 5048.457
       }
     },
     {
@@ -202,16 +202,16 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 3464.2683,
-        "Y": 3725.6113
+        "X": 3413.2158,
+        "Y": 4173.511
       }
     },
     {
       "ChildId": "19c7d3e5-a84f-4f60-b2d1-e6a03b9c574f",
       "SymbolName": "Lib.render._dx11.buffer.PickBuffer",
       "Position": {
-        "X": 3604.2683,
-        "Y": 5181.836
+        "X": 3488.8093,
+        "Y": 5011.9937
       }
     },
     {
@@ -234,40 +234,32 @@
       "ChildId": "337eb176-ed2f-4afa-b22d-c02e0ec8d0b4",
       "SymbolName": "Lib.render._dx11.api.FloatsToBuffer",
       "Position": {
-        "X": 3604.2683,
-        "Y": 3690.6113
+        "X": 3553.2158,
+        "Y": 4138.5107
       }
     },
     {
       "ChildId": "38a8717b-f99d-41ea-9492-402866c7c4ba",
       "SymbolName": "Lib.flow.context.GetRenderPassState",
       "Position": {
-        "X": 3464.2683,
-        "Y": 4438.0557
-      }
-    },
-    {
-      "ChildId": "39564153-45fe-4b86-ae88-078a81c5daa9",
-      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
-      "Position": {
-        "X": 3604.2683,
-        "Y": 4979.5806
+        "X": 3413.2158,
+        "Y": 4811.787
       }
     },
     {
       "ChildId": "39d2f4db-14da-4000-8d01-4b4a89cbf613",
       "SymbolName": "Lib.render.shading._.GetTextureFromContext",
       "Position": {
-        "X": 3464.2683,
-        "Y": 5116.562
+        "X": 3773.129,
+        "Y": 5118.457
       }
     },
     {
       "ChildId": "3a2d8c88-da05-42d2-9a1e-f1bcea94307e",
       "SymbolName": "Lib.render.shading._.ContextCBuffers",
       "Position": {
-        "X": 3604.2683,
-        "Y": 4508.0557
+        "X": 3913.1294,
+        "Y": 4698.457
       }
     },
     {
@@ -279,80 +271,80 @@
         "Y": 23.0
       },
       "Position": {
-        "X": 3604.2683,
-        "Y": 4173.979
+        "X": 3913.129,
+        "Y": 4558.457
       }
     },
     {
       "ChildId": "574045c2-a2f8-4d45-a2b0-33648c0bc837",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": 3604.2683,
-        "Y": 5116.562
+        "X": 3913.129,
+        "Y": 5118.457
       }
     },
     {
       "ChildId": "650b09b4-9bf9-4593-8ef6-c5acfae73388",
       "SymbolName": "Lib.numbers.bool.convert.BoolToInt",
       "Position": {
-        "X": 3464.2683,
-        "Y": 4368.0557
+        "X": 3413.2158,
+        "Y": 4741.787
       }
     },
     {
       "ChildId": "68cc4eb9-0ae0-47bd-9bd9-265c1c474ad1",
       "SymbolName": "Lib.render.shading._.GetTextureFromContext",
       "Position": {
-        "X": 3464.2683,
-        "Y": 5046.562
+        "X": 3773.1292,
+        "Y": 5083.457
       }
     },
     {
       "ChildId": "6a0f5e1e-9c3d-464a-af69-ff8c46b8a12f",
       "SymbolName": "Lib.render.shading._.GetPbrParameters",
       "Position": {
-        "X": 3604.2683,
-        "Y": 4716.623
+        "X": 3913.129,
+        "Y": 4768.457
       }
     },
     {
       "ChildId": "6aa984e7-02ca-4ed0-a73d-ab0e4d69e97b",
       "SymbolName": "Lib.numbers.color.BlendColors",
       "Position": {
-        "X": 3324.2683,
-        "Y": 3725.6113
+        "X": 3273.2158,
+        "Y": 4173.511
       }
     },
     {
       "ChildId": "7191cd15-ead9-45ed-b1a3-22dab2920605",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 3913.1296,
-        "Y": 5249.8916
+        "X": 3913.1294,
+        "Y": 5188.457
       }
     },
     {
       "ChildId": "755ca593-61c8-4f40-a491-95e1f451fb9b",
       "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
       "Position": {
-        "X": 3604.2683,
-        "Y": 5046.562
+        "X": 3913.1292,
+        "Y": 5083.457
       }
     },
     {
       "ChildId": "7f3b8d14-c2e6-4a59-91d7-b4a8e05f6c32",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 3604.2683,
-        "Y": 5286.836
+        "X": 3913.129,
+        "Y": 5013.457
       }
     },
     {
       "ChildId": "9d310ea7-3498-4070-ae75-f10459b48fbc",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 3604.2683,
-        "Y": 4944.5806
+        "X": 3913.129,
+        "Y": 5048.457
       }
     },
     {
@@ -364,56 +356,56 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 3464.2683,
-        "Y": 4005.6113
+        "X": 3413.2158,
+        "Y": 4453.5117
       }
     },
     {
       "ChildId": "a68c1ff9-e1bb-49ad-bf0d-92e0eb005b03",
       "SymbolName": "Types.Gfx.VertexShader",
       "Position": {
-        "X": 3913.1296,
-        "Y": 4479.8916
+        "X": 3913.1294,
+        "Y": 4488.457
       }
     },
     {
       "ChildId": "ab65fb20-e1ce-4f70-a1d0-15af32ba5735",
       "SymbolName": "Lib.flow.context.GetMatrixVar",
       "Position": {
-        "X": 3464.2683,
-        "Y": 3690.6113
+        "X": 3413.2158,
+        "Y": 4138.5107
       }
     },
     {
       "ChildId": "b37cc051-79aa-4c12-adde-ef5be6c9fb0a",
       "SymbolName": "Lib.render._dx11.fxsetup.SetPixelAndVertexShaderStage",
       "Position": {
-        "X": 4053.1294,
-        "Y": 4479.8916
+        "X": 4053.1292,
+        "Y": 4488.457
       }
     },
     {
       "ChildId": "b45f1e7a-6c3d-4a92-8b0e-2d7c9f16e35b",
       "SymbolName": "Lib.point.usse.KeepPreviousPointBuffer",
       "Position": {
-        "X": 3357.205,
-        "Y": 5182.9287
+        "X": 3277.9082,
+        "Y": 5004.814
       }
     },
     {
       "ChildId": "bce34338-d709-450c-a22e-178bb306f200",
       "SymbolName": "Types.Gfx.SamplerState",
       "Position": {
-        "X": 3913.1296,
-        "Y": 5214.8916
+        "X": 3913.1294,
+        "Y": 5153.457
       }
     },
     {
       "ChildId": "bd231b3d-c6fe-4bdf-ba6d-cd61051ee611",
       "SymbolName": "Lib.numbers.int.process.IntsToBuffer",
       "Position": {
-        "X": 3604.2683,
-        "Y": 4333.0557
+        "X": 3553.2158,
+        "Y": 4706.787
       }
     },
     {
@@ -441,16 +433,16 @@
       "ChildId": "d6e09a2c-5b71-4e3f-a8c4-07f9d1b6e283",
       "SymbolName": "Lib.flow.context.GetRenderPassState",
       "Position": {
-        "X": 3357.205,
-        "Y": 5252.9287
+        "X": 3277.9082,
+        "Y": 5080.487
       }
     },
     {
       "ChildId": "d7897cda-3f0a-4d7e-b5bf-1f972a7a2e1b",
       "SymbolName": "Types.Gfx.PixelShader",
       "Position": {
-        "X": 3913.1296,
-        "Y": 4514.8916
+        "X": 3913.1294,
+        "Y": 4523.457
       }
     },
     {
@@ -470,19 +462,11 @@
       }
     },
     {
-      "ChildId": "e9d89777-fe11-4f14-adca-a1a66136a31d",
-      "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
-      "Position": {
-        "X": 3604.2683,
-        "Y": 4659.305
-      }
-    },
-    {
       "ChildId": "f4937ffb-b31f-44fe-a40a-f9cf502dffcb",
       "SymbolName": "Lib.render._dx11.buffer.GetBufferComponents",
       "Position": {
-        "X": 3464.2683,
-        "Y": 4298.0557
+        "X": 3413.2158,
+        "Y": 4671.787
       }
     },
     {
@@ -549,5 +533,27 @@
       "LinkUrl": "https://www.figma.com/design/wBNGUlaACjaCDOTdeBvBvR/ComputeShader-Ideas?node-id=928-405&t=WS7jHQP1VOaxf4kA-1",
       "LinkType": "TutorialVideo"
     }
-  ]
+  ],
+  "ConnectionRoutes": {
+    "Points": [
+      {
+        "Id": "b967689e-ebe6-4e76-88fb-91dea567b4ca",
+        "Position": {
+          "X": 3370.057,
+          "Y": 5617.218
+        }
+      }
+    ],
+    "Routes": [
+      {
+        "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+        "SourceSlotId": "40e840c7-b707-4f63-8ae8-bd7498d34f54",
+        "TargetParentOrChildId": "e76c44ca-19fc-4e32-8ebd-c4f57a6aa6cd",
+        "TargetSlotId": "b79e3a8e-ceac-4d4d-998d-27f125217896",
+        "PointIds": [
+          "b967689e-ebe6-4e76-88fb-91dea567b4ca"
+        ]
+      }
+    ]
+  }
 }

@@ -18,7 +18,22 @@ cbuffer Transforms : register(b0)
     float4x4 ObjectToClipSpace;
 };
 
-cbuffer Params : register(b1)
+/** Last frame's transforms of this draw, for the velocity target. */
+cbuffer PreviousTransforms : register(b1) // b5:1
+{
+    float4x4 PrevCameraToClipSpace;
+    float4x4 PrevClipSpaceToCamera;
+    float4x4 PrevWorldToCamera;
+    float4x4 PrevCameraToWorld;
+    float4x4 PrevWorldToClipSpace;
+    float4x4 PrevClipSpaceToWorld;
+    float4x4 PrevObjectToWorld;
+    float4x4 PrevWorldToObject;
+    float4x4 PrevObjectToCamera;
+    float4x4 PrevObjectToClipSpace;
+};
+
+cbuffer Params : register(b2) // 1:2
 {
     float4x4 WorldToLightClipSpace;
     float4 Color;
@@ -31,7 +46,7 @@ cbuffer Params : register(b1)
     float4 ShadowColor;
 };
 
-cbuffer IntParams : register(b2)
+cbuffer IntParams : register(b3) //2:3
 {
     int SegmentCount;
     int UseWForSize;
@@ -39,20 +54,20 @@ cbuffer IntParams : register(b2)
     int IsShadowPass;
 };
 
-cbuffer FogParams : register(b3)
+cbuffer FogParams : register(b4) //3:4
 {
     float4 FogColor;
     float FogDistance;
     float FogBias;
 }
 
-cbuffer PointLights : register(b4)
+cbuffer PointLights : register(b5) //4:5
 {
     PointLight Lights[8];
     int ActiveLightCount;
 }
 
-cbuffer PbrParams : register(b5)
+cbuffer PbrParams : register(b6) // 6:6
 {
     float4 BaseColor;
     float4 EmissiveColor;
@@ -74,40 +89,29 @@ struct psInput
     float4 previousClipPosition : PREVIOUS_CLIP_POSITION;
 };
 
-/** Last frame's transforms of this draw, for the velocity target. */
-cbuffer PreviousTransforms : register(b6)
-{
-    float4x4 PrevCameraToClipSpace;
-    float4x4 PrevClipSpaceToCamera;
-    float4x4 PrevWorldToCamera;
-    float4x4 PrevCameraToWorld;
-    float4x4 PrevWorldToClipSpace;
-    float4x4 PrevClipSpaceToWorld;
-    float4x4 PrevObjectToWorld;
-    float4x4 PrevWorldToObject;
-    float4x4 PrevObjectToCamera;
-    float4x4 PrevObjectToClipSpace;
-};
+
 
 
 sampler texSampler : register(s0);
 sampler clampedSampler : register(s1);
 
-StructuredBuffer<PbrVertex> PbrVertices : register(t0);
-StructuredBuffer<Point> Points : register(t1);
 // t2 and t10 are unused: each point is its own sub-draw of an indexed multi-draw indirect command, and the
 // hardware reads the chunk's faces from the bound index buffer.
 
-Texture2D<float4> BaseColorMap : register(t3);
-Texture2D<float4> EmissiveColorMap : register(t4);
-Texture2D<float4> RSMOMap : register(t5);
-Texture2D<float4> NormalMap : register(t6);
-TextureCube<float4> PrefilteredSpecular : register(t7);
-Texture2D<float4> BRDFLookup : register(t8);
-Texture2D<float> ShadowMap : register(t9);
-
+Texture2D<float4> BaseColorMap : register(t0); // 3-0
+Texture2D<float4> EmissiveColorMap : register(t1); // 4:1
+Texture2D<float4> RSMOMap : register(t2); // 5:2
+Texture2D<float4> NormalMap : register(t3); // 6:3
+Texture2D<float4> BRDFLookup : register(t4); // 8:4
+StructuredBuffer<Point> Points : register(t5); //1:5
+StructuredBuffer<Point> PreviousPoints : register(t6); //11:7
+StructuredBuffer<PbrVertex> PbrVertices : register(t7); // 0:6
 /** The points one frame earlier, in the same order. Unbound or shorter, points fall back to their current position. */
-StructuredBuffer<Point> PreviousPoints : register(t11);
+TextureCube<float4> PrefilteredSpecular : register(t8); //7:8
+
+Texture2D<float> ShadowMap : register(t9); // 9:9
+
+
 
 // Each sub-draw walks its chunk's index range through the bound index buffer and carries its point index as
 // firstInstance. With a zero vertex offset, SV_VertexID is the absolute index.
