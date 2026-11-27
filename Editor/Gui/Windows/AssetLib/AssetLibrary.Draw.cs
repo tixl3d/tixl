@@ -136,7 +136,7 @@ internal sealed partial class AssetLibrary
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
 
             var containsTargetFile = ContainsTargetFile(folder);
-            if (_expandToFileTriggered && containsTargetFile)
+            if (_expandToFileTriggered && containsTargetFile || IsOnRevealPath(folder))
             {
                 ImGui.SetNextItemOpen(true);
             }
@@ -303,6 +303,13 @@ internal sealed partial class AssetLibrary
         return ImGui.GetItemRectMin().Y >= windowTop && ImGui.GetItemRectMax().Y <= windowBottom;
     }
 
+    private static bool IsOnRevealPath(AssetFolder folder)
+    {
+        return _state.RevealAddress != null
+               && !string.IsNullOrEmpty(folder.Address)
+               && _state.RevealAddress.StartsWith(folder.Address, StringComparison.Ordinal);
+    }
+
     private static bool ContainsTargetFile(AssetFolder folder)
     {
         var containsTargetFile = _state.ActivePathInput != null
@@ -419,6 +426,12 @@ internal sealed partial class AssetLibrary
             if (isActive && _expandToFileTriggered)
             {
                 _expandToFileTriggered = false;
+                ImGui.SetScrollHereY(0.5f);
+            }
+
+            if (_state.RevealAddress != null && string.Equals(asset.Address, _state.RevealAddress, StringComparison.Ordinal))
+            {
+                _state.RevealAddress = null;
                 ImGui.SetScrollHereY(0.5f);
             }
 

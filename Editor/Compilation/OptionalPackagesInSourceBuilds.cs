@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Concurrent;
 using System.IO;
 using System.Text.RegularExpressions;
 using T3.Core.Model;
@@ -21,8 +22,7 @@ internal static partial class OptionalPackagesInSourceBuilds
     /// </summary>
     public static bool ShouldLoad(string packageDirectory)
     {
-        var csproj = Directory.EnumerateFiles(packageDirectory, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
-        if (csproj == null || !OptionalDistribution().IsMatch(File.ReadAllText(csproj)))
+        if (!IsOptional(packageDirectory))
             return true;
 
         var name = Path.GetFileName(packageDirectory);
@@ -42,6 +42,20 @@ internal static partial class OptionalPackagesInSourceBuilds
         }
 
         return false;
+    }
+
+    /** True if the csproj in this package folder declares TixlDistribution=Optional. Cached per folder. */
+    public static bool IsOptional(string packageDirectory)
+    {
+        if (_isOptionalByDirectory.TryGetValue(packageDirectory, out var isOptional))
+            return isOptional;
+
+        var csproj = Directory.Exists(packageDirectory)
+                         ? Directory.EnumerateFiles(packageDirectory, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault()
+                         : null;
+        isOptional = csproj != null && OptionalDistribution().IsMatch(File.ReadAllText(csproj));
+        _isOptionalByDirectory[packageDirectory] = isOptional;
+        return isOptional;
     }
 
     /** Call after the project folders were scanned and before packages load. */
@@ -69,4 +83,5 @@ internal static partial class OptionalPackagesInSourceBuilds
 
     private static readonly List<string> _skippedNames = [];
     private static readonly HashSet<Guid> _skippedSymbolIds = [];
+    private static readonly ConcurrentDictionary<string, bool> _isOptionalByDirectory = new(StringComparer.Ordinal);
 }

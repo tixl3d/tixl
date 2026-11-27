@@ -27,6 +27,14 @@ internal static class InstalledExtensions
 
     public static readonly string Directory = Path.Combine(FileLocations.SettingsDirectory, "Extensions");
 
+    /** True for a package loaded from the installed-extensions folder, as opposed to one shipped with TiXL. */
+    public static bool ContainsPackageFolder(string packageFolder)
+    {
+        var root = Path.GetFullPath(Directory) + Path.DirectorySeparatorChar;
+        var comparison = OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        return Path.GetFullPath(packageFolder).StartsWith(root, comparison);
+    }
+
     /** The platform name used in TixlPlatforms and in the extension index, e.g. "win-x64". */
     public static readonly string CurrentPlatform =
         (OperatingSystem.IsWindows() ? "win" : OperatingSystem.IsMacOS() ? "osx" : "linux")

@@ -67,6 +67,13 @@ internal sealed class AssetLibState
     internal readonly SelectionHandler<Guid> Selection = new();
     internal Guid AnchorSelectionKey;
 
+    /** Asset ids to select on the next draw, after the selection has been synced with the graph. */
+    internal readonly List<Guid> PendingSelection = [];
+
+    /** Address whose folders are opened and whose row is scrolled into view; cleared once reached or after a few frames. */
+    internal string? RevealAddress;
+    internal int RevealFramesLeft;
+
     internal Guid RenamingInProcessId;
     internal string RenameBuffer = string.Empty; 
 

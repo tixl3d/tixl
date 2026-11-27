@@ -1,10 +1,12 @@
 #nullable enable
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Dialogs;
@@ -18,6 +20,7 @@ using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.SymbolLib;
@@ -140,8 +143,8 @@ internal sealed class SymbolLibrary : Window
         }
 
         CustomComponents.TooltipForLastItem(
-                                            "Scan usage dependencies for symbols",
-                                            "This can be useful for cleaning up operator name spaces.");
+                                            "Rescan usages and references",
+                                            "Runs when the library first opens and after operators are renamed or moved. Rescan after changing file paths or adding operators.");
 
         // Draw filter toggles if scan was performed
         if (_wasScanned)
@@ -195,7 +198,8 @@ internal sealed class SymbolLibrary : Window
 
     private bool NeedsRebuild => _lastUpdateVersion < EditorSymbolPackage.SymbolStructureVersionCounter;
 
-    private int _lastUpdateVersion;
+    /** Starts below any counter value, so the library scans the first time it is drawn. */
+    private int _lastUpdateVersion = -1;
 
     /// <summary>
     /// Shows a list of usages for a referenced symbol if the "used by" indicator was clicked.
@@ -1002,6 +1006,7 @@ internal sealed class SymbolLibrary : Window
                                          "has invalid references...",
                                          info.InvalidRequiredIds);
                 ImGui.PopStyleColor();
+                DrawAssetIssuesBadge(symbol, info.InvalidAssetReferences);
 
                 if (ListSymbolSetWithTooltip(
                                              340,
@@ -1105,6 +1110,220 @@ internal sealed class SymbolLibrary : Window
             ListSymbols(matches);
             ImGui.EndTooltip();
         }
+    }
+
+    private static void DrawAssetIssuesBadge(Symbol symbol, List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        if (issues.Count == 0)
+            return;
+
+        ImGui.SameLine(0, 4 * T3Ui.UiScaleFactor);
+        if (CustomComponents.IconButton(Icon.FileDocument, new Vector2(ImGui.GetTextLineHeight()), UiColors.StatusAttention))
+            ImGui.OpenPopup(AssetIssuesMenuId);
+
+        if (!ImGui.IsPopupOpen(AssetIssuesMenuId) && ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem(() => DrawAssetIssuesTooltip(symbol, issues));
+
+        CustomComponents.ContextMenuForItem(drawMenuItems: () => DrawAssetIssuesMenu(symbol, issues),
+                                            title: "Asset references",
+                                            id: AssetIssuesMenuId);
+    }
+
+    private static void DrawAssetIssuesTooltip(Symbol symbol, List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        ImGui.TextUnformatted("has asset references that won't travel with its package...");
+
+        foreach (var problem in Enum.GetValues<SymbolAnalysis.AssetReferenceProblem>())
+        {
+            var headerDrawn = false;
+            foreach (var issue in issues)
+            {
+                if (issue.Problem != problem)
+                    continue;
+
+                if (!headerDrawn)
+                {
+                    headerDrawn = true;
+                    FormInputs.AddVerticalSpace(5);
+                    ImGui.PushFont(Fonts.FontSmall);
+                    ImGui.TextUnformatted(GetProblemLabel(problem));
+                    ImGui.PopFont();
+                }
+
+                ImGui.TextUnformatted($"{GetIssueUserName(symbol, issue)}: {issue.Address}");
+            }
+        }
+
+        FormInputs.AddVerticalSpace(5);
+        ImGui.PushFont(Fonts.FontSmall);
+        ImGui.TextUnformatted("Click for options");
+        ImGui.PopFont();
+    }
+
+    private static void DrawAssetIssuesMenu(Symbol symbol, List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        if (CustomComponents.DrawMenuItem(_selectAssetIssueOperatorsId, "Select Operators in Graph",
+                                          isEnabled: ProjectView.Focused != null, reserveIconColumn: false))
+        {
+            SelectAssetIssueOperators(symbol, issues);
+        }
+
+        if (CustomComponents.DrawMenuItem(_listAssetIssuesInConsoleId, "List in Console", reserveIconColumn: false))
+            LogAssetIssues(symbol, issues);
+
+        if (CustomComponents.DrawMenuItem(_selectIssueAssetsId, "Select Assets in Asset Library", reserveIconColumn: false))
+            SelectIssueAssets(issues);
+    }
+
+    /// <summary>
+    /// Opens an instance of the symbol in the focused project (adding one to the current composition if the project
+    /// doesn't use it yet) and selects the children whose inputs have the issues.
+    /// </summary>
+    private static void SelectAssetIssueOperators(Symbol symbol, List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        var projectView = ProjectView.Focused;
+        if (projectView == null || !TryGetOrCreateInstanceInProject(symbol, projectView, out var instance))
+            return;
+
+        if (!projectView.TrySetCompositionOp(instance.InstancePath))
+            return;
+
+        foreach (var issue in issues)
+        {
+            if (issue.SymbolChildId != Guid.Empty)
+                projectView.NodeSelection.TrySelectCompositionChild(instance, issue.SymbolChildId);
+        }
+
+        projectView.GraphView.FocusViewToSelection();
+    }
+
+    /** Writes one warning per issue; entries link to the child operator when the open project uses the symbol. */
+    private static void LogAssetIssues(Symbol symbol, List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        Instance? instance = null;
+        var projectView = ProjectView.Focused;
+        var hasInstance = projectView != null && TryFindInstanceInProject(symbol, projectView, out instance);
+
+        foreach (var issue in issues)
+        {
+            var message = $"[{symbol.Name}] {GetIssueUserName(symbol, issue)}: {GetProblemLabel(issue.Problem)}: {issue.Address}";
+            if (instance != null && instance.Children.TryGetChildInstance(issue.SymbolChildId, out var childInstance))
+            {
+                Log.Warning(message, childInstance);
+            }
+            else
+            {
+                Log.Warning(message);
+            }
+        }
+
+        if (!hasInstance)
+            Log.Info($"[{symbol.Name}] isn't used in the open project, so these lines don't link to operators. Use Select Operators in Graph first.");
+    }
+
+    private static void SelectIssueAssets(List<SymbolAnalysis.AssetReferenceIssue> issues)
+    {
+        var assets = new List<Asset>();
+        foreach (var issue in issues)
+        {
+            if (issue.Problem is SymbolAnalysis.AssetReferenceProblem.Missing or SymbolAnalysis.AssetReferenceProblem.AbsolutePath)
+                continue;
+
+            if (AssetRegistry.TryGetAsset(issue.Address, out var asset) && !assets.Contains(asset))
+                assets.Add(asset);
+        }
+
+        if (assets.Count == 0)
+        {
+            Log.Info("None of these files are assets of a loaded project; missing files and absolute paths can't be shown in the Asset Library.");
+            return;
+        }
+
+        AssetLibrary.ShowAndSelect(assets);
+    }
+
+    private static bool TryGetOrCreateInstanceInProject(Symbol symbol, ProjectView projectView, [NotNullWhen(true)] out Instance? instance)
+    {
+        if (TryFindInstanceInProject(symbol, projectView, out instance))
+            return true;
+
+        var composition = projectView.CompositionInstance;
+        if (composition == null || composition.Symbol.SymbolPackage.IsReadOnly)
+        {
+            Log.Warning($"[{symbol.Name}] isn't used in the open project. Open an editable operator to add it there.");
+            return false;
+        }
+
+        if (SymbolAnalysis.TryGetSymbolInfo(symbol, out var info) && info.RequiredSymbolIds.Contains(composition.Symbol.Id))
+        {
+            Log.Warning($"[{symbol.Name}] can't be added to [{composition.Symbol.Name}], which it contains.");
+            return false;
+        }
+
+        var center = projectView.GraphView.Canvas.GetLastVisibleCanvasArea().GetCenter();
+        var childUi = GraphOperations.AddSymbolChild(symbol, composition.GetSymbolUi(), center);
+        projectView.GraphView.FlagStructureAsChanged();
+        Log.Info($"Added [{symbol.Name}] to [{composition.Symbol.Name}] to show its operators.");
+        return composition.Children.TryGetChildInstance(childUi.Id, out instance);
+    }
+
+    /** Prefers an instance inside the current composition, then any instance in the focused project. */
+    private static bool TryFindInstanceInProject(Symbol symbol, ProjectView projectView, [NotNullWhen(true)] out Instance? instance)
+    {
+        instance = null;
+        var composition = projectView.CompositionInstance;
+        if (composition != null && composition.Symbol == symbol)
+        {
+            instance = composition;
+            return true;
+        }
+
+        var root = projectView.RootInstance;
+        if (root.Symbol == symbol)
+        {
+            instance = root;
+            return true;
+        }
+
+        var rootPath = root.InstancePath;
+        if (rootPath.Count == 0)
+            return false;
+
+        foreach (var candidate in symbol.InstancesOfSelf)
+        {
+            var path = candidate.InstancePath;
+            if (path.Count == 0 || path[0] != rootPath[0])
+                continue;
+
+            if (candidate.Parent == composition)
+            {
+                instance = candidate;
+                return true;
+            }
+
+            instance ??= candidate;
+        }
+
+        return instance != null;
+    }
+
+    private static string GetIssueUserName(Symbol symbol, SymbolAnalysis.AssetReferenceIssue issue)
+    {
+        return symbol.Children.TryGetValue(issue.SymbolChildId, out var child)
+                   ? child.ReadableName
+                   : "default value";
+    }
+
+    private static string GetProblemLabel(SymbolAnalysis.AssetReferenceProblem problem)
+    {
+        return problem switch
+                   {
+                       SymbolAnalysis.AssetReferenceProblem.Missing             => "Not found",
+                       SymbolAnalysis.AssetReferenceProblem.AbsolutePath        => "Absolute path, only valid on this machine",
+                       SymbolAnalysis.AssetReferenceProblem.OtherPackage        => "In a package that doesn't ship with TiXL",
+                       SymbolAnalysis.AssetReferenceProblem.OutsideAssetsFolder => "In a linked folder outside the project",
+                       _                                                        => problem.ToString(),
+                   };
     }
 
     /// <summary>
@@ -1254,6 +1473,10 @@ internal sealed class SymbolLibrary : Window
     private static readonly int _renameNamespaceId = nameof(_renameNamespaceId).GetHashCode();
     private static readonly int _deleteSymbolId = nameof(_deleteSymbolId).GetHashCode();
     private static readonly int _revealSymbolInExplorerId = nameof(_revealSymbolInExplorerId).GetHashCode();
+    private const string AssetIssuesMenuId = "##assetIssuesMenu";
+    private static readonly int _selectAssetIssueOperatorsId = nameof(_selectAssetIssueOperatorsId).GetHashCode();
+    private static readonly int _listAssetIssuesInConsoleId = nameof(_listAssetIssuesInConsoleId).GetHashCode();
+    private static readonly int _selectIssueAssetsId = nameof(_selectIssueAssetsId).GetHashCode();
     private static readonly int _revealProjectInExplorerId = nameof(_revealProjectInExplorerId).GetHashCode();
     private static readonly int _revealNamespaceInExplorerId = nameof(_revealNamespaceInExplorerId).GetHashCode();
     private static readonly string _revealSymbolLabel = "Reveal Symbol in " + PlatformNames.FileBrowser;

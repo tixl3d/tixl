@@ -35,6 +35,19 @@ What would tie it is shipping a compiled DLL: a DLL is bound to Core's API, whic
 
 ## Design
 
+### D0. Repository, extension, project
+
+- A **project** is what exists today: one csproj, its namespaces, symbols and assets.
+- An **extension** is the unit of release, version, install and update. It contains **one or more projects**,
+  listed in its manifest, always released and installed together.
+- A **repository** holds any number of extensions; hosting does not care.
+
+Dependencies are allowed from a project to projects of the **same extension** and to bundled packages; never to
+another extension (no resolver, no version ranges between extensions). This covers both ways of sorting
+projects: projects that use each other form one multi-project extension, independent ones can be separate
+extensions in the same repository. Merging projects into one is never required. The dependency helper (D8)
+computes the groups: they are the connected components of the "uses operators or assets of" graph.
+
 ### D1. Two kinds of extension
 
 | | Source extension (new) | Precompiled extension (today) |
@@ -196,6 +209,80 @@ project with the extension missing or older offers "Install" / "Update" wherever
 
 Official precompiled packages keep their per-release index: they update together with the editor.
 
+### D8. Editor helpers for authors
+
+Built on what exists: the Share Project analysis (`ProjectPackageExporter.TryAnalyze`: cross-project references,
+unreferenced assets, dependency versions), `ChangeSymbolNamespaceCommand` (moves symbols to another project, undoable),
+the namespace drag source in the symbol library, and the hub's project list (which already has an Archived section).
+
+1. **Dependency check** (first, it decides the grouping). Per project or selection, lists everything outside
+   "this extension + bundled packages": operators of other editable projects, of optional extensions (Ndi,
+   Mediapipe), missing operators, and asset addresses of other packages (`pixtur.Wake:footage/…`). Shows the
+   project-to-project graph and the suggested extension groups. Actions per finding: *Move operator into this
+   project*, *Copy asset into this project and relink*, *Add project to this extension*. Also lists unreferenced
+   assets (already computed) as a size saving.
+
+   **Asset references** get the same treatment, from file/directory string inputs (the `StringInputUi.Usage` the
+   stub `SymbolAnalysis.LogInvalidAssetReference` already filters on) resolved through `AssetRegistry`:
+   *own / same extension / bundled* (fine), *other project* (copy and relink), *optional extension* (declare or
+   replace), *absolute path* (`ExternalAssetsPackage`; not portable, copy into the project), *missing* (address does
+   not resolve), and *bundled but leaving the bundle* (e.g. `Examples:user/…` once the showcase moves out). Copy
+   actions show the size and warn above the host's per-file limit (GitHub: 100 MB). Addresses built in C# are
+   invisible to this scan, as for the unreferenced-asset analysis. Shown as a badge in the symbol library next to
+   "has invalid references", like the symbol check.
+
+   First run on `tixl-examples-pixtur` (offline scan, 2026-11-27): all findings in `PlaygroundArchive2026`:
+   7 addresses into `pixtur.Playground` (images, an `.obj`, a 112 MB `.mov`), one into the no longer existing
+   `pixtur.Stammtisch`, one absolute Windows Dropbox path; 15 into bundled Examples (fonts, hdri, meshes, logo:
+   all in parts that stay bundled) and Lib.
+2. **Extensions in the project list.** Editable projects that belong to an extension get the extension's name and
+   version as a badge (reuse the existing badge/marker look), plus a marker when they changed since the last release.
+   Installed, read-only extensions get their own section like Archived, with the update badge from D7.
+3. **Extension settings and "Release…".** A project context-menu entry in the hub: id, title, description,
+   licence, member projects, `minTixlVersion`, version with *major / minor / patch* buttons where the suggested one
+   comes from the symbol-interface diff (D7). Stored in the csproj of the extension's first project (properties
+   from D2) plus a small manifest for the member list. *Release…* runs the dependency check, the compile check and
+   the diff, then writes `<id>.<version>.nupkg` and the updated `extension.json` into a release folder and shows
+   the registry snippet. **Uploading stays outside the editor** at first (host-neutral, D4); an optional
+   configured upload command can follow.
+4. **Moving namespaces between projects with their assets.** Dragging a namespace onto another project in the
+   symbol library moves its symbols (existing command) **and** the assets only they use, rewriting asset
+   addresses (`AssetRegistry.UpdateMovedAsset` handles moves inside a project today). Assets also used elsewhere:
+   ask (copy or keep shared). One undoable command; refuses if a target project would gain a dependency the D0
+   rules forbid. This is also how two projects are merged when an author wants that.
+
+   **Move dialog** (requested 2026-11-27). Dropping a namespace on another project opens *Move Operators…*
+   instead of moving at once. It lists the operators that move and, when some assets are used **only** by them,
+   a dropdown for those assets:
+   - *Move assets to a subfolder* (default when a whole project moves): keeps the source layout below a new folder
+     named after the moved namespace or project (`Assets/Wake/footage/…`). This is the "bundle a project into a
+     project collection" case: several projects end up side by side in one collection without their asset folders
+     being lumped together or colliding.
+   - *Move assets*: same relative paths in the target's Assets folder (default for a single namespace). Name
+     collisions with different content are listed and block this option.
+   - *Don't move assets*: addresses keep pointing at the source package; the asset check (helper 1) then reports
+     them as *other package* if the source isn't shipped.
+   Assets also used by operators that stay are listed separately (copy, or keep and reference). The dialog shows
+   counts and sizes; the whole move, including file moves and address rewrites in every symbol that references
+   the assets, is one undoable command.
+
+5. **Manage Assets dialog** (later). Opened from the asset badge's *Resolve…* entry and from the Asset Library.
+   Lists asset uses as a tree by project and namespace; every asset shows its state (ok, other package, absolute
+   path, outside the assets folder, missing) and can be selected. Selected assets can be copied or moved into a
+   project with their addresses rewritten (the same command as 4), relinked to another file, or removed from the
+   inputs that use them.
+
+Shipped first (2026-11-27): the symbol and asset checks in the symbol library (`SymbolAnalysis`: shipped-package
+rule, asset categories; magenta document badge with tooltip; *Invalid asset references* filter; scan on first
+open). Then the badge became a menu (left or right click): *Select Operators in Graph* (opens an instance in the focused
+project, adding one to the current composition if needed, and selects the affected children), *List in Console*
+(one warning per issue, linked to the child instance when the project uses the symbol) and *Select Assets in Asset
+Library* (`AssetLibrary.ShowAndSelect`: clears search and type filters, selects, opens folders, scrolls). A
+*Resolve…* entry is reserved for the Manage Assets dialog (5).
+
+Order: 1 and 2 first (small, useful immediately while sorting projects), then 3, then 4 (largest: file moves,
+asset relinking, undo across projects), then 5.
+
 ## Migration of the examples
 
 1. **Stays bundled:** `Examples/Symbols/Lib` (133 `*Example` operator help graphs, found by name through
@@ -203,10 +290,11 @@ Official precompiled packages keep their per-release index: they update together
 2. **First external extension:** the showcase graphs `Examples/Symbols/user` + `Assets/user` (~220 MB, 122 MB
    zstd) into an official repo, e.g. `tixl3d/tixl-showcase`, with a `track` entry. Installer shrinks by ~120 MB.
    GUIDs unchanged (`git mv`, history-preserving split).
-3. **pixtur.Examples** from `pixtur/T3Projects`: Archive ↔ Wake use each other's operators (8 / 2) and
-   Video_44_Highlights uses 3 of Video_OutputSetup, so they become one package (one csproj, GUIDs unchanged,
-   namespaces `pixtur.Examples.*`) or the links are cut. Playground (16 GB) and `_agentTests` stay out. Dedupe
-   `Examples/Assets/user/wake` (41 MB) against `Wake/Assets`.
+3. **pixtur's projects** from `pixtur/T3Projects` into one new repository, projects unchanged (D0). Archive ↔ Wake
+   use each other's operators (8 / 2) and Video_44_Highlights uses 3 of Video_OutputSetup, so those form two
+   multi-project extensions (or one, if preferred); ArtNet, DronesOfFury, ProjDesyAR, Tixl42_Release and VJCasual
+   are independent. Playground (16 GB) and `_agentTests` stay out. Dedupe `Examples/Assets/user/wake` (41 MB)
+   against `Wake/Assets`.
 
 Developers keep opening these repos as user projects in a source build; nothing changes for Debug work.
 
@@ -220,8 +308,10 @@ Developers keep opening these repos as user projects in a source build; nothing 
    (D7).
 3. **Publishing** (~2 days): multi-project + headless Share Project export, `tixl-publish-extension` (compile
    check, missing-operator scan, symbol-interface diff, `extension.json` update), CI wrappers, template repo.
-4. **Showcase repo** (~1 day), then **pixtur.Examples** (~1–2 days).
-5. **Docs** (~1 day): "Publishing from your own repository" in `.help/docs/contributing/WritingExtensions.md`,
+4. **Author helpers 1 + 2** (~2 days): dependency check, project-list badges (D8).
+5. **Showcase repo** (~1 day), then **pixtur's repository** (~1 day; no merging needed).
+6. **Author helpers 3 + 4** (~3–5 days): extension settings and Release…, namespace moves with assets (D8).
+7. **Docs** (~1 day): "Publishing from your own repository" in `.help/docs/contributing/WritingExtensions.md`,
    the agent procedure in `.agentic/EXTENSIONS.md`, release notes, a manual test set for install/update.
 
 ## Open questions

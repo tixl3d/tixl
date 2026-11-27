@@ -1,8 +1,13 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource.Assets;
 using T3.Core.Settings;
+using T3.Editor.Compilation;
+using T3.Editor.ExtensionPackages;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 
 namespace T3.Editor.UiModel.Helpers;
@@ -186,6 +191,7 @@ internal static class SymbolAnalysis
 
             var requiredSymbols = CollectRequiredSymbols(symbol);
             var invalidRequirements = CollectInvalidRequirements(symbol, requiredSymbols).ToList();
+            var invalidAssetReferences = CollectInvalidAssetReferences(symbol, symbolUi);
 
             reverseDeps.TryGetValue(symbol.Id, out var deps);
             var dependingSymbols = deps ?? new HashSet<Guid>();
@@ -195,6 +201,7 @@ internal static class SymbolAnalysis
                                                                         symbolUi,
                                                                         requiredSymbols,
                                                                         invalidRequirements,
+                                                                        invalidAssetReferences,
                                                                         dependingSymbols,
                                                                         usageCount);
         }
@@ -235,6 +242,7 @@ internal static class SymbolAnalysis
         // On-demand analysis for this single symbol
         var requiredSymbols = CollectRequiredSymbols(symbol);
         var invalidRequirements = CollectInvalidRequirements(symbol, requiredSymbols).ToList();
+        var invalidAssetReferences = CollectInvalidAssetReferences(symbol, symbolUi);
         var (usageCounts, reverseDeps) = CollectUsageAndReverseDependencies();
 
         usageCounts.TryGetValue(symbol.Id, out var usageCount);
@@ -246,6 +254,7 @@ internal static class SymbolAnalysis
                                       symbolUi,
                                       requiredSymbols,
                                       invalidRequirements,
+                                      invalidAssetReferences,
                                       dependingSymbols,
                                       usageCount);
 
@@ -268,6 +277,7 @@ internal static class SymbolAnalysis
         internal HashSet<Guid> RequiredSymbolIds = [];
         internal HashSet<Guid> DependingSymbols = [];
         public List<Guid> InvalidRequiredIds = [];
+        internal List<AssetReferenceIssue> InvalidAssetReferences = [];
         public IReadOnlyList<Guid> ExampleSymbolsIds = [];
         internal int UsageCount;
         internal bool LacksDescription;
@@ -277,6 +287,27 @@ internal static class SymbolAnalysis
         internal bool DependsOnObsoleteOps;
         internal SymbolUi.SymbolTags Tags; // Copy to avoid reference to symbolUi
         internal OperatorClassification OperatorType;
+    }
+
+    /// <summary>
+    /// A file or folder input of a child (or a default of the symbol's own input, then <see cref="SymbolChildId"/>
+    /// is empty) whose asset would not travel with the symbol's package.
+    /// </summary>
+    internal readonly record struct AssetReferenceIssue(Guid SymbolChildId, string Address, AssetReferenceProblem Problem, string PackageName);
+
+    internal enum AssetReferenceProblem
+    {
+        /** The address does not resolve: unknown package or no such file. */
+        Missing,
+
+        /** A drive or root path; it only exists on the machine that wrote it. */
+        AbsolutePath,
+
+        /** The asset belongs to a package that is neither this one nor shipped with TiXL. */
+        OtherPackage,
+
+        /** The address resolves through a linked folder mounted into the package, outside its Assets folder. */
+        OutsideAssetsFolder,
     }
 
     public enum OperatorClassification
@@ -314,6 +345,7 @@ internal static class SymbolAnalysis
                                                             SymbolUi symbolUi,
                                                             HashSet<Symbol> requiredSymbols,
                                                             List<Guid> invalidRequirements,
+                                                            List<AssetReferenceIssue> invalidAssetReferences,
                                                             HashSet<Guid> dependingSymbols,
                                                             int usageCount)
     {
@@ -341,6 +373,7 @@ internal static class SymbolAnalysis
                        RequiredSymbolIds = requiredSymbols.Select(s => s.Id).ToHashSet(),
                        DependingSymbols = dependingSymbols,
                        InvalidRequiredIds = invalidRequirements,
+                       InvalidAssetReferences = invalidAssetReferences,
                        ExampleSymbolsIds = ExampleSymbolLinking.GetExampleIds(symbol.Id),
                        UsageCount = usageCount,
                        LacksDescription = lacksDescription,
@@ -371,25 +404,16 @@ internal static class SymbolAnalysis
     }
 
     /// <summary>
-    /// Collect Ids of required symbols that are not within the list of projects
+    /// Collect Ids of required symbols that come neither from the root's own package nor from a package
+    /// shipped with TiXL, i.e. operators that would be missing wherever only the root's package is available.
     /// </summary>
     private static IEnumerable<Guid> CollectInvalidRequirements(Symbol root, HashSet<Symbol> requiredSymbols)
     {
         var result = new List<Symbol>();
 
-        // Todo: implement this correctly?
-        HashSet<string> validPackagesNames = new()
-                                                 {
-                                                     FileLocations.TypesPackageName,
-                                                     FileLocations.LibPackageName,
-                                                     FileLocations.ExamplesPackageName,
-                                                     root.SymbolPackage.RootNamespace,
-                                                 };
-
         foreach (var r in requiredSymbols)
         {
-            var projectId = r.SymbolPackage.RootNamespace;
-            if (validPackagesNames.Contains(projectId))
+            if (r.SymbolPackage == root.SymbolPackage || IsShippedPackage(r.SymbolPackage))
                 continue;
 
             result.Add(r);
@@ -399,6 +423,91 @@ internal static class SymbolAnalysis
               .OrderBy(s => s.Namespace)
               .ThenBy(s => s.Name)
               .Select(s => s.Id);
+    }
+
+    /// <summary>
+    /// True for packages every TiXL installation has: the built-in operator packages except optional ones in a
+    /// source build, and in a release every read-only package that wasn't installed as an extension.
+    /// </summary>
+    private static bool IsShippedPackage(SymbolPackage package)
+    {
+        if (package is EditableSymbolProject project)
+            return project.IsBuiltIn && !OptionalPackagesInSourceBuilds.IsOptional(project.Folder);
+
+        return !InstalledExtensions.ContainsPackageFolder(package.Folder);
+    }
+
+    private static List<AssetReferenceIssue> CollectInvalidAssetReferences(Symbol symbol, SymbolUi symbolUi)
+    {
+        var issues = new List<AssetReferenceIssue>();
+
+        foreach (var inputDefinition in symbol.InputDefinitions)
+        {
+            if (inputDefinition.DefaultValue is not InputValue<string> defaultValue)
+                continue;
+
+            if (symbolUi.InputUis.TryGetValue(inputDefinition.Id, out var inputUi) && inputUi is StringInputUi stringUi)
+                CheckAssetAddress(symbol.SymbolPackage, Guid.Empty, defaultValue.Value, stringUi.Usage, issues);
+        }
+
+        foreach (var child in symbol.Children.Values)
+        {
+            if (!SymbolUiRegistry.TryGetSymbolUi(child.Symbol.Id, out var childSymbolUi))
+                continue;
+
+            foreach (var input in child.Inputs.Values)
+            {
+                if (input.IsDefault || input.Value is not InputValue<string> stringValue)
+                    continue;
+
+                if (childSymbolUi.InputUis.TryGetValue(input.Id, out var inputUi) && inputUi is StringInputUi stringUi)
+                    CheckAssetAddress(symbol.SymbolPackage, child.Id, stringValue.Value, stringUi.Usage, issues);
+            }
+        }
+
+        return issues;
+    }
+
+    private static void CheckAssetAddress(SymbolPackage owner, Guid symbolChildId, string? address, StringInputUi.UsageType usage,
+                                          List<AssetReferenceIssue> issues)
+    {
+        // Output paths are written by renders and exports and need not exist yet
+        if (usage is not (StringInputUi.UsageType.FilePath or StringInputUi.UsageType.DirectoryPath))
+            return;
+
+        if (string.IsNullOrWhiteSpace(address) || address.Contains("://", StringComparison.Ordinal))
+            return;
+
+        var isWindowsRooted = address.Length > 1 && address[1] == ':';
+        if (isWindowsRooted || address[0] == '/' || address[0] == '\\')
+        {
+            issues.Add(new AssetReferenceIssue(symbolChildId, address, AssetReferenceProblem.AbsolutePath, string.Empty));
+            return;
+        }
+
+        var isFolder = usage == StringInputUi.UsageType.DirectoryPath;
+        if (!AssetRegistry.TryResolveAddress(address, null, out var absolutePath, out var resourcePackage, isFolder))
+        {
+            var separatorIndex = address.IndexOf(':');
+            var packageName = separatorIndex > 0 ? address[..separatorIndex] : string.Empty;
+            issues.Add(new AssetReferenceIssue(symbolChildId, address, AssetReferenceProblem.Missing, packageName));
+            return;
+        }
+
+        if (resourcePackage is not SymbolPackage assetPackage)
+            return;
+
+        if (assetPackage == owner)
+        {
+            var assetsFolder = Path.GetFullPath(owner.AssetsFolder) + Path.DirectorySeparatorChar;
+            if (!Path.GetFullPath(absolutePath).StartsWith(assetsFolder, StringComparison.OrdinalIgnoreCase))
+                issues.Add(new AssetReferenceIssue(symbolChildId, address, AssetReferenceProblem.OutsideAssetsFolder, owner.Name));
+
+            return;
+        }
+
+        if (!IsShippedPackage(assetPackage))
+            issues.Add(new AssetReferenceIssue(symbolChildId, address, AssetReferenceProblem.OtherPackage, assetPackage.Name));
     }
 
     private static Dictionary<Guid, int> CollectSymbolUsageCounts()

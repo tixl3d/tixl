@@ -5,6 +5,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -45,6 +46,7 @@ internal sealed partial class AssetLibrary : Window
         _state.KeepVisibleTreeItemIds.Clear();
 
         UpdateActiveSelection(selectedInstance);
+        ApplyPendingSelection();
 
         // Draw
         DrawLibContent();
@@ -96,6 +98,63 @@ internal sealed partial class AssetLibrary : Window
         return 
                string.IsNullOrEmpty(_state.SearchString) ||
                asset.Address.Contains(_state.SearchString, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Shows and focuses the Asset Library, selects the given assets and scrolls to the first one. Clears the search
+    /// and type filters, which could hide them.
+    /// </summary>
+    internal static void ShowAndSelect(IReadOnlyList<Asset> assets)
+    {
+        if (assets.Count == 0)
+            return;
+
+        _state.PendingSelection.Clear();
+        foreach (var asset in assets)
+        {
+            _state.PendingSelection.Add(asset.Id);
+        }
+
+        _state.RevealAddress = assets[0].Address;
+
+        if (_state.SearchString.Length > 0)
+        {
+            _state.SearchString = string.Empty;
+            _state.SearchStringChanged = true;
+        }
+
+        if (_state.ActiveTypeFilters.Count > 0)
+        {
+            _state.ActiveTypeFilters.Clear();
+            _state.FilteringNeedsUpdate = true;
+        }
+
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (window is not AssetLibrary library)
+                continue;
+
+            library.Config.Visible = true;
+            library.RequestWindowFocus();
+            break;
+        }
+    }
+
+    private static void ApplyPendingSelection()
+    {
+        if (_state.PendingSelection.Count > 0)
+        {
+            _state.Selection.SetSelection(_state.PendingSelection);
+            _state.AnchorSelectionKey = _state.PendingSelection[0];
+            _state.PendingSelection.Clear();
+
+            // A filtered-out or folder address never draws a row that would clear the reveal
+            _state.RevealFramesLeft = 3;
+            return;
+        }
+
+        if (_state.RevealFramesLeft > 0 && --_state.RevealFramesLeft == 0)
+            _state.RevealAddress = null;
     }
 
     private static void UpdateActiveSelection(Instance selectedInstance)

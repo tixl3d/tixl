@@ -12,7 +12,7 @@ namespace T3.Editor.Gui.Windows.SymbolLib;
 /// invalid references, or obsolete dependencies.
 /// </summary>
 /// <remarks>
-/// Only shown after scanning the operator library by pressing the update icon in the symbol library window.
+/// Only shown once the symbol library has scanned the operators, which it does the first time it is drawn.
 /// </remarks>
 internal sealed class LibraryFiltering
 {
@@ -99,6 +99,13 @@ internal sealed class LibraryFiltering
             Flags.InvalidRequiredOps,
             ref _activeFilters);
 
+        needsUpdate |= DrawFilterToggle(
+            "Invalid asset references ({0})",
+            opInfos.Count(i => i.InvalidAssetReferences.Count > 0
+                               && (i.OperatorType == SymbolAnalysis.OperatorClassification.Lib || !_onlyInLib)),
+            Flags.InvalidAssetReferences,
+            ref _activeFilters);
+
         // Depends on obsolete operators
         needsUpdate |= DrawFilterToggle(
             "Depends on obsolete ops ({0})",
@@ -152,6 +159,7 @@ internal sealed class LibraryFiltering
                     || _activeFilters.HasFlag(Flags.MissingSomeParameterDescriptions) && info.LacksSomeParameterDescription
                     || _activeFilters.HasFlag(Flags.MissingParameterGrouping) && info.LacksParameterGrouping
                     || _activeFilters.HasFlag(Flags.InvalidRequiredOps) && info.InvalidRequiredIds.Count > 0
+                    || _activeFilters.HasFlag(Flags.InvalidAssetReferences) && info.InvalidAssetReferences.Count > 0
                     || _activeFilters.HasFlag(Flags.Unused) && info.DependingSymbols.Count == 0
                     || _activeFilters.HasFlag(Flags.Obsolete) && info.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete)
                     || _activeFilters.HasFlag(Flags.NeedsFix) && info.Tags.HasFlag(SymbolUi.SymbolTags.NeedsFix)
@@ -202,6 +210,7 @@ internal sealed class LibraryFiltering
         Obsolete = 1 << 7,
         NeedsFix = 1 << 8,
         DependsOnObsoleteOps = 1 << 9,
+        InvalidAssetReferences = 1 << 10,
     }
 
     /// <summary>
