@@ -1,0 +1,37 @@
+{
+  "FormatVersion": 3,
+  "Id": "e0fb7629-b49d-4aac-9bdd-b746e0a58699"/*SetShadowParameters*/,
+  "Inputs": [
+    {
+      "Id": "392730c4-bdd5-4a6d-866f-630d26a4fc69"/*NormalOffset*/,
+      "DefaultValue": 0.004
+    },
+    {
+      "Id": "5f776e79-4b23-49c3-b678-ecd945e62656"/*WorldToLightClipSpace*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b838fceb-f2dd-49d1-ab99-642ada52d5a7"/*ShadowMap*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "cb509c95-2d3c-4bb0-8a94-7595c6bebe84"/*Color*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 0.8
+      }
+    },
+    {
+      "Id": "d342a295-34d7-4120-aa53-b4a2c04be509"/*SubTree*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "da489523-8ca0-489a-ab99-02e7362a1483"/*Bias*/,
+      "DefaultValue": 0.00015
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

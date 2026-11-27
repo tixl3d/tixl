@@ -1,7 +1,7 @@
 {
   "FormatVersion": 3,
   "Id": "a3c5471e-079b-4d4b-886a-ec02d6428ff6"/*DrawMesh*/,
-  "Description": "Draws a mesh with PBR shading using the current material, lights, fog and environment.\n\nIf no [SetEnvironment] or lights are defined, the render target provides a default reflection and two point lights attached to the camera. These can be overridden with [SetEnvironment], [SetMaterial], [SetPointLight] and [SetFog] further up the graph. Fill mode and culling allow wireframe or double-sided rendering.\n\nSee also: [DrawMeshUnlit], [DrawMeshHatched], [DrawMeshAtPoints], [DrawMeshWithShadow]\n\nAlso check out the [HowToDrawThings] tutorial.",
+  "Description": "Draws a mesh with PBR shading using the current material, lights, fog and environment.\n\nIf no [SetEnvironment] or lights are defined, the render target provides a default reflection and two point lights attached to the camera. These can be overridden with [SetEnvironment], [SetMaterial], [SetPointLight] and [SetFog] further up the graph. Inside a [SetShadow] the mesh casts and receives its shadow. Fill mode and culling allow wireframe or double-sided rendering.\n\nSee also: [DrawMeshUnlit], [DrawMeshHatched], [DrawMeshAtPoints], [SetShadow]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -388,6 +388,14 @@
       "Position": {
         "X": 2242.018,
         "Y": 3643.5764
+      }
+    },
+    {
+      "ChildId": "fc67955d-a981-41fe-a064-6ce282c59a9a",
+      "SymbolName": "Lib.render.shading._.GetShadowParameters",
+      "Position": {
+        "X": 2545.0,
+        "Y": 3550.0
       }
     }
   ],

@@ -1,8 +1,8 @@
 {
   "FormatVersion": 3,
   "Id": "c08a6847-e7c4-46e6-a8fb-24bb62a64b96"/*DrawMeshWithShadow*/,
-  "Description": "Draws a mesh with PBR shading and shadows from a shadow map.\n\nRequires [SetShadow] further up the graph and a light such as [SetPointLight] or [PointLight]. The first light also defines a soft spotlight cone outside of which everything is treated as shadowed.\n\nSee also: [DrawMesh], [SetShadow]",
-  "SymbolTags": "1",
+  "Description": "Obsolete. Use [DrawMesh] inside [SetShadow] instead, which sets the shadow color, bias and offset for all draws inside it.\n\nDraws a mesh with PBR shading and shadows from a shadow map.\n\nRequires [SetShadow] further up the graph and a light such as [SetPointLight] or [PointLight]. The first light also defines a soft spotlight cone outside of which everything is treated as shadowed.\n\nSee also: [DrawMesh], [SetShadow]",
+  "SymbolTags": "4096",
   "InputUis": [
     {
       "InputId": "0a01af5b-3f25-43e2-9157-1aa961b2ffcf"/*ShadowColor*/,

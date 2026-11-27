@@ -1,0 +1,24 @@
+{
+  "FormatVersion": 3,
+  "Id": "83106ab0-9429-4197-98d8-365f6b4cf652"/*GetShadowParameters*/,
+  "Description": "Internal helper. Gets the shadow map and shadow parameters of the enclosing [SetShadow] from the evaluation context.\n\nOutside a [SetShadow] the map is empty and the parameters disable the shadow lookup.",
+  "SymbolTags": "16",
+  "InputUis": [],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4c2fb374-643d-492d-a2df-74b5182bef53"/*ParameterBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "bbfae323-1e13-4b43-b33e-48ce98e92390"/*ShadowMap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

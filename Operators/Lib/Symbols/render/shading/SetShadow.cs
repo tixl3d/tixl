@@ -18,8 +18,17 @@ internal sealed class SetShadow : Instance<SetShadow>
         [Input(Guid = "3ee1e726-b5b8-4479-92cc-1a46886ddfd2")]
         public readonly InputSlot<int> Resolution = new InputSlot<int>();
 
+        [Input(Guid = "298be67d-77eb-49b3-a65a-dc3e2d5bef7c")]
+        public readonly InputSlot<System.Numerics.Vector4> ShadowColor = new InputSlot<System.Numerics.Vector4>();
+
         [Input(Guid = "5fb309a1-f164-4fe0-95e2-3bfc37823f78")]
         public readonly InputSlot<System.Numerics.Vector2> DepthRange = new InputSlot<System.Numerics.Vector2>();
+
+        [Input(Guid = "244b972a-2d18-4c2d-bcba-a2b480ecbada")]
+        public readonly InputSlot<float> ShadowBias = new InputSlot<float>();
+
+        [Input(Guid = "df4d2b87-2ec0-457f-ba69-8ae0ae684a02")]
+        public readonly InputSlot<float> NormalOffset = new InputSlot<float>();
 
         [Input(Guid = "bbec0f5e-b6ec-44b2-97ec-403419161b3a")]
         public readonly InputSlot<bool> ShowDebug = new InputSlot<bool>();

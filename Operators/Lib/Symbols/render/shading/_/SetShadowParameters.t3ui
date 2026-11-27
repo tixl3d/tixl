@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 3,
+  "Id": "e0fb7629-b49d-4aac-9bdd-b746e0a58699"/*SetShadowParameters*/,
+  "Description": "Internal helper of [SetShadow]. Provides a shadow map and its parameters to the draws in the connected subgraph, where [GetShadowParameters] reads them.\n\nWithout a light matrix the shadow is disabled.",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "392730c4-bdd5-4a6d-866f-630d26a4fc69"/*NormalOffset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "World space distance the lookup moves along the surface normal, against self-shadowing acne."
+    },
+    {
+      "InputId": "5f776e79-4b23-49c3-b678-ecd945e62656"/*WorldToLightClipSpace*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "World to clip space matrix of the camera the shadow map was rendered with."
+    },
+    {
+      "InputId": "b838fceb-f2dd-49d1-ab99-642ada52d5a7"/*ShadowMap*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "cb509c95-2d3c-4bb0-8a94-7595c6bebe84"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Color shadowed surfaces are blended towards. Alpha is the strength."
+    },
+    {
+      "InputId": "d342a295-34d7-4120-aa53-b4a2c04be509"/*SubTree*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The subgraph whose draws receive the shadow."
+    },
+    {
+      "InputId": "da489523-8ca0-489a-ab99-02e7362a1483"/*Bias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "How much deeper than the occluder a surface must be to count as shadowed."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "501b2de6-0d8e-4c64-8948-94bfc5484f23"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

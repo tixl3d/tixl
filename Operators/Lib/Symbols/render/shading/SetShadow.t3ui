@@ -1,9 +1,26 @@
 {
   "FormatVersion": 3,
   "Id": "facb7925-176a-4eae-bedc-cdbf532ff6ff"/*SetShadow*/,
-  "Description": "Renders a shadow map of the connected subgraph from a light position, so that shadow-receiving draw operators can render cast shadows.\n\nThe shadow map is rendered from LightPosition towards LightTarget. It is only used by [DrawMeshWithShadow], and requires a [PointLight] or [SetPointLight] for the lighting itself.\n\nAKA: shadowmap, castshadow\n\nSee also: [DrawMeshWithShadow], [PointLight]\n\nAlso check out the [HowToDrawThings] tutorial.",
+  "Description": "Renders a shadow map of the connected subgraph from a light position, so that [DrawMesh] operators inside it receive cast shadows.\n\nThe shadow map is rendered from LightPosition towards LightTarget. All draws in the subgraph cast shadows, but only [DrawMesh] receives them. The lighting itself still needs a light such as [SetSpotLight] or [PointLight]; place it to match LightPosition and LightTarget. ShadowColor, ShadowBias and NormalOffset set how the shadow looks for all receiving draws.\n\nAKA: shadowmap, castshadow\n\nSee also: [DrawMesh], [SetSpotLight], [PointLight]\n\nAlso check out the [HowToDrawThings] tutorial.",
   "SymbolTags": "1",
   "InputUis": [
+    {
+      "InputId": "244b972a-2d18-4c2d-bcba-a2b480ecbada"/*ShadowBias*/,
+      "Position": {
+        "X": -410.0,
+        "Y": -210.0
+      },
+      "GroupTitle": "Shadow Lookup",
+      "Description": "How much deeper than the occluder a surface must be to count as shadowed. Increase it if lit surfaces show striped self-shadowing (acne)."
+    },
+    {
+      "InputId": "298be67d-77eb-49b3-a65a-dc3e2d5bef7c"/*ShadowColor*/,
+      "Position": {
+        "X": -410.0,
+        "Y": -255.0
+      },
+      "Description": "Color that shadowed surfaces are blended towards. Alpha is the strength of the shadow, 0 disables it."
+    },
     {
       "InputId": "3ee1e726-b5b8-4479-92cc-1a46886ddfd2"/*Resolution*/,
       "Position": {
@@ -56,6 +73,14 @@
         "Y": -166.91022
       },
       "Description": "The scene casting and receiving shadows."
+    },
+    {
+      "InputId": "df4d2b87-2ec0-457f-ba69-8ae0ae684a02"/*NormalOffset*/,
+      "Position": {
+        "X": -410.0,
+        "Y": -165.0
+      },
+      "Description": "Moves the shadow lookup along the surface normal, in world units. Reduces acne on surfaces at grazing angles; too large values detach shadows from their casters."
     }
   ],
   "SymbolChildUis": [
@@ -131,6 +156,24 @@
       }
     },
     {
+      "ChildId": "66edd7d1-73ee-4b5c-91df-9f95136af431",
+      "SymbolName": "Lib.flow.context.GetMatrixVar",
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
+      "Position": {
+        "X": -210.0,
+        "Y": -300.0
+      }
+    },
+    {
+      "ChildId": "747833dc-0721-4234-abb7-7624072daeea",
+      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
+      "Position": {
+        "X": -210.0,
+        "Y": -345.0
+      }
+    },
+    {
       "ChildId": "7c5596f5-0af4-418e-9673-aa0c1811342a",
       "SymbolName": "Lib.flow.context.SetMatrixVar",
       "Position": {
@@ -179,6 +222,15 @@
       "Position": {
         "X": -410.40082,
         "Y": -874.6442
+      }
+    },
+    {
+      "ChildId": "b879e7c1-cedd-4549-9ddf-b7e369c62019",
+      "SymbolName": "Lib.render.shading._.SetShadowParameters",
+      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
+      "Position": {
+        "X": -70.0,
+        "Y": -390.0
       }
     },
     {
@@ -277,7 +329,7 @@
       "SymbolName": "Lib.render.shading._.SetContextTexture",
       "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
       "Position": {
-        "X": -69.59656,
+        "X": 70.40344,
         "Y": -389.56332
       }
     },

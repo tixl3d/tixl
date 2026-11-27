@@ -144,7 +144,7 @@
     },
     {
       "ChildId": "d57f6543-f4f5-4d3d-9d9e-885024bde37d",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 141.04497,
         "Y": 397.15137
@@ -160,7 +160,7 @@
     },
     {
       "ChildId": "efcb2f50-9d94-4865-81fb-a79aa482a5b8",
-      "SymbolName": "Lib.mesh.draw.DrawMeshWithShadow",
+      "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
         "X": 62.259888,
         "Y": 262.7862

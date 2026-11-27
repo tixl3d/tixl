@@ -56,6 +56,8 @@ public sealed class EvaluationContext
         StringVariables.Clear();
         RenderPass = default;
         PreviewOverlay = default;
+        ShadowMap = null;
+        ShadowParameters = ShadowSettings.DefaultParameterBuffer;
             
         PbrContextSettings.SetDefaultToContext(this);
     }
@@ -274,6 +276,12 @@ public sealed class EvaluationContext
         
     // Render settings
     public Buffer FogParameters { get; set; } = FogSettings.DefaultSettingsBuffer;
+
+    /// <summary>Shadow map of the enclosing [SetShadow] for draws that receive shadows; null outside one.</summary>
+    public T3.Graphics.Compat.ShaderResourceView ShadowMap { get; set; }
+
+    /// <summary>Constant buffer with the <see cref="ShadowSettings.ShadowParameters"/> that belong to <see cref="ShadowMap"/>.</summary>
+    public Buffer ShadowParameters { get; set; } = ShadowSettings.DefaultParameterBuffer;
         
     //public PbrMaterialTextures PbrMaterialTextures { get; set; } = new();
     public PbrMaterial PbrMaterial { get; set; }

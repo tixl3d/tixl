@@ -90,7 +90,7 @@ Draw operators fall into two groups.
 
 **Stylized and specialized shading** has its own lighting and only knows point lights for now:
 
-- [DrawMeshCelShading], [DrawMeshHatched], [DrawMeshWithShadow]
+- [DrawMeshCelShading], [DrawMeshHatched]
 - [DrawMeshAtPoints2], [DrawMeshChunksAtPoints]
 - [DrawTubes], [DrawRibbons], [DrawPointSpritesShaded]
 
@@ -125,9 +125,15 @@ the effect's parameters.
 
 ## Shadows
 
-[SetShadow] renders a shadow map from a light position toward a target. Only [DrawMeshWithShadow] receives it,
-and the shadow is independent of the light operators: place it to match the light you want to cast shadows. For
-soft contact shadows on any geometry, [ScreenSpaceLighting] and ambient occlusion often work better.
+Put a [SetShadow] above the part of the graph that should have shadows. It renders a shadow map from a light
+position toward a target, and every [DrawMesh] inside it receives the shadow. All draws inside it cast shadows, but the
+other draw operators don't receive them. Without a [SetShadow], [DrawMesh] skips the shadow lookup and costs nothing
+extra.
+
+The shadow is independent of the light operators: place a [SetSpotLight] or [PointLight] at the same position, so the
+lighting matches the shadow. ShadowColor and its alpha set how dark shadowed surfaces get. If lit surfaces show
+striped self-shadowing, increase ShadowBias or NormalOffset. For soft contact shadows on any geometry,
+[ScreenSpaceLighting] and ambient occlusion often work better.
 
 ## Lights and blend modes
 

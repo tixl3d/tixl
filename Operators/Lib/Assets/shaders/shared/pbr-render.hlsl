@@ -5,6 +5,11 @@
 #define PBR_SPECULAR Specular
 #endif
 
+// Shaders that receive [SetShadow] define this to tint the lit color in shadow, before emissive and fog are added.
+#ifndef PBR_APPLY_SHADOW
+#define PBR_APPLY_SHADOW(litColor) (litColor)
+#endif
+
 
 #ifndef __AdjustRoughnessForSpecularAA
 #define __AdjustRoughnessForSpecularAA
@@ -117,6 +122,7 @@ float4 ComputePbr()
 
     // Final fragment color.
     float4 litColor = float4(directLighting + ambientLighting, 1.0) * BaseColor * Color;
+    litColor.rgb = PBR_APPLY_SHADOW(litColor.rgb);
 
     litColor += float4(EmissiveColorMap.Sample(WrappedSampler, frag.uv).rgb * EmissiveColor.rgb, 0);
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, frag.fog * FogColor.a);
