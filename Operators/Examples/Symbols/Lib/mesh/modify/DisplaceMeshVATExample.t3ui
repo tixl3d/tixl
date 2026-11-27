@@ -87,9 +87,10 @@
     {
       "ChildId": "33d185d5-0030-40cb-a36c-cc671b49976c",
       "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "75892bdc-300d-432f-99d5-c468b0d4cf1f",
       "Position": {
-        "X": 1020.91943,
-        "Y": 274.5795
+        "X": 890.8392,
+        "Y": 276.83218
       }
     },
     {
@@ -102,19 +103,12 @@
       }
     },
     {
-      "ChildId": "3e8bf390-e5c5-4f36-a5cf-4eac127465b5",
-      "SymbolName": "Lib.particle.ParticleSystem",
-      "Position": {
-        "X": 403.35474,
-        "Y": 1293.3824
-      }
-    },
-    {
       "ChildId": "455ba60e-5ec2-4683-842c-e7a27c167e9d",
       "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "75892bdc-300d-432f-99d5-c468b0d4cf1f",
       "Position": {
-        "X": 1020.91943,
-        "Y": 239.5795
+        "X": 890.8392,
+        "Y": 241.83218
       }
     },
     {
@@ -124,14 +118,6 @@
       "Position": {
         "X": 404.72678,
         "Y": 653.95654
-      }
-    },
-    {
-      "ChildId": "461d0eec-943a-425a-9be0-ebc09249a51b",
-      "SymbolName": "Lib.particle.force.TurbulenceForce",
-      "Position": {
-        "X": 263.35474,
-        "Y": 1328.3824
       }
     },
     {
@@ -227,9 +213,10 @@
     {
       "ChildId": "7a77e11d-98fd-4bd3-bc24-6e43fbf0ac1f",
       "SymbolName": "Lib.render.transform.Transform",
+      "SectionId": "75892bdc-300d-432f-99d5-c468b0d4cf1f",
       "Position": {
-        "X": 1020.91943,
-        "Y": 204.5795
+        "X": 890.8392,
+        "Y": 206.83218
       }
     },
     {
@@ -287,7 +274,7 @@
       "ChildId": "90292e9b-e4bf-44a5-86cd-a429cf63c7e9",
       "SymbolName": "Lib.image.generate.basic.LinearGradient",
       "Position": {
-        "X": 1481.6547,
+        "X": 1621.6547,
         "Y": 84.54944
       }
     },
@@ -313,8 +300,8 @@
       "ChildId": "ad0ae883-a115-49f3-8256-bafe71ec9990",
       "SymbolName": "Lib.mesh.generate.QuadMesh",
       "Position": {
-        "X": 864.3993,
-        "Y": 169.5795
+        "X": 791.7711,
+        "Y": 15.651154
       }
     },
     {
@@ -383,8 +370,8 @@
       "ChildId": "c841d358-8b21-4e11-8420-f5e059fab8a6",
       "SymbolName": "Lib.mesh.draw.DrawMesh",
       "Position": {
-        "X": 1020.91943,
-        "Y": 169.5795
+        "X": 948.29126,
+        "Y": 15.651154
       }
     },
     {
@@ -394,14 +381,6 @@
       "Position": {
         "X": 1107.6578,
         "Y": -344.05136
-      }
-    },
-    {
-      "ChildId": "d6c1d665-bb74-452a-b161-fa31a157774e",
-      "SymbolName": "Lib.render.shading.TextureToCubeMap",
-      "Position": {
-        "X": 1621.6547,
-        "Y": 84.54944
       }
     },
     {
@@ -528,6 +507,24 @@
       "Size": {
         "X": 696.3646,
         "Y": 418.88123
+      }
+    },
+    {
+      "Id": "75892bdc-300d-432f-99d5-c468b0d4cf1f",
+      "Label": "instantiate",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 843.84717,
+        "Y": 141.03232
+      },
+      "Size": {
+        "X": 234.20105,
+        "Y": 207.08777
       }
     },
     {
