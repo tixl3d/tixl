@@ -167,7 +167,7 @@
     {
       "Id": "8aad18ca-aec8-41c2-835c-2d4da1c5025e"/*DemoProjectTests*/,
       "SymbolId": "cf9a082f-490c-4b59-8a9a-eee161420d06",
-      "SymbolName": "Examples.testing.DemoProjectTests",
+      "SymbolName": "pixtur.DemosByStill.DemoProjectTests",
       "InputValues": [],
       "Outputs": []
     },

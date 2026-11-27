@@ -94,9 +94,9 @@
     },
     {
       "ChildId": "8aad18ca-aec8-41c2-835c-2d4da1c5025e",
-      "SymbolName": "Examples.testing.DemoProjectTests",
+      "SymbolName": "pixtur.DemosByStill.DemoProjectTests",
       "Position": {
-        "X": 156.76201,
+        "X": 156.762,
         "Y": 541.0258
       }
     },
