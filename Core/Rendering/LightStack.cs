@@ -3,6 +3,7 @@ using Buffer = T3.Graphics.Compat.Buffer;
 using System.Runtime.InteropServices;
 using T3.Graphics.Compat;
 using T3.Core.Logging;
+using T3.Core.Operator;
 using T3.Core.Resource;
 
 namespace T3.Core.Rendering;
@@ -146,11 +147,15 @@ public class LightStack
 
     public void Clear()
     {
+        Array.Clear(_owners);
         _currentSize = 0;
         _isConstBufferDirty = true;
     }
 
-    public bool Push(Light light)
+    public bool Push(Light light) => Push(light, null);
+
+    /// <param name="owner">The operator that pushed the light, so [SetShadow] can find the light the user picked.</param>
+    public bool Push(Light light, Instance owner)
     {
         if (_currentSize == MaxLights)
         {
@@ -158,6 +163,7 @@ public class LightStack
             return false;
         }
 
+        _owners[_currentSize] = owner;
         _lights[_currentSize++] = light;
         _isConstBufferDirty = true;
 
@@ -169,8 +175,23 @@ public class LightStack
         if (_currentSize > 0)
         {
             _currentSize--;
+            _owners[_currentSize] = null;
             _isConstBufferDirty = true;
         }
+    }
+
+    /// <summary>Number of lights pushed by light operators in the current subtree, without the default lights.</summary>
+    public int PushedCount => _currentSize;
+
+    /// <summary>
+    /// A light pushed by a light operator, counted from the innermost one, i.e. the light operator closest above the
+    /// caller in the graph. The owner is null for lights pushed without one.
+    /// </summary>
+    public Light GetPushedLight(int indexFromInnermost, out Instance owner)
+    {
+        var index = _currentSize - 1 - indexFromInnermost;
+        owner = _owners[index];
+        return _lights[index];
     }
 
     private static void UpdateConstBuffer(ref Light[] lights, ref Buffer constBuffer, int activeLightCount)
@@ -232,6 +253,7 @@ public class LightStack
     }
 
     private Light[] _lights = new Light[MaxLights];
+    private readonly Instance[] _owners = new Instance[MaxLights];
     private int _currentSize = 0;
     private bool _isConstBufferDirty = true;
     private Buffer _constBuffer = null;

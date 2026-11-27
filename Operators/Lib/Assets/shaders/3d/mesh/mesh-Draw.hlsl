@@ -75,7 +75,11 @@ cbuffer ShadowParams : register(b7)
     float4x4 WorldToLightClipSpace;
     float4 ShadowColor; // Alpha is the strength
     float ShadowBias;
-    float ShadowNormalOffset;
+    float ShadowNormalOffset; // In shadow map texels
+    float ShadowTexelSizePerW;
+    float ShadowSpotCosInner;
+    float ShadowSpotCosOuter; // Below -1 when the shadow doesn't come from a spot light
+    float ShadowTanHalfFieldOfView;
 };
 
 struct psInput
@@ -190,8 +194,11 @@ float GetDistance(float3 p3)
 /** 1 where the light reaches the surface, 0 in shadow, filtered over 3x3 shadow map texels. */
 float ComputeShadowLight(float3 worldPosition, float3 normal)
 {
-    float4 posInLightClipSpace = mul(float4(worldPosition + normal * ShadowNormalOffset, 1), WorldToLightClipSpace);
+    // A texel covers more of the surface further from a perspective light, so the offset grows with the distance (w).
+    float texelWorldSize = mul(float4(worldPosition, 1), WorldToLightClipSpace).w * ShadowTexelSizePerW;
+    float4 posInLightClipSpace = mul(float4(worldPosition + normal * ShadowNormalOffset * texelWorldSize, 1), WorldToLightClipSpace);
     float3 shadowCoord = posInLightClipSpace.xyz / posInLightClipSpace.w;
+    float2 offsetFromAxis = shadowCoord.xy * ShadowTanHalfFieldOfView;
     shadowCoord.xy = shadowCoord.xy * float2(0.5, -0.5) + 0.5;
 
     // Outside the shadow map nothing is known about occluders.
@@ -213,7 +220,12 @@ float ComputeShadowLight(float3 worldPosition, float3 normal)
             shadowedCount += shadowCoord.z > occluderDepth + ShadowBias ? 1 : 0;
         }
     }
-    return 1 - shadowedCount / 9;
+
+    // Outside a spot light's cone its light doesn't reach the surface, so its shadow doesn't either. Same fade as
+    // EvaluateLight(), with the angle taken from the shadow camera, which looks along the cone's axis.
+    float cosAngleToAxis = rsqrt(1 + dot(offsetFromAxis, offsetFromAxis));
+    float cone = smoothstep(ShadowSpotCosOuter, max(ShadowSpotCosInner, ShadowSpotCosOuter + 1e-4), cosAngleToAxis);
+    return 1 - shadowedCount / 9 * cone;
 }
 
 float3 ApplyShadow(float3 litColor)

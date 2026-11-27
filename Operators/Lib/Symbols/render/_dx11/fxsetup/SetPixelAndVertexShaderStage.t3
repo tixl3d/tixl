@@ -3,6 +3,10 @@
   "Id": "b956f707-2a33-4330-b7ff-9c91edbcf041"/*SetPixelAndVertexShaderStage*/,
   "Inputs": [
     {
+      "Id": "18823709-a71d-43e3-9b4f-966ce56b745c"/*SkipPixelShaderInShadowPass*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "59864da4-3658-4d7d-830e-6ef0d3cbb505"/*PixelShader*/,
       "DefaultValue": null
     },

@@ -125,15 +125,21 @@ the effect's parameters.
 
 ## Shadows
 
-Put a [SetShadow] above the part of the graph that should have shadows. It renders a shadow map from a light
-position toward a target, and every [DrawMesh] inside it receives the shadow. All draws inside it cast shadows, but the
-other draw operators don't receive them. Without a [SetShadow], [DrawMesh] skips the shadow lookup and costs nothing
-extra.
+Put a [SetShadow] between the draws and a light, for example [DrawMesh] → [SetShadow] → [SpotLight]. It renders a
+shadow map from that light, and every [DrawMesh] inside it receives the shadow. All draws inside it cast shadows, but
+the other draw operators don't receive them. Without a [SetShadow], [DrawMesh] skips the shadow lookup and costs
+nothing extra.
 
-The shadow is independent of the light operators: place a [SetSpotLight] or [PointLight] at the same position, so the
-lighting matches the shadow. ShadowColor and its alpha set how dark shadowed surfaces get. If lit surfaces show
-striped self-shadowing, increase ShadowBias or NormalOffset. For soft contact shadows on any geometry,
-[ScreenSpaceLighting] and ambient occlusion often work better.
+In its default **FromLight** mode the shadow follows the light picked in SourceLight: "1st Light" is the light operator
+closest above [SetShadow], "2nd Light" the next one further up. Picking a light by name instead keeps the shadow on
+that light when you add more lights. A spot light casts the shadow of its cone, a directional light covers AreaSize
+around LightTarget, and a point light shines toward LightTarget within FieldOfView. In **Manual** mode the shadow is
+cast from LightPosition toward LightTarget, independent of any light.
+
+ShadowColor and its alpha set how dark shadowed surfaces get. If lit surfaces show striped self-shadowing, increase
+NormalOffset, which counts in shadow map texels, or ShadowBias. To check resolution and depth range, look at the
+ShadowMap output. For soft contact shadows on any geometry, [ScreenSpaceLighting] and ambient occlusion often work
+better.
 
 ## Lights and blend modes
 

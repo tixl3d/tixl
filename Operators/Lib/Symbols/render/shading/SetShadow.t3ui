@@ -1,390 +1,141 @@
 {
   "FormatVersion": 3,
   "Id": "facb7925-176a-4eae-bedc-cdbf532ff6ff"/*SetShadow*/,
-  "Description": "Renders a shadow map of the connected subgraph from a light position, so that [DrawMesh] operators inside it receive cast shadows.\n\nThe shadow map is rendered from LightPosition towards LightTarget. All draws in the subgraph cast shadows, but only [DrawMesh] receives them. The lighting itself still needs a light such as [SetSpotLight] or [PointLight]; place it to match LightPosition and LightTarget. ShadowColor, ShadowBias and NormalOffset set how the shadow looks for all receiving draws.\n\nAKA: shadowmap, castshadow\n\nSee also: [DrawMesh], [SetSpotLight], [PointLight]\n\nAlso check out the [HowToDrawThings] tutorial.",
+  "Description": "Renders a shadow map of the connected subgraph from a light, so that [DrawMesh] operators inside it receive cast shadows.\n\nPut it below a [SpotLight] or [DirectionalLight] (FromLight mode) and the shadow follows that light. All draws in the subgraph cast shadows, but only [DrawMesh] receives them. The shadow pass draws depth only and hides gizmos. The ShadowMap output shows the depth map for checking resolution and range.\n\nAKA: shadowmap, castshadow\n\nSee also: [DrawMesh], [SpotLight], [DirectionalLight]",
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "11ff37c1-46f4-4b5c-a12a-22c25c73fa38"/*SourceLight*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "The light that casts the shadow. \"1st Light\" is the light operator closest above, \"2nd Light\" the next one further up. Picking a light by name keeps the shadow on that light when other lights are added.",
+      "Usage": "CustomDropdown"
+    },
+    {
       "InputId": "244b972a-2d18-4c2d-bcba-a2b480ecbada"/*ShadowBias*/,
       "Position": {
-        "X": -410.0,
-        "Y": -210.0
+        "X": -200.0,
+        "Y": 180.0
       },
-      "GroupTitle": "Shadow Lookup",
-      "Description": "How much deeper than the occluder a surface must be to count as shadowed. Increase it if lit surfaces show striped self-shadowing (acne)."
+      "Description": "How much deeper than the occluder a surface must be to count as shadowed. Increase it if lit surfaces show striped self-shadowing (acne).",
+      "Min": 0.0,
+      "Max": 0.001,
+      "ClampMin": true
     },
     {
       "InputId": "298be67d-77eb-49b3-a65a-dc3e2d5bef7c"/*ShadowColor*/,
       "Position": {
-        "X": -410.0,
-        "Y": -255.0
+        "X": -200.0,
+        "Y": 135.0
       },
+      "GroupTitle": "Look",
       "Description": "Color that shadowed surfaces are blended towards. Alpha is the strength of the shadow, 0 disables it."
     },
     {
       "InputId": "3ee1e726-b5b8-4479-92cc-1a46886ddfd2"/*Resolution*/,
       "Position": {
-        "X": -1952.9755,
-        "Y": -421.11142
+        "X": -200.0,
+        "Y": 270.0
       },
-      "GroupTitle": "Shadow Settings",
-      "Description": "Width and height of the shadow map in pixels."
+      "GroupTitle": "Shadow Map",
+      "Description": "Width and height of the shadow map in pixels. Higher values give sharper shadows and cost more memory and fill rate.",
+      "Min": 256,
+      "Max": 4096,
+      "ClampMin": true
     },
     {
       "InputId": "5fb309a1-f164-4fe0-95e2-3bfc37823f78"/*DepthRange*/,
       "Position": {
-        "X": -1363.254,
-        "Y": 216.51556
+        "X": -200.0,
+        "Y": 315.0
       },
-      "GroupTitle": "Advanced",
-      "Description": "Near and far clip planes of the shadow map camera.",
+      "Description": "Near and far distance of the shadow camera. Geometry outside this range casts no shadow; a tighter range gives more precise shadows.",
       "UseVec2Control": "Range"
     },
     {
       "InputId": "6196074f-4770-4e81-812a-012fcaab207b"/*LightPosition*/,
       "Position": {
-        "X": -105.41022,
-        "Y": -952.71454
+        "X": -200.0,
+        "Y": 360.0
       },
-      "GroupTitle": "Light Settings",
-      "Description": "Position from which the shadow map is rendered. Usually the position of the point light."
+      "GroupTitle": "Manual and Fallback",
+      "Description": "Position the shadow is cast from in Manual mode, or when no matching light is found."
+    },
+    {
+      "InputId": "75814c4f-ca49-4103-9096-32c9f8326830"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "FromLight: the shadow is cast from the light picked in SourceLight. Spot lights use their cone, directional lights cover AreaSize around LightTarget, point lights shine towards LightTarget within FieldOfView. Without a matching light it falls back to Manual.\n\nManual: the shadow is cast from LightPosition towards LightTarget within FieldOfView.",
+      "DisplayAs": "SegmentedSwitch"
     },
     {
       "InputId": "76a6a0e4-168d-4172-9946-e843df9d0ca0"/*LightTarget*/,
       "Position": {
-        "X": -225.91083,
-        "Y": -910.1197
+        "X": -200.0,
+        "Y": 405.0
       },
-      "Description": "Point the shadow map camera looks at."
+      "Description": "Point the shadow camera looks at in Manual mode and for point lights. For directional lights, the center of the area that receives shadows."
     },
     {
-      "InputId": "bbec0f5e-b6ec-44b2-97ec-403419161b3a"/*ShowDebug*/,
+      "InputId": "76cd5b13-b23c-4cbc-bdab-c7d1d6222f48"/*AreaSize*/,
       "Position": {
-        "X": -1952.9755,
-        "Y": -376.11142
+        "X": -200.0,
+        "Y": 495.0
       },
-      "Description": "Draws the shadow map as an overlay for debugging.",
-      "AddPadding": "True"
+      "Description": "Width and height, in world units, of the area around LightTarget that receives shadows from a directional light.",
+      "Min": 1.0,
+      "Max": 50.0,
+      "ClampMin": true
     },
     {
       "InputId": "be6dc055-d4c8-4c75-a084-12c22a268034"/*Command*/,
       "Position": {
-        "X": -1262.983,
-        "Y": -166.91022
+        "X": -200.0,
+        "Y": 0.0
       },
-      "Description": "The scene casting and receiving shadows."
+      "Description": "The scene that casts and receives shadows."
+    },
+    {
+      "InputId": "d903772c-8dff-4147-868c-a461edaf3f9f"/*FieldOfView*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Opening angle of the shadow camera in degrees, in Manual mode and for point lights. Spot lights use their cone.",
+      "Min": 10.0,
+      "Max": 150.0,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "df4d2b87-2ec0-457f-ba69-8ae0ae684a02"/*NormalOffset*/,
       "Position": {
-        "X": -410.0,
-        "Y": -165.0
+        "X": -200.0,
+        "Y": 225.0
       },
-      "Description": "Moves the shadow lookup along the surface normal, in world units. Reduces acne on surfaces at grazing angles; too large values detach shadows from their casters."
+      "Description": "Moves the shadow lookup along the surface normal, in shadow map texels, so it scales with resolution, area and distance. Removes striped self-shadowing (acne); too large values detach shadows from their casters.",
+      "Min": 0.0,
+      "Max": 8.0
     }
   ],
-  "SymbolChildUis": [
-    {
-      "ChildId": "0785703f-9d1a-42d9-a320-e23db5cbf0e4",
-      "SymbolName": "Types.Gfx.Texture2d",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1433.6846,
-        "Y": -512.61255
-      }
-    },
-    {
-      "ChildId": "229ec977-e4b9-4c48-aa0e-7d76721870ab",
-      "SymbolName": "Types.Gfx.Texture2d",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1429.0453,
-        "Y": -325.53995
-      }
-    },
-    {
-      "ChildId": "23a72af6-9299-4eb8-87d8-d981936029f4",
-      "SymbolName": "Lib.numbers.vec2.Int2ToVector2",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1253.8896,
-        "Y": -616.9242
-      }
-    },
-    {
-      "ChildId": "2c69d230-4b2e-4c61-a7ad-0d0e757f2a8f",
-      "SymbolName": "Lib.render._dx11.api.ClearRenderTarget",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -722.49554,
-        "Y": -752.0451
-      }
-    },
-    {
-      "ChildId": "3603695e-3094-4803-a869-d03ede8b8b99",
-      "SymbolName": "Lib.flow.context.SetRenderPassState",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -812.3122,
-        "Y": -484.6477
-      }
-    },
-    {
-      "ChildId": "3b5eddab-549a-46d3-8894-4fc92836fa78",
-      "SymbolName": "Lib.numbers.vec2.Vector2Components",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1113.8896,
-        "Y": -616.9242
-      }
-    },
-    {
-      "ChildId": "557faca7-5742-4c47-875a-4449d1bb5710",
-      "SymbolName": "Lib.image.color.RemapColor",
-      "Position": {
-        "X": -533.60974,
-        "Y": 278.30737
-      }
-    },
-    {
-      "ChildId": "6257ed9f-6c20-4808-8070-f139c264cc29",
-      "SymbolName": "Lib.render._dx11.api.RtvFromTexture2d",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1043.2849,
-        "Y": -818.1228
-      }
-    },
-    {
-      "ChildId": "66edd7d1-73ee-4b5c-91df-9f95136af431",
-      "SymbolName": "Lib.flow.context.GetMatrixVar",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -210.0,
-        "Y": -300.0
-      }
-    },
-    {
-      "ChildId": "747833dc-0721-4234-abb7-7624072daeea",
-      "SymbolName": "Lib.render._dx11.api.SrvFromTexture2d",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -210.0,
-        "Y": -345.0
-      }
-    },
-    {
-      "ChildId": "7c5596f5-0af4-418e-9673-aa0c1811342a",
-      "SymbolName": "Lib.flow.context.SetMatrixVar",
-      "Position": {
-        "X": -410.40082,
-        "Y": -944.6442
-      }
-    },
-    {
-      "ChildId": "7e7e8107-550d-4c19-b0f6-d9baae1f68cf",
-      "SymbolName": "Lib.render._dx11.api.OutputMergerStage",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -722.49554,
-        "Y": -869.9844
-      }
-    },
-    {
-      "ChildId": "7ff94c0f-da58-48c0-929a-000f33c112e1",
-      "SymbolName": "Types.Values.Int2",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1802.9755,
-        "Y": -421.11142
-      }
-    },
-    {
-      "ChildId": "97df0ee0-a5dd-4a6b-bdbb-7e4978bbefe0",
-      "SymbolName": "Lib.render.camera.CurrentCamMatrices",
-      "Position": {
-        "X": -722.49554,
-        "Y": -954.4554
-      }
-    },
-    {
-      "ChildId": "997d451b-cca6-4476-bcf3-f5df20d1a41c",
-      "SymbolName": "Lib.flow.Execute",
-      "Position": {
-        "X": -1122.983,
-        "Y": -166.91022
-      }
-    },
-    {
-      "ChildId": "9c89ccf2-078f-4835-87b3-7409dc085795",
-      "SymbolName": "Lib.flow.Execute",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -410.40082,
-        "Y": -874.6442
-      }
-    },
-    {
-      "ChildId": "b879e7c1-cedd-4549-9ddf-b7e369c62019",
-      "SymbolName": "Lib.render.shading._.SetShadowParameters",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -70.0,
-        "Y": -390.0
-      }
-    },
-    {
-      "ChildId": "b941e69b-15ad-4bc9-a204-e45c94e80fe6",
-      "SymbolName": "Lib.flow.Switch",
-      "Position": {
-        "X": 248.83142,
-        "Y": -905.86584
-      }
-    },
-    {
-      "ChildId": "ba26151b-4afe-4ee7-97cb-89963f029049",
-      "SymbolName": "Lib.render._dx11.api.Rasterizer",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -722.49554,
-        "Y": -635.822
-      }
-    },
-    {
-      "ChildId": "c22dab0d-5bd7-4996-9491-96e58b3cc57d",
-      "SymbolName": "Lib.numbers.anim.animators.AnimValue",
-      "Position": {
-        "X": -983.61005,
-        "Y": 323.30737
-      }
-    },
-    {
-      "ChildId": "c2e579e0-57a5-43fe-8060-efdc5d5dd4f6",
-      "SymbolName": "Lib.image.use.DepthBufferAsGrayScale",
-      "Position": {
-        "X": -533.60974,
-        "Y": 173.30737
-      }
-    },
-    {
-      "ChildId": "c5fbdf6d-23f9-4d19-8436-01248301dd61",
-      "SymbolName": "Lib.numbers.bool.logic.Not",
-      "Position": {
-        "X": -833.60974,
-        "Y": 323.30737
-      }
-    },
-    {
-      "ChildId": "c8ac4b22-1ba6-42c0-b804-49fb6a195505",
-      "SymbolName": "Lib.render.transform.Group",
-      "Position": {
-        "X": 489.24707,
-        "Y": -823.62573
-      }
-    },
-    {
-      "ChildId": "c8be3b46-7842-456e-8939-1bb43d90388b",
-      "SymbolName": "Lib.render.camera.OrthographicCamera",
-      "Position": {
-        "X": 34.58978,
-        "Y": -817.8155
-      }
-    },
-    {
-      "ChildId": "db5fc23d-bd3d-4fc0-be34-d9200caca11a",
-      "SymbolName": "Lib.render.basic.DrawScreenQuad",
-      "Position": {
-        "X": -533.60974,
-        "Y": 313.30737
-      }
-    },
-    {
-      "ChildId": "ed994cf2-153d-404a-ad56-2a83f7e4f4c5",
-      "SymbolName": "Lib.render._dx11.api.DsvFromTexture2d",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -1003.9862,
-        "Y": -730.3097
-      }
-    },
-    {
-      "ChildId": "f198ed02-34a8-45b1-9f0b-44ca599d92bc",
-      "SymbolName": "Lib.render.camera.Camera",
-      "Position": {
-        "X": 34.589783,
-        "Y": -987.71454
-      }
-    },
-    {
-      "ChildId": "f59e3a68-eaf8-44e2-bb4a-a009c82d1fcf",
-      "SymbolName": "Lib.flow.context.SetRenderPassState",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -209.59656,
-        "Y": -389.56332
-      }
-    },
-    {
-      "ChildId": "f6a02ae4-254e-49f4-8ebc-f0979432a10c",
-      "SymbolName": "Lib.render.shading._.SetContextTexture",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": 70.40344,
-        "Y": -389.56332
-      }
-    },
-    {
-      "ChildId": "f7df1cea-f3af-4ab7-8c1c-a1d49e0a7e4b",
-      "SymbolName": "Lib.flow.Execute",
-      "Position": {
-        "X": -533.60974,
-        "Y": 348.30737
-      }
-    },
-    {
-      "ChildId": "fa671b46-4075-4ae6-835c-12e5e3a357d4",
-      "SymbolName": "Lib.render._dx11.api.Viewport",
-      "SectionId": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Position": {
-        "X": -973.88965,
-        "Y": -651.9242
-      }
-    },
-    {
-      "ChildId": "ffa1309c-9569-421b-9ed8-ecb96471d6c6",
-      "SymbolName": "Lib.render.gizmo.DrawCamGizmos",
-      "Position": {
-        "X": -673.60974,
-        "Y": 383.30737
-      }
-    }
-  ],
+  "SymbolChildUis": [],
   "OutputUis": [
+    {
+      "OutputId": "86d41b9d-fde7-41da-91e9-3708625b8b81"/*ShadowMap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
     {
       "OutputId": "a0a1b038-8637-45af-89b5-dcef99f872f7"/*Output*/,
       "Position": {
-        "X": 639.2471,
-        "Y": -823.62573
-      }
-    }
-  ],
-  "Sections": [
-    {
-      "Id": "a427cc55-35e1-41a8-9453-5f8cf036d639",
-      "Title": "Initialize ShadowMap Render Target",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": -2059.4312,
-        "Y": -933.6432
-      },
-      "Size": {
-        "X": 2161.2048,
-        "Y": 677.5397
+        "X": 0.0,
+        "Y": 0.0
       }
     }
   ]

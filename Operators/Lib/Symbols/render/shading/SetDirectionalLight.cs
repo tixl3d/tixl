@@ -27,7 +27,7 @@ internal sealed class SetDirectionalLight : Instance<SetDirectionalLight>, ITran
         var light = Light.CreateDirectional(Target.GetValue(context) - Position.GetValue(context),
                                             Intensity.GetValue(context),
                                             Color.GetValue(context));
-        var wasPushed = lights.Push(light);
+        var wasPushed = lights.Push(light, this);
 
         Command.GetValue(context); // Evaluate sub-tree
 

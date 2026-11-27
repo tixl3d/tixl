@@ -5,6 +5,14 @@
   "SymbolTags": "24",
   "InputUis": [
     {
+      "InputId": "18823709-a71d-43e3-9b4f-966ce56b745c"/*SkipPixelShaderInShadowPass*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Draws without a pixel shader inside the depth-only pass of [SetShadow]. Only for draws whose shape doesn't depend on the pixel shader: alpha cut-off, discards or round sprites would cast solid shadows."
+    },
+    {
       "InputId": "59864da4-3658-4d7d-830e-6ef0d3cbb505"/*PixelShader*/,
       "Relevancy": "Required",
       "Position": {

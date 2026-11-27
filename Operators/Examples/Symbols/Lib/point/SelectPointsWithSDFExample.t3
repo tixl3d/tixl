@@ -192,9 +192,9 @@
           }
         },
         {
-          "Id": "df4d2b87-2ec0-457f-ba69-8ae0ae684a02"/*NormalOffset*/,
-          "Type": "System.Single",
-          "Value": -0.005
+          "Id": "75814c4f-ca49-4103-9096-32c9f8326830"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 1
         }
       ],
       "Outputs": []

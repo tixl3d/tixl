@@ -31,7 +31,9 @@ internal sealed class Draw : Instance<Draw>, IRenderStatsProvider
         var setVs = deviceContext.VertexShader.Shader;
         var setPs = deviceContext.PixelShader.Shader;
             
-        if (setVs == null || setPs == null)
+        // Depth-only shadow passes may unbind the pixel shader on purpose (SetPixelAndVertexShaderStage).
+        var isPixelShaderMissing = setPs == null && !context.RenderPass.IsShadowPass;
+        if (setVs == null || isPixelShaderMissing)
         {
             if (!_complainedOnce)
             {

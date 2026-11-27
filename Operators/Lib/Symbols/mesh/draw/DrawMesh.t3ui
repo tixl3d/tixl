@@ -359,6 +359,14 @@
       }
     },
     {
+      "ChildId": "e62b6abc-e86c-42fe-a3dc-a32f312b7cd6",
+      "SymbolName": "Lib.numbers.float.logic.Compare",
+      "Position": {
+        "X": 2545.0,
+        "Y": 3610.0
+      }
+    },
+    {
       "ChildId": "eddca9ff-0408-4623-b5a4-7ff8e9c5917c",
       "SymbolName": "Lib.render._dx11.api.Rasterizer",
       "Position": {

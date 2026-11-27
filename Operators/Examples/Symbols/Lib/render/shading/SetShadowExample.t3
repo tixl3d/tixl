@@ -185,11 +185,6 @@
             "Y": 1.57,
             "Z": 1.2
           }
-        },
-        {
-          "Id": "bbec0f5e-b6ec-44b2-97ec-403419161b3a"/*ShowDebug*/,
-          "Type": "System.Boolean",
-          "Value": true
         }
       ],
       "Outputs": []
